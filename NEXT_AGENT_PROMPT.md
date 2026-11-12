@@ -20,3 +20,5 @@ You are taking over an **existing BrandPilot implementation** from another AI. *
 - **Recommended agent:** Sonnet 5.5 (fallback Fable 5.2) · reasoning: medium · dev effort: ~2h.
 - **After it:** 3.2 (server `data_rows` mirror with per-kind validation) — Fable 5.2, high, ~4h. Full queue is in `IMPLEMENTATION_STATUS.md`.
 - **If you need a browser and have no browser tool:** installing `playwright-core` in a temp folder outside the repo and launching the installed Chrome (`chromium.launch({ channel: 'chrome' })`) worked for all of Phase 2; `page.setInputFiles(selector, path)` drives file inputs and `page.waitForEvent('download')` captures template downloads. Do not add test tools to `package.json`.
+
+Note (2026-11-12): `IMPLEMENTATION_STATUS.md` → "In progress / uncommitted" lists a small uncommitted header-CSS fix in `public/index.html` and a port-3000 note. Commit or keep it before starting the next queued task.

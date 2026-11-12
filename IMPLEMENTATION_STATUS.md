@@ -20,7 +20,8 @@
   - 2.5 `server/fetchUrl.js` + `POST /api/companies/:id/fetch-url` `{ url }` → `{ url, title, text }`: http/https, ports 80/443/8080/8443, host must resolve only to public addresses (checked on every redirect hop, max 3), connection pinned to the checked address, text content only, 1 MB, 10 s, 20 reads per 10 min per user. Errors: 400 `invalid_url` / `blocked_host`, 413, 415 `unsupported_type`, 429, 502 `fetch_failed`, 504 `timeout`. The "Try to read the website" button uses it.
 
 ## In progress / uncommitted
-- None.
+- Uncommitted on `dev` (2026-11-12, Opus 5.5, small UI fix outside the queue): `public/index.html` line 24 — header company `<select>` now sizes to content and matches `.btn.sm` height (`.top select{width:auto;min-height:30px;...}`, `.top>label.row{flex-wrap:nowrap}`), so "Company", the dropdown and "+ New company" sit on one line. Verified the CSS is served; visual check by the owner in the browser.
+- Environment note: on the owner's Windows machine port 3000 is inside a reserved range (`netsh interface ipv4 show excludedportrange protocol=tcp` → 2977–3076); run with `PORT=4000`. `server/index.js` ignores the listen error Express 5 passes to the callback, so it prints "running" and exits 0 — small fix pending.
 
 ## Decisions (reversible unless noted)
 - **Stack:** Node >=22.5 (ESM) + Express 5; built-in `node:sqlite` (file under `data/`, git-ignored); `node:test`. No build step, no frontend framework. Only dependency: `express`.
