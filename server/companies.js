@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
 import { createCampaigns } from './campaigns.js';
+import { buildReport, renderReport, REPORT_LANGS } from './report.js';
 import { campaignQa } from './campaignQa.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
@@ -137,6 +138,22 @@ export function createCompanies(
     const result = campaignQa(db, req.company.id, req.params.cid);
     if (!result) return res.status(404).json({ error: 'not_found' });
     res.json(result);
+  });
+
+  // Marketing report: KPIs, audit findings with evidence, open gaps and campaigns. JSON, or Markdown to download.
+  router.get('/:id/report', requireCompany, (req, res) => {
+    const range = req.query.range === undefined ? '28' : req.query.range;
+    if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
+    const format = req.query.format === undefined ? 'json' : req.query.format;
+    if (format !== 'json' && format !== 'md') return res.status(400).json({ error: 'invalid_format' });
+    const lang = req.query.lang === undefined ? 'en' : req.query.lang;
+    if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
+    const report = buildReport(db, req.company.id, { range });
+    if (format === 'json') return res.json(report);
+    res
+      .type('text/markdown; charset=utf-8')
+      .set('Content-Disposition', `attachment; filename="marketing-report-${report.generatedAt.slice(0, 10)}.md"`)
+      .send(renderReport(report, lang));
   });
 
   // What imported data the server holds for this company, per dataset.
