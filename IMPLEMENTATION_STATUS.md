@@ -2,67 +2,50 @@
 
 > Shared state for every AI coding agent. Replace stale statements with observed facts. Keep short (<80 lines). Update after **every** task, along with `NEXT_AGENT_PROMPT.md`.
 
-**Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 1.5c completed
-**Current phase:** 1 — SaaS foundation (1.1–1.5c done; only the 1.6 sign-off remains)
-**Branch / commit:** `main` (all task branches 1.1–1.5c fast-forwarded into it on 2026-11-12; old `feat/*` branches still exist locally and can be deleted). No remote configured; nothing pushed. Create a short `feat/<task>` branch per task. — see `git log -1`
-**Run:** `npm install` then `npm start` → http://localhost:3000 (`PORT` env overrides; `npm run dev` = watch mode)
+**Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 1.6 completed — **Phase 1 signed off**
+**Current phase:** 2 — Company intelligence (not started)
+**Branch / commit:** `feat/1.6-phase1-signoff` (docs-only commits ahead of `main`; `main` holds everything through 1.5c). No remote configured; nothing pushed. One short `feat/<task>` branch per task.
+**Run:** `npm install` then `npm start` → http://localhost:3000 (`PORT` and `BRANDPILOT_DB=<file>` env override; `npm run dev` = watch mode)
 **Test:** `npm test` (built-in `node --test`, files in `test/`)
 
 ## Verified complete
-- Phase 0: Node 24 + Express 5 app serves the prototype at `/` and `GET /api/health`. Launch verified in a browser (dashboard renders, no console errors); 3/3 tests pass.
-- 1.1: `server/db.js` exports `openDb(path)` and `initSchema(db)`; tables `users`, `sessions`, `companies`, `memberships`; foreign keys on, WAL for file DBs.
-- 1.2: `server/auth.js` — `POST /api/auth/register|login|logout`, `GET /api/auth/me`. scrypt hashes; cookie `bp_session` (httpOnly, SameSite=Lax, Secure in production, 30 days); only the SHA-256 of the token is stored. `createApp({ db })` wires it; `app.locals.requireAuth` and `app.locals.db` are available for new routers.
-- 1.3: `server/companies.js` — `POST /api/companies`, `GET /api/companies`, `GET /api/companies/:id`, all behind `requireAuth`. `requireCompany` (also on `app.locals`) sets `req.company = { id, name, role }` or answers 404 to non-members. Company + owner membership are created in one transaction.
-- 1.4: `GET`/`PUT /api/companies/:id/state` — one JSON object per company in table `company_state`; PUT body `{ state: {...} }` replaces it. 5 MB limit on this route only (1 MB elsewhere); oversize → 413 `too_large`.
-- 1.5a: `public/index.html` shows an EN/AR (RTL) sign-in / create-account card unless `GET /api/auth/me` succeeds; top bar shows the user's email and a Sign out button. Code is the `Auth gate` block at the end of the script (`start()`, `authRender()`, `startApp()`, global `USER`).
-- 1.5b: the frontend loads companies from the API after sign-in and saves each changed company with a debounced `PUT .../state` (the `Server sync` block at the end of the script: `SYNC`, `api()`, `createCo()`, `syncNow()`, `startApp()`). `localStorage` keeps only `lang`, `active`, `ui`, `ai`. Server gained `DELETE /api/companies/:id` (owner only) and an optional `name` on `PUT .../state` that renames the company.
-- 1.5c: auth rate limiting in `server/auth.js` — 5 failed logins per IP + email per 15 min, 20 registrations per IP per hour → 429 `too_many_attempts` with `Retry-After`; a successful login clears the count. Tests override via `createApp({ db, authLimits })`.
-- Handoff pack installed at repo root; original zip + extract kept in `docs/handoff-pack/`.
+- Phase 0: Node + Express app serves the frontend and `GET /api/health`.
+- Phase 1 (exit criteria met, see Last tests): `server/db.js` (SQLite schema), `server/auth.js` (register / login / logout / me, scrypt, hashed session tokens, rate limiting), `server/companies.js` (create / list / get / delete, `requireCompany` isolation, per-company state blob `GET`/`PUT .../state`), frontend sign-in card (EN/AR) and server sync in `public/index.html`.
 
 ## In progress / uncommitted
 - None.
 
 ## Decisions (reversible unless noted)
-- **Stack:** Node >=22.5 (ESM) + Express 5; persistence = built-in `node:sqlite` (file under `data/`, git-ignored); tests = `node:test`. No build step, no frontend framework. Only dependency: `express`.
-- **Frontend:** `public/index.html` is the working copy of the single-file vanilla-JS prototype (EN/AR + RTL already inside). Root `BrandPilot.html` stays untouched as reference. Patch the working copy in place; do not rewrite or redesign.
-- The prototype keeps all state in `localStorage`, has no backend and no real AI call — everything in it is a mock until wired to `/api`.
-- Auth: no third-party library. CSRF relies on SameSite=Lax plus JSON-only bodies — keep all state-changing routes POST/PUT/DELETE with JSON, never GET.
-- API errors are JSON `{ error: code }`: 400 invalid input, 401 `unauthenticated`/`invalid_credentials`, 404 `not_found`, 409 `email_taken`.
-- **Isolation rule:** every company-scoped route is `/api/companies/:id/...` and goes through `requireCompany`; queries below it filter by `req.company.id`, never by an id from the body.
-- **Frontend state shape (from `public/index.html`):** one global `S = { v:1, lang, active, companies:[...], ui }` saved whole by `save()` to `localStorage['brandpilot.v1']`; `boot()` (last function) loads it or calls `seed()` for demo companies; `newCompany(o)` builds a company object; `C()` = active company. Lines are very long — use `grep -o` with context, never read the whole file.
-- **Sync model:** `save()` (called by every `render()`) schedules `syncNow()`, which diffs `S.companies` against what was last sent: unknown local id → `POST` then re-key to the server id; missing id → `DELETE`; changed JSON → `PUT`. So any code that mutates `S.companies` and calls `R()` is persisted without extra work. A 401 reloads to the sign-in card; other failures toast once and retry every 5 s.
-- A new account starts with one empty company ("My company") on the onboarding view — no synthetic seed. `seed()` is now unused dead code; the explicit "load demo" action inside a company still works and is labeled synthetic. "Delete everything" now deletes the account's companies and leaves one empty company.
-- Known limits: last write wins (no conflict detection between two tabs/devices); a company over 5 MB (large media) fails to save with a visible error; edits in the last ~0.8 s before closing the tab are flushed with `keepalive` only when under 60 KB.
-- Rate limiter is in-memory and per process (resets on restart, not shared across instances). It keys on `req.ip`: behind a reverse proxy set Express `trust proxy` correctly at deployment, or every user shares one bucket.
-- Dev tip: a stale `node` can keep port 3000 after a session ends; if `/api/auth/me` returns 404, kill it (`netstat -ano | grep :3000`) or run with `PORT=3100`.
-- Tests must call `createApp({ db: openDb(':memory:') })`; a bare `createApp()` opens the file DB.
-- IDs are app-generated TEXT (use `crypto.randomUUID()`); timestamps are ISO strings; `users.email` is UNIQUE NOCASE.
-- `node:sqlite` prints an ExperimentalWarning on Node 24 — harmless, leave it.
+- **Stack:** Node >=22.5 (ESM) + Express 5; built-in `node:sqlite` (file under `data/`, git-ignored); `node:test`. No build step, no frontend framework. Only dependency: `express`.
+- **Frontend:** `public/index.html` is the live single-file vanilla-JS app (EN/AR + RTL). Root `BrandPilot.html` is the untouched reference. Patch in place; never rewrite or redesign. Lines are very long — locate code with `grep -n -o 'pattern.\{0,200\}'`, never read the file whole.
+- **Frontend state:** global `S = { v, lang, active, companies:{id→obj}, ui, ai }`; `C()` = active company; every `render()` calls `save()`, which schedules `syncNow()` — it diffs `S.companies` against what was last sent (new → `POST` + re-key to server id, removed → `DELETE`, changed → `PUT .../state`). So code that mutates a company and calls `R()` is persisted automatically. `localStorage` holds only `lang`, `active`, `ui`, `ai`.
+- **Isolation rule:** every company-scoped route is `/api/companies/:id/...` behind `requireCompany` (404 for non-members); queries filter by `req.company.id`, never by an id from the body.
+- **API conventions:** JSON errors `{ error: code }` — 400 invalid input, 401, 403, 404, 409, 413 `too_large`, 429 `too_many_attempts`. State-changing routes are POST/PUT/DELETE with JSON bodies (CSRF relies on SameSite=Lax + JSON-only). Tests call `createApp({ db: openDb(':memory:') })`.
+- **Knowledge today (prototype logic, client-side, inside the state blob):** `addSource(c,title,kind,text,demo)` → `c.sources[]`; `extract(c)` is a fixed-rules extractor (not AI) producing `c.findings[]` items `{ id, cat, text, type, status: pending|approved|rejected, src, ev, needs, date }`; `approveF(c,f)`; `publishK(c)` snapshots approved facts into `c.kver[]`. The server stores this opaquely — it cannot yet tell approved facts from anything else.
+- A new account starts with one empty company; no synthetic seed. Synthetic demo material loads only through the explicit, labeled "load demo" action.
+- Known limits: last write wins across tabs/devices; company state over 5 MB fails to save with a visible error; rate limiter is in-memory per process and keys on `req.ip` (set Express `trust proxy` behind a reverse proxy).
 - ShipSafe folders and other zips in this directory are unrelated and git-ignored.
 
-## Task queue (Phase 1) — do the first unchecked one only
+## Task queue (Phase 2) — do the first unchecked one only
 | # | Task | Agent | Reasoning | Dev effort |
 |---|---|---|---|---|
-| ~~1.1~~ | Done 2026-11-12 — `server/db.js` + `test/db.test.js` | Fable 5.2 | medium | 2h |
-| ~~1.2~~ | Done 2026-11-12 — `server/auth.js` + `test/auth.test.js` | Fable 5.2 | high | 4h |
-| ~~1.3~~ | Done 2026-11-12 — `server/companies.js` + `test/companies.test.js` | Fable 5.2 | high | 4h |
-| ~~1.4~~ | Done 2026-11-12 — state routes in `server/companies.js` + `test/state.test.js` | Fable 5.2 | medium | 2h |
-| ~~1.5a~~ | Done 2026-11-12 — auth gate + sign out in `public/index.html` | Fable 5.2 | high | 4h |
-| ~~1.5b~~ | Done 2026-11-12 — server sync in `public/index.html`, `DELETE` + rename on the server | Fable 5.2 | high | 1d |
-| ~~1.5c~~ | Done 2026-11-12 — limiter in `server/auth.js` + `test/ratelimit.test.js` | Fable 5.2 | medium | 1h |
-| 1.6 | Phase 1 exit check: sign in, create company, reload, data persists; second user cannot see it. Tick Phase 1 in `PHASES.md` | Sonnet 5.5 | medium | 1h |
+| 2.1 | Browser pass of the existing knowledge flow through the real UI on a synced company: edit company details, add a text source, upload a `.txt`, run discovery, approve + reject findings, publish, reload. Record what works; fix only breakages caused by the server sync | Sonnet 5.5 [Fable 5.2] | medium | 2h |
+| 2.2 | Server knowledge mirror: tables `sources` and `facts` (company-scoped). On `PUT .../state` the server rewrites both from `state.sources` / `state.findings` in one transaction, validating shape. Add `GET /api/companies/:id/facts?status=approved` and an internal `approvedFacts(db, companyId)` — the only read path later phases may use for "facts" | Fable 5.2 [Opus 5.5] | high | 4h |
+| 2.3 | Evidence invariant on the server: a fact is stored as `approved` only with non-empty evidence (or `type: 'user'`, labeled "entered manually"); anything else is stored as `pending` and reported back in the PUT response; facts from `demo` sources carry `synthetic: true`. Show the downgrade in the UI | Fable 5.2 [Opus 5.5] | high | 3h |
+| 2.4 | File ingestion honesty: the upload control accepts `.pdf/.docx/.pptx` and images but only text-like files can be read as text in the browser. Verify what each type does; make unsupported types say so (EN/AR) instead of producing empty or garbage sources; cap text size | Sonnet 5.5 | medium | 2h |
+| 2.5 | Website source via the server: `POST /api/companies/:id/fetch-url` (the browser `fetch(c.website)` fails on CORS) — http/https only, block private/loopback addresses after DNS resolution, 10 s timeout, 1 MB cap, no redirects to blocked hosts; wire the existing "fetch website" action to it | Fable 5.2 [Opus 5.5] | high | 4h |
+| 2.6 | Phase 2 exit check in a browser: approved facts survive refresh; evidence visible; `GET .../facts?status=approved` never returns pending/rejected items; second user gets 404. Tick Phase 2 in `PHASES.md`; write the Phase 3 queue | Sonnet 5.5 | medium | 1h |
 
 ## Next atomic task
-**1.6** — Phase 1 exit sign-off (details in `NEXT_AGENT_PROMPT.md`). **Done when:** the browser scenario is rerun once on the final code, Phase 1 is ticked in `PHASES.md`, and a Phase 2 task queue (each task with Agent / Reasoning / Dev effort) replaces the Phase 1 queue here.
+**2.1** — see the table and `NEXT_AGENT_PROMPT.md`. **Done when:** each step of the flow is recorded here as works / broken-and-fixed / broken-and-deferred, from a real browser run; `npm test` green.
 
 ## Last tests (actual results only)
 - 2026-11-12 `npm test` → 34 pass, 0 fail (`health` 3, `db` 4, `auth` 8, `companies` 6, `state` 9, `ratelimit` 4).
-- 2026-11-12 browser, on the 1.5b code (before the limiter was added): two-user scenario passed — A's companies persist across reload and sign-out; B in the same browser sees only its own company and gets 404 on A's id; delete / delete-all / locally added company reach the server; Arabic/RTL fine; no JS errors.
-- Not exercised by hand: the 429 message in the sign-in card, the real file-import button, the load-demo action, the 5 MB error path, the offline retry path.
+- 2026-11-12 Phase 1 exit scenario, final code, scripted in the app's built-in browser against a throwaway DB: A registers → one empty company; renames it, adds a source with Arabic text, runs the rules extractor (10 findings); reload → all intact; sign out; B registers in the same browser → only its own empty company, 404 on A's company id; six wrong passwords → "Too many attempts" message in EN and AR; A signs in on a second server instance sharing the same DB file → data intact (persistence is in the DB, not the process). No JS errors.
+- Not exercised by hand: clicking through the real buttons (the run drove app functions from the console), file import, load-demo, the 5 MB error path, offline retry. Task 2.1 covers the UI path.
 
 ## Blockers / external prerequisites
-- None for Phase 1. Phase 4 will need an AI API key in `.env` (never commit).
+- None for Phase 2. Phase 4 will need an AI API key in `.env` (never commit).
 
 ## Files changed in latest task
-- Added: `test/ratelimit.test.js`
-- Edited: `server/auth.js` (limiter), `server/app.js` (`authLimits` option), `public/index.html` (`too_many_attempts` message)
+- Edited: `PHASES.md` (Phase 1 ticked), `IMPLEMENTATION_STATUS.md`, `NEXT_AGENT_PROMPT.md`. No code changes.
