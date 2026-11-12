@@ -33,6 +33,31 @@ CREATE TABLE IF NOT EXISTS company_state (
   data       TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+-- Knowledge mirror: rewritten from the state blob on every state save (see knowledge.js).
+CREATE TABLE IF NOT EXISTS sources (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  id         TEXT NOT NULL,
+  title      TEXT NOT NULL,
+  kind       TEXT NOT NULL,
+  text       TEXT,
+  demo       INTEGER NOT NULL DEFAULT 0,
+  date       TEXT NOT NULL,
+  PRIMARY KEY (company_id, id)
+);
+CREATE TABLE IF NOT EXISTS facts (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  id         TEXT NOT NULL,
+  cat        TEXT NOT NULL,
+  text       TEXT NOT NULL,
+  type       TEXT NOT NULL,
+  status     TEXT NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
+  src        TEXT,
+  ev         TEXT NOT NULL,
+  needs      INTEGER NOT NULL DEFAULT 0,
+  date       TEXT NOT NULL,
+  PRIMARY KEY (company_id, id)
+);
+CREATE INDEX IF NOT EXISTS facts_company_status ON facts(company_id, status);
 `;
 
 export function initSchema(db) {

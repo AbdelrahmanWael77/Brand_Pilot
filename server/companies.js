@@ -1,5 +1,6 @@
 import express from 'express';
 import crypto from 'node:crypto';
+import { createKnowledge, STATUSES } from './knowledge.js';
 
 const MAX_NAME = 120;
 
@@ -9,6 +10,7 @@ const MAX_NAME = 120;
  * single place that enforces per-company data isolation.
  */
 export function createCompanies(db) {
+  const knowledge = createKnowledge(db);
   const q = {
     insertCompany: db.prepare('INSERT INTO companies (id, name, created_by, created_at) VALUES (?, ?, ?, ?)'),
     insertMembership: db.prepare('INSERT INTO memberships (user_id, company_id, role) VALUES (?, ?, ?)'),
@@ -61,7 +63,7 @@ export function createCompanies(db) {
 
   router.get('/:id', requireCompany, (req, res) => res.json({ company: req.company }));
 
-  // Owner only. Memberships and state go with it (ON DELETE CASCADE).
+  // Owner only. Memberships, state, sources and facts go with it (ON DELETE CASCADE).
   router.delete('/:id', requireCompany, (req, res) => {
     if (req.company.role !== 'owner') return res.status(403).json({ error: 'forbidden' });
     q.deleteCompany.run(req.company.id);
@@ -86,9 +88,26 @@ export function createCompanies(db) {
       if (!name || name.length > MAX_NAME) return res.status(400).json({ error: 'invalid_name' });
     }
     const updatedAt = new Date().toISOString();
-    q.putState.run(req.company.id, JSON.stringify(state), updatedAt);
-    if (name && name !== req.company.name) q.renameCompany.run(name, req.company.id);
-    res.json({ ok: true, updatedAt });
+    // Blob, name and the knowledge mirror change together or not at all.
+    let mirrored;
+    db.exec('BEGIN');
+    try {
+      q.putState.run(req.company.id, JSON.stringify(state), updatedAt);
+      if (name && name !== req.company.name) q.renameCompany.run(name, req.company.id);
+      mirrored = knowledge.mirror(req.company.id, state);
+      db.exec('COMMIT');
+    } catch (e) {
+      db.exec('ROLLBACK');
+      throw e;
+    }
+    res.json({ ok: true, updatedAt, knowledge: mirrored });
+  });
+
+  // Mirrored findings of this company. `?status=approved` is what later phases treat as facts.
+  router.get('/:id/facts', requireCompany, (req, res) => {
+    const status = req.query.status;
+    if (status !== undefined && !STATUSES.includes(status)) return res.status(400).json({ error: 'invalid_status' });
+    res.json({ facts: knowledge.listFacts(req.company.id, status ?? null) });
   });
 
   return { router, requireCompany };
