@@ -33,6 +33,99 @@ CREATE TABLE IF NOT EXISTS company_state (
   data       TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+-- Knowledge mirror: rewritten from the state blob on every state save (see knowledge.js).
+CREATE TABLE IF NOT EXISTS sources (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  id         TEXT NOT NULL,
+  title      TEXT NOT NULL,
+  kind       TEXT NOT NULL,
+  text       TEXT,
+  demo       INTEGER NOT NULL DEFAULT 0,
+  date       TEXT NOT NULL,
+  PRIMARY KEY (company_id, id)
+);
+CREATE TABLE IF NOT EXISTS facts (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  id         TEXT NOT NULL,
+  cat        TEXT NOT NULL,
+  text       TEXT NOT NULL,
+  type       TEXT NOT NULL,
+  status     TEXT NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
+  src        TEXT,
+  ev         TEXT NOT NULL,
+  needs      INTEGER NOT NULL DEFAULT 0,
+  date       TEXT NOT NULL,
+  PRIMARY KEY (company_id, id)
+);
+CREATE INDEX IF NOT EXISTS facts_company_status ON facts(company_id, status);
+-- Imported performance data mirror: rewritten from state.data on state save (see data.js).
+CREATE TABLE IF NOT EXISTS data_rows (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  kind       TEXT NOT NULL CHECK (kind IN ('meta', 'ga4', 'gsc', 'leads')),
+  date       TEXT NOT NULL,
+  row        TEXT NOT NULL,
+  synthetic  INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS data_rows_company_kind_date ON data_rows(company_id, kind, date);
+-- Fingerprint of the data last mirrored per company, so unchanged saves skip the rewrite.
+CREATE TABLE IF NOT EXISTS data_mirror (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  hash       TEXT NOT NULL,
+  result     TEXT NOT NULL
+);
+-- Campaign mirror: rewritten from state.campaigns on state save (see campaigns.js).
+CREATE TABLE IF NOT EXISTS campaigns (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  id         TEXT NOT NULL,
+  pos        INTEGER NOT NULL,
+  name       TEXT NOT NULL,
+  slug       TEXT NOT NULL,
+  rec        TEXT,
+  approved   INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT,
+  brief      TEXT NOT NULL,
+  PRIMARY KEY (company_id, id)
+);
+CREATE TABLE IF NOT EXISTS campaign_assets (
+  company_id  TEXT NOT NULL,
+  campaign_id TEXT NOT NULL,
+  id          TEXT NOT NULL,
+  pos         INTEGER NOT NULL,
+  type        TEXT NOT NULL CHECK (type IN ('post', 'landing', 'email', 'guide')),
+  lang        TEXT NOT NULL CHECK (lang IN ('en', 'ar')),
+  channel     TEXT NOT NULL,
+  n           INTEGER NOT NULL DEFAULT 0,
+  status      TEXT NOT NULL CHECK (status IN ('draft', 'approved')),
+  flagged     INTEGER NOT NULL DEFAULT 0,
+  fields      TEXT NOT NULL,
+  PRIMARY KEY (company_id, campaign_id, id),
+  FOREIGN KEY (company_id, campaign_id) REFERENCES campaigns(company_id, id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS campaign_mirror (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  hash       TEXT NOT NULL,
+  result     TEXT NOT NULL
+);
+-- Saved marketing reports: a snapshot of what the report said at that moment (never rebuilt).
+CREATE TABLE IF NOT EXISTS reports (
+  id         TEXT PRIMARY KEY,
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  range      TEXT NOT NULL,
+  lang       TEXT NOT NULL,
+  auto       INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  data       TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS reports_company ON reports (company_id, created_at);
+-- Automatic reports: when the next snapshot of a company is due (no row = off).
+CREATE TABLE IF NOT EXISTS report_schedules (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  every      TEXT NOT NULL,
+  range      TEXT NOT NULL,
+  lang       TEXT NOT NULL,
+  next_due   TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 `;
 
 export function initSchema(db) {
