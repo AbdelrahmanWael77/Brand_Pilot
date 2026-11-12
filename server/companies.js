@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
 import { createCampaigns } from './campaigns.js';
+import { campaignQa } from './campaignQa.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
 import { buildContext, ask, ASK } from './director.js';
@@ -129,6 +130,13 @@ export function createCompanies(
     const campaign = campaigns.get(req.company.id, req.params.cid);
     if (!campaign) return res.status(404).json({ error: 'not_found' });
     res.json({ campaign });
+  });
+
+  // The server's own content checks for one campaign (approved CTA / offer, claims, placeholders, recommendation).
+  router.get('/:id/campaigns/:cid/qa', requireCompany, (req, res) => {
+    const result = campaignQa(db, req.company.id, req.params.cid);
+    if (!result) return res.status(404).json({ error: 'not_found' });
+    res.json(result);
   });
 
   // What imported data the server holds for this company, per dataset.
