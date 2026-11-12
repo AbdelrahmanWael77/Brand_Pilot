@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
 import { metrics, RANGES } from './metrics.js';
+import { audit } from './audit.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
 
@@ -120,6 +121,11 @@ export function createCompanies(db, { fetchUrl = createFetchUrl(), fetchLimit = 
     const range = req.query.range === undefined ? '28' : req.query.range;
     if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
     res.json(metrics(db, req.company.id, range));
+  });
+
+  // Audit items from validated rows and approved facts; each states its basis and evidence.
+  router.get('/:id/audit', requireCompany, (req, res) => {
+    res.json(audit(db, req.company.id));
   });
 
   // Mirrored findings of this company. `?status=approved` is what later phases treat as facts.
