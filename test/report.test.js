@@ -148,7 +148,21 @@ test('Markdown download: headers, numbers, escaping of company text, Arabic labe
   assert.match(ar, /^# التقرير التسويقي — /);
   assert.match(ar, /\| جلسات الموقع \| 2,000 \| \+400\.0% \|/);
   assert.match(ar, /### نقاط القوة/);
-  assert.match(ar, /بالإنجليزية حالياً/); // finding texts are English: said, not hidden
+  // Findings are written in Arabic by the server audit; no "findings are English" note.
+  assert.match(ar, /\*\*زوار Search هم الأعلى في معدل الاستفسار\*\* — من بياناتكم المستوردة/);
+  assert.match(ar, /- Search: 30 استفسار من 900 جلسة \(3\.33%\)/);
+  assert.match(ar, /الظهور في البحث العضوي غير معروف\*\* — استوردوا تصدير الأداء من Search Console\./);
+  assert.doesNotMatch(ar, /بالإنجليزية حالياً|visitors enquire|Import a /);
+  assert.doesNotMatch(en, /[\u0600-\u06FF]/); // and the English report has no Arabic in it
+  // JSON in Arabic on request; English by default.
+  const j = await (await get(companyId, '?range=7&lang=ar')).json();
+  assert.equal(j.findingsLang, 'ar');
+  assert.equal(j.findings.strong[0].title, 'زوار Search هم الأعلى في معدل الاستفسار');
+  assert.equal((await (await get(companyId, '?range=7')).json()).findingsLang, 'en');
+  // A report saved before Arabic findings existed (English texts, no findingsLang) still says so in Arabic.
+  const old = await (await get(companyId, '?range=7')).json();
+  delete old.findingsLang;
+  assert.match(renderReport(old, 'ar'), /بالإنجليزية حالياً/);
   assert.match(ar, /مسودة/);
 });
 
@@ -197,7 +211,8 @@ test('printable HTML: self-contained, locked down, escaped, right direction per 
   const ar = await (await get(evil, '?range=7&format=html&lang=ar')).text();
   assert.match(ar, /^<!doctype html>\n<html lang="ar" dir="rtl">/);
   assert.match(ar, /<td>جلسات الموقع<\/td>/);
-  assert.match(ar, /بالإنجليزية حالياً/);
+  assert.match(ar, /هم الأعلى في معدل الاستفسار/);
+  assert.doesNotMatch(ar, /بالإنجليزية حالياً/);
 
   // Synthetic data is labeled in the page too.
   s.imports = [{ kind: 'ga4', origin: 'fixture' }];

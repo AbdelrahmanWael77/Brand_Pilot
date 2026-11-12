@@ -9,8 +9,9 @@
  *   buildReport(db, companyId, { range, now })  → plain object (also the JSON response)
  *   renderReport(report, lang)                  → Markdown, labels in English or Arabic
  *
- * Finding texts (titles, reasons, actions, evidence) come from `server/audit.js`, which writes
- * English only; the Arabic report says so instead of pretending they are translated.
+ * Finding texts (titles, reasons, actions, evidence) come from `server/audit.js` in the report's
+ * language (`lang`). Reports saved before Arabic findings existed hold English texts; the Arabic
+ * rendering of those says so.
  */
 import { approvedFacts } from './knowledge.js';
 import { metrics, RANGES } from './metrics.js';
@@ -36,11 +37,11 @@ const SECTIONS = [
 ];
 
 /** Report data for one company. Returns null when the company does not exist. */
-export function buildReport(db, companyId, { range = '28', now = new Date() } = {}) {
+export function buildReport(db, companyId, { range = '28', now = new Date(), lang = 'en' } = {}) {
   const row = db.prepare('SELECT name FROM companies WHERE id = ?').get(companyId);
   if (!row) return null;
   const m = metrics(db, companyId, range);
-  const a = audit(db, companyId);
+  const a = audit(db, companyId, { lang });
   const facts = approvedFacts(db, companyId);
   const camps = createCampaigns(db).list(companyId);
   const currency = db.prepare('SELECT currency FROM company_settings WHERE company_id = ?').get(companyId)?.currency ?? null;
@@ -71,6 +72,7 @@ export function buildReport(db, companyId, { range = '28', now = new Date() } = 
     period: m.period,
     previous: m.previous,
     synthetic: !!m.synthetic || !!a.synthetic || facts.some((f) => f.synthetic),
+    findingsLang: lang, // language of the finding and gap texts below
     currency, // of spend and cost per lead; null = not set, numbers are shown without a label
     kpis,
     findings,
@@ -156,7 +158,7 @@ export function renderReport(r, lang = 'en') {
   const any = SECTIONS.some(([key]) => r.findings[key].length);
   if (!any) L.push(t.noFindings);
   else {
-    if (t.englishNote) L.push(`_${t.englishNote}_`, '');
+    if (t.englishNote && r.findingsLang !== 'ar') L.push(`_${t.englishNote}_`, ''); // only for reports saved before Arabic findings existed
     for (const [key] of SECTIONS) {
       if (!r.findings[key].length) continue;
       L.push(`### ${t[key]}`, '');
@@ -230,7 +232,7 @@ export function renderReportHtml(r, lang = 'en') {
   o.push(`<h2>${h(t.findings)}</h2>`);
   if (!SECTIONS.some(([key]) => r.findings[key].length)) o.push(`<p class="muted">${h(t.noFindings)}</p>`);
   else {
-    if (t.englishNote) o.push(`<p class="muted">${h(t.englishNote)}</p>`);
+    if (t.englishNote && r.findingsLang !== 'ar') o.push(`<p class="muted">${h(t.englishNote)}</p>`);
     for (const [key] of SECTIONS) {
       if (!r.findings[key].length) continue;
       o.push(`<h3>${h(t[key])}</h3>`);

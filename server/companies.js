@@ -173,7 +173,7 @@ export function createCompanies(
     if (!['json', 'md', 'html'].includes(format)) return res.status(400).json({ error: 'invalid_format' });
     const lang = req.query.lang === undefined ? 'en' : req.query.lang;
     if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
-    sendReport(res, buildReport(db, req.company.id, { range }), format, lang);
+    sendReport(res, buildReport(db, req.company.id, { range, lang }), format, lang);
   });
 
   // Report history: save what the report says now, list the saved ones, read one back (never rebuilt).
@@ -224,7 +224,9 @@ export function createCompanies(
 
   // Audit items from validated rows and approved facts; each states its basis and evidence.
   router.get('/:id/audit', requireCompany, (req, res) => {
-    res.json(audit(db, req.company.id));
+    const lang = req.query.lang === undefined ? 'en' : req.query.lang;
+    if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
+    res.json(audit(db, req.company.id, { lang }));
   });
 
   // What the AI Marketing Director is allowed to know about this company: approved facts, KPIs, audit items.

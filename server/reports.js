@@ -34,7 +34,7 @@ export function createReports(db) {
   /** Builds the report now and stores it. Returns the list entry, or null for an unknown company. */
   function save(companyId, { range = '28', lang = 'en', auto = false, now = new Date() } = {}) {
     if (!RANGES.includes(range) || !REPORT_LANGS.includes(lang)) throw new TypeError('invalid report options');
-    const data = buildReport(db, companyId, { range, now });
+    const data = buildReport(db, companyId, { range, now, lang });
     if (!data) return null;
     const row = { id: crypto.randomUUID(), range, lang, auto: auto ? 1 : 0, created_at: data.generatedAt };
     db.exec('BEGIN');

@@ -294,6 +294,59 @@ test('route: audit uses the validated mirror and approved facts; pending and rej
   assert.doesNotMatch(JSON.stringify(b), /PENDING|REJECTED/);
 });
 
+test('Arabic wording: same rules, ids, numbers and evidence values; only the text changes', () => {
+  const data = {
+    ...empty(),
+    ga4: [ga4('Search', 'desktop', 500, 20), ga4('Social', 'mobile', 1000, 5), ga4('Email', 'desktop', 500, 10)],
+    gsc: [gsc('marketing agency', 2000, 10, 8)],
+    leads: [...leads('Referral', 25, 21), ...leads('Ads', 30, 2), ...leads('', 15, 3)],
+  };
+  const facts = [fact('t', 'tone'), fact('b', 'brandid')];
+  const en = computeAudit(data, facts).items;
+  const ar = computeAudit(data, facts, { lang: 'ar' }).items;
+  assert.deepEqual(computeAudit(data, facts, { lang: 'en' }).items, en); // English is the default, unchanged
+  assert.deepEqual(ar.map((i) => [i.id, i.kind, i.basis, i.synthetic]), en.map((i) => [i.id, i.kind, i.basis, i.synthetic]));
+  assert.ok(en.length >= 8);
+  const AR = /[\u0600-\u06FF]/;
+  for (const [k, i] of ar.entries()) {
+    const e = en[k];
+    for (const f of ['title', 'why', 'action']) {
+      assert.match(i[f], AR, `${i.id}.${f}`);
+      assert.doesNotMatch(e[f], AR, `${i.id}.${f} (en)`);
+    }
+    if (i.needs) assert.match(i.needs, AR, `${i.id}.needs`);
+    assert.equal(i.evidence.length, e.evidence.length, i.id);
+    i.evidence.forEach((x, n) => {
+      const { text, ...rest } = x;
+      const { text: enText, ...enRest } = e.evidence[n];
+      assert.deepEqual(rest, enRest, i.id); // metric, value, rows, factId are identical
+      if (!x.factId) assert.match(text, AR, `${i.id} evidence ${n}`); // a fact's own text is quoted as it is
+      else assert.equal(text, enText);
+    });
+  }
+  const by = Object.fromEntries(ar.map((i) => [i.id, i]));
+  assert.equal(by['ch-best'].title, 'زوار Search هم الأعلى في معدل الاستفسار');
+  assert.equal(by['ch-best'].evidence[0].text, 'Search: 20 استفسار من 500 جلسة (4.00%)');
+  assert.equal(by['src-lowq'].evidence[0].text, 'Ads: 30 عميل محتمل، 7% مؤهلون مقابل 37% إجمالاً');
+  assert.equal(by['seo-q'].evidence[0].text, '«marketing agency»: 2000 ظهور، 10 نقرة (0.5%)، متوسط المركز 8.0');
+  assert.equal(by['brand-doc'].title, 'نبرة الصوت والألوان موثقة ومعتمدة');
+
+  // Nothing imported, nothing approved: every "not enough data" item is in Arabic too.
+  const none = computeAudit(empty(), [], { lang: 'ar' }).items;
+  assert.equal(none.length, 5);
+  for (const i of none) {
+    assert.match(i.title, AR, i.id);
+    assert.match(i.needs, AR, i.id);
+  }
+  assert.equal(item(none, 'brand-doc').needs, 'اعتمدوا حقيقة لـنبرة الصوت وهوية العلامة (الألوان) في مركز المعرفة.');
+});
+
+test('route: ?lang=ar answers in Arabic; an unknown language is refused', async () => {
+  const a = await (await call('GET', `/api/companies/${companyId}/audit?lang=ar`, alice)).json();
+  assert.match(a.items[0].title, /[\u0600-\u06FF]/);
+  assert.equal((await call('GET', `/api/companies/${companyId}/audit?lang=fr`, alice)).status, 400);
+});
+
 test('route: other users get 404', async () => {
   assert.equal((await call('GET', `/api/companies/${companyId}/audit`, bob)).status, 404);
   assert.equal((await call('GET', `/api/companies/${companyId}/audit`)).status, 401);
