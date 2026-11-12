@@ -5,9 +5,9 @@
 **Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 1.6 completed — **Phase 1 signed off**
 **Current phase:** 2 — Company intelligence (not started)
 **Location:** `D:\brand-pilot-implemntion` (moved from `D:\brand-pilot` on 2026-11-12 with full Git history; the old folder is retired — do not work there).
-**Branch / commit:** `main` holds everything through 1.6 (merged 2026-11-12); old `feat/*` branches are fully merged and can be deleted. No remote configured; nothing pushed. One short `feat/<task>` branch per task.
+**Branch / commit:** `main` holds everything through 1.6. Remote `origin` = https://github.com/AbdelrahmanWael77/Brand_Pilot.git (`main` pushed 2026-11-12). One short `feat/<task>` branch per task; push after each verified task when the owner allows.
 **Run:** `npm install` then `npm start` → http://localhost:3000 (`PORT` and `BRANDPILOT_DB=<file>` env override; `npm run dev` = watch mode)
-**Test:** `npm test` (built-in `node --test`, files in `test/`)
+**Test:** `npm test` (built-in `node --test`, files in `test/`). **Dev account:** with the app running, `npm run seed:dev` creates the local-only login defined in `scripts/seed-dev-user.js`.
 
 ## Verified complete
 - Phase 0: Node + Express app serves the frontend and `GET /api/health`.

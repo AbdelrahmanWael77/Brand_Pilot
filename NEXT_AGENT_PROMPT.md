@@ -9,7 +9,7 @@ You are taking over an **existing BrandPilot implementation** from another AI. *
 
 ## Latest handoff snapshot — 2026-11-12
 - **Phase:** 2 — Company intelligence, not started. Phases 0 and 1 are verified and signed off (sign-in, per-account companies, server persistence, isolation, rate limiting).
-- **Branch:** `main` holds everything through 1.6. Create `feat/2.1-knowledge-ui-pass` from it. No remote configured; nothing pushed.
+- **Branch:** `main` holds everything through 1.6 and is pushed to `origin` (https://github.com/AbdelrahmanWael77/Brand_Pilot.git). Create `feat/2.1-knowledge-ui-pass` from it.
 - **Stack:** Node >=22.5 ESM, Express 5, built-in `node:sqlite`, `node:test`. Frontend = single-file vanilla JS at `public/index.html` (patch in place, keep EN/AR RTL; very long lines — use `grep -n -o 'pattern.\{0,200\}'`, never read it whole).
 - **Run / test:** `npm install`, `npm start` (http://localhost:3000; `PORT=3100` if 3000 is held by a stale process; `BRANDPILOT_DB=<file>` for a throwaway database), `npm test`.
 - **Last verified:** `npm test` 34/34; Phase 1 exit scenario passed in a browser on the final code.
