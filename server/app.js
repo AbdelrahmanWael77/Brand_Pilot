@@ -13,7 +13,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * from createFetchUrl, a small `fetchLimit`, or an `ai` client from createAi with a stubbed network);
  * production uses the defaults (`ai` is built from ANTHROPIC_API_KEY / AI_MODEL).
  */
-export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi() } = {}) {
+export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), askLimit } = {}) {
   const app = express();
   app.disable('x-powered-by');
   // 1 MB JSON everywhere except the company state blob, which may hold sources and imported data.
@@ -25,7 +25,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
 
   const auth = createAuth(db, { limits: authLimits });
   app.locals.db = db;
-  const companies = createCompanies(db, { fetchUrl, fetchLimit });
+  const companies = createCompanies(db, { fetchUrl, fetchLimit, ai, askLimit });
   app.locals.requireAuth = auth.requireAuth;
   app.locals.requireCompany = companies.requireCompany;
   app.locals.ai = ai;

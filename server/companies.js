@@ -4,7 +4,8 @@ import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
-import { buildContext } from './director.js';
+import { buildContext, ask, ASK } from './director.js';
+import { AiError } from './ai.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
 
@@ -15,10 +16,14 @@ const MAX_NAME = 120;
  * Every company-scoped route must go through `requireCompany`, which is the
  * single place that enforces per-company data isolation.
  */
-export function createCompanies(db, { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 } } = {}) {
+export function createCompanies(
+  db,
+  { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 } } = {},
+) {
   const knowledge = createKnowledge(db);
   const data = createData(db);
   const fetchLimiter = createLimiter(fetchLimit); // outbound requests per user
+  const askLimiter = createLimiter(askLimit); // AI questions per user
   const q = {
     insertCompany: db.prepare('INSERT INTO companies (id, name, created_by, created_at) VALUES (?, ?, ?, ?)'),
     insertMembership: db.prepare('INSERT INTO memberships (user_id, company_id, role) VALUES (?, ?, ?)'),
@@ -132,6 +137,26 @@ export function createCompanies(db, { fetchUrl = createFetchUrl(), fetchLimit = 
   // What the AI Marketing Director is allowed to know about this company: approved facts, KPIs, audit items.
   router.get('/:id/director/context', requireCompany, (req, res) => {
     res.json(buildContext(db, req.company.id));
+  });
+
+  // One question to the AI Marketing Director, answered only from this company's context (director.js).
+  router.post('/:id/director/ask', requireCompany, async (req, res) => {
+    const question = typeof req.body?.question === 'string' ? req.body.question.trim() : '';
+    if (!question || question.length > ASK.question) return res.status(400).json({ error: 'invalid_question' });
+    const lang = req.body.lang ?? 'en';
+    if (lang !== 'en' && lang !== 'ar') return res.status(400).json({ error: 'invalid_lang' });
+    const wait = askLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    askLimiter.hit(req.user.id);
+    if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
+    try {
+      res.json(await ask(db, ai, req.company.id, { question, lang }));
+    } catch (e) {
+      if (!(e instanceof AiError)) throw e;
+      // The provider's own message stays in the server log.
+      console.error(`director/ask: ${e.code}`, e.cause?.message ?? '');
+      res.status(e.status).json({ error: e.code });
+    }
   });
 
   // Mirrored findings of this company. `?status=approved` is what later phases treat as facts.
