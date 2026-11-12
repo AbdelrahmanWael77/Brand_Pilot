@@ -59,14 +59,14 @@ test('no facts before the first save', async () => {
 test('PUT state mirrors sources and findings; approved filter returns only approved', async () => {
   const r = await put(companyId, alice, state());
   assert.equal(r.status, 200);
-  assert.deepEqual((await r.json()).knowledge, { sources: 2, facts: 4, skipped: 0 });
+  assert.deepEqual((await r.json()).knowledge, { sources: 2, facts: 4, skipped: 0, downgraded: [] });
   assert.equal(count('sources', companyId), 2);
 
   const approved = (await facts(companyId, alice, '?status=approved')).facts;
   assert.deepEqual(approved.map((f) => f.id), ['f1', 'f2']);
   assert.ok(approved.every((f) => f.status === 'approved'));
   assert.deepEqual(approved[0], {
-    id: 'f1', cat: 'services', text: 'Fact f1', type: 'fact', status: 'approved', src: 's1', srcTitle: 'about.txt',
+    id: 'f1', cat: 'services', text: 'Fact f1', type: 'fact', status: 'approved', src: 's1', srcTitle: 'about.txt', synthetic: false,
     ev: 'Quote for f1', needs: false, date: '2026-11-12',
   });
   assert.equal(approved[1].srcTitle, null);
@@ -112,14 +112,17 @@ test('malformed items are skipped without failing the save', async () => {
   );
   const r = await put(companyId, alice, s);
   assert.equal(r.status, 200);
-  assert.deepEqual((await r.json()).knowledge, { sources: 2, facts: 5, skipped: 13 });
-  const f8 = (await facts(companyId, alice, '?status=approved')).facts.find((f) => f.id === 'f8');
-  assert.deepEqual({ cat: f8.cat, ev: f8.ev, src: f8.src, needs: f8.needs, date: f8.date }, { cat: '', ev: '', src: null, needs: false, date: '' });
+  assert.deepEqual((await r.json()).knowledge, { sources: 2, facts: 5, skipped: 13, downgraded: ['f8'] });
+  const f8 = (await facts(companyId, alice)).facts.find((f) => f.id === 'f8');
+  assert.deepEqual(
+    { status: f8.status, cat: f8.cat, ev: f8.ev, src: f8.src, needs: f8.needs, date: f8.date },
+    { status: 'pending', cat: '', ev: '', src: null, needs: false, date: '' },
+  );
 
   for (const bad of [{ sources: 'nope', findings: 12 }, { sources: {}, findings: null }]) {
     const res = await put(companyId, alice, bad);
     assert.equal(res.status, 200);
-    assert.deepEqual((await res.json()).knowledge, { sources: 0, facts: 0, skipped: 0 });
+    assert.deepEqual((await res.json()).knowledge, { sources: 0, facts: 0, skipped: 0, downgraded: [] });
   }
   // The blob itself is stored untouched.
   await put(companyId, alice, s);
@@ -164,4 +167,61 @@ test('deleting a company removes its sources and facts', async () => {
   assert.equal(count('facts', id), 4);
   assert.equal((await call('DELETE', `/api/companies/${id}`, alice)).status, 200);
   assert.equal(count('facts', id) + count('sources', id), 0);
+});
+
+test('evidence invariant: approved needs evidence or manual entry', async () => {
+  const id = await newCompany(alice, 'Evidence');
+  const s = {
+    sources: [{ id: 's1', title: 'about.txt', kind: 'document', text: 'x', date: '2026-11-12', demo: false }],
+    findings: [
+      finding('with-ev', 'approved'),
+      finding('empty-ev', 'approved', { ev: '' }),
+      finding('blank-ev', 'approved', { ev: '  \n\t ' }),
+      finding('no-ev-key', 'approved', { ev: undefined }),
+      finding('inference', 'approved', { type: 'inference', ev: '' }),
+      finding('user-no-ev', 'approved', { type: 'user', src: null, ev: '' }),
+      finding('user-ev', 'approved', { type: 'user', src: null, ev: 'Entered manually' }),
+      finding('rejected-no-ev', 'rejected', { ev: '' }),
+      finding('pending-no-ev', 'pending', { ev: '' }),
+    ],
+  };
+  const r = await put(id, alice, s);
+  assert.equal(r.status, 200);
+  assert.deepEqual((await r.json()).knowledge.downgraded, ['empty-ev', 'blank-ev', 'no-ev-key', 'inference']);
+
+  const all = (await facts(id, alice)).facts;
+  const status = Object.fromEntries(all.map((f) => [f.id, f.status]));
+  assert.deepEqual(status, {
+    'with-ev': 'approved', 'empty-ev': 'pending', 'blank-ev': 'pending', 'no-ev-key': 'pending', inference: 'pending',
+    'user-no-ev': 'approved', 'user-ev': 'approved', 'rejected-no-ev': 'rejected', 'pending-no-ev': 'pending',
+  });
+  const approved = ['with-ev', 'user-no-ev', 'user-ev'];
+  assert.deepEqual((await facts(id, alice, '?status=approved')).facts.map((f) => f.id), approved);
+  assert.deepEqual(approvedFacts(db, id).map((f) => f.id), approved);
+  // The stored blob is not rewritten; only the mirror is authoritative for facts.
+  const blob = (await (await call('GET', `/api/companies/${id}/state`, alice)).json()).state;
+  assert.equal(blob.findings[1].status, 'approved');
+});
+
+test('facts from demo sources are flagged synthetic', async () => {
+  const id = await newCompany(alice, 'Demo');
+  const s = {
+    sources: [
+      { id: 'real', title: 'about.txt', kind: 'document', text: 'x', date: '2026-11-12', demo: false },
+      { id: 'demo', title: 'Demo brief', kind: 'document', text: 'y', date: '2026-11-12', demo: true },
+      { id: 'truthy', title: 'Not a boolean', kind: 'document', text: 'z', date: '2026-11-12', demo: 'yes' },
+    ],
+    findings: [
+      finding('a', 'approved', { src: 'real' }),
+      finding('b', 'approved', { src: 'demo' }),
+      finding('c', 'approved', { src: 'missing-source' }),
+      finding('d', 'approved', { type: 'user', src: null, ev: 'Entered manually' }),
+      finding('e', 'pending', { src: 'demo' }),
+      finding('f', 'approved', { src: 'truthy' }),
+    ],
+  };
+  assert.equal((await put(id, alice, s)).status, 200);
+  const flags = Object.fromEntries((await facts(id, alice)).facts.map((f) => [f.id, f.synthetic]));
+  assert.deepEqual(flags, { a: false, b: true, c: false, d: false, e: true, f: false });
+  assert.deepEqual(approvedFacts(db, id).filter((f) => f.synthetic).map((f) => f.id), ['b']);
 });

@@ -6,6 +6,10 @@
  * later phases can ask "which facts are approved?" without trusting the blob.
  *
  * `approvedFacts` is the ONLY read path other server code may use for facts.
+ *
+ * Evidence invariant: a finding is mirrored as `approved` only when it carries a
+ * non-empty evidence quote, or was typed by a person (`type: 'user'`). Any other
+ * "approved" finding is stored as `pending` and reported back as downgraded.
  */
 
 const STATUSES = ['pending', 'approved', 'rejected'];
@@ -22,6 +26,9 @@ function cleanSource(s) {
   if (s.text !== null && s.text !== undefined && typeof s.text !== 'string') return null;
   return { id: s.id, title: s.title, kind: str(s.kind), text: strOrNull(s.text), demo: s.demo === true ? 1 : 0, date: str(s.date) };
 }
+
+/** True when a finding may count as an approved fact. */
+export const hasEvidence = (f) => f.type === 'user' || f.ev.trim() !== '';
 
 /** Returns a clean fact row, or null when the item is not a usable finding. */
 function cleanFact(f) {
@@ -68,7 +75,7 @@ export function createKnowledge(db) {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ),
     facts: db.prepare(
-      `SELECT f.id, f.cat, f.text, f.type, f.status, f.src, f.ev, f.needs, f.date, s.title AS src_title
+      `SELECT f.id, f.cat, f.text, f.type, f.status, f.src, f.ev, f.needs, f.date, s.title AS src_title, s.demo AS src_demo
        FROM facts f LEFT JOIN sources s ON s.company_id = f.company_id AND s.id = f.src
        WHERE f.company_id = ? AND (? IS NULL OR f.status = ?) ORDER BY f.rowid`,
     ),
@@ -81,13 +88,20 @@ export function createKnowledge(db) {
   function mirror(companyId, state) {
     const sources = cleanList(state?.sources, cleanSource);
     const facts = cleanList(state?.findings, cleanFact);
+    const downgraded = [];
+    for (const f of facts.rows) {
+      if (f.status === 'approved' && !hasEvidence(f)) {
+        f.status = 'pending';
+        downgraded.push(f.id);
+      }
+    }
     q.deleteFacts.run(companyId);
     q.deleteSources.run(companyId);
     for (const s of sources.rows) q.insertSource.run(companyId, s.id, s.title, s.kind, s.text, s.demo, s.date);
     for (const f of facts.rows) {
       q.insertFact.run(companyId, f.id, f.cat, f.text, f.type, f.status, f.src, f.ev, f.needs, f.date);
     }
-    return { sources: sources.rows.length, facts: facts.rows.length, skipped: sources.skipped + facts.skipped };
+    return { sources: sources.rows.length, facts: facts.rows.length, skipped: sources.skipped + facts.skipped, downgraded };
   }
 
   /** Facts of one company, optionally filtered by status (must be one of STATUSES or null). */
@@ -100,6 +114,7 @@ export function createKnowledge(db) {
       status: r.status,
       src: r.src,
       srcTitle: r.src_title ?? null,
+      synthetic: r.src_demo === 1, // comes from a labeled demo source, not real company material
       ev: r.ev,
       needs: r.needs === 1,
       date: r.date,
