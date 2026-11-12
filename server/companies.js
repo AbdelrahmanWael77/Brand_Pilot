@@ -1,6 +1,8 @@
 import express from 'express';
 import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
+import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
+import { createLimiter } from './auth.js';
 
 const MAX_NAME = 120;
 
@@ -9,8 +11,9 @@ const MAX_NAME = 120;
  * Every company-scoped route must go through `requireCompany`, which is the
  * single place that enforces per-company data isolation.
  */
-export function createCompanies(db) {
+export function createCompanies(db, { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 } } = {}) {
   const knowledge = createKnowledge(db);
+  const fetchLimiter = createLimiter(fetchLimit); // outbound requests per user
   const q = {
     insertCompany: db.prepare('INSERT INTO companies (id, name, created_by, created_at) VALUES (?, ?, ?, ?)'),
     insertMembership: db.prepare('INSERT INTO memberships (user_id, company_id, role) VALUES (?, ?, ?)'),
@@ -108,6 +111,22 @@ export function createCompanies(db) {
     const status = req.query.status;
     if (status !== undefined && !STATUSES.includes(status)) return res.status(400).json({ error: 'invalid_status' });
     res.json({ facts: knowledge.listFacts(req.company.id, status ?? null) });
+  });
+
+  // Read one public web page for this company (the browser cannot: cross-origin rules).
+  // All network-safety rules live in fetchUrl.js. Nothing is stored here; the client adds the source.
+  router.post('/:id/fetch-url', requireCompany, async (req, res) => {
+    const url = req.body?.url;
+    if (typeof url !== 'string' || !url.trim() || url.length > 2000) return res.status(400).json({ error: 'invalid_url' });
+    const wait = fetchLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    fetchLimiter.hit(req.user.id);
+    try {
+      res.json(await fetchUrl(url));
+    } catch (e) {
+      if (e instanceof FetchUrlError) return res.status(e.status).json({ error: e.code });
+      throw e;
+    }
   });
 
   return { router, requireCompany };

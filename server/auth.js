@@ -50,7 +50,7 @@ function parseCredentials(body) {
  * Fixed-window in-memory counter. Per process: resets on restart and is not shared
  * between instances — enough for a single-node MVP, replace before scaling out.
  */
-function createLimiter({ max, windowMs, maxKeys = 10_000 }) {
+export function createLimiter({ max, windowMs, maxKeys = 10_000 }) {
   const hits = new Map();
   const live = (key, now) => {
     const e = hits.get(key);
