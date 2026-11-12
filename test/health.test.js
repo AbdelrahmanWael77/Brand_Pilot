@@ -1,10 +1,11 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
+import { openDb } from '../server/db.js';
 
 let server, base;
 before(async () => {
-  server = createApp().listen(0);
+  server = createApp({ db: openDb(':memory:') }).listen(0);
   await new Promise((r) => server.once('listening', r));
   base = `http://127.0.0.1:${server.address().port}`;
 });
