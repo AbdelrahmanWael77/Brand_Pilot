@@ -123,6 +123,36 @@ test('lead rules: src-unknown, src-best, src-lowq — triggered, not triggered, 
   assert.equal(item(items, 'src-lowq'), undefined);
 });
 
+test('segment rule: seg-best — triggered with the browser’s numbers, not triggered, insufficient', () => {
+  const seg = (segment, total, qualified) => leads('Facebook', total, qualified).map((r) => (segment ? { ...r, segment } : r));
+  // Clinics 21/30 = 70%, Labs 4/30 = 13%; overall 25/60 ≈ 42% → Clinics is above 115% of it.
+  let s = item(run({ leads: [...seg('Clinics', 30, 21), ...seg('Labs', 30, 4)] }), 'seg-best');
+  assert.equal(s.basis, 'data');
+  assert.equal(s.kind, 'opp');
+  assert.equal(s.title, '"Clinics" is your strongest customer segment');
+  assert.deepEqual(s.evidence.map((e) => e.text), ['Clinics: 70% qualified (30 leads)', 'Labs: 13% qualified (30 leads)']);
+  near(s.evidence[0].value, 0.7);
+  assert.equal(s.evidence[0].rows, 30);
+  // Under 30 leads the line says so; a customer counts as qualified.
+  s = item(run({ leads: [...seg('Clinics', 20, 15).map((r, i) => (i === 0 ? { ...r, status: 'customer' } : r)), ...seg('Labs', 40, 4)] }), 'seg-best');
+  assert.equal(s.evidence[0].text, 'Clinics: 75% qualified (20 leads, small sample)');
+
+  // Even segments → no conclusion and no "insufficient" either: there was enough data, it just shows no winner.
+  assert.equal(item(run({ leads: [...seg('Clinics', 30, 15), ...seg('Labs', 30, 15)] }), 'seg-best'), undefined);
+  // Best segment only slightly above the overall share (55% vs 50% → under 115%).
+  assert.equal(item(run({ leads: [...seg('Clinics', 40, 22), ...seg('Labs', 40, 18)] }), 'seg-best'), undefined);
+
+  // One sized segment, small segments, or no segment field: not enough to compare.
+  for (const rows of [[...seg('Clinics', 30, 21), ...seg('Labs', 10, 0)], [...seg('Clinics', 14, 14), ...seg('Labs', 14, 0)], seg(null, 60, 20)]) {
+    s = item(run({ leads: rows }), 'seg-best');
+    assert.equal(s.basis, 'insufficient');
+    assert.match(s.needs, /15\+ leads/);
+    assert.deepEqual(s.evidence, []);
+  }
+  // No leads at all: only the "no leads" gap, no segment item.
+  assert.equal(item(run({}), 'seg-best'), undefined);
+});
+
 test('brand-doc rests on approved facts only', () => {
   let i = item(run({}, [fact('f1', 'tone', 'Warm and friendly'), fact('f2', 'brandid', 'Olive green #556B2F'), fact('f3', 'products')]), 'brand-doc');
   assert.equal(i.basis, 'facts');

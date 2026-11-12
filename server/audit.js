@@ -36,6 +36,9 @@ export const T = {
   sourceMinLeads: 15, // to be called "best"
   lowQualityMinLeads: 20,
   lowQualityBelowAverage: 0.6,
+  segmentMinLeads: 15, // a segment needs this many leads to be compared
+  segmentOverAverage: 1.15, // "strongest" = qualified share above 115% of the overall share
+  segmentSmallSample: 30, // below this the evidence line says "small sample"
 };
 
 const sum = (rows, k) => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
@@ -209,6 +212,28 @@ export function computeAudit(data, facts) {
           evidence: [{ metric: 'qualified_share', value: low.rate, rows: low.count, text: `${low.name}: ${low.count} leads, ${pct(low.rate, 0)} qualified vs ${pct(overall, 0)} overall` }],
         });
       }
+    }
+    // Segments: the rule campaigns are built from ("Create campaign from this" in the Audit).
+    const segments = [...groupBy(l, 'segment')]
+      .map(([name, rs]) => ({ name, count: rs.length, qualified: rs.filter(isQualified).length, rate: rs.filter(isQualified).length / rs.length }))
+      .filter((x) => x.count >= T.segmentMinLeads)
+      .sort((a, b) => b.rate - a.rate);
+    if (segments.length < 2) {
+      insufficient('seg-best', 'leads', 'Customer segments cannot be compared yet', `Two segments need ${T.segmentMinLeads}+ leads each, with the segment filled in on the lead, before they can be compared.`);
+    } else if (segments[0].rate > overall * T.segmentOverAverage) {
+      const top = segments[0];
+      conclude('opp', 'leads', {
+        id: 'seg-best',
+        title: `"${top.name}" is your strongest customer segment`,
+        why: 'A campaign aimed at the segment that already qualifies best is the most evidence-backed way to raise lead quality.',
+        action: `Run a campaign addressed to ${top.name}, built only from approved product facts.`,
+        evidence: segments.map((x) => ({
+          metric: 'qualified_share',
+          value: x.rate,
+          rows: x.count,
+          text: `${x.name}: ${pct(x.rate, 0)} qualified (${x.count} leads${x.count < T.segmentSmallSample ? ', small sample' : ''})`,
+        })),
+      });
     }
   }
 

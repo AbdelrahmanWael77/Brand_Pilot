@@ -188,6 +188,25 @@ test('route: checks use approved facts and the server audit; pending, rejected a
   assert.equal(again.exportable, true);
 });
 
+test('route: a campaign made from the segment recommendation is verified when the lead rows support it', async () => {
+  const id = (await (await call('POST', '/api/companies', alice, { name: 'Segments Co' })).json()).company.id;
+  const lead = (segment, i, q) => ({ date: '2026-10-01', status: i < q ? 'qualified' : 'new', source: 'Facebook', segment });
+  const rows = (a, b) => [...Array.from({ length: 30 }, (_, i) => lead('Clinics', i, a)), ...Array.from({ length: 30 }, (_, i) => lead('Labs', i, b))];
+  const state = { sources: [], findings: [], data: { leads: rows(21, 4) }, imports: [], campaigns: [stateCampaign('k1', 'seg-best')] };
+  const rec = async () => by(await (await call('GET', `/api/companies/${id}/campaigns/k1/qa`, alice)).json()).recommendation;
+  await call('PUT', `/api/companies/${id}/state`, alice, { state });
+  let c = await rec();
+  assert.equal(c.pass, true);
+  assert.match(c.detail, /seg-best.*validated data.*Clinics/);
+
+  // Same campaign, but the data no longer shows a stronger segment → not verified.
+  state.data.leads = rows(15, 15);
+  await call('PUT', `/api/companies/${id}/state`, alice, { state });
+  c = await rec();
+  assert.equal(c.pass, false);
+  assert.match(c.detail, /not verified on the server/);
+});
+
 test('route: unknown campaign 404, another user 404, signed out 401', async () => {
   assert.equal((await qa('nope')).status, 404);
   assert.equal((await qa('k1', bob)).status, 404);
