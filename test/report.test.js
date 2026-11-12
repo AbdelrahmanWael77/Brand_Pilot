@@ -167,6 +167,48 @@ test('synthetic data is labeled in the JSON and in the document', async () => {
   assert.match(en, /from your imported data \(synthetic\)/);
 });
 
+test('printable HTML: self-contained, locked down, escaped, right direction per language', async () => {
+  // A hostile company name and a hostile approved fact category must arrive as text.
+  const evil = (await (await call('POST', '/api/companies', alice, { name: '<script>alert(1)</script> "Co" & \'Sons\'' })).json()).company.id;
+  const s = state();
+  s.campaigns[0].name = '<img src=x onerror=alert(2)>';
+  await call('PUT', `/api/companies/${evil}/state`, alice, { state: s });
+
+  const res = await get(evil, '?range=7&format=html');
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get('content-type'), /^text\/html; charset=utf-8/);
+  const csp = res.headers.get('content-security-policy');
+  assert.match(csp, /default-src 'none'/);
+  assert.doesNotMatch(csp, /script-src/);
+  assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
+  const en = await res.text();
+  assert.match(en, /^<!doctype html>\n<html lang="en" dir="ltr">/);
+  assert.doesNotMatch(en, /<script|<img|<link|<iframe|<a\s|<form|<object|<embed|javascript:/i); // no tag that runs or loads anything
+  assert.match(en, /&lt;script&gt;alert\(1\)&lt;\/script&gt; &quot;Co&quot; &amp; &#39;Sons&#39;/);
+  assert.match(en, /&lt;img src=x onerror=alert\(2\)&gt;/);
+  assert.match(en, /<td>Website sessions<\/td><td class="n"><span class="ltr">2,000<\/span><\/td><td class="n"><span class="ltr">\+400\.0%<\/span><\/td>/);
+  assert.match(en, /<td>Leads<\/td><td class="n"><span class="nd">no data<\/span><\/td>/);
+  assert.match(en, /<h3>Strengths<\/h3>/);
+  assert.match(en, /Search: 30 enquiries from 900 sessions/);
+  assert.match(en, /@media print/);
+  assert.doesNotMatch(en, />0<\/span><\/td>/); // sessions etc. exist; missing numbers are never 0
+  assert.doesNotMatch(en, /PENDING|REJECTED/);
+
+  const ar = await (await get(evil, '?range=7&format=html&lang=ar')).text();
+  assert.match(ar, /^<!doctype html>\n<html lang="ar" dir="rtl">/);
+  assert.match(ar, /<td>جلسات الموقع<\/td>/);
+  assert.match(ar, /بالإنجليزية حالياً/);
+
+  // Synthetic data is labeled in the page too.
+  s.imports = [{ kind: 'ga4', origin: 'fixture' }];
+  await call('PUT', `/api/companies/${evil}/state`, alice, { state: s });
+  const syn = await (await get(evil, '?range=all&format=html')).text();
+  assert.match(syn, /<p class="warn">Contains synthetic demo data — not real performance\.<\/p>/);
+  assert.match(syn, /<span class="tag syn">synthetic<\/span>/);
+
+  assert.equal((await get(evil, '?format=html', bob)).status, 404);
+});
+
 test('validation and isolation', async () => {
   assert.equal((await get(companyId, '?range=5')).status, 400);
   assert.equal((await get(companyId, '?format=pdf')).status, 400);

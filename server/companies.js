@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
 import { createCampaigns } from './campaigns.js';
-import { buildReport, renderReport, REPORT_LANGS } from './report.js';
+import { buildReport, renderReport, renderReportHtml, REPORT_LANGS } from './report.js';
 import { campaignQa } from './campaignQa.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
@@ -145,11 +145,20 @@ export function createCompanies(
     const range = req.query.range === undefined ? '28' : req.query.range;
     if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
     const format = req.query.format === undefined ? 'json' : req.query.format;
-    if (format !== 'json' && format !== 'md') return res.status(400).json({ error: 'invalid_format' });
+    if (!['json', 'md', 'html'].includes(format)) return res.status(400).json({ error: 'invalid_format' });
     const lang = req.query.lang === undefined ? 'en' : req.query.lang;
     if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
     const report = buildReport(db, req.company.id, { range });
     if (format === 'json') return res.json(report);
+    if (format === 'html') {
+      // A page to print or save as PDF: inline styles only, nothing may load or run.
+      return res
+        .type('text/html; charset=utf-8')
+        .set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'")
+        .set('X-Content-Type-Options', 'nosniff')
+        .set('Cache-Control', 'no-store')
+        .send(renderReportHtml(report, lang));
+    }
     res
       .type('text/markdown; charset=utf-8')
       .set('Content-Disposition', `attachment; filename="marketing-report-${report.generatedAt.slice(0, 10)}.md"`)

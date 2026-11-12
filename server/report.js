@@ -182,3 +182,74 @@ export function renderReport(r, lang = 'en') {
   L.push('', '---', t.footer, '');
   return L.join('\n');
 }
+
+// ---- Printable HTML (task 6.3) ----
+const h = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const CSS = `
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:#0f172a;line-height:1.5;margin:0;background:#f1f5f9}
+main{max-width:820px;margin:24px auto;background:#fff;padding:32px 40px;border-radius:12px;box-shadow:0 1px 4px rgba(15,23,42,.12)}
+h1{font-size:24px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 8px;padding-bottom:4px;border-bottom:2px solid #e2e8f0}h3{font-size:15px;margin:18px 0 6px}
+p{margin:6px 0}.meta{color:#475569;font-size:13px}.muted{color:#64748b;font-size:13px}
+.warn{border:1px dashed #fb923c;background:#fff7ed;color:#9a3412;padding:8px 12px;border-radius:8px;font-weight:700;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:6px 8px;border-bottom:1px solid #e2e8f0;text-align:start}
+th{font-size:12px;text-transform:uppercase;color:#475569}td.n,th.n{text-align:end;white-space:nowrap}
+.nd{color:#64748b}.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px;background:#ecfdf5;color:#065f46}
+.tag.syn{background:#fff7ed;color:#9a3412;border:1px dashed #fdba74}
+.f{border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin:8px 0;break-inside:avoid}.f ul{margin:4px 0;padding-inline-start:20px;font-size:14px}
+ul{padding-inline-start:20px}footer{margin-top:28px;padding-top:10px;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px}
+.ltr{direction:ltr;unicode-bidi:isolate}
+@page{size:A4;margin:16mm}
+@media print{body{background:#fff}main{margin:0;max-width:none;padding:0;border-radius:0;box-shadow:none}h2{break-after:avoid}tr{break-inside:avoid}}
+`;
+
+/** One self-contained page (inline CSS, no scripts, no external requests) to print or save as PDF. */
+export function renderReportHtml(r, lang = 'en') {
+  const t = T[lang] ?? T.en;
+  const rtl = lang === 'ar';
+  const syn = ` <span class="tag syn">${h(t.syn)}</span>`;
+  const ltr = (s) => `<span class="ltr">${h(s)}</span>`;
+  const o = [];
+  o.push(`<h1>${h(t.title)} — <span dir="auto">${h(r.company.name)}</span></h1>`);
+  o.push(`<p class="meta">${h(t.generated)}: ${ltr(r.generatedAt.slice(0, 10))}</p>`);
+  if (r.period) {
+    o.push(`<p class="meta">${h(t.period)}: ${ltr(`${r.period.from} → ${r.period.to}`)}${r.range === 'all' ? ` (${h(t.allData)})` : ''}${r.previous ? ` · ${h(t.prevPeriod)} ${ltr(`${r.previous.from} → ${r.previous.to}`)}` : ''}</p>`);
+  } else o.push(`<p class="meta">${h(t.noData)}</p>`);
+  if (r.synthetic) o.push(`<p class="warn">${h(t.synthetic.replace(/\*/g, ''))}</p>`);
+
+  o.push(`<h2>${h(t.kpis)}</h2><table><thead><tr><th>${h(t.metric)}</th><th class="n">${h(t.value)}</th><th class="n">${h(t.change)} (${h(t.vsPrev)})</th></tr></thead><tbody>`);
+  for (const k of r.kpis) {
+    const value = k.value === null ? `<span class="nd">${h(t[k.reason] ?? t.no_data)}</span>` : ltr(fmt(k.value, k.format)) + (k.synthetic ? syn : '');
+    o.push(`<tr><td>${h(t.kpi[k.id] ?? k.id)}</td><td class="n">${value}</td><td class="n">${k.change === null ? h(t.none) : ltr(signed(k.change))}</td></tr>`);
+  }
+  o.push('</tbody></table>');
+
+  o.push(`<h2>${h(t.findings)}</h2>`);
+  if (!SECTIONS.some(([key]) => r.findings[key].length)) o.push(`<p class="muted">${h(t.noFindings)}</p>`);
+  else {
+    if (t.englishNote) o.push(`<p class="muted">${h(t.englishNote)}</p>`);
+    for (const [key] of SECTIONS) {
+      if (!r.findings[key].length) continue;
+      o.push(`<h3>${h(t[key])}</h3>`);
+      for (const f of r.findings[key]) {
+        o.push(`<div class="f"><p><b dir="auto">${h(f.title)}</b> <span class="tag">${h(t.basis[f.basis] ?? f.basis)}</span>${f.synthetic ? syn : ''}</p>`);
+        if (f.why) o.push(`<p dir="auto">${h(f.why)}</p>`);
+        if (f.evidence.length) o.push(`<p class="muted">${h(t.evidence)}:</p><ul>${f.evidence.map((e) => `<li dir="auto">${h(e)}</li>`).join('')}</ul>`);
+        if (f.action) o.push(`<p dir="auto"><b>${h(t.action)}:</b> ${h(f.action)}</p>`);
+        o.push('</div>');
+      }
+    }
+  }
+
+  if (r.gaps.length) {
+    o.push(`<h2>${h(t.gaps)}</h2><p class="muted">${h(t.gapsNote)}</p><ul>${r.gaps.map((g) => `<li dir="auto"><b>${h(g.title)}</b> — ${h(g.needs)}</li>`).join('')}</ul>`);
+  }
+  o.push(`<h2>${h(t.knowledge)}</h2><p>${h(t.factsN(r.knowledge.approvedFacts))}${r.knowledge.synthetic ? ` (${r.knowledge.synthetic} ${h(t.syn)})` : ''}</p>`);
+  o.push(`<h2>${h(t.campaigns)}</h2>`);
+  if (!r.campaigns.length) o.push(`<p class="muted">${h(t.noCampaigns)}</p>`);
+  else {
+    o.push(`<ul>${r.campaigns.map((c) => `<li><b dir="auto">${h(c.name)}</b> — ${h(c.approved ? t.approved : t.draft)}; ${h(t.assets(c.approvedAssets, c.assets))}; ${c.rec ? `${h(t.fromRec)} <code>${h(c.rec)}</code>` : h(t.manual)}</li>`).join('')}</ul>`);
+  }
+  o.push(`<footer>${h(t.footer)}</footer>`);
+  return `<!doctype html>\n<html lang="${rtl ? 'ar' : 'en'}" dir="${rtl ? 'rtl' : 'ltr'}">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${h(t.title)} — ${h(r.company.name)}</title>\n<style>${CSS}</style>\n</head>\n<body>\n<main>\n${o.join('\n')}\n</main>\n</body>\n</html>\n`;
+}
