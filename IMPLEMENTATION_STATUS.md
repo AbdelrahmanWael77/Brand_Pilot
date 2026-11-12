@@ -4,6 +4,7 @@
 
 **Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 1.6 completed — **Phase 1 signed off**
 **Current phase:** 2 — Company intelligence (not started)
+**Location:** `D:brand-pilot-implemntion` (moved from `D:brand-pilot` on 2026-11-12 with full Git history; the old folder is retired — do not work there).
 **Branch / commit:** `feat/1.6-phase1-signoff` (docs-only commits ahead of `main`; `main` holds everything through 1.5c). No remote configured; nothing pushed. One short `feat/<task>` branch per task.
 **Run:** `npm install` then `npm start` → http://localhost:3000 (`PORT` and `BRANDPILOT_DB=<file>` env override; `npm run dev` = watch mode)
 **Test:** `npm test` (built-in `node --test`, files in `test/`)
