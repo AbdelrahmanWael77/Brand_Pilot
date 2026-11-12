@@ -73,6 +73,39 @@ CREATE TABLE IF NOT EXISTS data_mirror (
   hash       TEXT NOT NULL,
   result     TEXT NOT NULL
 );
+-- Campaign mirror: rewritten from state.campaigns on state save (see campaigns.js).
+CREATE TABLE IF NOT EXISTS campaigns (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  id         TEXT NOT NULL,
+  pos        INTEGER NOT NULL,
+  name       TEXT NOT NULL,
+  slug       TEXT NOT NULL,
+  rec        TEXT,
+  approved   INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT,
+  brief      TEXT NOT NULL,
+  PRIMARY KEY (company_id, id)
+);
+CREATE TABLE IF NOT EXISTS campaign_assets (
+  company_id  TEXT NOT NULL,
+  campaign_id TEXT NOT NULL,
+  id          TEXT NOT NULL,
+  pos         INTEGER NOT NULL,
+  type        TEXT NOT NULL CHECK (type IN ('post', 'landing', 'email', 'guide')),
+  lang        TEXT NOT NULL CHECK (lang IN ('en', 'ar')),
+  channel     TEXT NOT NULL,
+  n           INTEGER NOT NULL DEFAULT 0,
+  status      TEXT NOT NULL CHECK (status IN ('draft', 'approved')),
+  flagged     INTEGER NOT NULL DEFAULT 0,
+  fields      TEXT NOT NULL,
+  PRIMARY KEY (company_id, campaign_id, id),
+  FOREIGN KEY (company_id, campaign_id) REFERENCES campaigns(company_id, id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS campaign_mirror (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  hash       TEXT NOT NULL,
+  result     TEXT NOT NULL
+);
 `;
 
 export function initSchema(db) {

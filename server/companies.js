@@ -2,6 +2,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
+import { createCampaigns } from './campaigns.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
 import { buildContext, ask, ASK } from './director.js';
@@ -22,6 +23,7 @@ export function createCompanies(
 ) {
   const knowledge = createKnowledge(db);
   const data = createData(db);
+  const campaigns = createCampaigns(db);
   const fetchLimiter = createLimiter(fetchLimit); // outbound requests per user
   const askLimiter = createLimiter(askLimit); // AI questions per user
   const q = {
@@ -101,20 +103,32 @@ export function createCompanies(
       if (!name || name.length > MAX_NAME) return res.status(400).json({ error: 'invalid_name' });
     }
     const updatedAt = new Date().toISOString();
-    // Blob, name and the knowledge and data mirrors change together or not at all.
-    let mirrored, mirroredData;
+    // Blob, name and the knowledge, data and campaign mirrors change together or not at all.
+    let mirrored, mirroredData, mirroredCampaigns;
     db.exec('BEGIN');
     try {
       q.putState.run(req.company.id, JSON.stringify(state), updatedAt);
       if (name && name !== req.company.name) q.renameCompany.run(name, req.company.id);
       mirrored = knowledge.mirror(req.company.id, state);
       mirroredData = data.mirror(req.company.id, state);
+      mirroredCampaigns = campaigns.mirror(req.company.id, state);
       db.exec('COMMIT');
     } catch (e) {
       db.exec('ROLLBACK');
       throw e;
     }
-    res.json({ ok: true, updatedAt, knowledge: mirrored, data: mirroredData });
+    res.json({ ok: true, updatedAt, knowledge: mirrored, data: mirroredData, campaigns: mirroredCampaigns });
+  });
+
+  // Campaigns the server holds for this company (validated copy of the Campaign Studio's state).
+  router.get('/:id/campaigns', requireCompany, (req, res) => {
+    res.json({ campaigns: campaigns.list(req.company.id) });
+  });
+
+  router.get('/:id/campaigns/:cid', requireCompany, (req, res) => {
+    const campaign = campaigns.get(req.company.id, req.params.cid);
+    if (!campaign) return res.status(404).json({ error: 'not_found' });
+    res.json({ campaign });
   });
 
   // What imported data the server holds for this company, per dataset.
