@@ -11,7 +11,12 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export function createApp({ db = openDb() } = {}) {
   const app = express();
   app.disable('x-powered-by');
-  app.use(express.json({ limit: '1mb' }));
+  // 1 MB JSON everywhere except the company state blob, which may hold sources and imported data.
+  const jsonDefault = express.json({ limit: '1mb' });
+  const jsonState = express.json({ limit: '5mb' });
+  app.use((req, res, next) =>
+    (/^\/api\/companies\/[^/]+\/state\/?$/.test(req.path) ? jsonState : jsonDefault)(req, res, next),
+  );
 
   const auth = createAuth(db);
   app.locals.db = db;
@@ -32,7 +37,8 @@ export function createApp({ db = openDb() } = {}) {
   app.use((err, _req, res, _next) => {
     const status = err?.status >= 400 && err?.status < 500 ? err.status : 500;
     if (status === 500) console.error(err);
-    res.status(status).json({ error: status === 500 ? 'server_error' : 'bad_request' });
+    const error = status === 500 ? 'server_error' : status === 413 ? 'too_large' : 'bad_request';
+    res.status(status).json({ error });
   });
   return app;
 }

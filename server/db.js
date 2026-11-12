@@ -28,6 +28,11 @@ CREATE TABLE IF NOT EXISTS memberships (
   PRIMARY KEY (user_id, company_id)
 );
 CREATE INDEX IF NOT EXISTS memberships_company ON memberships(company_id);
+CREATE TABLE IF NOT EXISTS company_state (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  data       TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 `;
 
 export function initSchema(db) {

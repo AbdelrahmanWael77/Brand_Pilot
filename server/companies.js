@@ -20,6 +20,11 @@ export function createCompanies(db) {
       `SELECT c.id, c.name, m.role FROM memberships m JOIN companies c ON c.id = m.company_id
        WHERE m.user_id = ? AND c.id = ?`,
     ),
+    getState: db.prepare('SELECT data, updated_at FROM company_state WHERE company_id = ?'),
+    putState: db.prepare(
+      `INSERT INTO company_state (company_id, data, updated_at) VALUES (?, ?, ?)
+       ON CONFLICT(company_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
+    ),
   };
 
   /** Sets req.company for members; 404 for everyone else so ids cannot be probed. */
@@ -53,6 +58,22 @@ export function createCompanies(db) {
   });
 
   router.get('/:id', requireCompany, (req, res) => res.json({ company: req.company }));
+
+  // One JSON object per company: server-side home for the prototype's per-company data.
+  router.get('/:id/state', requireCompany, (req, res) => {
+    const row = q.getState.get(req.company.id);
+    res.json({ state: row ? JSON.parse(row.data) : null, updatedAt: row ? row.updated_at : null });
+  });
+
+  router.put('/:id/state', requireCompany, (req, res) => {
+    const state = req.body?.state;
+    if (state === null || typeof state !== 'object' || Array.isArray(state)) {
+      return res.status(400).json({ error: 'invalid_state' });
+    }
+    const updatedAt = new Date().toISOString();
+    q.putState.run(req.company.id, JSON.stringify(state), updatedAt);
+    res.json({ ok: true, updatedAt });
+  });
 
   return { router, requireCompany };
 }
