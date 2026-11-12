@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+!.env.example
+data/
+*.log
+
+# Unrelated / legacy material kept locally, not part of the BrandPilot repo
+ShipSafe*/
+shipsafe*/
+*.zip
+!docs/handoff-pack/BrandPilot_Agent_Handoff_Pack.zip

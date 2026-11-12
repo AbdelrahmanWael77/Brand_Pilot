@@ -1,0 +1,163 @@
+{
+  "kit": "BrandPilot Phase 0 Team Setup",
+  "created": "2026-11-11",
+  "status": "pre-implementation",
+  "fileCount": 31,
+  "files": [
+    {
+      "path": "START_HERE.md",
+      "bytes": 4059,
+      "sha256": "c976ac6fbfd18b294f9b20365cb43455becb42daae5ed791cfff95afcc0fa4ae"
+    },
+    {
+      "path": "claude_project/01_PASTE_INSTRUCTIONS.md",
+      "bytes": 4967,
+      "sha256": "74b35ba9270858d84108776dca810309479ff01d514e31e393ca8efdc4d320e3"
+    },
+    {
+      "path": "claude_project/02_SHARED_MEMORY.md",
+      "bytes": 3809,
+      "sha256": "f63c577b8ceb7daa99407a6dee526028424725a2aa6efe6f3d97dd1b8a4a9b80"
+    },
+    {
+      "path": "claude_project/03_PROJECT_CHARTER.md",
+      "bytes": 3629,
+      "sha256": "c8d2df5a61bbb273d9b05701a8786544a2899ab9b338ec87cdfb9b940b82f1ab"
+    },
+    {
+      "path": "claude_project/04_PHASE_ROADMAP.md",
+      "bytes": 4218,
+      "sha256": "8c292d9bbf7bcade42ff9bd69b1b6ffbd29740c819717cdea5c75b277fb5ab0a"
+    },
+    {
+      "path": "claude_project/05_TEAM_OPERATING_MODEL.md",
+      "bytes": 3268,
+      "sha256": "9c38add6f73675bd4c9e4227d19e5a0175abf80a859b5b56c35da26c24b93ae2"
+    },
+    {
+      "path": "claude_project/06_SUPERPOWERS_PLAYBOOK.md",
+      "bytes": 4913,
+      "sha256": "34baf02a8fc74c2c16a32b65db5b5f6331b2da9fbd9b110f2aff067d57df233f"
+    },
+    {
+      "path": "claude_project/07_REQUIREMENTS_ACCEPTANCE.md",
+      "bytes": 4126,
+      "sha256": "fba5ddd9fae65543d1c4b6d28b86787be9014fac26f8121f7784d00e4174b758"
+    },
+    {
+      "path": "claude_project/08_FLOWNEST_SOURCE_OF_TRUTH.md",
+      "bytes": 3075,
+      "sha256": "51631ceafa59a9d2a873d7a0b1db922d79d15c7dcaa4a8c72e14abf3b0329635"
+    },
+    {
+      "path": "claude_project/09_DECISIONS_RISKS.md",
+      "bytes": 3837,
+      "sha256": "e06483dcbc2778fc45bcced2a6b486044ebb5240a7236f23ffa46dcc979d00e1"
+    },
+    {
+      "path": "claude_project/10_PHASE_START_AND_HANDOFF_PROMPTS.md",
+      "bytes": 2973,
+      "sha256": "4e5056511fc1d6e01d5b4fe2d54e12211da87a28ca5e92bc784f7d8c0c0d15a6"
+    },
+    {
+      "path": "phase_runbooks/PHASE_00_ALIGNMENT.md",
+      "bytes": 1236,
+      "sha256": "8097b6fd4ff01c5a9eea3a8e7ca935ce788eaca627078ca46221b298efe48add"
+    },
+    {
+      "path": "phase_runbooks/PHASE_01_DOMAIN_AND_PERSISTENCE.md",
+      "bytes": 1329,
+      "sha256": "7655589d77200b027e5f36cb396dc3a05c1d2b93ee6a2069ab67997129d01f3a"
+    },
+    {
+      "path": "phase_runbooks/PHASE_02_TEMPLATES_VERTICAL_SLICE.md",
+      "bytes": 1299,
+      "sha256": "bf307e5ee36bd8153aaadf8611febd2bf3026a772dd2dfbfae0a707e1ba9ceda"
+    },
+    {
+      "path": "phase_runbooks/PHASE_03_FLOWNEST_CAMPAIGN.md",
+      "bytes": 1358,
+      "sha256": "9b65327ba3bcd336acf10c3c243a68ed041dca2d7504c68452e46ed2f06dcdbd"
+    },
+    {
+      "path": "phase_runbooks/PHASE_04_EDITOR_PREVIEW_LOCALIZATION.md",
+      "bytes": 1336,
+      "sha256": "319fe31510560e08a46dd0035515fb0b505bf3cd781d1a3c64df50445ff493fe"
+    },
+    {
+      "path": "phase_runbooks/PHASE_05_CHANGE_IMPACT_ENGINE.md",
+      "bytes": 1342,
+      "sha256": "e910a76ee6cd57b1fa7ec1bc673cfa16457b7e888216d6e3fcfc970560d1ad8a"
+    },
+    {
+      "path": "phase_runbooks/PHASE_06_QA_AND_REVIEW.md",
+      "bytes": 1292,
+      "sha256": "bcae1198cad5c8c1ef44623fb1d1def83e0dd862ce6971dd9ee60a0da6f42d42"
+    },
+    {
+      "path": "phase_runbooks/PHASE_07_EDITABLE_EXPORTS.md",
+      "bytes": 1272,
+      "sha256": "39daf2f748d39449613d5bf74db0327bc5f1fb4278beee1364bcae61ad7bdbe3"
+    },
+    {
+      "path": "phase_runbooks/PHASE_08_SYSTEM_VERIFICATION_SECOND_BRAND.md",
+      "bytes": 1296,
+      "sha256": "41783e1a93eadae779a799cab76d239d3bd27d9fc48104966b3d8c96f7dd1e99"
+    },
+    {
+      "path": "phase_runbooks/PHASE_09_DEMO_SURPRISE_DRILL.md",
+      "bytes": 1382,
+      "sha256": "6360a987f40a01447b006ad531d07e218b17be7bb69a83d66633ca537169e72d"
+    },
+    {
+      "path": "repo/CLAUDE.md",
+      "bytes": 1928,
+      "sha256": "a5164b26c96a027fe56298207f5704d16432516abbf9875d584272ff1fd1bbb7"
+    },
+    {
+      "path": "repo/docs/adr/0001-draft-architecture.md",
+      "bytes": 1376,
+      "sha256": "933ced2a56cd7a1fe23771e9cc5c494cf41256efd042e0164ca625fa53a986ee"
+    },
+    {
+      "path": "repo/docs/fixtures/FLOWNEST_APPROVED_FACTS.json",
+      "bytes": 1523,
+      "sha256": "76dfd7a77ee9b4e43de643f52bf9865ecb66a7b9abbfd4a24ec217acf11a73d3"
+    },
+    {
+      "path": "repo/docs/fixtures/SECOND_BRAND_TEST_FIXTURE.json",
+      "bytes": 714,
+      "sha256": "8ed20ad66b82e353df6dfe2c35d18d226d40bd2ee38ea104182d0691d3e33a7e"
+    },
+    {
+      "path": "repo/docs/process/CHANGE_IMPACT_PROTOCOL.md",
+      "bytes": 2961,
+      "sha256": "cf395ad8e72420c5173e4cf9588c7deb2cc23435d4f6288d2fce5debd20c3ce6"
+    },
+    {
+      "path": "repo/docs/process/PHASE_GATE_TEMPLATE.md",
+      "bytes": 1291,
+      "sha256": "b692ecc33a0bda372ae99c7d8328d4e82dc5d4190c0495ae4da53feba370cca1"
+    },
+    {
+      "path": "repo/docs/process/QA_REVIEW_AND_EXPORT_GATES.md",
+      "bytes": 3072,
+      "sha256": "97b79b01ab244ecb68b97ecd1251ac4003f1cf4695cc35cee0c6fa019289aabc"
+    },
+    {
+      "path": "repo/docs/requirements/TRACEABILITY.md",
+      "bytes": 1420,
+      "sha256": "cf898299cdea534d8398133fd8c2b19d316369eb5aa2488486208071d92bbbac"
+    },
+    {
+      "path": "repo/docs/superpowers/plans/README.md",
+      "bytes": 1131,
+      "sha256": "a791426610d3028e89a8fddf4d00985a65120359fc399c1bacd05d0b38d53914"
+    },
+    {
+      "path": "repo/docs/superpowers/specs/2026-11-11-brandpilot-system-design-DRAFT.md",
+      "bytes": 9064,
+      "sha256": "afadac7474a3b0af7663ba445b8d62f2eb32cef6f82cc99a6ba97865987c3499"
+    }
+  ]
+}

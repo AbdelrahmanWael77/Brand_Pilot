@@ -1,0 +1,13 @@
+ONE-TIME SETUP (human):
+1. Copy AGENTS.md, CLAUDE.md, PHASES.md, IMPLEMENTATION_STATUS.md and NEXT_AGENT_PROMPT.md into the ROOT of the shared BrandPilot project/repository (alongside project files).
+2. Keep BrandPilot.html in the project as a prototype reference if it is not already there.
+3. Use one shared Git repository/workspace for all AI agents. If you switch to another model that cannot access that repo, move/copy the updated files and code first.
+4. Fable and other tools do not necessarily auto-load AGENTS.md. If your tool has Project Rules / Custom Instructions, set it to: "Before each implementation task read AGENTS.md and IMPLEMENTATION_STATUS.md at the project root. Follow them. Update IMPLEMENTATION_STATUS.md and NEXT_AGENT_PROMPT.md after every task."
+
+PASTE THIS TO START FABLE:
+"Work in the CURRENT BrandPilot project; do not start from scratch. Read AGENTS.md, IMPLEMENTATION_STATUS.md, and (only if relevant) PHASES.md. Follow the permanent rules. Inspect Git status and the relevant code. Execute exactly the next atomic task, verify it with a targeted test, then update IMPLEMENTATION_STATUS.md and overwrite NEXT_AGENT_PROMPT.md with an accurate copy-paste prompt for a different AI to resume. Keep the response short and avoid unrelated features."
+
+PASTE THIS WHEN SWITCHING MODELS:
+"Please read NEXT_AGENT_PROMPT.md in this project and carry out its instructions. Do not restart the project or reread whole conversations."
+
+IMPORTANT: No agent can reliably know when an account quota will end. Therefore the handoff files must be kept current after EVERY small task, not only at the last moment.
