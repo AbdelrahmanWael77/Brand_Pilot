@@ -2,7 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
 import { openDb } from '../server/db.js';
-import { createReports, REPORTS_MAX } from '../server/reports.js';
+import { createReports, REPORTS_MAX, addInterval } from '../server/reports.js';
 
 let server, base, db, alice, bob, companyId, otherId;
 before(async () => {
@@ -115,4 +115,91 @@ test('store: keeps the newest REPORTS_MAX per company, automatic flag, unknown c
 
   assert.equal((await call('DELETE', `/api/companies/${otherId}`, bob)).status, 200);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM reports WHERE company_id = ?').get(otherId).n, 0);
+});
+
+// ---- automatic reports (injected clock; nothing here waits) ----
+const at = (s) => new Date(s);
+
+test('addInterval: a week is 7 days; a month keeps the day, or the last day of a shorter month', () => {
+  assert.equal(addInterval(at('2026-11-12T09:00:00Z'), 'weekly').toISOString(), '2026-11-19T09:00:00.000Z');
+  assert.equal(addInterval(at('2026-11-12T09:00:00Z'), 'monthly').toISOString(), '2026-12-12T09:00:00.000Z');
+  assert.equal(addInterval(at('2026-12-31T09:00:00Z'), 'monthly').toISOString(), '2027-01-31T09:00:00.000Z');
+  assert.equal(addInterval(at('2027-01-31T09:00:00Z'), 'monthly').toISOString(), '2027-02-28T09:00:00.000Z');
+});
+
+test('schedule: nothing before the due time, one automatic snapshot when due, one after a long gap, off stops it', async () => {
+  const reports = createReports(db);
+  const co = (await (await call('POST', '/api/companies', alice, { name: 'Scheduled Co' })).json()).company.id;
+  await put(co, ga4(700));
+  assert.equal(reports.getSchedule(co), null);
+
+  const s = reports.setSchedule(co, { every: 'weekly', lang: 'ar' }, at('2026-11-01T10:00:00Z'));
+  assert.deepEqual(s, { every: 'weekly', range: '7', lang: 'ar', nextDue: '2026-11-08T10:00:00.000Z' });
+
+  assert.equal(reports.runDue(at('2026-11-08T09:59:59Z')), 0); // not yet
+  assert.equal(reports.list(co).length, 0);
+
+  assert.equal(reports.runDue(at('2026-11-08T10:00:00Z')), 1); // due
+  let list = reports.list(co);
+  assert.equal(list.length, 1);
+  assert.deepEqual({ auto: list[0].auto, range: list[0].range, lang: list[0].lang, createdAt: list[0].createdAt }, { auto: true, range: '7', lang: 'ar', createdAt: '2026-11-08T10:00:00.000Z' });
+  assert.equal(reports.getSchedule(co).nextDue, '2026-11-15T10:00:00.000Z');
+  assert.equal(reports.runDue(at('2026-11-08T11:00:00Z')), 0); // the hourly check does not repeat it
+
+  // The server was off for five weeks: one report, and the next due date is in the future.
+  assert.equal(reports.runDue(at('2026-12-20T12:00:00Z')), 1);
+  assert.equal(reports.list(co).length, 2);
+  assert.equal(reports.getSchedule(co).nextDue, '2026-12-27T10:00:00.000Z');
+
+  // Changing only the language keeps the due date; changing the interval restarts it.
+  assert.equal(reports.setSchedule(co, { every: 'weekly', lang: 'en' }, at('2026-12-21T00:00:00Z')).nextDue, '2026-12-27T10:00:00.000Z');
+  assert.deepEqual(reports.setSchedule(co, { every: 'monthly', lang: 'en' }, at('2026-12-21T00:00:00Z')), { every: 'monthly', range: '28', lang: 'en', nextDue: '2027-01-21T00:00:00.000Z' });
+
+  assert.equal(reports.setSchedule(co, { every: 'off' }), null);
+  assert.equal(reports.runDue(at('2030-01-01T00:00:00Z')), 0);
+  assert.equal(reports.list(co).length, 2);
+  assert.throws(() => reports.setSchedule(co, { every: 'daily' }), TypeError);
+});
+
+test('schedule: one failing company does not stop the others; deleting a company removes its schedule', async () => {
+  const reports = createReports(db);
+  const a = (await (await call('POST', '/api/companies', alice, { name: 'A' })).json()).company.id;
+  const b = (await (await call('POST', '/api/companies', alice, { name: 'B' })).json()).company.id;
+  reports.setSchedule(a, { every: 'weekly' }, at('2026-01-01T00:00:00Z'));
+  reports.setSchedule(b, { every: 'weekly' }, at('2026-01-01T00:00:01Z'));
+  // Corrupt A's schedule so its save throws (an unknown period).
+  db.prepare("UPDATE report_schedules SET range = 'bogus' WHERE company_id = ?").run(a);
+  const err = console.error;
+  console.error = () => {};
+  try {
+    assert.equal(reports.runDue(at('2026-01-09T00:00:00Z')), 1);
+  } finally {
+    console.error = err;
+  }
+  assert.equal(reports.list(a).length, 0);
+  assert.equal(reports.list(b).length, 1);
+
+  assert.equal((await call('DELETE', `/api/companies/${b}`, alice)).status, 200);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM report_schedules WHERE company_id = ?').get(b).n, 0);
+});
+
+test('schedule routes: read, set, turn off; validation; isolation; a report id is still readable', async () => {
+  const sched = (method, body, cookie = alice, id = companyId) => call(method, `/api/companies/${id}/reports/schedule`, cookie, body);
+  assert.deepEqual(await (await sched('GET')).json(), { schedule: null });
+  assert.equal((await sched('PUT', { every: 'daily' })).status, 400);
+  assert.equal((await sched('PUT', { every: 'weekly', lang: 'fr' })).status, 400);
+  const set = await (await sched('PUT', { every: 'monthly', lang: 'ar' })).json();
+  assert.equal(set.schedule.every, 'monthly');
+  assert.equal(set.schedule.range, '28');
+  assert.equal(set.schedule.lang, 'ar');
+  assert.ok(Date.parse(set.schedule.nextDue) > Date.now() + 27 * 86400_000);
+  assert.deepEqual(await (await sched('GET')).json(), set);
+  assert.equal((await sched('GET', undefined, bob)).status, 404);
+  assert.equal((await sched('PUT', { every: 'off' }, bob)).status, 404);
+  assert.deepEqual(await (await sched('GET')).json(), set); // bob changed nothing
+  // `/reports/schedule` does not shadow real report ids.
+  const mine = (await (await call('GET', `/api/companies/${companyId}/reports`, alice)).json()).reports[0];
+  assert.equal((await call('GET', `/api/companies/${companyId}/reports/${mine.id}`, alice)).status, 200);
+  assert.deepEqual(await (await sched('PUT', { every: 'off' })).json(), { schedule: null });
+  assert.deepEqual(await (await sched('GET')).json(), { schedule: null });
 });

@@ -185,6 +185,17 @@ export function createCompanies(
   router.get('/:id/reports', requireCompany, (req, res) => {
     res.json({ reports: reports.list(req.company.id) });
   });
+  // Automatic reports: off, weekly or monthly. Declared before `/:rid` so "schedule" is not read as a report id.
+  router.get('/:id/reports/schedule', requireCompany, (req, res) => {
+    res.json({ schedule: reports.getSchedule(req.company.id) });
+  });
+  router.put('/:id/reports/schedule', requireCompany, (req, res) => {
+    const every = req.body?.every;
+    if (!['off', 'weekly', 'monthly'].includes(every)) return res.status(400).json({ error: 'invalid_schedule' });
+    const lang = req.body?.lang ?? 'en';
+    if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
+    res.json({ schedule: reports.setSchedule(req.company.id, { every, lang }) });
+  });
   router.get('/:id/reports/:rid', requireCompany, (req, res) => {
     const format = req.query.format === undefined ? 'json' : req.query.format;
     if (!['json', 'md', 'html'].includes(format)) return res.status(400).json({ error: 'invalid_format' });
