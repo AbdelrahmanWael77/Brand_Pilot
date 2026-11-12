@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
+import { createData } from './data.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
 
@@ -13,6 +14,7 @@ const MAX_NAME = 120;
  */
 export function createCompanies(db, { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 } } = {}) {
   const knowledge = createKnowledge(db);
+  const data = createData(db);
   const fetchLimiter = createLimiter(fetchLimit); // outbound requests per user
   const q = {
     insertCompany: db.prepare('INSERT INTO companies (id, name, created_by, created_at) VALUES (?, ?, ?, ?)'),
@@ -91,19 +93,25 @@ export function createCompanies(db, { fetchUrl = createFetchUrl(), fetchLimit = 
       if (!name || name.length > MAX_NAME) return res.status(400).json({ error: 'invalid_name' });
     }
     const updatedAt = new Date().toISOString();
-    // Blob, name and the knowledge mirror change together or not at all.
-    let mirrored;
+    // Blob, name and the knowledge and data mirrors change together or not at all.
+    let mirrored, mirroredData;
     db.exec('BEGIN');
     try {
       q.putState.run(req.company.id, JSON.stringify(state), updatedAt);
       if (name && name !== req.company.name) q.renameCompany.run(name, req.company.id);
       mirrored = knowledge.mirror(req.company.id, state);
+      mirroredData = data.mirror(req.company.id, state);
       db.exec('COMMIT');
     } catch (e) {
       db.exec('ROLLBACK');
       throw e;
     }
-    res.json({ ok: true, updatedAt, knowledge: mirrored });
+    res.json({ ok: true, updatedAt, knowledge: mirrored, data: mirroredData });
+  });
+
+  // What imported data the server holds for this company, per dataset.
+  router.get('/:id/data/summary', requireCompany, (req, res) => {
+    res.json({ data: data.summary(req.company.id) });
   });
 
   // Mirrored findings of this company. `?status=approved` is what later phases treat as facts.

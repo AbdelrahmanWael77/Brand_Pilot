@@ -58,6 +58,21 @@ CREATE TABLE IF NOT EXISTS facts (
   PRIMARY KEY (company_id, id)
 );
 CREATE INDEX IF NOT EXISTS facts_company_status ON facts(company_id, status);
+-- Imported performance data mirror: rewritten from state.data on state save (see data.js).
+CREATE TABLE IF NOT EXISTS data_rows (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  kind       TEXT NOT NULL CHECK (kind IN ('meta', 'ga4', 'gsc', 'leads')),
+  date       TEXT NOT NULL,
+  row        TEXT NOT NULL,
+  synthetic  INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS data_rows_company_kind_date ON data_rows(company_id, kind, date);
+-- Fingerprint of the data last mirrored per company, so unchanged saves skip the rewrite.
+CREATE TABLE IF NOT EXISTS data_mirror (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  hash       TEXT NOT NULL,
+  result     TEXT NOT NULL
+);
 `;
 
 export function initSchema(db) {
