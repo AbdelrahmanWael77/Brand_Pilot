@@ -106,6 +106,17 @@ CREATE TABLE IF NOT EXISTS campaign_mirror (
   hash       TEXT NOT NULL,
   result     TEXT NOT NULL
 );
+-- Saved marketing reports: a snapshot of what the report said at that moment (never rebuilt).
+CREATE TABLE IF NOT EXISTS reports (
+  id         TEXT PRIMARY KEY,
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  range      TEXT NOT NULL,
+  lang       TEXT NOT NULL,
+  auto       INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  data       TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS reports_company ON reports (company_id, created_at);
 `;
 
 export function initSchema(db) {
