@@ -1,6 +1,6 @@
 # COPY EVERYTHING BELOW INTO THE NEXT AI AGENT (Fable / Claude / Codex / other)
 
-You are taking over an **existing BrandPilot implementation** from another AI. **DO NOT restart, replan the project, or overwrite work.** Work in the shared repository (`D:\brand-pilot` on the owner's machine).
+You are taking over an **existing BrandPilot implementation** from another AI. **DO NOT restart, replan the project, or overwrite work.** Work in the shared repository (`D:\brand-pilot-implemntion` on the owner's machine; the old `D:\brand-pilot` folder is retired).
 
 1. Read `AGENTS.md` and `IMPLEMENTATION_STATUS.md` at the repo root; read `PHASES.md` only if needed.
 2. Run `git status` and `npm test` first. Trust code and test results, not the previous agent's claims.
