@@ -123,6 +123,58 @@ test('lead rules: src-unknown, src-best, src-lowq — triggered, not triggered, 
   assert.equal(item(items, 'src-lowq'), undefined);
 });
 
+test('page rule: page-leak — triggered, not triggered, insufficient', () => {
+  const page = (landing_page, sessions, enquiries) => ({ ...ga4('Search', 'desktop', sessions, enquiries), ...(landing_page ? { landing_page } : {}) });
+  // Site: 60 enquiries / 3000 sessions = 2.00%. /pricing: 1000 sessions (33%), 5 enquiries = 0.50% → under 60% of the average.
+  let p = item(run({ ga4: [page('/pricing', 1000, 5), page('/home', 1500, 40), page('/blog', 500, 15)] }), 'page-leak');
+  assert.equal(p.basis, 'data');
+  assert.equal(p.kind, 'weak');
+  assert.equal(p.title, 'Landing page /pricing under-converts');
+  assert.equal(p.evidence[0].text, '/pricing: 1000 sessions (33%), enquiry rate 0.50% vs site 2.00%');
+  near(p.evidence[0].value, 0.005);
+  // Two leaking pages → the one with more sessions.
+  p = item(run({ ga4: [page('/a', 1000, 2), page('/b', 1200, 3), page('/home', 800, 55)] }), 'page-leak');
+  assert.match(p.title, /\/b /);
+  // A weak page carrying under 12% of sessions, or a page close to the average, is not a finding.
+  assert.equal(item(run({ ga4: [page('/tiny', 300, 0), page('/home', 2700, 60)] }), 'page-leak'), undefined);
+  assert.equal(item(run({ ga4: [page('/pricing', 1000, 15), page('/home', 2000, 45)] }), 'page-leak'), undefined);
+  // No landing_page column: cannot compare.
+  p = item(run({ ga4: [page(null, 1000, 5), page(null, 2000, 55)] }), 'page-leak');
+  assert.equal(p.basis, 'insufficient');
+  assert.match(p.needs, /landing_page/);
+  // No enquiries at all: only the tracking finding, no page item.
+  assert.equal(item(run({ ga4: [page('/a', 1000, 0)] }), 'page-leak'), undefined);
+});
+
+test('theme rule: theme-best — triggered, not triggered, insufficient', () => {
+  const posts = (theme, n, reach, engagements, link_clicks = 0) => Array.from({ length: n }, () => ({ date: '2026-11-01', platform: 'facebook', reach, engagements, link_clicks, ...(theme ? { theme } : {}), synthetic: false }));
+  // Tips: 4 × (1000 reach, 80 eng, 10 clicks) = 8.0% / 1.00%; Offers: 4 × (1000, 20) = 2.0%; account 400/8000 = 5.0%.
+  let th = item(run({ meta: [...posts('Tips', 4, 1000, 80, 10), ...posts('Offers', 4, 1000, 20)] }), 'theme-best');
+  assert.equal(th.basis, 'data');
+  assert.equal(th.kind, 'strong');
+  assert.equal(th.title, '"Tips" is your strongest content theme');
+  assert.deepEqual(th.evidence.map((e) => e.text), [
+    '"Tips": engagement 8.0% of reach across 4 posts; link clicks 1.00% of reach',
+    'Account average engagement: 5.0%; weakest theme "Offers": 2.0%',
+    'Engagement is an awareness signal, not proof of enquiries.',
+  ]);
+  near(th.evidence[0].value, 0.08);
+  assert.equal(th.evidence[0].rows, 4);
+  // Posts tagged "campaign" are not a theme, but they count in the account average.
+  th = item(run({ meta: [...posts('Tips', 4, 1000, 80), ...posts('Offers', 4, 1000, 20), ...posts('campaign', 6, 1000, 200)] }), 'theme-best');
+  assert.equal(th, undefined); // account average is now 12.9%, Tips (8%) is not above 120% of it
+  // Even themes → nothing.
+  assert.equal(item(run({ meta: [...posts('Tips', 4, 1000, 50), ...posts('Offers', 4, 1000, 50)] }), 'theme-best'), undefined);
+  // One sized theme, themes under 4 posts, or no theme column: not enough to compare.
+  for (const rows of [[...posts('Tips', 4, 1000, 80), ...posts('Offers', 3, 1000, 20)], [...posts('Tips', 3, 1000, 90), ...posts('Offers', 3, 1000, 10)], posts(null, 10, 1000, 50)]) {
+    th = item(run({ meta: rows }), 'theme-best');
+    assert.equal(th.basis, 'insufficient');
+    assert.match(th.needs, /4\+ posts/);
+  }
+  // No Meta data: only the "not connected" gap.
+  assert.equal(item(run({}), 'theme-best'), undefined);
+});
+
 test('segment rule: seg-best — triggered with the browser’s numbers, not triggered, insufficient', () => {
   const seg = (segment, total, qualified) => leads('Facebook', total, qualified).map((r) => (segment ? { ...r, segment } : r));
   // Clinics 21/30 = 70%, Labs 4/30 = 13%; overall 25/60 ≈ 42% → Clinics is above 115% of it.

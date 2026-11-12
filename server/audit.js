@@ -36,6 +36,10 @@ export const T = {
   sourceMinLeads: 15, // to be called "best"
   lowQualityMinLeads: 20,
   lowQualityBelowAverage: 0.6,
+  pageMinShare: 0.12, // a leaking landing page carries at least 12% of sessions…
+  pageBelowAverage: 0.6, // …and converts below 60% of the site average
+  themeMinPosts: 4, // a content theme needs this many posts to be compared
+  themeOverAverage: 1.2, // "strongest" = engagement above 120% of the account average
   segmentMinLeads: 15, // a segment needs this many leads to be compared
   segmentOverAverage: 1.15, // "strongest" = qualified share above 115% of the overall share
   segmentSmallSample: 30, // below this the evidence line says "small sample"
@@ -119,6 +123,21 @@ export function computeAudit(data, facts) {
               { metric: 'enquiry_rate', value: leak.rate, text: `${leak.name}: ${pct(leak.sessions / S, 0)} of sessions, enquiry rate ${pct(leak.rate, 2)} vs site ${pct(rate, 2)}` },
               { text: 'Hypothesis, not a measurement: posts send people to pages that do not match what the post promised.' },
             ],
+          });
+        }
+      }
+      const pages = breakdown(g, 'landing_page');
+      if (!pages.length) {
+        insufficient('page-leak', 'ga4', 'Landing pages cannot be compared yet', 'GA4 rows need a landing_page column.');
+      } else {
+        const page = pages.filter((x) => x.sessions / S >= T.pageMinShare && x.rate < rate * T.pageBelowAverage).sort((a, b) => b.sessions - a.sessions)[0];
+        if (page) {
+          conclude('weak', 'ga4', {
+            id: 'page-leak',
+            title: `Landing page ${page.name} under-converts`,
+            why: 'A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.',
+            action: `Review ${page.name}: put the primary CTA above the fold, shorten the form, state the offer in the first screen.`,
+            evidence: [{ metric: 'enquiry_rate', value: page.rate, text: `${page.name}: ${page.sessions} sessions (${pct(page.sessions / S, 0)}), enquiry rate ${pct(page.rate, 2)} vs site ${pct(rate, 2)}` }],
           });
         }
       }
@@ -238,7 +257,35 @@ export function computeAudit(data, facts) {
   }
 
   /* ---- Social (Meta) ---- */
-  if (!data.meta.length) insufficient('no-meta', 'meta', 'Social performance is not connected', 'Import a Meta Business Suite export in Integrations & Data.');
+  const m = data.meta;
+  if (!m.length) {
+    insufficient('no-meta', 'meta', 'Social performance is not connected', 'Import a Meta Business Suite export in Integrations & Data.');
+  } else {
+    // Engagement per person reached. Posts tagged "campaign" are not a content theme.
+    const engagement = (rs) => sum(rs, 'engagements') / Math.max(1, sum(rs, 'reach'));
+    const account = engagement(m);
+    const themes = [...groupBy(m.filter((x) => x.theme !== 'campaign'), 'theme')]
+      .filter(([, rs]) => rs.length >= T.themeMinPosts)
+      .map(([name, rs]) => ({ name, posts: rs.length, rate: engagement(rs), clicks: sum(rs, 'link_clicks') / Math.max(1, sum(rs, 'reach')) }))
+      .sort((a, b) => b.rate - a.rate);
+    if (themes.length < 2) {
+      insufficient('theme-best', 'meta', 'Content themes cannot be compared yet', `Two themes need ${T.themeMinPosts}+ posts each, with the theme filled in on the post, before they can be compared.`);
+    } else if (themes[0].rate > account * T.themeOverAverage) {
+      const top = themes[0];
+      const weakest = themes[themes.length - 1];
+      conclude('strong', 'meta', {
+        id: 'theme-best',
+        title: `"${top.name}" is your strongest content theme`,
+        why: 'Your own history shows what the audience responds to — a better guide than generic best practice.',
+        action: `Publish more "${top.name}" posts and end each with the primary CTA and a tracked link.`,
+        evidence: [
+          { metric: 'engagement_rate', value: top.rate, rows: top.posts, text: `"${top.name}": engagement ${pct(top.rate, 1)} of reach across ${top.posts} posts; link clicks ${pct(top.clicks, 2)} of reach` },
+          { metric: 'engagement_rate', value: account, rows: m.length, text: `Account average engagement: ${pct(account, 1)}; weakest theme "${weakest.name}": ${pct(weakest.rate, 1)}` },
+          { text: 'Engagement is an awareness signal, not proof of enquiries.' },
+        ],
+      });
+    }
+  }
 
   /* ---- Brand, from approved facts only ---- */
   const tone = facts.filter((f) => f.cat === 'tone');
