@@ -4,6 +4,7 @@ import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
+import { buildContext } from './director.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
 
@@ -126,6 +127,11 @@ export function createCompanies(db, { fetchUrl = createFetchUrl(), fetchLimit = 
   // Audit items from validated rows and approved facts; each states its basis and evidence.
   router.get('/:id/audit', requireCompany, (req, res) => {
     res.json(audit(db, req.company.id));
+  });
+
+  // What the AI Marketing Director is allowed to know about this company: approved facts, KPIs, audit items.
+  router.get('/:id/director/context', requireCompany, (req, res) => {
+    res.json(buildContext(db, req.company.id));
   });
 
   // Mirrored findings of this company. `?status=approved` is what later phases treat as facts.
