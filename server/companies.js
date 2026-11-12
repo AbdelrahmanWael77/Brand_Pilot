@@ -2,6 +2,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
+import { metrics, RANGES } from './metrics.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
 
@@ -112,6 +113,13 @@ export function createCompanies(db, { fetchUrl = createFetchUrl(), fetchLimit = 
   // What imported data the server holds for this company, per dataset.
   router.get('/:id/data/summary', requireCompany, (req, res) => {
     res.json({ data: data.summary(req.company.id) });
+  });
+
+  // KPIs from the validated rows. Missing measures come back as null with a reason, never 0.
+  router.get('/:id/metrics', requireCompany, (req, res) => {
+    const range = req.query.range === undefined ? '28' : req.query.range;
+    if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
+    res.json(metrics(db, req.company.id, range));
   });
 
   // Mirrored findings of this company. `?status=approved` is what later phases treat as facts.
