@@ -288,6 +288,8 @@ const SCH={meta:{req:['date','platform','reach','engagements'],opt:['post_id','f
  leads:{req:['date','status'],opt:['source','campaign','segment'],num:[],en:'Leads / CRM export',ar:'العملاء المحتملون / تصدير CRM'}};
 function parseCSV(t){const rows=[];let row=[],cur='',q=false;t=t.replace(/^\uFEFF/,'');for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}else if(ch==='"')q=true;else if(ch===','){row.push(cur);cur=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(cur);cur='';if(row.some(x=>x!==''))rows.push(row);row=[]}else cur+=ch}row.push(cur);if(row.some(x=>x!==''))rows.push(row);return rows}
 const detectKind=h=>h.includes('query')?'gsc':h.includes('platform')&&h.includes('reach')?'meta':h.includes('sessions')?'ga4':h.includes('status')&&h.includes('date')?'leads':null;
+/* A date that exists on the calendar (2026-13-45 and 2026-02-30 do not). */
+const realDate=d=>{const t=new Date(d+'T00:00:00Z');return!isNaN(t)&&t.toISOString().slice(0,10)===d};
 function importData(c,text,origin,fname,kind){
  let rows;const t=String(text).trim();
  if(t[0]==='['||t[0]==='{'){let j;try{j=JSON.parse(t)}catch(e){throw Error(L('This JSON file could not be parsed.','تعذّر قراءة ملف JSON.'))}if(!Array.isArray(j))j=j.rows||j.data||[];if(!j.length)throw Error(L('No rows found in the JSON file.','لا توجد صفوف في ملف JSON.'));const h=Object.keys(j[0]);rows=[h,...j.map(o=>h.map(k=>o[k]??''))]}else rows=parseCSV(t);
@@ -296,7 +298,7 @@ function importData(c,text,origin,fname,kind){
  if(!kind)throw Error(L('Unrecognised columns. Expected a Meta, GA4, Search Console or leads file — download a template to see the format.','أعمدة غير معروفة. المتوقع ملف ميتا أو GA4 أو سيرش كونسول أو عملاء محتملين — حمّل قالباً لمعرفة الصيغة.'));
  const sc=SCH[kind],miss=sc.req.filter(k=>!h.includes(k));if(miss.length)throw Error(L('Missing required columns: ','أعمدة مطلوبة ناقصة: ')+miss.join(', '));
  let skipped=0;const out=[];
- rows.slice(1).forEach(rw=>{const o={};h.forEach((k,i)=>o[k]=String(rw[i]??'').trim());let d=o.date;const m=/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(d);if(m)d=m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){skipped++;return}o.date=d;
+ rows.slice(1).forEach(rw=>{const o={};h.forEach((k,i)=>o[k]=String(rw[i]??'').trim());let d=o.date;const m=/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(d);if(m)d=m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!realDate(d)){skipped++;return}o.date=d;
   let bad=false;sc.num.forEach(k=>{if(k in o){o[k]=o[k]===''?0:+o[k];if(isNaN(o[k]))bad=true}});if(bad){skipped++;return}
   if(o.platform)o.platform=o.platform.toLowerCase();if(o.status)o.status=o.status.toLowerCase();out.push(o)});
  if(!out.length)throw Error(L('No valid rows: dates must be YYYY-MM-DD or DD/MM/YYYY and numeric columns must contain numbers.','لا توجد صفوف صالحة: التاريخ بصيغة YYYY-MM-DD أو DD/MM/YYYY والأعمدة الرقمية أرقام فقط.'));
