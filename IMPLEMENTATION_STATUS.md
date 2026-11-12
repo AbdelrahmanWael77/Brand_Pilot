@@ -5,7 +5,7 @@
 **Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 2.6 completed — **Phase 2 signed off**
 **Current phase:** 3 — Marketing analysis (not started)
 **Location:** the Git checkout you are in (seen at `D:\Projects\Brand_Pilot` on 2026-11-12; earlier handoffs said `D:\brand-pilot-implemntion`; `D:\brand-pilot` is retired). A fresh checkout has no `node_modules` — run `npm install` before `npm test`.
-**Branch / commit:** local `main` holds everything through 2.5; 2.6 is committed on `feat/2.6-phase2-exit` (handoff files + `PHASES.md` only; not merged). **Nothing after 1.6 is pushed** — `origin/main` (https://github.com/AbdelrahmanWael77/Brand_Pilot.git) is still at the 1.6 state. One short `feat/<task>` branch per task; push only when the owner allows.
+**Branch / commit:** local `main` holds everything through 2.6 (Phase 2 signed off). **Nothing after 1.6 is on GitHub**: `origin/main` is 6 commits behind — push to `origin` (https://github.com/AbdelrahmanWael77/Brand_Pilot.git) was refused on 2026-11-12 with HTTP 403: the GitHub account signed in on this machine has no write access to that repository. The owner must grant access (or give a fork / other remote to push to). Do not work around it. One short `feat/<task>` branch per task.
 **Run:** `npm install` then `npm start` → http://localhost:3000 (`PORT` and `BRANDPILOT_DB=<file>` env override; `npm run dev` = watch mode)
 **Test:** `npm test` (built-in `node --test`, files in `test/`). **Dev account:** with the app running, `npm run seed:dev` creates the local-only login defined in `scripts/seed-dev-user.js`.
 
@@ -60,7 +60,8 @@
 - Not exercised: `.jpg` / `.webp` uploads (same code path as `.png`), load-demo, the 5 MB error path, offline retry, a headed or mobile-width browser, the data import / audit screens (task 3.1).
 
 ## Blockers / external prerequisites
-- None for Phase 3. Phase 4 will need an AI API key in `.env` (never commit).
+- **Push blocked:** push to `origin` (https://github.com/AbdelrahmanWael77/Brand_Pilot.git) was refused on 2026-11-12 with HTTP 403: the GitHub account signed in on this machine has no write access to that repository. The owner must grant access (or give a fork / other remote to push to). Do not work around it. Work continues locally; this does not block Phase 3 tasks.
+- Phase 4 will need an AI API key in `.env` (never commit).
 
 ## Files changed in latest task
 - Edited: `PHASES.md` (Phase 2 ticked), `IMPLEMENTATION_STATUS.md`, `NEXT_AGENT_PROMPT.md`. No code changes.
