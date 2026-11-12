@@ -5,7 +5,7 @@
 **Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 2.6 completed — **Phase 2 signed off**
 **Current phase:** 3 — Marketing analysis (not started)
 **Location:** the Git checkout you are in (seen at `D:\Projects\Brand_Pilot` on 2026-11-12; earlier handoffs said `D:\brand-pilot-implemntion`; `D:\brand-pilot` is retired). A fresh checkout has no `node_modules` — run `npm install` before `npm test`.
-**Branch / commit:** local `main` holds everything through 2.6 (Phase 2 signed off). **Nothing after 1.6 is on GitHub**: `origin/main` is 6 commits behind — push to `origin` (https://github.com/AbdelrahmanWael77/Brand_Pilot.git) was refused on 2026-11-12 with HTTP 403: the GitHub account signed in on this machine has no write access to that repository. The owner must grant access (or give a fork / other remote to push to). Do not work around it. One short `feat/<task>` branch per task.
+**Branch / commit:** **`dev` is the working branch** (owner's decision, 2026-11-12): it holds everything through 2.6 and is on GitHub (`origin/dev`, https://github.com/AbdelrahmanWael77/Brand_Pilot.git). `origin/main` is still at the 1.6 state — a direct push to `main` was refused with HTTP 403, so do not push to `main`; getting `dev` into `main` is the owner's call (pull request). One short `feat/<task>` branch per task, branched from `dev`, merged back into `dev` (fast-forward), then `git push origin dev`.
 **Run:** `npm install` then `npm start` → http://localhost:3000 (`PORT` and `BRANDPILOT_DB=<file>` env override; `npm run dev` = watch mode)
 **Test:** `npm test` (built-in `node --test`, files in `test/`). **Dev account:** with the app running, `npm run seed:dev` creates the local-only login defined in `scripts/seed-dev-user.js`.
 
@@ -60,7 +60,7 @@
 - Not exercised: `.jpg` / `.webp` uploads (same code path as `.png`), load-demo, the 5 MB error path, offline retry, a headed or mobile-width browser, the data import / audit screens (task 3.1).
 
 ## Blockers / external prerequisites
-- **Push blocked:** push to `origin` (https://github.com/AbdelrahmanWael77/Brand_Pilot.git) was refused on 2026-11-12 with HTTP 403: the GitHub account signed in on this machine has no write access to that repository. The owner must grant access (or give a fork / other remote to push to). Do not work around it. Work continues locally; this does not block Phase 3 tasks.
+- None for Phase 3. Pushing to `origin/main` is refused (403) — push to `dev` only.
 - Phase 4 will need an AI API key in `.env` (never commit).
 
 ## Files changed in latest task
