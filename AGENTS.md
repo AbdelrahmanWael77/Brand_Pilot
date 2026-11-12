@@ -43,4 +43,3 @@ A task is complete only after its minimal acceptance test **and** both handoff f
 ## Reference material (read only when a task needs it)
 - `docs/handoff-pack/` — original handoff pack zip + pristine extract. Do not edit; the live copies are the root files.
 - `BrandPilot.html` — untouched prototype (reference). The live frontend is its working copy `public/index.html`.
-- `BrandPilot_Intelligence.html`, `brandpilot_standalone*.html`, `flownest-*.html`, `BrandPilot_Phase0_Team_Kit/` — older iterations, **not** canonical.

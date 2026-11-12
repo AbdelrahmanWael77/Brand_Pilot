@@ -25,7 +25,7 @@
 - **Knowledge today (prototype logic, client-side, inside the state blob):** `addSource(c,title,kind,text,demo)` → `c.sources[]`; `extract(c)` is a fixed-rules extractor (not AI) producing `c.findings[]` items `{ id, cat, text, type, status: pending|approved|rejected, src, ev, needs, date }`; `approveF(c,f)`; `publishK(c)` snapshots approved facts into `c.kver[]`. The server stores this opaquely — it cannot yet tell approved facts from anything else.
 - A new account starts with one empty company; no synthetic seed. Synthetic demo material loads only through the explicit, labeled "load demo" action.
 - Known limits: last write wins across tabs/devices; company state over 5 MB fails to save with a visible error; rate limiter is in-memory per process and keys on `req.ip` (set Express `trust proxy` behind a reverse proxy).
-- ShipSafe folders and other zips in this directory are unrelated and git-ignored.
+- Older prototype iterations and the Phase 0 Team Kit were removed from the repo on 2026-11-12 (still in Git history before that date, and in the retired `D:\brand-pilot` folder).
 
 ## Task queue (Phase 2) — do the first unchecked one only
 | # | Task | Agent | Reasoning | Dev effort |
