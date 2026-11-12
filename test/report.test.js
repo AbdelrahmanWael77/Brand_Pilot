@@ -2,7 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
 import { openDb } from '../server/db.js';
-import { buildReport, renderReport, KPI_FORMAT } from '../server/report.js';
+import { buildReport, renderReport, renderReportHtml, KPI_FORMAT } from '../server/report.js';
 
 let server, base, db, alice, bob, companyId, emptyId;
 before(async () => {
@@ -207,6 +207,42 @@ test('printable HTML: self-contained, locked down, escaped, right direction per 
   assert.match(syn, /<span class="tag syn">synthetic<\/span>/);
 
   assert.equal((await get(evil, '?format=html', bob)).status, 404);
+});
+
+test('currency: money values carry the company currency; none or invalid → plain numbers; old snapshots still render', async () => {
+  const co = (await (await call('POST', '/api/companies', alice, { name: 'Money Co' })).json()).company.id;
+  const s = {
+    sources: [], findings: [], imports: [],
+    data: {
+      meta: [{ date: '2026-11-01', platform: 'facebook', reach: 1000, engagements: 50, spend: 4200 }],
+      leads: Array.from({ length: 50 }, () => ({ date: '2026-11-01', status: 'new', source: 'Ads' })),
+    },
+  };
+  await call('PUT', `/api/companies/${co}/state`, alice, { state: s });
+  let r = await (await get(co, '?range=all')).json();
+  assert.equal(r.currency, null);
+  assert.match(renderReport(r, 'en'), /\| Spend \| 4,200 \| — \|/);
+
+  await call('PUT', `/api/companies/${co}/state`, alice, { state: { ...s, currency: 'EGP' } });
+  r = await (await get(co, '?range=all')).json();
+  assert.equal(r.currency, 'EGP');
+  const en = renderReport(r, 'en');
+  assert.match(en, /\| Spend \| 4,200 EGP \| — \|/);
+  assert.match(en, /\| Cost per lead \| 84 EGP \| — \|/);
+  assert.match(en, /\| Reach \| 1,000 \| — \|/); // only money is labeled
+  assert.match(renderReport(r, 'ar'), /\| الإنفاق \| 4,200 EGP \|/);
+  const html = await (await get(co, '?range=all&format=html&lang=ar')).text();
+  assert.match(html, /<td>الإنفاق<\/td><td class="n"><span class="ltr">4,200 EGP<\/span>/);
+
+  for (const bad of ['egp', 'EGPX', '<b>', 42, null]) {
+    await call('PUT', `/api/companies/${co}/state`, alice, { state: { ...s, currency: bad } });
+    assert.equal((await (await get(co, '?range=all')).json()).currency, null, String(bad));
+  }
+  // A report saved before currencies existed has no such field.
+  const old = { ...r };
+  delete old.currency;
+  assert.match(renderReport(old, 'en'), /\| Spend \| 4,200 \| — \|/);
+  assert.match(renderReportHtml(old, 'en'), /<span class="ltr">4,200<\/span>/);
 });
 
 test('validation and isolation', async () => {

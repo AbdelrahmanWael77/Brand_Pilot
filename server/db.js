@@ -106,6 +106,11 @@ CREATE TABLE IF NOT EXISTS campaign_mirror (
   hash       TEXT NOT NULL,
   result     TEXT NOT NULL
 );
+-- Per-company settings the server needs to trust (mirrored from the state on save).
+CREATE TABLE IF NOT EXISTS company_settings (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  currency   TEXT
+);
 -- Saved marketing reports: a snapshot of what the report said at that moment (never rebuilt).
 CREATE TABLE IF NOT EXISTS reports (
   id         TEXT PRIMARY KEY,

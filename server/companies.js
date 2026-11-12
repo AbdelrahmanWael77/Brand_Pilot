@@ -60,6 +60,9 @@ export function createCompanies(
        WHERE m.user_id = ? AND c.id = ?`,
     ),
     renameCompany: db.prepare('UPDATE companies SET name = ? WHERE id = ?'),
+    putCurrency: db.prepare(
+      'INSERT INTO company_settings (company_id, currency) VALUES (?, ?) ON CONFLICT(company_id) DO UPDATE SET currency = excluded.currency',
+    ),
     deleteCompany: db.prepare('DELETE FROM companies WHERE id = ?'),
     getState: db.prepare('SELECT data, updated_at FROM company_state WHERE company_id = ?'),
     putState: db.prepare(
@@ -134,6 +137,8 @@ export function createCompanies(
       mirrored = knowledge.mirror(req.company.id, state);
       mirroredData = data.mirror(req.company.id, state);
       mirroredCampaigns = campaigns.mirror(req.company.id, state);
+      // Currency of the money columns: a 3-letter code, or none (then reports show plain numbers).
+      q.putCurrency.run(req.company.id, typeof state.currency === 'string' && /^[A-Z]{3}$/.test(state.currency) ? state.currency : null);
       db.exec('COMMIT');
     } catch (e) {
       db.exec('ROLLBACK');

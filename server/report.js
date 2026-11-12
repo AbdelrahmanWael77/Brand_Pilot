@@ -43,6 +43,7 @@ export function buildReport(db, companyId, { range = '28', now = new Date() } = 
   const a = audit(db, companyId);
   const facts = approvedFacts(db, companyId);
   const camps = createCampaigns(db).list(companyId);
+  const currency = db.prepare('SELECT currency FROM company_settings WHERE company_id = ?').get(companyId)?.currency ?? null;
 
   const kpis = Object.keys(KPI_FORMAT)
     .filter((id) => m.kpis[id])
@@ -70,6 +71,7 @@ export function buildReport(db, companyId, { range = '28', now = new Date() } = 
     period: m.period,
     previous: m.previous,
     synthetic: !!m.synthetic || !!a.synthetic || facts.some((f) => f.synthetic),
+    currency, // of spend and cost per lead; null = not set, numbers are shown without a label
     kpis,
     findings,
     gaps: a.items.filter((i) => i.basis === 'insufficient').map((i) => ({ id: i.id, title: i.title, needs: i.needs })),
@@ -126,7 +128,8 @@ const T = {
 };
 
 const num = (v) => (Number.isInteger(v) ? v.toLocaleString('en-US') : v.toLocaleString('en-US', { maximumFractionDigits: 2 }));
-const fmt = (v, format) => (format === 'percent' ? `${(v * 100).toFixed(2)}%` : num(v));
+/** `cur` labels money values; reports saved before currencies existed have none. */
+const fmt = (v, format, cur) => (format === 'percent' ? `${(v * 100).toFixed(2)}%` : format === 'money' && cur ? `${num(v)} ${cur}` : num(v));
 const signed = (c) => `${c >= 0 ? '+' : '−'}${Math.abs(c * 100).toFixed(1)}%`;
 /** Company text goes into Markdown: keep it on one line and out of table / emphasis syntax. */
 const md = (s) => String(s ?? '').replace(/[\r\n]+/g, ' ').replace(/([\\|*_`<>#[\]])/g, '\\$1');
@@ -145,7 +148,7 @@ export function renderReport(r, lang = 'en') {
   L.push('', `## ${t.kpis}`, '');
   L.push(`| ${t.metric} | ${t.value} | ${t.change} (${t.vsPrev}) |`, '|---|---:|---:|');
   for (const k of r.kpis) {
-    const value = k.value === null ? t[k.reason] ?? t.no_data : fmt(k.value, k.format) + (k.synthetic ? ` (${t.syn})` : '');
+    const value = k.value === null ? t[k.reason] ?? t.no_data : fmt(k.value, k.format, r.currency) + (k.synthetic ? ` (${t.syn})` : '');
     L.push(`| ${t.kpi[k.id] ?? k.id} | ${value} | ${k.change === null ? t.none : signed(k.change)} |`);
   }
 
@@ -219,7 +222,7 @@ export function renderReportHtml(r, lang = 'en') {
 
   o.push(`<h2>${h(t.kpis)}</h2><table><thead><tr><th>${h(t.metric)}</th><th class="n">${h(t.value)}</th><th class="n">${h(t.change)} (${h(t.vsPrev)})</th></tr></thead><tbody>`);
   for (const k of r.kpis) {
-    const value = k.value === null ? `<span class="nd">${h(t[k.reason] ?? t.no_data)}</span>` : ltr(fmt(k.value, k.format)) + (k.synthetic ? syn : '');
+    const value = k.value === null ? `<span class="nd">${h(t[k.reason] ?? t.no_data)}</span>` : ltr(fmt(k.value, k.format, r.currency)) + (k.synthetic ? syn : '');
     o.push(`<tr><td>${h(t.kpi[k.id] ?? k.id)}</td><td class="n">${value}</td><td class="n">${k.change === null ? h(t.none) : ltr(signed(k.change))}</td></tr>`);
   }
   o.push('</tbody></table>');
