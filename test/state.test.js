@@ -92,3 +92,31 @@ test('deleting a company removes its state (cascade)', async () => {
   db.prepare('DELETE FROM companies WHERE id = ?').run(company.id);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM company_state WHERE company_id = ?').get(company.id).n, 0);
 });
+
+test('PUT with name renames the company; invalid name is rejected', async () => {
+  const { company } = await (await call('POST', '/api/companies', alice, { name: 'Old name' })).json();
+  const p = `/api/companies/${company.id}`;
+  assert.equal((await call('PUT', `${p}/state`, alice, { name: '  New name ', state: { a: 1 } })).status, 200);
+  assert.equal((await (await call('GET', p, alice)).json()).company.name, 'New name');
+  assert.equal((await call('PUT', `${p}/state`, alice, { name: '', state: { a: 2 } })).status, 400);
+  assert.deepEqual((await (await call('GET', `${p}/state`, alice)).json()).state, { a: 1 });
+});
+
+test('owner can delete a company; others cannot', async () => {
+  const { company } = await (await call('POST', '/api/companies', alice, { name: 'To delete' })).json();
+  const p = `/api/companies/${company.id}`;
+  await call('PUT', `${p}/state`, alice, { state: { a: 1 } });
+  assert.equal((await call('DELETE', p, bob)).status, 404);
+  assert.equal((await call('DELETE', p)).status, 401);
+  assert.equal((await call('GET', p, alice)).status, 200);
+
+  // A non-owner member is refused.
+  const bobId = db.prepare('SELECT id FROM users WHERE email = ?').get('bob@example.com').id;
+  db.prepare('INSERT INTO memberships (user_id, company_id, role) VALUES (?, ?, ?)').run(bobId, company.id, 'member');
+  assert.equal((await call('DELETE', p, bob)).status, 403);
+
+  assert.equal((await call('DELETE', p, alice)).status, 200);
+  assert.equal((await call('GET', p, alice)).status, 404);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM company_state WHERE company_id = ?').get(company.id).n, 0);
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM memberships WHERE company_id = ?').get(company.id).n, 0);
+});
