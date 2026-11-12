@@ -7,8 +7,8 @@ import { createCompanies } from './companies.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-/** Tests pass `{ db: openDb(':memory:') }`; production uses the default file database. */
-export function createApp({ db = openDb() } = {}) {
+/** Tests pass `{ db: openDb(':memory:') }` (and optionally small `authLimits`); production uses the defaults. */
+export function createApp({ db = openDb(), authLimits } = {}) {
   const app = express();
   app.disable('x-powered-by');
   // 1 MB JSON everywhere except the company state blob, which may hold sources and imported data.
@@ -18,7 +18,7 @@ export function createApp({ db = openDb() } = {}) {
     (/^\/api\/companies\/[^/]+\/state\/?$/.test(req.path) ? jsonState : jsonDefault)(req, res, next),
   );
 
-  const auth = createAuth(db);
+  const auth = createAuth(db, { limits: authLimits });
   app.locals.db = db;
   const companies = createCompanies(db);
   app.locals.requireAuth = auth.requireAuth;

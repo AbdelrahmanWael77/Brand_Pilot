@@ -46,7 +46,49 @@ function parseCredentials(body) {
   return { email, password };
 }
 
-export function createAuth(db) {
+/**
+ * Fixed-window in-memory counter. Per process: resets on restart and is not shared
+ * between instances — enough for a single-node MVP, replace before scaling out.
+ */
+function createLimiter({ max, windowMs, maxKeys = 10_000 }) {
+  const hits = new Map();
+  const live = (key, now) => {
+    const e = hits.get(key);
+    if (e && e.resetAt <= now) {
+      hits.delete(key);
+      return null;
+    }
+    return e || null;
+  };
+  return {
+    /** Seconds until the key may try again, or 0 when it is not blocked. */
+    retryAfter(key, now = Date.now()) {
+      const e = live(key, now);
+      return e && e.count >= max ? Math.max(1, Math.ceil((e.resetAt - now) / 1000)) : 0;
+    },
+    hit(key, now = Date.now()) {
+      const e = live(key, now);
+      if (e) return void e.count++;
+      if (hits.size >= maxKeys) hits.delete(hits.keys().next().value); // drop the oldest key
+      hits.set(key, { count: 1, resetAt: now + windowMs });
+    },
+    clear: (key) => hits.delete(key),
+  };
+}
+
+const DEFAULT_LIMITS = {
+  login: { max: 5, windowMs: 15 * 60_000 }, // failed attempts per ip + email
+  register: { max: 20, windowMs: 60 * 60_000 }, // attempts per ip
+};
+
+function tooMany(res, seconds) {
+  res.setHeader('Retry-After', String(seconds));
+  return res.status(429).json({ error: 'too_many_attempts' });
+}
+
+export function createAuth(db, { limits = {} } = {}) {
+  const loginLimit = createLimiter({ ...DEFAULT_LIMITS.login, ...limits.login });
+  const registerLimit = createLimiter({ ...DEFAULT_LIMITS.register, ...limits.register });
   const q = {
     userByEmail: db.prepare('SELECT id, email, password_hash FROM users WHERE email = ?'),
     insertUser: db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)'),
@@ -90,6 +132,10 @@ export function createAuth(db) {
   const router = express.Router();
 
   router.post('/register', async (req, res) => {
+    const ipKey = String(req.ip);
+    const wait = registerLimit.retryAfter(ipKey);
+    if (wait) return tooMany(res, wait);
+    registerLimit.hit(ipKey);
     const c = parseCredentials(req.body);
     if (c.error) return res.status(400).json({ error: c.error });
     if (q.userByEmail.get(c.email)) return res.status(409).json({ error: 'email_taken' });
@@ -108,9 +154,17 @@ export function createAuth(db) {
 
   router.post('/login', async (req, res) => {
     const c = parseCredentials(req.body);
+    const rawEmail = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase().slice(0, 254) : '';
+    const key = `${req.ip}|${rawEmail}`;
+    const wait = loginLimit.retryAfter(key); // checked before scrypt so blocked callers cost nothing
+    if (wait) return tooMany(res, wait);
     const row = c.error ? null : q.userByEmail.get(c.email);
     const ok = await verifyPassword(c.password ?? '', row ? row.password_hash : await dummyHash);
-    if (!row || !ok) return res.status(401).json({ error: 'invalid_credentials' });
+    if (!row || !ok) {
+      loginLimit.hit(key);
+      return res.status(401).json({ error: 'invalid_credentials' });
+    }
+    loginLimit.clear(key);
     startSession(res, row.id);
     res.json({ user: { id: row.id, email: row.email } });
   });

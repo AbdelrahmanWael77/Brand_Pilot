@@ -2,9 +2,9 @@
 
 > Shared state for every AI coding agent. Replace stale statements with observed facts. Keep short (<80 lines). Update after **every** task, along with `NEXT_AGENT_PROMPT.md`.
 
-**Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 1.5b completed
-**Current phase:** 1 — SaaS foundation (1.1–1.5b done; exit scenario works in the browser — 1.5c and the 1.6 sign-off remain)
-**Branch / commit:** `feat/1.5b-frontend-sync` (stacked: 1.5b → 1.5a → 1.4 → 1.3 → 1.2 → 1.1; none merged into `main`) — see `git log -1`
+**Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 1.5c completed
+**Current phase:** 1 — SaaS foundation (1.1–1.5c done; only the 1.6 sign-off remains)
+**Branch / commit:** `feat/1.5c-rate-limit` (stacked: 1.5c → 1.5b → 1.5a → 1.4 → 1.3 → 1.2 → 1.1; none merged into `main`) — see `git log -1`
 **Run:** `npm install` then `npm start` → http://localhost:3000 (`PORT` env overrides; `npm run dev` = watch mode)
 **Test:** `npm test` (built-in `node --test`, files in `test/`)
 
@@ -16,6 +16,7 @@
 - 1.4: `GET`/`PUT /api/companies/:id/state` — one JSON object per company in table `company_state`; PUT body `{ state: {...} }` replaces it. 5 MB limit on this route only (1 MB elsewhere); oversize → 413 `too_large`.
 - 1.5a: `public/index.html` shows an EN/AR (RTL) sign-in / create-account card unless `GET /api/auth/me` succeeds; top bar shows the user's email and a Sign out button. Code is the `Auth gate` block at the end of the script (`start()`, `authRender()`, `startApp()`, global `USER`).
 - 1.5b: the frontend loads companies from the API after sign-in and saves each changed company with a debounced `PUT .../state` (the `Server sync` block at the end of the script: `SYNC`, `api()`, `createCo()`, `syncNow()`, `startApp()`). `localStorage` keeps only `lang`, `active`, `ui`, `ai`. Server gained `DELETE /api/companies/:id` (owner only) and an optional `name` on `PUT .../state` that renames the company.
+- 1.5c: auth rate limiting in `server/auth.js` — 5 failed logins per IP + email per 15 min, 20 registrations per IP per hour → 429 `too_many_attempts` with `Retry-After`; a successful login clears the count. Tests override via `createApp({ db, authLimits })`.
 - Handoff pack installed at repo root; original zip + extract kept in `docs/handoff-pack/`.
 
 ## In progress / uncommitted
@@ -32,6 +33,7 @@
 - **Sync model:** `save()` (called by every `render()`) schedules `syncNow()`, which diffs `S.companies` against what was last sent: unknown local id → `POST` then re-key to the server id; missing id → `DELETE`; changed JSON → `PUT`. So any code that mutates `S.companies` and calls `R()` is persisted without extra work. A 401 reloads to the sign-in card; other failures toast once and retry every 5 s.
 - A new account starts with one empty company ("My company") on the onboarding view — no synthetic seed. `seed()` is now unused dead code; the explicit "load demo" action inside a company still works and is labeled synthetic. "Delete everything" now deletes the account's companies and leaves one empty company.
 - Known limits: last write wins (no conflict detection between two tabs/devices); a company over 5 MB (large media) fails to save with a visible error; edits in the last ~0.8 s before closing the tab are flushed with `keepalive` only when under 60 KB.
+- Rate limiter is in-memory and per process (resets on restart, not shared across instances). It keys on `req.ip`: behind a reverse proxy set Express `trust proxy` correctly at deployment, or every user shares one bucket.
 - Dev tip: a stale `node` can keep port 3000 after a session ends; if `/api/auth/me` returns 404, kill it (`netstat -ano | grep :3000`) or run with `PORT=3100`.
 - Tests must call `createApp({ db: openDb(':memory:') })`; a bare `createApp()` opens the file DB.
 - IDs are app-generated TEXT (use `crypto.randomUUID()`); timestamps are ISO strings; `users.email` is UNIQUE NOCASE.
@@ -47,19 +49,20 @@
 | ~~1.4~~ | Done 2026-11-12 — state routes in `server/companies.js` + `test/state.test.js` | Fable 5.2 | medium | 2h |
 | ~~1.5a~~ | Done 2026-11-12 — auth gate + sign out in `public/index.html` | Fable 5.2 | high | 4h |
 | ~~1.5b~~ | Done 2026-11-12 — server sync in `public/index.html`, `DELETE` + rename on the server | Fable 5.2 | high | 1d |
-| 1.5c | Login/register rate limiting (in-memory, per IP + email, 429) — required before any public deployment | Sonnet 5.5 | medium | 1h |
+| ~~1.5c~~ | Done 2026-11-12 — limiter in `server/auth.js` + `test/ratelimit.test.js` | Fable 5.2 | medium | 1h |
 | 1.6 | Phase 1 exit check: sign in, create company, reload, data persists; second user cannot see it. Tick Phase 1 in `PHASES.md` | Sonnet 5.5 | medium | 1h |
 
 ## Next atomic task
-**1.5c** — Rate-limit `POST /api/auth/login` and `/register` (details in `NEXT_AGENT_PROMPT.md`). **Done when:** new tests pass — repeated failed logins for one email get 429 with `Retry-After`; a different email/IP is unaffected; a successful login clears the counter; `npm test` green.
+**1.6** — Phase 1 exit sign-off (details in `NEXT_AGENT_PROMPT.md`). **Done when:** the browser scenario is rerun once on the final code, Phase 1 is ticked in `PHASES.md`, and a Phase 2 task queue (each task with Agent / Reasoning / Dev effort) replaces the Phase 1 queue here.
 
 ## Last tests (actual results only)
-- 2026-11-12 `npm test` → 30 pass, 0 fail (`health` 3, `db` 4, `auth` 8, `companies` 6, `state` 9).
-- 2026-11-12 browser (scripted in the app's built-in browser, throwaway DB): user A registers → one empty company; renames it, adds a source with Arabic text, creates a second company; reload → both intact; no company data in `localStorage`; sign out; user B registers in the same browser → sees only its own empty company and gets 404 on A's company id; A signs back in → data intact; delete company, "delete everything" and a locally added company (import path) all reach the server; Arabic/RTL fine; no JS errors.
-- Not exercised by hand: the real file-import button, the load-demo action, the 5 MB error path, the offline retry path.
+- 2026-11-12 `npm test` → 34 pass, 0 fail (`health` 3, `db` 4, `auth` 8, `companies` 6, `state` 9, `ratelimit` 4).
+- 2026-11-12 browser, on the 1.5b code (before the limiter was added): two-user scenario passed — A's companies persist across reload and sign-out; B in the same browser sees only its own company and gets 404 on A's id; delete / delete-all / locally added company reach the server; Arabic/RTL fine; no JS errors.
+- Not exercised by hand: the 429 message in the sign-in card, the real file-import button, the load-demo action, the 5 MB error path, the offline retry path.
 
 ## Blockers / external prerequisites
 - None for Phase 1. Phase 4 will need an AI API key in `.env` (never commit).
 
 ## Files changed in latest task
-- Edited: `public/index.html` (`save`, `boot`, `newCo`, `reset`, `logout`, new `Server sync` block), `server/companies.js` (`DELETE /:id`, optional `name` on state PUT), `test/state.test.js` (+2 tests)
+- Added: `test/ratelimit.test.js`
+- Edited: `server/auth.js` (limiter), `server/app.js` (`authLimits` option), `public/index.html` (`too_many_attempts` message)
