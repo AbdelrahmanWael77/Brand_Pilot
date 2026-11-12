@@ -4,7 +4,7 @@
 
 **Last updated:** 2026-11-12 — Fable 5.2 (Claude Code), task 1.5c completed
 **Current phase:** 1 — SaaS foundation (1.1–1.5c done; only the 1.6 sign-off remains)
-**Branch / commit:** `feat/1.5c-rate-limit` (stacked: 1.5c → 1.5b → 1.5a → 1.4 → 1.3 → 1.2 → 1.1; none merged into `main`) — see `git log -1`
+**Branch / commit:** `main` (all task branches 1.1–1.5c fast-forwarded into it on 2026-11-12; old `feat/*` branches still exist locally and can be deleted). No remote configured; nothing pushed. Create a short `feat/<task>` branch per task. — see `git log -1`
 **Run:** `npm install` then `npm start` → http://localhost:3000 (`PORT` env overrides; `npm run dev` = watch mode)
 **Test:** `npm test` (built-in `node --test`, files in `test/`)
 
