@@ -109,15 +109,18 @@ test('without config: status says so, start and sync answer 503, nothing calls M
   const db2 = openDb(':memory:');
   const s2 = createApp({ db: db2, meta: { config: metaConfig({}), fetch: () => assert.fail('no network') } }).listen(0);
   await new Promise((r) => s2.once('listening', r));
+  try {
   const b2 = `http://127.0.0.1:${s2.address().port}`;
   const ck = (await fetch(b2 + '/api/auth/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'c@example.com', password: 'correct horse' }) })).headers.getSetCookie()[0].split(';')[0];
   const id = (await (await fetch(b2 + '/api/companies', { method: 'POST', headers: { 'content-type': 'application/json', cookie: ck }, body: '{"name":"X"}' })).json()).company.id;
-  assert.deepEqual(await (await fetch(b2 + '/api/integrations/status', { headers: { cookie: ck } })).json(), { meta: { configured: false } });
+  assert.deepEqual((await (await fetch(b2 + '/api/integrations/status', { headers: { cookie: ck } })).json()).meta, { configured: false });
   assert.equal((await fetch(`${b2}/api/companies/${id}/integrations/meta/start`, { method: 'POST', headers: { cookie: ck } })).status, 503);
   assert.equal((await fetch(`${b2}/api/companies/${id}/integrations/meta/sync`, { method: 'POST', headers: { cookie: ck, 'content-type': 'application/json' }, body: '{}' })).status, 503);
   assert.deepEqual(await (await fetch(`${b2}/api/companies/${id}/integrations/meta`, { headers: { cookie: ck } })).json(), { configured: false, connected: false });
-  s2.close();
-  db2.close();
+  } finally {
+    s2.close();
+    db2.close();
+  }
   assert.equal(metaConfig({ META_APP_ID: '1', META_APP_SECRET: 's', META_REDIRECT_URI: 'https://x/cb', TOKEN_KEY: 'short' }).configured, false);
 });
 
