@@ -15,7 +15,10 @@
  * public/index.html (which keeps the bilingual wording for the UI, keyed by the same
  * ids). Text here is English, for tests and for grounding later AI answers.
  * Ported so far: no-ga4, no-track, ch-best, ch-leak, mobile-gap, no-gsc, seo-q,
- * no-leads, src-unknown, src-best, src-lowq, no-meta, brand-doc.
+ * no-leads, src-unknown, src-best, src-lowq, seg-best, page-leak, no-meta, theme-best,
+ * cadence, eng-drop, lang, no-spend, plat-roles, brand-doc. Not ported: `defs` (the "qualified lead"
+ * definition lives only in the state blob, which the server does not trust) and the
+ * document-observation and portfolio rules.
  * Like the prototype, the audit looks at all imported rows, not one period.
  */
 import { createData, KINDS } from './data.js';
@@ -43,6 +46,19 @@ export const T = {
   segmentMinLeads: 15, // a segment needs this many leads to be compared
   segmentOverAverage: 1.15, // "strongest" = qualified share above 115% of the overall share
   segmentSmallSample: 30, // below this the evidence line says "small sample"
+  cadenceMaxGap: 14, // a gap between posting days longer than this is a weakness
+  recentDays: 28, // the recent window for the engagement trend…
+  recentMinPosts: 6, // …needs this many posts (campaign posts excluded)…
+  baselineMinPosts: 10, // …and this many earlier posts
+  engagementDrop: 0.85, // "below baseline" = recent engagement under 85% of the earlier rate
+  languageMinPosts: 5, // each language needs this many posts to be compared
+  languageGap: 1.12, // the stronger language must be more than 12% ahead
+};
+const dayDiff = (a, b) => Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 864e5);
+const addDays = (d, n) => {
+  const x = new Date(d + 'T00:00:00Z');
+  x.setUTCDate(x.getUTCDate() + n);
+  return x.toISOString().slice(0, 10);
 };
 
 const sum = (rows, k) => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
@@ -285,6 +301,105 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
           { metric: 'engagement_rate', value: top.rate, rows: top.posts, text: L(`"${top.name}": engagement ${pct(top.rate, 1)} of reach across ${top.posts} posts; link clicks ${pct(top.clicks, 2)} of reach`, `«${top.name}»: التفاعل ${pct(top.rate, 1)} من الوصول عبر ${top.posts} منشور؛ نقرات الروابط ${pct(top.clicks, 2)} من الوصول`) },
           { metric: 'engagement_rate', value: account, rows: m.length, text: L(`Account average engagement: ${pct(account, 1)}; weakest theme "${weakest.name}": ${pct(weakest.rate, 1)}`, `متوسط تفاعل الحساب: ${pct(account, 1)}؛ أضعف موضوع «${weakest.name}»: ${pct(weakest.rate, 1)}`) },
           { text: L('Engagement is an awareness signal, not proof of enquiries.', 'التفاعل إشارة وعي، وليس دليلاً على استفسارات.') },
+        ],
+      });
+    }
+
+    // Posting cadence: the longest gap between two posting days.
+    const days = [...new Set(m.map((x) => x.date))].sort();
+    if (days.length < 2) {
+      insufficient('cadence', 'meta', L('Posting rhythm cannot be checked yet', 'لا يمكن فحص انتظام النشر بعد'), L('Posts from at least two different days are needed.', 'يلزم وجود منشورات من يومين مختلفين على الأقل.'));
+    } else {
+      let gap = 0;
+      let after = '';
+      for (let i = 1; i < days.length; i++) {
+        const d = dayDiff(days[i - 1], days[i]);
+        if (d > gap) {
+          gap = d;
+          after = days[i - 1];
+        }
+      }
+      if (gap > T.cadenceMaxGap) {
+        conclude('weak', 'meta', {
+          id: 'cadence',
+          title: L(`Posting stopped for ${gap} days`, `توقف النشر لمدة ${gap} يوماً`),
+          why: L('Irregular publishing makes results hard to read and gives followers no reason to expect you.', 'النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظاركم.'),
+          action: L('Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.', 'اعتمدوا تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.'),
+          evidence: [
+            { metric: 'posting_gap_days', value: gap, text: L(`No posts between ${after} and ${addDays(after, gap)}.`, `لا توجد منشورات بين ${after} و ${addDays(after, gap)}.`) },
+            { metric: 'posts', value: m.length, rows: m.length, text: L(`${m.length} posts across ${days.length} posting days in the import.`, `${m.length} منشور في ${days.length} يوم نشر ضمن الاستيراد.`) },
+          ],
+        });
+      }
+
+      // Engagement in the last 28 days of posts against the earlier baseline (campaign posts left out of the recent window, as in the browser).
+      const cut = addDays(days[days.length - 1], -(T.recentDays - 1));
+      const recent = m.filter((x) => x.date >= cut && x.theme !== 'campaign');
+      const earlier = m.filter((x) => x.date < cut);
+      if (recent.length < T.recentMinPosts || earlier.length < T.baselineMinPosts) {
+        insufficient('eng-drop', 'meta', L('Engagement trend cannot be checked yet', 'لا يمكن فحص اتجاه التفاعل بعد'), L(`${T.recentMinPosts}+ posts in the last ${T.recentDays} days and ${T.baselineMinPosts}+ earlier posts are needed (now: ${recent.length} and ${earlier.length}).`, `يلزم ${T.recentMinPosts} منشورات أو أكثر في آخر ${T.recentDays} يوماً و${T.baselineMinPosts} منشورات سابقة أو أكثر (حالياً: ${recent.length} و${earlier.length}).`));
+      } else if (engagement(recent) < engagement(earlier) * T.engagementDrop) {
+        conclude('weak', 'meta', {
+          id: 'eng-drop',
+          title: L('Engagement is below your own baseline', 'التفاعل أقل من مستواكم المعتاد'),
+          why: L('The comparison is with your own earlier posts, not an industry benchmark.', 'المقارنة مع منشوراتكم السابقة وليس مع معيار للصناعة.'),
+          action: L('Check the theme mix of recent posts against the strongest theme before changing anything else.', 'قارنوا موضوعات المنشورات الأخيرة بأقوى موضوع قبل تغيير أي شيء آخر.'),
+          evidence: [
+            { metric: 'engagement_rate', value: engagement(recent), rows: recent.length, text: L(`Last ${T.recentDays} days: ${pct(engagement(recent), 1)} engagement per reach (${recent.length} posts)`, `آخر ${T.recentDays} يوماً: ${pct(engagement(recent), 1)} تفاعل لكل وصول (${recent.length} منشور)`) },
+            { metric: 'engagement_rate', value: engagement(earlier), rows: earlier.length, text: L(`Earlier baseline: ${pct(engagement(earlier), 1)} (${earlier.length} posts)`, `المستوى السابق: ${pct(engagement(earlier), 1)} (${earlier.length} منشور)`) },
+            { text: L('Cause unknown: could be theme mix, the posting gap, or platform changes.', 'السبب غير معروف: قد يكون تنوع الموضوعات أو فجوة النشر أو تغييرات المنصة.') },
+          ],
+        });
+      }
+    }
+
+    // Arabic against English posts. One language only is a normal state, not missing data.
+    const langs = groupBy(m, 'language');
+    const ar = langs.get('ar');
+    const en = langs.get('en');
+    if (ar && en) {
+      if (ar.length < T.languageMinPosts || en.length < T.languageMinPosts) {
+        insufficient('lang', 'meta', L('Arabic and English posts cannot be compared yet', 'لا يمكن مقارنة المنشورات العربية والإنجليزية بعد'), L(`${T.languageMinPosts}+ posts in each language are needed (now: ${ar.length} Arabic, ${en.length} English).`, `يلزم ${T.languageMinPosts} منشورات أو أكثر بكل لغة (حالياً: ${ar.length} عربي و${en.length} إنجليزي).`));
+      } else {
+        const a = engagement(ar);
+        const b = engagement(en);
+        if (Math.max(a, b) / Math.min(a, b) > T.languageGap) {
+          conclude('opp', 'meta', {
+            id: 'lang',
+            title: a > b ? L('Arabic posts earn more engagement than English posts', 'المنشورات العربية تحقق تفاعلاً أعلى من الإنجليزية') : L('English posts earn more engagement than Arabic posts', 'المنشورات الإنجليزية تحقق تفاعلاً أعلى من العربية'),
+            why: L('Language is a cheap lever: the same idea can be published in the language the audience prefers.', 'اللغة رافعة قليلة التكلفة: الفكرة نفسها يمكن نشرها باللغة التي يفضلها الجمهور.'),
+            action: L('Lead campaigns with the stronger language and test whether it also brings more enquiries.', 'ابدؤوا الحملات باللغة الأقوى واختبروا هل تجلب استفسارات أكثر أيضاً.'),
+            evidence: [
+              { metric: 'engagement_rate', value: a, rows: ar.length, text: L(`Arabic: ${pct(a, 1)} of reach (${ar.length} posts)`, `العربية: ${pct(a, 1)} من الوصول (${ar.length} منشور)`) },
+              { metric: 'engagement_rate', value: b, rows: en.length, text: L(`English: ${pct(b, 1)} of reach (${en.length} posts)`, `الإنجليزية: ${pct(b, 1)} من الوصول (${en.length} منشور)`) },
+            ],
+          });
+        }
+      }
+    }
+
+    // Without spend, cost per lead cannot be calculated. Not a conclusion about the business: a missing input.
+    if (!sum(m, 'spend')) {
+      insufficient('no-spend', 'meta', L('No spend data — cost per lead cannot be calculated', 'لا توجد بيانات إنفاق — تعذّر حساب تكلفة العميل'), L('Include the spend column when exporting paid posts.', 'أضيفوا عمود الإنفاق عند تصدير المنشورات المدفوعة.'));
+    }
+
+    // Facebook and Instagram side by side. One platform only is a normal state, not missing data.
+    const platforms = groupBy(m, 'platform');
+    const fb = platforms.get('facebook');
+    const ig = platforms.get('instagram');
+    if (fb && ig) {
+      const clicks = (rs) => sum(rs, 'link_clicks') / Math.max(1, sum(rs, 'reach'));
+      conclude('opp', 'meta', {
+        id: 'plat-roles',
+        title: L('Facebook and Instagram do different jobs', 'فيسبوك وإنستجرام يؤديان دورين مختلفين'),
+        why: L('Treating both platforms the same wastes the strength of each.', 'معاملة المنصتين بالطريقة نفسها تهدر قوة كل منهما.'),
+        action: clicks(fb) > clicks(ig)
+          ? L('Use Facebook for posts that link to the landing page; use Instagram for attention and DMs.', 'استخدموا فيسبوك للمنشورات التي تقود إلى صفحة الهبوط، وإنستجرام لجذب الانتباه والرسائل.')
+          : L('Use Instagram as the main traffic and enquiry driver; keep Facebook for reach among existing followers.', 'اجعلوا إنستجرام المحرك الأساسي للزيارات والاستفسارات، وفيسبوك للوصول إلى المتابعين الحاليين.'),
+        evidence: [
+          { metric: 'engagement_rate', value: engagement(fb), rows: fb.length, text: L(`Facebook: engagement ${pct(engagement(fb), 1)} of reach, link clicks ${pct(clicks(fb), 2)} (${fb.length} posts)`, `فيسبوك: تفاعل ${pct(engagement(fb), 1)} من الوصول، نقرات ${pct(clicks(fb), 2)} (${fb.length} منشور)`) },
+          { metric: 'engagement_rate', value: engagement(ig), rows: ig.length, text: L(`Instagram: engagement ${pct(engagement(ig), 1)}, link clicks ${pct(clicks(ig), 2)} (${ig.length} posts)`, `إنستجرام: تفاعل ${pct(engagement(ig), 1)}، نقرات ${pct(clicks(ig), 2)} (${ig.length} منشور)`) },
+          { text: L('Metric definitions differ between platforms; compare direction, not exact values.', 'تعريفات المقاييس تختلف بين المنصتين؛ قارنوا الاتجاه لا القيم الدقيقة.') },
         ],
       });
     }

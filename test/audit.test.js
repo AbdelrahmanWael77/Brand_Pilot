@@ -351,3 +351,94 @@ test('route: other users get 404', async () => {
   assert.equal((await call('GET', `/api/companies/${companyId}/audit`, bob)).status, 404);
   assert.equal((await call('GET', `/api/companies/${companyId}/audit`)).status, 401);
 });
+
+// ---- Meta rules ported in 6.11: cadence, eng-drop, lang, plat-roles ----
+const post = (date, o = {}) => ({ date, platform: 'facebook', reach: 1000, engagements: 30, synthetic: false, ...o });
+const day = (n) => `2026-11-${String(n).padStart(2, '0')}`;
+const oct = (n) => `2026-10-${String(n).padStart(2, '0')}`;
+
+test('cadence: a gap of more than 14 days between posting days — triggered, not triggered, insufficient', () => {
+  const c = item(run({ meta: [post(oct(1)), post(oct(2)), post(oct(2)), post(oct(20))] }), 'cadence');
+  assert.equal(c.basis, 'data');
+  assert.equal(c.kind, 'weak');
+  assert.equal(c.title, 'Posting stopped for 18 days');
+  assert.deepEqual(c.evidence.map((e) => e.text), ['No posts between 2026-10-02 and 2026-10-20.', '4 posts across 3 posting days in the import.']);
+  assert.equal(c.evidence[0].value, 18);
+  assert.equal(item(run({ meta: [post(oct(1)), post(oct(15))] }), 'cadence'), undefined); // exactly 14 days
+  const one = item(run({ meta: [post(oct(1)), post(oct(1))] }), 'cadence');
+  assert.equal(one.basis, 'insufficient');
+  assert.equal(item(run({}), 'cadence'), undefined);
+});
+
+test('eng-drop: last 28 days of posts against the earlier baseline — triggered, not triggered, insufficient', () => {
+  const earlier = Array.from({ length: 10 }, (_, i) => post(oct(i + 1), { engagements: 50 }));
+  const recent = (n, engagements) => Array.from({ length: n }, (_, i) => post(day(28 - i), { engagements }));
+  const e = item(run({ meta: [...earlier, ...recent(6, 30)] }), 'eng-drop');
+  assert.equal(e.basis, 'data');
+  assert.equal(e.kind, 'weak');
+  assert.deepEqual(e.evidence.slice(0, 2).map((x) => x.text), ['Last 28 days: 3.0% engagement per reach (6 posts)', 'Earlier baseline: 5.0% (10 posts)']);
+  // The window starts 27 days before the last post: 2026-11-01 is recent, 2026-10-31 is baseline.
+  const edge = item(run({ meta: [...earlier, ...recent(5, 30), post(day(1), { engagements: 30 })] }), 'eng-drop');
+  assert.equal(edge.evidence[0].rows, 6);
+  // Campaign posts are left out of the recent window.
+  const camp = item(run({ meta: [...earlier, ...recent(6, 30), ...Array.from({ length: 3 }, () => post(day(27), { theme: 'campaign', engagements: 900 }))] }), 'eng-drop');
+  assert.equal(camp.evidence[0].text, 'Last 28 days: 3.0% engagement per reach (6 posts)');
+  assert.equal(item(run({ meta: [...earlier, ...recent(6, 45)] }), 'eng-drop'), undefined); // 4.5% is not under 85% of 5.0%
+  const few = item(run({ meta: [...earlier, ...recent(5, 30)] }), 'eng-drop');
+  assert.equal(few.basis, 'insufficient');
+  assert.match(few.needs, /now: 5 and 10/);
+});
+
+test('lang: Arabic against English posts — triggered either way, not triggered, insufficient, one language', () => {
+  const posts = (language, n, engagements) => Array.from({ length: n }, () => post(oct(1), { language, engagements }));
+  const l = item(run({ meta: [...posts('ar', 5, 60), ...posts('en', 5, 40)] }), 'lang');
+  assert.equal(l.kind, 'opp');
+  assert.equal(l.basis, 'data');
+  assert.equal(l.title, 'Arabic posts earn more engagement than English posts');
+  assert.deepEqual(l.evidence.map((x) => x.text), ['Arabic: 6.0% of reach (5 posts)', 'English: 4.0% of reach (5 posts)']);
+  assert.equal(item(run({ meta: [...posts('ar', 5, 30), ...posts('en', 6, 40)] }), 'lang').title, 'English posts earn more engagement than Arabic posts');
+  assert.equal(item(run({ meta: [...posts('ar', 5, 45), ...posts('en', 5, 42)] }), 'lang'), undefined); // 7% apart, under 12%
+  const few = item(run({ meta: [...posts('ar', 4, 60), ...posts('en', 5, 40)] }), 'lang');
+  assert.equal(few.basis, 'insufficient');
+  assert.match(few.needs, /now: 4 Arabic, 5 English/);
+  assert.equal(item(run({ meta: posts('en', 9, 40) }), 'lang'), undefined); // one language is not a gap
+});
+
+test('plat-roles: Facebook and Instagram side by side; one platform is not a gap', () => {
+  const fb = [post(oct(1), { engagements: 10, link_clicks: 15 }), post(oct(2), { engagements: 10, link_clicks: 15 })];
+  const ig = [1, 2, 3].map((n) => post(oct(n), { platform: 'instagram', engagements: 20, link_clicks: 1 }));
+  const p = item(run({ meta: [...fb, ...ig] }), 'plat-roles');
+  assert.equal(p.kind, 'opp');
+  assert.deepEqual(p.evidence.slice(0, 2).map((x) => x.text), ['Facebook: engagement 1.0% of reach, link clicks 1.50% (2 posts)', 'Instagram: engagement 2.0%, link clicks 0.10% (3 posts)']);
+  assert.match(p.action, /^Use Facebook for posts that link/);
+  const swapped = item(run({ meta: [fb[0], ...ig.map((x) => ({ ...x, link_clicks: 40 }))] }), 'plat-roles');
+  assert.match(swapped.action, /^Use Instagram as the main traffic/);
+  assert.equal(item(run({ meta: fb }), 'plat-roles'), undefined);
+});
+
+test('Meta rules in Arabic: same ids and numbers, Arabic wording', () => {
+  const meta = [
+    ...Array.from({ length: 10 }, (_, i) => post(oct(i + 1), { engagements: 50, language: 'ar' })),
+    ...Array.from({ length: 6 }, (_, i) => post(day(28 - i), { engagements: 30, language: 'en', platform: 'instagram' })),
+  ];
+  const en = computeAudit({ ...empty(), meta }, []).items;
+  const ar = computeAudit({ ...empty(), meta }, [], { lang: 'ar' }).items;
+  for (const id of ['cadence', 'eng-drop', 'lang', 'plat-roles']) {
+    const a = item(ar, id);
+    const e = item(en, id);
+    assert.ok(a && e, id);
+    assert.equal(a.kind, e.kind, id);
+    assert.deepEqual(a.evidence.map((x) => x.value), e.evidence.map((x) => x.value), id);
+    for (const t of [a.title, a.why, a.action, ...a.evidence.map((x) => x.text)]) assert.match(t, /[؀-ۿ]/, `${id}: ${t}`);
+  }
+  assert.equal(item(ar, 'cadence').title, 'توقف النشر لمدة 44 يوماً');
+  assert.equal(item(ar, 'lang').title, 'المنشورات العربية تحقق تفاعلاً أعلى من الإنجليزية');
+});
+
+test('no-spend: Meta rows without any spend are a gap, not a conclusion', () => {
+  const gap = item(run({ meta: [post(oct(1)), post(oct(2))] }), 'no-spend');
+  assert.equal(gap.basis, 'insufficient');
+  assert.equal(gap.title, 'No spend data — cost per lead cannot be calculated');
+  assert.equal(item(run({ meta: [post(oct(1)), post(oct(2), { spend: 150 })] }), 'no-spend'), undefined);
+  assert.equal(item(run({}), 'no-spend'), undefined);
+});
