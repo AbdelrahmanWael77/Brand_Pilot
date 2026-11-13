@@ -208,12 +208,30 @@ ul{padding-inline-start:20px}footer{margin-top:28px;padding-top:10px;border-top:
 @media print{body{background:#fff}main{margin:0;max-width:none;padding:0;border-radius:0;box-shadow:none}h2{break-after:avoid}tr{break-inside:avoid}}
 `;
 
+/**
+ * Escaped text for the Arabic page: each Latin / numeric run ("Facebook 12%", "/pricing", "1233")
+ * is wrapped in <bdi>, so it keeps its own left-to-right order inside right-to-left text and does
+ * not decide the direction of a `dir="auto"` line. The frontend's `bd()` uses the same rule.
+ */
+const RUN = /(?:[+\-\/#@$](?=[A-Za-z0-9]))?[A-Za-z0-9](?:(?:[A-Za-z0-9 .,%\/:+'&_\-–→÷×=]|\([A-Za-z0-9 .,%\/:+'&_\-–→÷×=]*\))*(?:[A-Za-z0-9%]|\([A-Za-z0-9 .,%\/:+'&_\-–→÷×=]*\)))?/g;
+export function bidi(s) {
+  s = String(s ?? '');
+  let out = '';
+  let i = 0;
+  for (const m of s.matchAll(RUN)) {
+    out += `${h(s.slice(i, m.index))}<bdi>${h(m[0])}</bdi>`;
+    i = m.index + m[0].length;
+  }
+  return out + h(s.slice(i));
+}
+
 /** One self-contained page (inline CSS, no scripts, no external requests) to print or save as PDF. */
 export function renderReportHtml(r, lang = 'en') {
   const t = T[lang] ?? T.en;
   const rtl = lang === 'ar';
   const syn = ` <span class="tag syn">${h(t.syn)}</span>`;
   const ltr = (s) => `<span class="ltr">${h(s)}</span>`;
+  const x = rtl ? bidi : h; // company and finding text: Latin / numeric runs isolated on the Arabic page
   const o = [];
   o.push(`<h1>${h(t.title)} — <span dir="auto">${h(r.company.name)}</span></h1>`);
   o.push(`<p class="meta">${h(t.generated)}: ${ltr(r.generatedAt.slice(0, 10))}</p>`);
@@ -237,17 +255,17 @@ export function renderReportHtml(r, lang = 'en') {
       if (!r.findings[key].length) continue;
       o.push(`<h3>${h(t[key])}</h3>`);
       for (const f of r.findings[key]) {
-        o.push(`<div class="f"><p><b dir="auto">${h(f.title)}</b> <span class="tag">${h(t.basis[f.basis] ?? f.basis)}</span>${f.synthetic ? syn : ''}</p>`);
-        if (f.why) o.push(`<p dir="auto">${h(f.why)}</p>`);
-        if (f.evidence.length) o.push(`<p class="muted">${h(t.evidence)}:</p><ul>${f.evidence.map((e) => `<li dir="auto">${h(e)}</li>`).join('')}</ul>`);
-        if (f.action) o.push(`<p dir="auto"><b>${h(t.action)}:</b> ${h(f.action)}</p>`);
+        o.push(`<div class="f"><p><b dir="auto">${x(f.title)}</b> <span class="tag">${h(t.basis[f.basis] ?? f.basis)}</span>${f.synthetic ? syn : ''}</p>`);
+        if (f.why) o.push(`<p dir="auto">${x(f.why)}</p>`);
+        if (f.evidence.length) o.push(`<p class="muted">${h(t.evidence)}:</p><ul>${f.evidence.map((e) => `<li dir="auto">${x(e)}</li>`).join('')}</ul>`);
+        if (f.action) o.push(`<p dir="auto"><b>${h(t.action)}:</b> ${x(f.action)}</p>`);
         o.push('</div>');
       }
     }
   }
 
   if (r.gaps.length) {
-    o.push(`<h2>${h(t.gaps)}</h2><p class="muted">${h(t.gapsNote)}</p><ul>${r.gaps.map((g) => `<li dir="auto"><b>${h(g.title)}</b> — ${h(g.needs)}</li>`).join('')}</ul>`);
+    o.push(`<h2>${h(t.gaps)}</h2><p class="muted">${h(t.gapsNote)}</p><ul>${r.gaps.map((g) => `<li dir="auto"><b>${x(g.title)}</b> — ${x(g.needs)}</li>`).join('')}</ul>`);
   }
   o.push(`<h2>${h(t.knowledge)}</h2><p>${h(t.factsN(r.knowledge.approvedFacts))}${r.knowledge.synthetic ? ` (${r.knowledge.synthetic} ${h(t.syn)})` : ''}</p>`);
   o.push(`<h2>${h(t.campaigns)}</h2>`);

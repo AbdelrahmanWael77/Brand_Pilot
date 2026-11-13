@@ -2,7 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
 import { openDb } from '../server/db.js';
-import { buildReport, renderReport, renderReportHtml, KPI_FORMAT } from '../server/report.js';
+import { buildReport, renderReport, renderReportHtml, bidi, KPI_FORMAT } from '../server/report.js';
 
 let server, base, db, alice, bob, companyId, emptyId;
 before(async () => {
@@ -213,6 +213,12 @@ test('printable HTML: self-contained, locked down, escaped, right direction per 
   assert.match(ar, /<td>جلسات الموقع<\/td>/);
   assert.match(ar, /هم الأعلى في معدل الاستفسار/);
   assert.doesNotMatch(ar, /بالإنجليزية حالياً/);
+  // Latin / numeric runs inside Arabic finding text are isolated on the Arabic page only.
+  assert.match(ar, /<li dir="auto">[^<]*<bdi>[A-Za-z0-9]/);
+  assert.doesNotMatch(en, /<bdi>/);
+  assert.doesNotMatch(ar, /<bdi>[^<]*[؀-ۿ]/); // no Arabic letter is ever inside a run
+  assert.doesNotMatch(ar, /<script|<img/i); // escaping still holds inside and around the runs
+  assert.doesNotMatch(await (await get(evil, '?range=7&format=md&lang=ar')).text(), /<bdi>/); // Markdown untouched
 
   // Synthetic data is labeled in the page too.
   s.imports = [{ kind: 'ga4', origin: 'fixture' }];
@@ -268,4 +274,14 @@ test('validation and isolation', async () => {
   assert.equal((await get(companyId, '?format=md', bob)).status, 404);
   assert.equal((await call('GET', `/api/companies/${companyId}/report`)).status, 401);
   assert.equal(buildReport(db, 'no-such-company'), null);
+});
+
+test('bidi isolates Latin and numeric runs and escapes everything', () => {
+  assert.equal(bidi('Facebook: 12% من الجلسات (1233 جلسة)'), '<bdi>Facebook: 12%</bdi> من الجلسات (<bdi>1233</bdi> جلسة)');
+  assert.equal(bidi('الصفحة /pricing تحمل 14.5% من الجلسات'), 'الصفحة <bdi>/pricing</bdi> تحمل <bdi>14.5%</bdi> من الجلسات');
+  assert.equal(bidi('Meta (Facebook) و Instagram'), '<bdi>Meta (Facebook)</bdi> و <bdi>Instagram</bdi>');
+  assert.equal(bidi('(GA4) جلسات.'), '(<bdi>GA4</bdi>) جلسات.'); // brackets and the full stop stay with the Arabic text
+  assert.equal(bidi('نص عربي فقط'), 'نص عربي فقط');
+  assert.equal(bidi('<script>x</script> & "R&D"'), '&lt;<bdi>script</bdi>&gt;<bdi>x</bdi>&lt;<bdi>/script</bdi>&gt; &amp; &quot;<bdi>R&amp;D</bdi>&quot;');
+  assert.equal(bidi(null), '');
 });
