@@ -5,6 +5,7 @@ import { openDb } from './db.js';
 import { createAuth } from './auth.js';
 import { createCompanies } from './companies.js';
 import { createAi } from './ai.js';
+import { createMeta } from './meta.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -19,9 +20,10 @@ export function parseTrustProxy(v) {
 /**
  * Tests pass `{ db: openDb(':memory:') }` (and optionally small `authLimits`, a stubbed `fetchUrl`
  * from createFetchUrl, a small `fetchLimit`, or an `ai` client from createAi with a stubbed network);
- * production uses the defaults (`ai` is built from ANTHROPIC_API_KEY / AI_MODEL).
+ * production uses the defaults (`ai` is built from ANTHROPIC_API_KEY / AI_MODEL). `meta` takes
+ * { config, fetch, syncLimit, now } for createMeta (tests pass a stubbed Graph network).
  */
-export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), askLimit, reportLimit, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
+export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), askLimit, reportLimit, meta: metaOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
   const app = express();
   app.disable('x-powered-by');
   // Behind a reverse proxy the client's address is in X-Forwarded-For; trusted only when the owner says so
@@ -50,6 +52,17 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
 
   app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'brandpilot' }));
   app.use('/api/auth', auth.router);
+  // Live Meta connection (meta.js). The OAuth callback is a browser redirect from Meta: without a session it
+  // goes back to the app instead of answering JSON. The company routes need membership, like every company route.
+  const meta = createMeta(db, metaOptions);
+  app.get('/api/integrations/meta/callback', (req, res, next) => {
+    const user = auth.currentUser(req);
+    if (!user) return res.redirect(302, '/?meta=signin');
+    req.user = user;
+    next();
+  }, meta.callback);
+  app.get('/api/integrations/status', auth.requireAuth, meta.status);
+  app.use('/api/companies/:id/integrations/meta', auth.requireAuth, companies.requireCompany, meta.company);
   app.use('/api/companies', auth.requireAuth, companies.router);
   // Whether an AI key is set on this server. Says nothing else: no key, no model, no provider detail.
   app.get('/api/ai/status', auth.requireAuth, (_req, res) => res.json({ configured: ai.configured }));
