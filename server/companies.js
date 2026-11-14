@@ -9,6 +9,7 @@ import { campaignQa } from './campaignQa.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
 import { buildContext, ask, ASK } from './director.js';
+import { suggestThemes, cleanPosts } from './themes.js';
 import { AiError } from './ai.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
@@ -250,6 +251,26 @@ export function createCompanies(
       if (!(e instanceof AiError)) throw e;
       // The provider's own message stays in the server log.
       console.error(`director/ask: ${e.code}`, e.cause?.message ?? '');
+      res.status(e.status).json({ error: e.code });
+    }
+  });
+
+  // AI theme suggestions for a batch of post captions (themes.js). Nothing is stored: the user confirms in the browser.
+  // Shares the per-user allowance of the AI questions.
+  router.post('/:id/data/meta/suggest-themes', requireCompany, async (req, res) => {
+    const posts = cleanPosts(req.body?.posts);
+    if (!posts) return res.status(400).json({ error: 'invalid_posts' });
+    const lang = req.body.lang ?? 'en';
+    if (lang !== 'en' && lang !== 'ar') return res.status(400).json({ error: 'invalid_lang' });
+    const wait = askLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    askLimiter.hit(req.user.id);
+    if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
+    try {
+      res.json(await suggestThemes(db, ai, req.company.id, { posts, lang }));
+    } catch (e) {
+      if (!(e instanceof AiError)) throw e;
+      console.error(`suggest-themes: ${e.code}`, e.cause?.message ?? '');
       res.status(e.status).json({ error: e.code });
     }
   });
