@@ -35,7 +35,7 @@ const summary = async (id, cookie) => (await (await call('GET', `/api/companies/
 const count = (id) => db.prepare('SELECT COUNT(*) AS n FROM data_rows WHERE company_id = ?').get(id).n;
 
 // Rows shaped exactly as the frontend's importData stores them.
-const meta = (date, extra = {}) => ({ date, platform: 'facebook', post_id: 'p1', format: 'image', theme: 'tips', language: 'ar', reach: 1800, impressions: 2200, engagements: 64, link_clicks: 21, spend: 0, campaign: '', ...extra });
+const meta = (date, extra = {}) => ({ date, platform: 'facebook', post_id: 'p1', theme: 'tips', language: 'ar', reach: 1800, impressions: 2200, engagements: 64, link_clicks: 21, spend: 0, campaign: '', ...extra });
 const ga4 = (date, extra = {}) => ({ date, channel: 'Organic Search', landing_page: '/', device: 'mobile', sessions: 120, engaged_sessions: 70, enquiries: 3, campaign: '', ...extra });
 const gsc = (date, extra = {}) => ({ date, query: 'مخبز القاهرة', page: '/', clicks: 4, impressions: 180, position: 7.2, ...extra });
 const lead = (date, extra = {}) => ({ date, source: 'Facebook', campaign: 'my-campaign', segment: 'Cafes', status: 'qualified', ...extra });

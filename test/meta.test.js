@@ -88,7 +88,7 @@ test('row mapping: only current metrics, absent ones left out, never invented', 
   assert.equal('language' in r, false);
   assert.deepEqual(igRow({ id: 'm', timestamp: '2026-11-11T10:00:00+0000', media_type: 'REELS', caption: 'عرض اليوم' },
     [{ name: 'reach', values: [{ value: 9 }] }, { name: 'total_interactions', total_value: { value: 2 } }]),
-  { date: '2026-11-11', platform: 'instagram', post_id: 'm', reach: 9, engagements: 2, format: 'reels', language: 'ar' });
+  { date: '2026-11-11', platform: 'instagram', post_id: 'm', reach: 9, engagements: 2, language: 'ar' });
   assert.equal(scriptLang('Clinics عيادات عيادات'), 'ar');
   assert.equal(scriptLang('123 !'), undefined);
 });
@@ -189,7 +189,7 @@ test('sync: posts and media in the window become Meta rows; gaps are counted, no
   assert.deepEqual(s.rows, [
     { date: '2026-11-10', platform: 'facebook', post_id: 'P1_a', reach: 1200, impressions: 2000, engagements: 50, link_clicks: 30, language: 'ar' },
     { date: '2026-11-01', platform: 'facebook', post_id: 'P1_b', reach: 800, impressions: 900, engagements: 0, language: 'en' },
-    { date: '2026-11-11', platform: 'instagram', post_id: 'M1', reach: 500, impressions: 650, engagements: 37, format: 'image', language: 'en' },
+    { date: '2026-11-11', platform: 'instagram', post_id: 'M1', reach: 500, impressions: 650, engagements: 37, language: 'en' },
   ]);
   assert.deepEqual(s.skipped, { noInsights: 1, errors: 1 }); // P1_c returned no metrics; M2's insights failed
   assert.deepEqual(s.accounts, { pages: 1, instagram: 1 });

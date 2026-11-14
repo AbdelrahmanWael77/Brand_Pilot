@@ -31,7 +31,7 @@ function posts(platforms, everyNDays) {
     const ctr = { facebook: 0.012, instagram: 0.004, linkedin: 0.015 }[platform] * (0.5 + rnd());
     const campaign = pick(CAMPAIGNS);
     rows.push({
-      date: day(i + int(0, everyNDays - 1)), platform, post_id: `${platform.slice(0, 2)}-${n++}`, format: fmt, theme,
+      date: day(i + int(0, everyNDays - 1)), platform, post_id: `${platform.slice(0, 2)}-${n++}`, theme,
       language: rnd() < 0.6 ? 'ar' : 'en', reach, impressions: Math.round(reach * (1.15 + rnd() * 0.4)),
       engagements: Math.round(reach * er), link_clicks: Math.round(reach * ctr),
       spend: campaign ? int(300, 1500) : 0, campaign,
@@ -84,8 +84,8 @@ const csvCell = (v) => { const s = String(v ?? ''); return /[",\n]/.test(s) ? `"
 const toCSV = (rows, cols) => [cols.join(','), ...rows.map((r) => cols.map((c) => csvCell(r[c])).join(','))].join('\n') + '\n';
 
 const sets = {
-  meta: [posts(['facebook', 'instagram'], 2), 'date,platform,post_id,format,theme,language,reach,impressions,engagements,link_clicks,spend,campaign'],
-  linkedin: [posts(['linkedin'], 3), 'date,platform,post_id,format,theme,language,reach,impressions,engagements,link_clicks,spend,campaign'],
+  meta: [posts(['facebook', 'instagram'], 2), 'date,platform,post_id,theme,language,reach,impressions,engagements,link_clicks,spend,campaign'],
+  linkedin: [posts(['linkedin'], 3), 'date,platform,post_id,theme,language,reach,impressions,engagements,link_clicks,spend,campaign'],
   ga4: [ga4(), 'date,channel,landing_page,device,sessions,engaged_sessions,enquiries,campaign'],
   gsc: [gsc(), 'date,query,page,clicks,impressions,position'],
   leads: [leads(), 'date,source,campaign,segment,status'],

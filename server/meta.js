@@ -126,7 +126,6 @@ export function igRow(media, insights) {
   const row = { date, platform: 'instagram', post_id: String(media.id), reach, engagements: num(by.total_interactions) ?? 0 };
   const views = num(by.views);
   if (views !== undefined) row.impressions = views;
-  if (media.media_type) row.format = String(media.media_type).toLowerCase();
   const lang = scriptLang(media.caption);
   if (lang) row.language = lang;
   return row;

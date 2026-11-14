@@ -15,7 +15,7 @@ import crypto from 'node:crypto';
 export const SCHEMAS = {
   meta: {
     req: ['date', 'platform', 'reach', 'engagements'],
-    opt: ['post_id', 'format', 'theme', 'language', 'impressions', 'link_clicks', 'spend', 'campaign', 'text'],
+    opt: ['post_id', 'theme', 'language', 'impressions', 'link_clicks', 'spend', 'campaign', 'text'],
     num: ['reach', 'impressions', 'engagements', 'link_clicks', 'spend'],
   },
   ga4: {
