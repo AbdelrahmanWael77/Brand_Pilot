@@ -1,0 +1,29 @@
+date,platform,post_id,format,theme,language,reach,impressions,engagements,link_clicks,spend,campaign
+2026-08-19,linkedin,li-1,image,behind the scenes,ar,1098,1589,69,10,0,
+2026-08-20,linkedin,li-2,image,how-to tips,ar,898,1296,29,17,421,back-to-work
+2026-08-25,linkedin,li-3,text,behind the scenes,ar,678,929,43,15,810,agency-trial
+2026-08-26,linkedin,li-4,text,product update,en,1078,1655,34,15,0,
+2026-08-30,linkedin,li-5,text,how-to tips,en,649,835,37,12,0,
+2026-09-01,linkedin,li-6,text,product update,ar,1113,1461,41,24,0,
+2026-09-04,linkedin,li-7,image,product update,ar,928,1393,57,19,731,agency-trial
+2026-09-08,linkedin,li-8,text,product update,ar,1005,1172,61,20,0,
+2026-09-11,linkedin,li-9,carousel,product update,en,1406,1842,53,23,0,
+2026-09-15,linkedin,li-10,image,behind the scenes,ar,1192,1503,30,26,1035,agency-trial
+2026-09-17,linkedin,li-11,image,product update,ar,1043,1438,43,13,0,
+2026-09-21,linkedin,li-12,carousel,product update,ar,1183,1648,68,9,0,
+2026-09-22,linkedin,li-13,text,product update,ar,1104,1454,39,18,0,
+2026-09-26,linkedin,li-14,carousel,how-to tips,en,1503,2250,60,17,324,agency-trial
+2026-09-30,linkedin,li-15,text,product update,ar,1353,1679,35,15,0,
+2026-10-02,linkedin,li-16,carousel,product update,en,999,1294,24,14,0,
+2026-10-05,linkedin,li-17,image,offer,ar,1056,1539,61,18,0,
+2026-10-07,linkedin,li-18,image,offer,ar,1414,1929,59,21,0,
+2026-10-12,linkedin,li-19,image,offer,ar,1096,1496,54,19,1381,agency-trial
+2026-10-15,linkedin,li-20,text,offer,ar,745,1107,33,11,376,agency-trial
+2026-10-16,linkedin,li-21,text,how-to tips,ar,704,1040,30,13,1296,agency-trial
+2026-10-20,linkedin,li-22,image,product update,ar,1342,1800,70,27,492,agency-trial
+2026-10-23,linkedin,li-23,image,how-to tips,ar,868,1170,43,8,641,back-to-work
+2026-10-26,linkedin,li-24,text,customer story,ar,854,1030,38,17,1473,agency-trial
+2026-10-29,linkedin,li-25,carousel,how-to tips,ar,719,1006,36,12,935,agency-trial
+2026-10-31,linkedin,li-26,carousel,offer,ar,1500,2244,62,16,0,
+2026-11-05,linkedin,li-27,text,offer,ar,1036,1379,29,17,1306,agency-trial
+2026-11-07,linkedin,li-28,carousel,offer,ar,1115,1520,62,9,1222,agency-trial

@@ -149,9 +149,9 @@ test('Markdown download: headers, numbers, escaping of company text, Arabic labe
   assert.match(ar, /\| جلسات الموقع \| 2,000 \| \+400\.0% \|/);
   assert.match(ar, /### نقاط القوة/);
   // Findings are written in Arabic by the server audit; no "findings are English" note.
-  assert.match(ar, /\*\*زوار Search هم الأعلى في معدل الاستفسار\*\* — من بياناتكم المستوردة/);
+  assert.match(ar, /\*\*زوار Search هم الأعلى في معدل الاستفسار\*\* — من بياناتك المستوردة/);
   assert.match(ar, /- Search: 30 استفسار من 900 جلسة \(3\.33%\)/);
-  assert.match(ar, /الظهور في البحث العضوي غير معروف\*\* — استوردوا تصدير الأداء من Search Console\./);
+  assert.match(ar, /الظهور في البحث العضوي غير معروف\*\* — استورد تصدير الأداء من Search Console\./);
   assert.doesNotMatch(ar, /بالإنجليزية حالياً|visitors enquire|Import a /);
   assert.doesNotMatch(en, /[\u0600-\u06FF]/); // and the English report has no Arabic in it
   // JSON in Arabic on request; English by default.

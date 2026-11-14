@@ -338,7 +338,7 @@ test('Arabic wording: same rules, ids, numbers and evidence values; only the tex
     assert.match(i.title, AR, i.id);
     assert.match(i.needs, AR, i.id);
   }
-  assert.equal(item(none, 'brand-doc').needs, 'اعتمدوا حقيقة لـنبرة الصوت وهوية العلامة (الألوان) في مركز المعرفة.');
+  assert.equal(item(none, 'brand-doc').needs, 'اعتمد حقيقة لـنبرة الصوت وهوية العلامة (الألوان) في مركز المعرفة.');
 });
 
 test('route: ?lang=ar answers in Arabic; an unknown language is refused', async () => {

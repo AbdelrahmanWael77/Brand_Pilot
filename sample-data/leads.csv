@@ -1,0 +1,242 @@
+date,source,campaign,segment,status
+2026-08-17,Referral,,Software houses,qualified
+2026-08-17,Google,,Retail,qualified
+2026-08-17,Google,,Software houses,lost
+2026-08-17,Facebook,,Retail,lost
+2026-08-17,LinkedIn,,Retail,qualified
+2026-08-18,Referral,,Education,qualified
+2026-08-18,Referral,,Agencies,contacted
+2026-08-19,Facebook,,Retail,customer
+2026-08-20,Google,,Software houses,customer
+2026-08-20,WhatsApp,,Software houses,contacted
+2026-08-20,Google,,Education,customer
+2026-08-20,Instagram,agency-trial,Agencies,customer
+2026-08-20,Instagram,,Retail,new
+2026-08-21,Referral,,Retail,qualified
+2026-08-21,LinkedIn,,Education,contacted
+2026-08-21,Google,,Education,qualified
+2026-08-21,Google,,Education,new
+2026-08-22,Facebook,,Education,contacted
+2026-08-22,Facebook,back-to-work,Education,customer
+2026-08-23,Instagram,,Retail,qualified
+2026-08-24,WhatsApp,,Agencies,contacted
+2026-08-24,Facebook,agency-trial,Retail,new
+2026-08-24,Facebook,,Software houses,new
+2026-08-24,WhatsApp,,Agencies,qualified
+2026-08-25,WhatsApp,,Retail,lost
+2026-08-26,WhatsApp,,Agencies,customer
+2026-08-27,Instagram,back-to-work,Retail,lost
+2026-08-27,WhatsApp,,Education,new
+2026-08-27,Google,,Agencies,contacted
+2026-08-27,Facebook,agency-trial,Software houses,new
+2026-08-27,WhatsApp,,Software houses,contacted
+2026-08-28,Facebook,back-to-work,Agencies,customer
+2026-08-29,Facebook,agency-trial,Education,new
+2026-08-29,Facebook,,Software houses,contacted
+2026-08-29,LinkedIn,,Education,new
+2026-08-29,LinkedIn,,Education,lost
+2026-08-30,Referral,,Retail,qualified
+2026-08-30,Instagram,,Agencies,contacted
+2026-08-30,Instagram,back-to-work,Retail,lost
+2026-08-31,Instagram,,Education,contacted
+2026-08-31,WhatsApp,,Education,lost
+2026-08-31,LinkedIn,,Retail,qualified
+2026-08-31,LinkedIn,,Retail,qualified
+2026-08-31,Facebook,,Agencies,contacted
+2026-09-01,Facebook,back-to-work,Education,new
+2026-09-01,WhatsApp,,Retail,lost
+2026-09-01,Facebook,agency-trial,Retail,qualified
+2026-09-01,WhatsApp,,Education,lost
+2026-09-01,Facebook,,Retail,customer
+2026-09-02,Facebook,,Software houses,customer
+2026-09-02,Facebook,,Education,qualified
+2026-09-02,WhatsApp,,Agencies,customer
+2026-09-02,Facebook,agency-trial,Software houses,qualified
+2026-09-03,Instagram,,Software houses,contacted
+2026-09-03,Facebook,back-to-work,Education,contacted
+2026-09-04,Instagram,agency-trial,Software houses,lost
+2026-09-04,Facebook,,Software houses,new
+2026-09-05,Instagram,agency-trial,Software houses,lost
+2026-09-06,Google,,Retail,contacted
+2026-09-06,Facebook,agency-trial,Education,new
+2026-09-07,Facebook,back-to-work,Software houses,qualified
+2026-09-07,LinkedIn,,Retail,contacted
+2026-09-07,Facebook,,Education,qualified
+2026-09-07,WhatsApp,,Retail,qualified
+2026-09-08,Instagram,agency-trial,Software houses,new
+2026-09-08,Google,,Agencies,contacted
+2026-09-08,Facebook,back-to-work,Software houses,contacted
+2026-09-09,Google,,Agencies,lost
+2026-09-09,Instagram,agency-trial,Education,contacted
+2026-09-09,Google,,Agencies,new
+2026-09-09,Instagram,back-to-work,Agencies,contacted
+2026-09-10,Facebook,agency-trial,Retail,customer
+2026-09-10,Google,,Agencies,qualified
+2026-09-11,Facebook,,Agencies,qualified
+2026-09-11,Instagram,,Agencies,qualified
+2026-09-12,Referral,,Agencies,contacted
+2026-09-13,Google,,Education,lost
+2026-09-13,Referral,,Agencies,qualified
+2026-09-13,Instagram,back-to-work,Software houses,contacted
+2026-09-13,Instagram,,Agencies,customer
+2026-09-14,Facebook,,Software houses,lost
+2026-09-14,WhatsApp,,Agencies,contacted
+2026-09-15,Facebook,,Education,customer
+2026-09-15,Instagram,,Education,contacted
+2026-09-16,Facebook,back-to-work,Software houses,qualified
+2026-09-16,Facebook,back-to-work,Software houses,qualified
+2026-09-17,Google,,Software houses,customer
+2026-09-17,Facebook,,Software houses,qualified
+2026-09-17,Instagram,,Agencies,lost
+2026-09-17,Instagram,agency-trial,Agencies,lost
+2026-09-17,Google,,Education,qualified
+2026-09-18,WhatsApp,,Agencies,qualified
+2026-09-19,WhatsApp,,Agencies,lost
+2026-09-19,Google,,Software houses,qualified
+2026-09-19,LinkedIn,,Education,qualified
+2026-09-19,Facebook,back-to-work,Education,new
+2026-09-19,Google,,Software houses,contacted
+2026-09-20,Facebook,,Education,new
+2026-09-20,LinkedIn,,Education,qualified
+2026-09-21,Instagram,,Agencies,lost
+2026-09-21,Google,,Retail,new
+2026-09-22,Google,,Retail,lost
+2026-09-22,Google,,Education,customer
+2026-09-22,Google,,Retail,qualified
+2026-09-23,Instagram,agency-trial,Retail,lost
+2026-09-23,LinkedIn,,Education,qualified
+2026-09-23,Instagram,,Education,contacted
+2026-09-24,Referral,,Agencies,qualified
+2026-09-24,WhatsApp,,Education,contacted
+2026-09-25,Google,,Software houses,customer
+2026-09-25,Instagram,,Retail,new
+2026-09-26,Google,,Retail,lost
+2026-09-26,LinkedIn,,Education,lost
+2026-09-26,WhatsApp,,Software houses,lost
+2026-09-26,Instagram,back-to-work,Software houses,lost
+2026-09-26,Google,,Education,lost
+2026-09-27,Google,,Agencies,lost
+2026-09-27,WhatsApp,,Retail,contacted
+2026-09-27,Google,,Education,qualified
+2026-09-27,Instagram,agency-trial,Retail,new
+2026-09-28,LinkedIn,,Education,qualified
+2026-09-28,Instagram,,Education,customer
+2026-09-28,Google,,Education,contacted
+2026-09-28,Referral,,Software houses,qualified
+2026-09-29,Instagram,,Education,contacted
+2026-09-29,LinkedIn,,Agencies,customer
+2026-09-29,Facebook,,Retail,qualified
+2026-09-29,Google,,Software houses,qualified
+2026-09-30,Google,,Retail,contacted
+2026-10-01,Google,,Software houses,customer
+2026-10-02,Instagram,agency-trial,Software houses,lost
+2026-10-02,Google,,Retail,contacted
+2026-10-02,LinkedIn,,Software houses,contacted
+2026-10-02,Facebook,agency-trial,Retail,lost
+2026-10-03,Facebook,back-to-work,Agencies,new
+2026-10-04,Google,,Retail,lost
+2026-10-04,Google,,Agencies,qualified
+2026-10-04,Facebook,agency-trial,Software houses,lost
+2026-10-04,Facebook,agency-trial,Software houses,qualified
+2026-10-05,Facebook,,Software houses,lost
+2026-10-05,Facebook,,Agencies,qualified
+2026-10-05,WhatsApp,,Agencies,customer
+2026-10-05,Google,,Software houses,qualified
+2026-10-06,WhatsApp,,Retail,contacted
+2026-10-07,Instagram,,Agencies,new
+2026-10-07,Instagram,,Education,qualified
+2026-10-08,Facebook,agency-trial,Agencies,contacted
+2026-10-09,Google,,Software houses,contacted
+2026-10-09,WhatsApp,,Retail,new
+2026-10-09,Google,,Software houses,new
+2026-10-09,Instagram,,Retail,customer
+2026-10-09,Instagram,agency-trial,Retail,lost
+2026-10-10,Facebook,,Software houses,new
+2026-10-11,Instagram,agency-trial,Software houses,contacted
+2026-10-11,Instagram,,Retail,new
+2026-10-11,Instagram,,Software houses,lost
+2026-10-12,Google,,Software houses,customer
+2026-10-13,Instagram,,Software houses,new
+2026-10-13,Instagram,back-to-work,Software houses,qualified
+2026-10-13,Facebook,,Education,contacted
+2026-10-13,Instagram,agency-trial,Education,new
+2026-10-13,Facebook,back-to-work,Software houses,contacted
+2026-10-14,Referral,,Agencies,lost
+2026-10-14,WhatsApp,,Education,lost
+2026-10-14,Instagram,agency-trial,Education,qualified
+2026-10-15,Instagram,,Software houses,contacted
+2026-10-15,WhatsApp,,Software houses,qualified
+2026-10-15,Google,,Retail,lost
+2026-10-15,Facebook,,Education,qualified
+2026-10-16,Facebook,agency-trial,Agencies,new
+2026-10-17,Instagram,,Education,lost
+2026-10-18,Facebook,agency-trial,Software houses,new
+2026-10-18,Instagram,back-to-work,Education,contacted
+2026-10-18,Facebook,back-to-work,Software houses,contacted
+2026-10-18,Referral,,Education,qualified
+2026-10-18,Google,,Education,qualified
+2026-10-19,WhatsApp,,Agencies,qualified
+2026-10-19,Instagram,back-to-work,Software houses,qualified
+2026-10-19,Facebook,agency-trial,Education,qualified
+2026-10-19,Instagram,back-to-work,Software houses,new
+2026-10-20,Instagram,,Software houses,lost
+2026-10-20,Facebook,back-to-work,Retail,contacted
+2026-10-21,Facebook,,Agencies,lost
+2026-10-21,Facebook,agency-trial,Software houses,contacted
+2026-10-21,Facebook,agency-trial,Education,qualified
+2026-10-21,Google,,Education,qualified
+2026-10-22,Facebook,,Software houses,new
+2026-10-22,Instagram,back-to-work,Agencies,lost
+2026-10-22,WhatsApp,,Education,lost
+2026-10-22,Google,,Software houses,new
+2026-10-22,WhatsApp,,Software houses,customer
+2026-10-23,Google,,Retail,lost
+2026-10-23,Google,,Retail,qualified
+2026-10-24,Facebook,agency-trial,Software houses,qualified
+2026-10-24,Google,,Retail,contacted
+2026-10-24,WhatsApp,,Agencies,contacted
+2026-10-25,WhatsApp,,Agencies,customer
+2026-10-25,Instagram,back-to-work,Agencies,lost
+2026-10-25,Facebook,back-to-work,Education,new
+2026-10-26,Instagram,,Retail,contacted
+2026-10-26,Google,,Retail,qualified
+2026-10-26,Facebook,,Education,qualified
+2026-10-26,Facebook,,Agencies,contacted
+2026-10-27,Facebook,agency-trial,Education,new
+2026-10-28,Instagram,,Software houses,contacted
+2026-10-28,Facebook,,Agencies,contacted
+2026-10-28,Facebook,,Agencies,contacted
+2026-10-28,Google,,Education,qualified
+2026-10-29,Google,,Software houses,qualified
+2026-10-29,Instagram,back-to-work,Retail,new
+2026-10-30,WhatsApp,,Agencies,contacted
+2026-10-31,Facebook,back-to-work,Software houses,lost
+2026-10-31,Instagram,agency-trial,Education,new
+2026-10-31,WhatsApp,,Education,lost
+2026-10-31,Facebook,back-to-work,Retail,qualified
+2026-11-01,Instagram,back-to-work,Software houses,contacted
+2026-11-01,Instagram,,Agencies,lost
+2026-11-02,Facebook,back-to-work,Software houses,qualified
+2026-11-02,Referral,,Retail,qualified
+2026-11-02,Instagram,,Education,lost
+2026-11-02,WhatsApp,,Education,customer
+2026-11-02,WhatsApp,,Retail,customer
+2026-11-03,Instagram,agency-trial,Retail,lost
+2026-11-03,Google,,Software houses,contacted
+2026-11-03,Instagram,,Agencies,qualified
+2026-11-03,LinkedIn,,Agencies,customer
+2026-11-04,Google,,Agencies,new
+2026-11-04,Referral,,Software houses,contacted
+2026-11-04,Facebook,agency-trial,Agencies,qualified
+2026-11-04,Facebook,,Software houses,new
+2026-11-05,LinkedIn,,Agencies,customer
+2026-11-05,Google,,Retail,customer
+2026-11-06,Facebook,agency-trial,Agencies,customer
+2026-11-06,Google,,Software houses,contacted
+2026-11-06,LinkedIn,,Software houses,contacted
+2026-11-06,Referral,,Education,contacted
+2026-11-07,Facebook,back-to-work,Agencies,contacted
+2026-11-07,Instagram,back-to-work,Agencies,lost
+2026-11-07,Facebook,back-to-work,Education,contacted
+2026-11-07,Google,,Agencies,qualified
+2026-11-08,Instagram,,Retail,lost

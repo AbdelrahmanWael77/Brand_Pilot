@@ -99,7 +99,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
   /* ---- Website (GA4) ---- */
   const g = data.ga4;
   if (!g.length) {
-    insufficient('no-ga4', 'ga4', L('Website performance is not connected', 'أداء الموقع غير مربوط'), L('Import a GA4 export (CSV) in Integrations & Data.', 'استوردوا تصدير GA4 (CSV) من «التكاملات والبيانات».'));
+    insufficient('no-ga4', 'ga4', L('Website performance is not connected', 'أداء الموقع غير مربوط'), L('Import a GA4 export (CSV) in Integrations & Data.', 'استورد تصدير GA4 (CSV) من «التكاملات والبيانات».'));
   } else {
     const S = sum(g, 'sessions');
     const E = sum(g, 'enquiries');
@@ -108,7 +108,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
         id: 'no-track',
         title: L('The website records no enquiry events', 'الموقع لا يسجل أي أحداث استفسار'),
         why: L('Without a key event for form submissions, WhatsApp clicks or bookings, nobody can tell which channel or page produces enquiries.', 'بدون حدث رئيسي لإرسال النموذج أو نقرات واتساب أو الحجز، لا يمكن معرفة أي قناة أو صفحة تجلب الاستفسارات.'),
-        action: L('Define one GA4 key event per enquiry path (form submit, WhatsApp click, call click) and re-import.', 'عرّفوا حدثاً رئيسياً في GA4 لكل مسار استفسار (إرسال النموذج، نقرة واتساب، نقرة اتصال) ثم أعيدوا الاستيراد.'),
+        action: L('Define one GA4 key event per enquiry path (form submit, WhatsApp click, call click) and re-import.', 'عرّف حدثاً رئيسياً في GA4 لكل مسار استفسار (إرسال النموذج، نقرة واتساب، نقرة اتصال) ثم أعد الاستيراد.'),
         evidence: [
           { metric: 'sessions', value: S, rows: g.length, text: L(`${S} sessions imported, 0 enquiry key events in the whole period.`, `تم استيراد ${S} جلسة، و0 حدث استفسار رئيسي في كامل الفترة.`) },
           { text: L('Interpretation: tracking is most likely not configured (a true zero is unlikely at this traffic level).', 'تفسير: على الأرجح التتبع غير مُعدّ (الصفر الحقيقي غير مرجّح عند هذا الحجم من الزيارات).') },
@@ -127,7 +127,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
             id: 'ch-best',
             title: L(`${best.name} visitors enquire at the highest rate`, `زوار ${best.name} هم الأعلى في معدل الاستفسار`),
             why: L('This channel already brings people with intent; growing it is lower-risk than fixing a weak one.', 'هذه القناة تجلب بالفعل زواراً لديهم نية؛ تنميتها أقل مخاطرة من إصلاح قناة ضعيفة.'),
-            action: L(`Invest more effort in ${best.name}: more content, better pages, clearer follow-up.`, `استثمروا جهداً أكبر في ${best.name}: محتوى أكثر، صفحات أفضل، متابعة أوضح.`),
+            action: L(`Invest more effort in ${best.name}: more content, better pages, clearer follow-up.`, `استثمر جهداً أكبر في ${best.name}: محتوى أكثر، صفحات أفضل، متابعة أوضح.`),
             evidence: [{ metric: 'enquiry_rate', value: best.rate, text: L(`${best.name}: ${best.enquiries} enquiries from ${best.sessions} sessions (${pct(best.rate, 2)})`, `${best.name}: ${best.enquiries} استفسار من ${best.sessions} جلسة (${pct(best.rate, 2)})`) }, site],
           });
         }
@@ -137,7 +137,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
             id: 'ch-leak',
             title: L(`${leak.name} brings many visits but few enquiries`, `${leak.name} تجلب زيارات كثيرة واستفسارات قليلة`),
             why: L('Attention is being won but not converted.', 'نكسب الانتباه ولا نحوّله إلى استفسارات.'),
-            action: L(`Send ${leak.name} traffic to a dedicated landing page with one CTA instead of general pages.`, `وجّهوا زيارات ${leak.name} إلى صفحة هبوط مخصصة بدعوة واحدة لاتخاذ إجراء بدلاً من الصفحات العامة.`),
+            action: L(`Send ${leak.name} traffic to a dedicated landing page with one CTA instead of general pages.`, `وجّه زيارات ${leak.name} إلى صفحة هبوط مخصصة بدعوة واحدة لاتخاذ إجراء بدلاً من الصفحات العامة.`),
             evidence: [
               { metric: 'enquiry_rate', value: leak.rate, text: L(`${leak.name}: ${pct(leak.sessions / S, 0)} of sessions, enquiry rate ${pct(leak.rate, 2)} vs site ${pct(rate, 2)}`, `${leak.name}: ${pct(leak.sessions / S, 0)} من الجلسات، معدل الاستفسار ${pct(leak.rate, 2)} مقابل ${pct(rate, 2)} للموقع`) },
               { text: L('Hypothesis, not a measurement: posts send people to pages that do not match what the post promised.', 'فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور.') },
@@ -155,7 +155,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
             id: 'page-leak',
             title: L(`Landing page ${page.name} under-converts`, `صفحة الهبوط ${page.name} أقل تحويلاً من المتوسط`),
             why: L('A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.', 'صفحة عالية الزيارات بتحويل أقل من متوسط الموقع هي أرخص مكان لكسب استفسارات: الزوار موجودون بالفعل.'),
-            action: L(`Review ${page.name}: put the primary CTA above the fold, shorten the form, state the offer in the first screen.`, `راجعوا ${page.name}: ضعوا الدعوة الرئيسية في أعلى الصفحة، اختصروا النموذج، واذكروا العرض في الشاشة الأولى.`),
+            action: L(`Review ${page.name}: put the primary CTA above the fold, shorten the form, state the offer in the first screen.`, `راجع ${page.name}: ضع الدعوة الرئيسية في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.`),
             evidence: [{ metric: 'enquiry_rate', value: page.rate, text: L(`${page.name}: ${page.sessions} sessions (${pct(page.sessions / S, 0)}), enquiry rate ${pct(page.rate, 2)} vs site ${pct(rate, 2)}`, `${page.name}: ${page.sessions} جلسة (${pct(page.sessions / S, 0)})، معدل الاستفسار ${pct(page.rate, 2)} مقابل ${pct(rate, 2)} للموقع`) }],
           });
         }
@@ -170,7 +170,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
           id: 'mobile-gap',
           title: L('Mobile visitors enquire far less than desktop visitors', 'زوار الجوال يستفسرون أقل بكثير من زوار سطح المكتب'),
           why: L('If the mobile path is harder, every channel pays for it.', 'إذا كان مسار الجوال أصعب، فكل القنوات تدفع الثمن.'),
-          action: L('Test the enquiry path on a phone: form length, button size, load time, WhatsApp/click-to-call option.', 'اختبروا مسار الاستفسار على الهاتف: طول النموذج، حجم الأزرار، زمن التحميل، وخيار واتساب أو الاتصال بنقرة.'),
+          action: L('Test the enquiry path on a phone: form length, button size, load time, WhatsApp/click-to-call option.', 'اختبر مسار الاستفسار على الهاتف: طول النموذج، حجم الأزرار، زمن التحميل، وخيار واتساب أو الاتصال بنقرة.'),
           evidence: [
             { metric: 'enquiry_rate', value: mo.rate, text: L(`Mobile: ${pct(mo.sessions / S, 0)} of sessions, enquiry rate ${pct(mo.rate, 2)}`, `الجوال: ${pct(mo.sessions / S, 0)} من الجلسات، معدل الاستفسار ${pct(mo.rate, 2)}`) },
             { metric: 'enquiry_rate', value: de.rate, text: L(`Desktop: enquiry rate ${pct(de.rate, 2)}`, `سطح المكتب: معدل الاستفسار ${pct(de.rate, 2)}`) },
@@ -182,7 +182,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
 
   /* ---- Organic search (Search Console) ---- */
   if (!data.gsc.length) {
-    insufficient('no-gsc', 'gsc', L('Organic search visibility is unknown', 'الظهور في البحث العضوي غير معروف'), L('Import a Search Console performance export.', 'استوردوا تصدير الأداء من Search Console.'));
+    insufficient('no-gsc', 'gsc', L('Organic search visibility is unknown', 'الظهور في البحث العضوي غير معروف'), L('Import a Search Console performance export.', 'استورد تصدير الأداء من Search Console.'));
   } else {
     const queries = [...groupBy(data.gsc, 'query')].map(([name, rs]) => {
       const impressions = sum(rs, 'impressions');
@@ -199,9 +199,9 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
       if (missed.length) {
         conclude('opp', 'gsc', {
           id: 'seo-q',
-          title: L('People search for what you offer but rarely reach you', 'الناس يبحثون عمّا تقدمونه لكنهم قلّما يصلون إليكم'),
-          why: L('These queries already show your pages. Moving a few positions up usually costs less than buying the same visits.', 'هذه الاستعلامات تُظهر صفحاتكم بالفعل. التقدم بضعة مراكز يكلّف عادةً أقل من شراء الزيارات نفسها.'),
-          action: L('Create or improve one page per query: put the phrase in the title, answer the need directly, add the primary CTA.', 'أنشئوا أو حسّنوا صفحة لكل استعلام: ضعوا العبارة في العنوان، أجيبوا عن الحاجة مباشرة، وأضيفوا الدعوة الرئيسية.'),
+          title: L('People search for what you offer but rarely reach you', 'الناس يبحثون عمّا تقدمه لكنهم قلّما يصلون إليك'),
+          why: L('These queries already show your pages. Moving a few positions up usually costs less than buying the same visits.', 'هذه الاستعلامات تُظهر صفحاتك بالفعل. التقدم بضعة مراكز يكلّف عادةً أقل من شراء الزيارات نفسها.'),
+          action: L('Create or improve one page per query: put the phrase in the title, answer the need directly, add the primary CTA.', 'أنشئ أو حسّن صفحة لكل استعلام: ضع العبارة في العنوان، أجب عن الحاجة مباشرة، وأضف الدعوة الرئيسية.'),
           evidence: missed.map((x) => ({ metric: 'ctr', value: x.clicks / x.impressions, text: L(`"${x.name}": ${x.impressions} impressions, ${x.clicks} clicks (${pct(x.clicks / x.impressions, 1)}), average position ${x.position.toFixed(1)}`, `«${x.name}»: ${x.impressions} ظهور، ${x.clicks} نقرة (${pct(x.clicks / x.impressions, 1)})، متوسط المركز ${x.position.toFixed(1)}`) })),
         });
       }
@@ -211,7 +211,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
   /* ---- Leads ---- */
   const l = data.leads;
   if (!l.length) {
-    insufficient('no-leads', 'leads', L('Lead quality and sales outcomes are not connected', 'جودة العملاء المحتملين ونتائج المبيعات غير مربوطة'), L('Export leads from your CRM or sheet with date, source, segment and status, and import the CSV.', 'صدّروا العملاء المحتملين من نظام CRM أو الجدول مع التاريخ والمصدر والشريحة والحالة، ثم استوردوا ملف CSV.'));
+    insufficient('no-leads', 'leads', L('Lead quality and sales outcomes are not connected', 'جودة العملاء المحتملين ونتائج المبيعات غير مربوطة'), L('Export leads from your CRM or sheet with date, source, segment and status, and import the CSV.', 'صدّر العملاء المحتملين من نظام CRM أو الجدول مع التاريخ والمصدر والشريحة والحالة، ثم استورد ملف CSV.'));
   } else {
     const overall = l.filter(isQualified).length / l.length;
     const all = { metric: 'qualified_share', value: overall, rows: l.length, text: L(`All leads: ${pct(overall, 0)} qualified (${l.length} leads)`, `كل العملاء المحتملين: ${pct(overall, 0)} مؤهلون (${l.length} عميل محتمل)`) };
@@ -221,7 +221,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
         id: 'src-unknown',
         title: L('The source of many leads is not recorded', 'مصدر كثير من العملاء المحتملين غير مسجَّل'),
         why: L('Leads with no source cannot be credited to any channel, so good channels look weaker than they are.', 'العملاء المحتملون بلا مصدر لا يُنسبون إلى أي قناة، فتبدو القنوات الجيدة أضعف مما هي.'),
-        action: L('Add a required "How did you hear about us?" field or capture UTM values in the form.', 'أضيفوا حقلاً إلزامياً «كيف سمعتم عنا؟» أو التقطوا قيم UTM في النموذج.'),
+        action: L('Add a required "How did you hear about us?" field or capture UTM values in the form.', 'أضف حقلاً إلزامياً «كيف سمعتم عنا؟» أو التقط قيم UTM في النموذج.'),
         evidence: [{ metric: 'unknown_source_share', value: unknown, rows: l.length, text: L(`${pct(unknown, 0)} of ${l.length} leads have an empty source field.`, `${pct(unknown, 0)} من ${l.length} عميل محتمل حقل المصدر لديهم فارغ.`) }],
       });
     }
@@ -234,9 +234,9 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
       if (best.rate > overall * T.bestOverAverage) {
         conclude('strong', 'leads', {
           id: 'src-best',
-          title: L(`${best.name} brings your best-quality leads`, `${best.name} يجلب أفضل عملائكم المحتملين جودةً`),
+          title: L(`${best.name} brings your best-quality leads`, `${best.name} يجلب أفضل عملائك المحتملين جودةً`),
           why: L('Quality, not volume, is what turns into customers.', 'الجودة، لا العدد، هي ما يتحول إلى عملاء.'),
-          action: L(`Protect and grow ${best.name}; study what these leads saw before enquiring.`, `حافظوا على ${best.name} ونمّوه؛ وادرسوا ما رآه هؤلاء العملاء قبل الاستفسار.`),
+          action: L(`Protect and grow ${best.name}; study what these leads saw before enquiring.`, `حافظ على ${best.name} ونمّه؛ وادرس ما رآه هؤلاء العملاء قبل الاستفسار.`),
           evidence: [{ metric: 'qualified_share', value: best.rate, rows: best.count, text: L(`${best.name}: ${best.qualified} of ${best.count} leads qualified (${pct(best.rate, 0)})`, `${best.name}: ${best.qualified} من ${best.count} عميل محتمل مؤهلون (${pct(best.rate, 0)})`) }, all],
         });
       }
@@ -246,7 +246,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
           id: 'src-lowq',
           title: L(`${low.name} produces volume, not quality`, `${low.name} ينتج عدداً لا جودة`),
           why: L('Counting these leads as success would reward the wrong activity.', 'اعتبار هؤلاء العملاء نجاحاً يكافئ النشاط الخطأ.'),
-          action: L(`Tighten the audience and message on ${low.name}: name who the offer is for, and add one qualifying question to the form.`, `ضيّقوا الجمهور والرسالة في ${low.name}: حدّدوا لمن العرض، وأضيفوا سؤال تأهيل واحداً إلى النموذج.`),
+          action: L(`Tighten the audience and message on ${low.name}: name who the offer is for, and add one qualifying question to the form.`, `ضيّق الجمهور والرسالة في ${low.name}: حدّد لمن العرض، وأضف سؤال تأهيل واحداً إلى النموذج.`),
           evidence: [{ metric: 'qualified_share', value: low.rate, rows: low.count, text: L(`${low.name}: ${low.count} leads, ${pct(low.rate, 0)} qualified vs ${pct(overall, 0)} overall`, `${low.name}: ${low.count} عميل محتمل، ${pct(low.rate, 0)} مؤهلون مقابل ${pct(overall, 0)} إجمالاً`) }],
         });
       }
@@ -262,9 +262,9 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
       const top = segments[0];
       conclude('opp', 'leads', {
         id: 'seg-best',
-        title: L(`"${top.name}" is your strongest customer segment`, `«${top.name}» هي أقوى شريحة عملاء لديكم`),
+        title: L(`"${top.name}" is your strongest customer segment`, `«${top.name}» هي أقوى شريحة عملاء لديك`),
         why: L('A campaign aimed at the segment that already qualifies best is the most evidence-backed way to raise lead quality.', 'حملة موجهة للشريحة الأعلى تأهيلاً هي أكثر طريقة مدعومة بالدليل لرفع جودة العملاء المحتملين.'),
-        action: L(`Run a campaign addressed to ${top.name}, built only from approved product facts.`, `نفّذوا حملة موجهة إلى ${top.name}، مبنية فقط على حقائق المنتج المعتمدة.`),
+        action: L(`Run a campaign addressed to ${top.name}, built only from approved product facts.`, `نفّذ حملة موجهة إلى ${top.name}، مبنية فقط على حقائق المنتج المعتمدة.`),
         evidence: segments.map((x) => ({
           metric: 'qualified_share',
           value: x.rate,
@@ -278,7 +278,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
   /* ---- Social (Meta) ---- */
   const m = data.meta;
   if (!m.length) {
-    insufficient('no-meta', 'meta', L('Social performance is not connected', 'أداء وسائل التواصل غير مربوط'), L('Import a Meta Business Suite export in Integrations & Data.', 'استوردوا تصدير Meta Business Suite من «التكاملات والبيانات».'));
+    insufficient('no-meta', 'meta', L('Social performance is not connected', 'أداء وسائل التواصل غير مربوط'), L('Import a Meta Business Suite export in Integrations & Data.', 'استورد تصدير Meta Business Suite من «التكاملات والبيانات».'));
   } else {
     // Engagement per person reached. Posts tagged "campaign" are not a content theme.
     const engagement = (rs) => sum(rs, 'engagements') / Math.max(1, sum(rs, 'reach'));
@@ -294,9 +294,9 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
       const weakest = themes[themes.length - 1];
       conclude('strong', 'meta', {
         id: 'theme-best',
-        title: L(`"${top.name}" is your strongest content theme`, `«${top.name}» هو أقوى موضوع محتوى لديكم`),
-        why: L('Your own history shows what the audience responds to — a better guide than generic best practice.', 'تاريخكم نفسه يبيّن ما يتفاعل معه الجمهور — وهو دليل أفضل من الممارسات العامة.'),
-        action: L(`Publish more "${top.name}" posts and end each with the primary CTA and a tracked link.`, `انشروا مزيداً من منشورات «${top.name}» واختموا كلاً منها بالدعوة الرئيسية ورابط متتبَّع.`),
+        title: L(`"${top.name}" is your strongest content theme`, `«${top.name}» هو أقوى موضوع محتوى لديك`),
+        why: L('Your own history shows what the audience responds to — a better guide than generic best practice.', 'تاريخك نفسه يبيّن ما يتفاعل معه الجمهور — وهو دليل أفضل من الممارسات العامة.'),
+        action: L(`Publish more "${top.name}" posts and end each with the primary CTA and a tracked link.`, `انشر مزيداً من منشورات «${top.name}» واختم كلاً منها بالدعوة الرئيسية ورابط متتبَّع.`),
         evidence: [
           { metric: 'engagement_rate', value: top.rate, rows: top.posts, text: L(`"${top.name}": engagement ${pct(top.rate, 1)} of reach across ${top.posts} posts; link clicks ${pct(top.clicks, 2)} of reach`, `«${top.name}»: التفاعل ${pct(top.rate, 1)} من الوصول عبر ${top.posts} منشور؛ نقرات الروابط ${pct(top.clicks, 2)} من الوصول`) },
           { metric: 'engagement_rate', value: account, rows: m.length, text: L(`Account average engagement: ${pct(account, 1)}; weakest theme "${weakest.name}": ${pct(weakest.rate, 1)}`, `متوسط تفاعل الحساب: ${pct(account, 1)}؛ أضعف موضوع «${weakest.name}»: ${pct(weakest.rate, 1)}`) },
@@ -323,8 +323,8 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
         conclude('weak', 'meta', {
           id: 'cadence',
           title: L(`Posting stopped for ${gap} days`, `توقف النشر لمدة ${gap} يوماً`),
-          why: L('Irregular publishing makes results hard to read and gives followers no reason to expect you.', 'النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظاركم.'),
-          action: L('Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.', 'اعتمدوا تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.'),
+          why: L('Irregular publishing makes results hard to read and gives followers no reason to expect you.', 'النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظارك.'),
+          action: L('Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.', 'اعتمد تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.'),
           evidence: [
             { metric: 'posting_gap_days', value: gap, text: L(`No posts between ${after} and ${addDays(after, gap)}.`, `لا توجد منشورات بين ${after} و ${addDays(after, gap)}.`) },
             { metric: 'posts', value: m.length, rows: m.length, text: L(`${m.length} posts across ${days.length} posting days in the import.`, `${m.length} منشور في ${days.length} يوم نشر ضمن الاستيراد.`) },
@@ -341,9 +341,9 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
       } else if (engagement(recent) < engagement(earlier) * T.engagementDrop) {
         conclude('weak', 'meta', {
           id: 'eng-drop',
-          title: L('Engagement is below your own baseline', 'التفاعل أقل من مستواكم المعتاد'),
-          why: L('The comparison is with your own earlier posts, not an industry benchmark.', 'المقارنة مع منشوراتكم السابقة وليس مع معيار للصناعة.'),
-          action: L('Check the theme mix of recent posts against the strongest theme before changing anything else.', 'قارنوا موضوعات المنشورات الأخيرة بأقوى موضوع قبل تغيير أي شيء آخر.'),
+          title: L('Engagement is below your own baseline', 'التفاعل أقل من مستواك المعتاد'),
+          why: L('The comparison is with your own earlier posts, not an industry benchmark.', 'المقارنة مع منشوراتك السابقة وليس مع معيار للصناعة.'),
+          action: L('Check the theme mix of recent posts against the strongest theme before changing anything else.', 'قارن موضوعات المنشورات الأخيرة بأقوى موضوع قبل تغيير أي شيء آخر.'),
           evidence: [
             { metric: 'engagement_rate', value: engagement(recent), rows: recent.length, text: L(`Last ${T.recentDays} days: ${pct(engagement(recent), 1)} engagement per reach (${recent.length} posts)`, `آخر ${T.recentDays} يوماً: ${pct(engagement(recent), 1)} تفاعل لكل وصول (${recent.length} منشور)`) },
             { metric: 'engagement_rate', value: engagement(earlier), rows: earlier.length, text: L(`Earlier baseline: ${pct(engagement(earlier), 1)} (${earlier.length} posts)`, `المستوى السابق: ${pct(engagement(earlier), 1)} (${earlier.length} منشور)`) },
@@ -368,7 +368,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
             id: 'lang',
             title: a > b ? L('Arabic posts earn more engagement than English posts', 'المنشورات العربية تحقق تفاعلاً أعلى من الإنجليزية') : L('English posts earn more engagement than Arabic posts', 'المنشورات الإنجليزية تحقق تفاعلاً أعلى من العربية'),
             why: L('Language is a cheap lever: the same idea can be published in the language the audience prefers.', 'اللغة رافعة قليلة التكلفة: الفكرة نفسها يمكن نشرها باللغة التي يفضلها الجمهور.'),
-            action: L('Lead campaigns with the stronger language and test whether it also brings more enquiries.', 'ابدؤوا الحملات باللغة الأقوى واختبروا هل تجلب استفسارات أكثر أيضاً.'),
+            action: L('Lead campaigns with the stronger language and test whether it also brings more enquiries.', 'ابدأ الحملات باللغة الأقوى واختبر هل تجلب استفسارات أكثر أيضاً.'),
             evidence: [
               { metric: 'engagement_rate', value: a, rows: ar.length, text: L(`Arabic: ${pct(a, 1)} of reach (${ar.length} posts)`, `العربية: ${pct(a, 1)} من الوصول (${ar.length} منشور)`) },
               { metric: 'engagement_rate', value: b, rows: en.length, text: L(`English: ${pct(b, 1)} of reach (${en.length} posts)`, `الإنجليزية: ${pct(b, 1)} من الوصول (${en.length} منشور)`) },
@@ -380,7 +380,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
 
     // Without spend, cost per lead cannot be calculated. Not a conclusion about the business: a missing input.
     if (!sum(m, 'spend')) {
-      insufficient('no-spend', 'meta', L('No spend data — cost per lead cannot be calculated', 'لا توجد بيانات إنفاق — تعذّر حساب تكلفة العميل'), L('Include the spend column when exporting paid posts.', 'أضيفوا عمود الإنفاق عند تصدير المنشورات المدفوعة.'));
+      insufficient('no-spend', 'meta', L('No spend data — cost per lead cannot be calculated', 'لا توجد بيانات إنفاق — تعذّر حساب تكلفة العميل'), L('Include the spend column when exporting paid posts.', 'أضف عمود الإنفاق عند تصدير المنشورات المدفوعة.'));
     }
 
     // Facebook and Instagram side by side. One platform only is a normal state, not missing data.
@@ -394,12 +394,12 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
         title: L('Facebook and Instagram do different jobs', 'فيسبوك وإنستجرام يؤديان دورين مختلفين'),
         why: L('Treating both platforms the same wastes the strength of each.', 'معاملة المنصتين بالطريقة نفسها تهدر قوة كل منهما.'),
         action: clicks(fb) > clicks(ig)
-          ? L('Use Facebook for posts that link to the landing page; use Instagram for attention and DMs.', 'استخدموا فيسبوك للمنشورات التي تقود إلى صفحة الهبوط، وإنستجرام لجذب الانتباه والرسائل.')
-          : L('Use Instagram as the main traffic and enquiry driver; keep Facebook for reach among existing followers.', 'اجعلوا إنستجرام المحرك الأساسي للزيارات والاستفسارات، وفيسبوك للوصول إلى المتابعين الحاليين.'),
+          ? L('Use Facebook for posts that link to the landing page; use Instagram for attention and DMs.', 'استخدم فيسبوك للمنشورات التي تقود إلى صفحة الهبوط، وإنستجرام لجذب الانتباه والرسائل.')
+          : L('Use Instagram as the main traffic and enquiry driver; keep Facebook for reach among existing followers.', 'اجعل إنستجرام المحرك الأساسي للزيارات والاستفسارات، وفيسبوك للوصول إلى المتابعين الحاليين.'),
         evidence: [
           { metric: 'engagement_rate', value: engagement(fb), rows: fb.length, text: L(`Facebook: engagement ${pct(engagement(fb), 1)} of reach, link clicks ${pct(clicks(fb), 2)} (${fb.length} posts)`, `فيسبوك: تفاعل ${pct(engagement(fb), 1)} من الوصول، نقرات ${pct(clicks(fb), 2)} (${fb.length} منشور)`) },
           { metric: 'engagement_rate', value: engagement(ig), rows: ig.length, text: L(`Instagram: engagement ${pct(engagement(ig), 1)}, link clicks ${pct(clicks(ig), 2)} (${ig.length} posts)`, `إنستجرام: تفاعل ${pct(engagement(ig), 1)}، نقرات ${pct(clicks(ig), 2)} (${ig.length} منشور)`) },
-          { text: L('Metric definitions differ between platforms; compare direction, not exact values.', 'تعريفات المقاييس تختلف بين المنصتين؛ قارنوا الاتجاه لا القيم الدقيقة.') },
+          { text: L('Metric definitions differ between platforms; compare direction, not exact values.', 'تعريفات المقاييس تختلف بين المنصتين؛ قارن الاتجاه لا القيم الدقيقة.') },
         ],
       });
     }
@@ -417,12 +417,12 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
       synthetic: used.some((f) => f.synthetic),
       title: L('Tone of voice and colours are documented and approved', 'نبرة الصوت والألوان موثقة ومعتمدة'),
       why: L('Documented guidelines let every asset be checked automatically instead of by eye.', 'الإرشادات الموثقة تسمح بفحص كل مادة تلقائياً بدلاً من الفحص بالعين.'),
-      action: L('Keep the approved guidelines up to date as the brand evolves.', 'حدّثوا الإرشادات المعتمدة كلما تطورت العلامة.'),
+      action: L('Keep the approved guidelines up to date as the brand evolves.', 'حدّث الإرشادات المعتمدة كلما تطورت العلامة.'),
       evidence: used.map((f) => ({ factId: f.id, text: f.text })),
     });
   } else {
     const missing = [tone.length ? null : L('tone of voice', 'نبرة الصوت'), brand.length ? null : L('brand identity (colours)', 'هوية العلامة (الألوان)')].filter(Boolean).join(L(' and ', ' و'));
-    insufficient('brand-doc', null, L('Brand guidelines are not approved yet', 'إرشادات العلامة غير معتمدة بعد'), L(`Approve a fact for ${missing} in the Knowledge Hub.`, `اعتمدوا حقيقة لـ${missing} في مركز المعرفة.`));
+    insufficient('brand-doc', null, L('Brand guidelines are not approved yet', 'إرشادات العلامة غير معتمدة بعد'), L(`Approve a fact for ${missing} in the Knowledge Hub.`, `اعتمد حقيقة لـ${missing} في مركز المعرفة.`));
   }
 
   return { synthetic: items.some((i) => i.synthetic), items };

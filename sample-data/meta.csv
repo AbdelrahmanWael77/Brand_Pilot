@@ -1,0 +1,85 @@
+date,platform,post_id,format,theme,language,reach,impressions,engagements,link_clicks,spend,campaign
+2026-08-17,facebook,fa-1,carousel,how-to tips,ar,3061,4590,76,32,0,
+2026-08-17,instagram,in-2,text,offer,ar,3299,5048,205,18,1410,back-to-work
+2026-08-19,instagram,in-4,image,how-to tips,ar,3412,4874,244,18,1154,back-to-work
+2026-08-20,facebook,fa-3,text,product update,ar,1561,2313,54,14,860,agency-trial
+2026-08-21,facebook,fa-5,video,offer,en,2100,2914,44,17,0,
+2026-08-21,instagram,in-6,text,customer story,en,3426,5250,149,7,0,
+2026-08-23,instagram,in-8,text,product update,ar,3930,5469,178,10,1138,back-to-work
+2026-08-24,facebook,fa-7,image,offer,ar,2365,3592,66,23,0,
+2026-08-25,instagram,in-10,image,product update,ar,3755,4434,298,14,1291,back-to-work
+2026-08-26,facebook,fa-9,reel,customer story,en,4170,5465,162,69,483,agency-trial
+2026-08-27,instagram,in-12,carousel,product update,ar,3370,4219,169,7,1012,back-to-work
+2026-08-28,facebook,fa-11,text,behind the scenes,en,1537,1889,45,14,0,
+2026-08-30,facebook,fa-13,video,product update,ar,2407,3655,60,25,0,
+2026-08-30,instagram,in-14,text,product update,en,4575,7055,143,14,1149,back-to-work
+2026-08-31,facebook,fa-15,text,customer story,en,3259,5015,126,21,0,
+2026-08-31,instagram,in-16,image,product update,en,2710,3665,169,13,0,
+2026-09-03,facebook,fa-17,image,offer,en,2663,3724,120,40,1242,back-to-work
+2026-09-03,instagram,in-18,image,product update,ar,3648,4710,155,18,0,
+2026-09-04,facebook,fa-19,reel,product update,ar,2270,2843,69,30,0,
+2026-09-04,instagram,in-20,carousel,product update,en,4017,5069,316,19,1399,back-to-work
+2026-09-06,facebook,fa-21,text,product update,ar,2511,2991,102,33,0,
+2026-09-07,instagram,in-22,carousel,product update,ar,5376,6944,334,29,0,
+2026-09-09,facebook,fa-23,video,product update,en,2707,4067,104,25,494,agency-trial
+2026-09-09,instagram,in-24,reel,product update,ar,7007,9142,213,26,0,
+2026-09-11,facebook,fa-25,text,behind the scenes,ar,2410,2919,52,29,1280,back-to-work
+2026-09-11,instagram,in-26,text,behind the scenes,en,2157,2559,89,11,1116,agency-trial
+2026-09-12,facebook,fa-27,text,behind the scenes,en,2352,2929,105,36,900,agency-trial
+2026-09-13,instagram,in-28,reel,customer story,ar,5714,7098,292,15,409,agency-trial
+2026-09-15,facebook,fa-29,text,offer,ar,1999,2658,62,15,0,
+2026-09-15,instagram,in-30,reel,customer story,ar,9983,14926,447,29,520,agency-trial
+2026-09-17,facebook,fa-31,carousel,customer story,ar,5537,8347,233,64,0,
+2026-09-17,instagram,in-32,image,behind the scenes,en,2074,2436,139,6,0,
+2026-09-19,facebook,fa-33,text,how-to tips,en,1677,2226,67,14,0,
+2026-09-19,instagram,in-34,reel,behind the scenes,ar,4299,5604,142,17,1354,back-to-work
+2026-09-21,facebook,fa-35,reel,customer story,ar,7706,9498,358,107,1223,back-to-work
+2026-09-21,instagram,in-36,reel,how-to tips,ar,3659,5316,239,20,452,back-to-work
+2026-09-22,facebook,fa-37,image,customer story,en,3112,4021,81,27,0,
+2026-09-22,instagram,in-38,reel,product update,ar,7722,9369,383,32,923,agency-trial
+2026-09-25,facebook,fa-39,carousel,product update,ar,2252,3333,108,25,637,agency-trial
+2026-09-25,instagram,in-40,carousel,offer,ar,4628,5555,191,19,0,
+2026-09-26,instagram,in-42,text,offer,ar,3847,5561,172,17,0,
+2026-09-27,facebook,fa-41,video,behind the scenes,ar,3180,4113,110,44,0,
+2026-09-28,facebook,fa-43,image,behind the scenes,ar,2155,3107,81,31,0,
+2026-09-28,instagram,in-44,text,customer story,en,4130,5247,329,13,682,agency-trial
+2026-09-30,facebook,fa-45,carousel,offer,ar,3605,5415,97,50,0,
+2026-09-30,instagram,in-46,reel,product update,ar,8120,9957,403,44,0,
+2026-10-02,facebook,fa-47,text,customer story,en,4469,5369,126,59,0,
+2026-10-02,instagram,in-48,text,behind the scenes,en,3740,4948,189,11,0,
+2026-10-05,facebook,fa-49,image,how-to tips,ar,2315,3566,81,23,0,
+2026-10-05,instagram,in-50,video,offer,en,4124,5877,176,18,0,
+2026-10-06,facebook,fa-51,reel,customer story,ar,6107,8196,217,103,1331,agency-trial
+2026-10-07,instagram,in-52,text,behind the scenes,en,3596,4627,168,18,843,agency-trial
+2026-10-08,facebook,fa-53,video,customer story,ar,2661,3432,62,43,0,
+2026-10-08,instagram,in-54,reel,offer,ar,5207,6290,290,17,568,back-to-work
+2026-10-10,facebook,fa-55,video,offer,en,1532,2008,59,26,1202,back-to-work
+2026-10-10,instagram,in-56,reel,customer story,en,8942,10737,676,18,1132,back-to-work
+2026-10-12,facebook,fa-57,text,customer story,en,4051,5405,102,68,0,
+2026-10-13,instagram,in-58,reel,how-to tips,en,8478,10827,308,28,1344,back-to-work
+2026-10-14,facebook,fa-59,reel,behind the scenes,ar,5357,6709,252,59,1304,back-to-work
+2026-10-14,instagram,in-60,image,behind the scenes,en,4036,5378,140,18,935,agency-trial
+2026-10-16,instagram,in-62,carousel,behind the scenes,en,3369,4590,129,20,0,
+2026-10-17,facebook,fa-61,reel,customer story,en,7683,10377,330,76,888,agency-trial
+2026-10-19,facebook,fa-63,reel,offer,ar,2595,3750,73,20,0,
+2026-10-19,instagram,in-64,reel,product update,ar,5665,7291,281,28,0,
+2026-10-20,facebook,fa-65,reel,product update,ar,5366,7752,246,73,601,back-to-work
+2026-10-20,instagram,in-66,carousel,how-to tips,en,3573,4832,118,13,0,
+2026-10-23,facebook,fa-67,carousel,behind the scenes,en,3972,6108,143,62,0,
+2026-10-23,instagram,in-68,video,customer story,ar,4826,6274,222,20,0,
+2026-10-24,instagram,in-70,text,behind the scenes,ar,4686,6827,305,15,1422,back-to-work
+2026-10-25,facebook,fa-69,video,customer story,ar,2957,3655,137,27,972,back-to-work
+2026-10-26,instagram,in-72,reel,behind the scenes,en,5348,7290,180,15,0,
+2026-10-27,facebook,fa-71,video,product update,ar,3040,4201,71,48,0,
+2026-10-28,instagram,in-74,video,product update,ar,3139,4734,139,11,469,agency-trial
+2026-10-29,facebook,fa-73,text,product update,ar,1527,2298,64,10,1407,agency-trial
+2026-10-30,instagram,in-76,reel,behind the scenes,ar,5505,6647,371,13,445,back-to-work
+2026-10-31,facebook,fa-75,video,how-to tips,ar,2871,4158,76,38,0,
+2026-11-02,facebook,fa-77,text,how-to tips,en,1669,2088,68,27,1243,back-to-work
+2026-11-02,instagram,in-78,carousel,offer,ar,3914,5129,139,12,339,agency-trial
+2026-11-03,facebook,fa-79,text,offer,ar,3161,4117,95,49,0,
+2026-11-03,instagram,in-80,image,behind the scenes,ar,2231,2692,123,10,1002,back-to-work
+2026-11-05,facebook,fa-81,text,behind the scenes,en,1485,1886,62,10,433,back-to-work
+2026-11-05,instagram,in-82,text,customer story,ar,4619,5990,171,27,0,
+2026-11-07,facebook,fa-83,video,how-to tips,ar,3195,3833,86,53,390,back-to-work
+2026-11-08,instagram,in-84,text,how-to tips,en,4528,5679,247,21,0,

@@ -1,0 +1,1689 @@
+[
+  {
+    "date": "2026-08-17",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-17",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-17",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-08-17",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-08-17",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-18",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-18",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-19",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "customer"
+  },
+  {
+    "date": "2026-08-20",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "customer"
+  },
+  {
+    "date": "2026-08-20",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-20",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "customer"
+  },
+  {
+    "date": "2026-08-20",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-08-20",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "new"
+  },
+  {
+    "date": "2026-08-21",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-21",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-21",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-21",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-08-22",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-22",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Education",
+    "status": "customer"
+  },
+  {
+    "date": "2026-08-23",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-24",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-24",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Retail",
+    "status": "new"
+  },
+  {
+    "date": "2026-08-24",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-08-24",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-25",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-08-26",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-08-27",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-08-27",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-08-27",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-27",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-08-27",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-28",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-08-29",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-08-29",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-29",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-08-29",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-08-30",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-30",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-30",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-08-31",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-08-31",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-08-31",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-31",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-08-31",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-01",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-01",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-01",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-01",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-01",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-02",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-02",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-02",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-02",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-03",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-03",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-04",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-04",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-05",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-06",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-06",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-07",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-07",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-07",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-07",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-08",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-08",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-08",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-09",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-09",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-09",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-09",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-10",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Retail",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-10",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-11",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-11",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-12",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-13",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-13",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-13",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-13",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-14",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-14",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-15",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Education",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-15",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-16",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-16",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-17",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-17",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-17",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-17",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-17",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-18",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-19",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-19",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-19",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-19",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-19",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-20",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-20",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-21",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-21",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-22",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-22",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-22",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-23",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-23",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-23",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-24",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-24",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-25",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-25",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-26",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-26",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-26",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-26",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-26",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-27",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-09-27",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-27",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-27",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Retail",
+    "status": "new"
+  },
+  {
+    "date": "2026-09-28",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-28",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Education",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-28",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-28",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-29",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-09-29",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-09-29",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-29",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-09-30",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-01",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "customer"
+  },
+  {
+    "date": "2026-10-02",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-02",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-02",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-02",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-03",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Agencies",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-04",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-04",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-04",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-04",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-05",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-05",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-05",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-10-05",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-06",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-07",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-07",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-08",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-09",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-09",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-09",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-09",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "customer"
+  },
+  {
+    "date": "2026-10-09",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-10",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-11",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-11",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-11",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-12",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "customer"
+  },
+  {
+    "date": "2026-10-13",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-13",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-13",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-13",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-13",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-14",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-14",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-14",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-15",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-15",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-15",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-15",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-16",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Agencies",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-17",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-18",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-18",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-18",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-18",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-18",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-19",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-19",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-19",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-19",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-20",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-20",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-21",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-21",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-21",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-21",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-22",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-22",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-22",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-22",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-22",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "customer"
+  },
+  {
+    "date": "2026-10-23",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-23",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-24",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-24",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-24",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-25",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-10-25",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-25",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-26",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-26",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-26",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-26",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-27",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-28",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-28",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-28",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-28",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Education",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-29",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-10-29",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Retail",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-30",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-10-31",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-31",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Education",
+    "status": "new"
+  },
+  {
+    "date": "2026-10-31",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-10-31",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-11-01",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-11-01",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-11-02",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Software houses",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-11-02",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-11-02",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Education",
+    "status": "lost"
+  },
+  {
+    "date": "2026-11-02",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Education",
+    "status": "customer"
+  },
+  {
+    "date": "2026-11-02",
+    "source": "WhatsApp",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "customer"
+  },
+  {
+    "date": "2026-11-03",
+    "source": "Instagram",
+    "campaign": "agency-trial",
+    "segment": "Retail",
+    "status": "lost"
+  },
+  {
+    "date": "2026-11-03",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-11-03",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-11-03",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-11-04",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "new"
+  },
+  {
+    "date": "2026-11-04",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-11-04",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-11-04",
+    "source": "Facebook",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "new"
+  },
+  {
+    "date": "2026-11-05",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-11-05",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "customer"
+  },
+  {
+    "date": "2026-11-06",
+    "source": "Facebook",
+    "campaign": "agency-trial",
+    "segment": "Agencies",
+    "status": "customer"
+  },
+  {
+    "date": "2026-11-06",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-11-06",
+    "source": "LinkedIn",
+    "campaign": "",
+    "segment": "Software houses",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-11-06",
+    "source": "Referral",
+    "campaign": "",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-11-07",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Agencies",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-11-07",
+    "source": "Instagram",
+    "campaign": "back-to-work",
+    "segment": "Agencies",
+    "status": "lost"
+  },
+  {
+    "date": "2026-11-07",
+    "source": "Facebook",
+    "campaign": "back-to-work",
+    "segment": "Education",
+    "status": "contacted"
+  },
+  {
+    "date": "2026-11-07",
+    "source": "Google",
+    "campaign": "",
+    "segment": "Agencies",
+    "status": "qualified"
+  },
+  {
+    "date": "2026-11-08",
+    "source": "Instagram",
+    "campaign": "",
+    "segment": "Retail",
+    "status": "lost"
+  }
+]
