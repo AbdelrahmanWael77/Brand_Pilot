@@ -1,0 +1,2 @@
+# Vendored third-party files stay byte-exact (their sha256 is recorded in IMPLEMENTATION_STATUS.md).
+public/vendor/* -text
