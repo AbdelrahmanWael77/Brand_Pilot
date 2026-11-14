@@ -35,6 +35,29 @@ Do:
 Acceptance: browser run in EN and AR — toggle, reload, generate with (a) Facebook + Instagram, (b) LinkedIn only, (c) Email unticked, (d) nothing ticked; `npm test` passes (add a server test only if you change server code).
 ```
 
+## 9.17 — Campaign Studio: "Choose a recommendation" must show recommendations to choose from (bug — do it right after 9.1)
+
+```
+You are continuing the BrandPilot implementation. Read AGENTS.md and IMPLEMENTATION_STATUS.md, then do exactly task 9.17. General rules: top of TASK_PROMPTS.md.
+
+Owner report (2026-11-14): in Campaign Studio, clicking "Choose a recommendation" shows no recommendations to choose from.
+
+What the code does today (public/index.html, read from the code, NOT reproduced in a browser):
+- With no campaign, the Studio view (search `No campaigns yet`) draws an empty state through `empty(title, text, buttonLabel, 'audit')`: the "Choose a recommendation" button is only a link to the Marketing Audit screen. There is no chooser.
+- On the Audit screen (`V.audit`) every finding is listed under the tab last used (`S.ui.at`: all / strong / weak / opp / risk). A finding can start a campaign only when its rule sets `make === 'campaign'` — then `recCard` adds the button "Create campaign from this" (`data-a="recCamp"` → `recCamp(id)` → `newCampaign(c, rec)`). Those rules are few and need data: `ch-best`, `ch-leak` (GA4 channels), `theme-best` (posts with confirmed themes), `seg-best` (leads with segments), and the portfolio rules `pf-…` (project documents) — grep `make:'campaign'` for the current list.
+- So the user lands on a long audit page where nothing is marked as "choose me": with thin data no finding has the button at all; with enough data the buttons are scattered among other cards, possibly hidden by a remembered tab, and the page does not say why they came here.
+
+Do:
+1. Reproduce first in a browser with (a) a new company without data, (b) the sample data from sample-data/ plus approved facts and confirmed themes. Write down what the user actually sees after the click in each case.
+2. Build a real chooser, in the Studio itself (a modal or an inline list — reuse `MODAL` and `recCard` pieces; no new screen): the list of current findings with `make === 'campaign'`, each with its title, the one-line reason, its evidence count, the server badge (`srvBadge`: verified on the server / browser only) and a "Create campaign from this" button calling the existing `recCamp`. Sort verified ones first.
+3. When there is none, say why and what to do, specifically: which inputs are missing for each campaign-making rule (no GA4 data → channels; no leads with segments; posts without confirmed themes → link to the Tag posts step; no project documents), each with a button to the right screen, plus "Start a blank campaign" (`campNew`). Take the missing inputs from the audit's own `insufficient` items (`srvAudit(c)` / `SRV_AR` wording) instead of writing a second set of rules.
+4. Offer the chooser also when campaigns already exist (next to "+ Blank" in the Studio header), so a second campaign can start from a recommendation without hunting through the Audit screen.
+5. Audit screen: unchanged, except that arriving from the Studio must not leave the user on a filtered tab — if you keep any link to it, set the tab to the one that holds the campaign findings.
+6. Update `journey(c)` / `campPipe` if their wording points to "choose a recommendation".
+
+Acceptance: browser run, EN and AR, desktop and 375 px — (a) empty company: the chooser explains what is missing with working buttons and offers a blank campaign; (b) company with data: the chooser lists the campaign recommendations, one click creates the campaign with `camp.rec`, `recTitle` and the evidence in "Why this campaign", and Brand QA's server `recommendation` check passes for a server-verified rule; (c) a second campaign from the header button. `npm test` passes; page script passes `node --check`.
+```
+
 ## 9.2 — Meta and LinkedIn data removable separately
 
 ```
