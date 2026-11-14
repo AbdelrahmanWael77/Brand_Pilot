@@ -91,6 +91,7 @@ export function buildPrompt(context, question, lang) {
     'Every claim must be backed by ids from the context, listed in "support": a fact by its "id", a metric by its KPI name, an audit item by its "id". Never cite an id that is not in the context.',
     'A KPI whose value is null was not measured: say so, never treat it as zero. An audit item with basis "insufficient" is not a conclusion: it says which input is missing. When an item is marked "synthetic", say that the advice rests on demo data.',
     'If the context cannot answer the question, set "insufficient" to true and say in "answer" what is missing; do not guess.',
+    ...(lang === 'ar' ? ['Write the Arabic answer in plain Modern Standard Arabic and address the reader in the singular (أنت), never the plural (أنتم). Quote approved wording such as offers and calls to action as it is written in the context.'] : []),
     'Reply with one JSON object and nothing else, no code fence: {"answer": string, "support": [{"type": "fact" | "metric" | "audit", "id": string}], "insufficient": boolean}. "answer" is plain text for the owner: short, concrete, no ids in it.',
   ].join('\n');
   // "<" is escaped so that company text cannot close the tag it is quoted in.
