@@ -174,7 +174,9 @@ export async function ask(db, ai, companyId, { question, lang = 'en' }) {
   if (isEmptyContext(context)) {
     // Nothing to ground an answer in: say what is missing and do not call the model.
     const needs = [...new Set(context.audit.items.map((i) => i.needs).filter(Boolean))];
-    return { answer: null, support: [], insufficient: true, unsupported: false, synthetic: context.synthetic, model: null, needs };
+    // needItems carries the audit id of each need so the interface can show its own wording (for example Arabic).
+    const needItems = context.audit.items.filter((i) => i.needs).map((i) => ({ id: i.id, text: i.needs }));
+    return { answer: null, support: [], insufficient: true, unsupported: false, synthetic: context.synthetic, model: null, needs, needItems };
   }
   const r = await ai.complete(buildPrompt(context, question, lang));
   const text = r.text.trim();

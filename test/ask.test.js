@@ -184,6 +184,7 @@ test('empty company: insufficient, with what is needed, and the model is not cal
   assert.equal(b.model, null);
   assert.ok(b.needs.length > 0);
   for (const x of b.needs) assert.equal(typeof x, 'string');
+  assert.ok(b.needItems.length > 0 && b.needItems.every((x) => typeof x.id === 'string' && b.needs.includes(x.text)));
 });
 
 test('unknown cited ids are dropped; with none left the answer is labeled unsupported', async () => {
