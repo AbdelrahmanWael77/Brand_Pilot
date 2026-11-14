@@ -187,3 +187,14 @@ test('deleting a company removes its data rows and fingerprint', async () => {
   assert.equal(count(id), 0);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM data_mirror WHERE company_id = ?').get(id).n, 0);
 });
+
+test('meta rows keep an optional caption and never the tagging suggestions (8.5)', () => {
+  const r = cleanRow('meta', { date: '2026-10-01', platform: 'linkedin', reach: 10, engagements: 1, text: 'x'.repeat(600), theme: 'tips', theme_suggested: 'stories', theme_why: 'w', theme_src: 'rules', theme_ok: 1 });
+  assert.equal(r.text.length, 500);
+  assert.equal(r.theme, 'tips');
+  for (const k of ['theme_suggested', 'theme_why', 'theme_src', 'theme_ok']) assert.equal(k in r, false, k);
+  // a post the user has not confirmed has no theme on the server, whatever was suggested
+  const u = cleanRow('meta', { date: '2026-10-02', platform: 'linkedin', reach: 10, engagements: 1, text: 'hello', theme_suggested: 'stories' });
+  assert.equal('theme' in u, false);
+  assert.equal(u.text, 'hello');
+});
