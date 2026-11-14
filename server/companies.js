@@ -10,6 +10,7 @@ import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
 import { buildContext, ask, ASK } from './director.js';
 import { suggestThemes, cleanPosts } from './themes.js';
+import { extractFacts, cleanRequest } from './extract.js';
 import { AiError } from './ai.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
@@ -23,13 +24,14 @@ const MAX_NAME = 120;
  */
 export function createCompanies(
   db,
-  { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 }, reportLimit = { max: 30, windowMs: 10 * 60_000 } } = {},
+  { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 }, reportLimit = { max: 30, windowMs: 10 * 60_000 }, extractLimit = { max: 10, windowMs: 10 * 60_000 } } = {},
 ) {
   const knowledge = createKnowledge(db);
   const data = createData(db);
   const campaigns = createCampaigns(db);
   const fetchLimiter = createLimiter(fetchLimit); // outbound requests per user
   const askLimiter = createLimiter(askLimit); // AI questions per user
+  const extractLimiter = createLimiter(extractLimit); // AI source readings per user
   const reports = createReports(db);
   const reportLimiter = createLimiter(reportLimit); // saved reports per user
   /** One report in the asked format: JSON, a Markdown download, or a printable page. */
@@ -271,6 +273,24 @@ export function createCompanies(
     } catch (e) {
       if (!(e instanceof AiError)) throw e;
       console.error(`suggest-themes: ${e.code}`, e.cause?.message ?? '');
+      res.status(e.status).json({ error: e.code });
+    }
+  });
+
+  // AI fact extraction from one source (extract.js). Nothing is stored: the browser adds the kept facts as
+  // pending findings and the user approves or rejects them. Every kept fact carries a quote found in the text.
+  router.post('/:id/sources/extract', requireCompany, async (req, res) => {
+    const request = cleanRequest(req.body);
+    if (request.error) return res.status(400).json({ error: request.error });
+    const wait = extractLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    extractLimiter.hit(req.user.id);
+    if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
+    try {
+      res.json(await extractFacts(ai, request));
+    } catch (e) {
+      if (!(e instanceof AiError)) throw e;
+      console.error(`sources/extract: ${e.code}`, e.cause?.message ?? '');
       res.status(e.status).json({ error: e.code });
     }
   });

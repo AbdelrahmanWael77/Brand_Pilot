@@ -24,7 +24,7 @@ export function parseTrustProxy(v) {
  * production uses the defaults (`ai` is built from ANTHROPIC_API_KEY / AI_MODEL). `meta` and `google` take
  * { config, fetch, syncLimit, now } for createMeta / createGoogle (tests pass a stubbed network).
  */
-export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), askLimit, reportLimit, meta: metaOptions, google: googleOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
+export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
   const app = express();
   app.disable('x-powered-by');
   // Behind a reverse proxy the client's address is in X-Forwarded-For; trusted only when the owner says so
@@ -46,7 +46,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
 
   const auth = createAuth(db, { limits: authLimits });
   app.locals.db = db;
-  const companies = createCompanies(db, { fetchUrl, fetchLimit, ai, askLimit, reportLimit });
+  const companies = createCompanies(db, { fetchUrl, fetchLimit, ai, askLimit, reportLimit, extractLimit });
   app.locals.requireAuth = auth.requireAuth;
   app.locals.requireCompany = companies.requireCompany;
   app.locals.ai = ai;
