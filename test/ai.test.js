@@ -2,7 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
 import { openDb } from '../server/db.js';
-import { createAi, AiError, DEFAULT_MODEL } from '../server/ai.js';
+import { createAi, AiError, DEFAULT_MODEL, DEFAULT_OPENAI_MODEL, OPENAI_URL } from '../server/ai.js';
 
 const KEY = 'test-key-never-real';
 const json = (status, body, headers = {}) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } });
@@ -153,4 +153,133 @@ test('GET /api/ai/status: 401 signed out; { configured } only, never the key or 
   assert.deepEqual(JSON.parse(b), { configured: true });
   assert.doesNotMatch(b, new RegExp(KEY));
   assert.equal(n.calls.length, 0); // asking for the status never calls the provider
+});
+
+// ---------------------------------------------------------------------------------------------
+// OpenAI provider (owner's choice 2026-11-14): same contract, Chat Completions over fetch.
+// ---------------------------------------------------------------------------------------------
+const OKEY = 'openai-test-key-never-real';
+const completion = (over = {}, msg = {}) => ({
+  id: 'chatcmpl_1', object: 'chat.completion', model: 'gpt-6-astra-2026-09-01',
+  choices: [{ index: 0, message: { role: 'assistant', content: 'Hello there', refusal: null, ...msg }, finish_reason: 'stop', ...over }],
+  usage: { prompt_tokens: 5, completion_tokens: 2 },
+});
+const openai = (reply, over = {}) => {
+  const n = net(reply);
+  return { n, ai: createAi({ apiKey: '', openaiKey: OKEY, fetch: n.fetch, ...over }) };
+};
+const oFails = async (p, code) => {
+  await assert.rejects(p, (e) => {
+    assert.ok(e instanceof AiError, String(e));
+    assert.equal(e.code, code);
+    assert.doesNotMatch(e.message, new RegExp(OKEY));
+    return true;
+  });
+};
+
+test('provider choice: the key that is set decides; Anthropic first when both are; an explicit provider wins', () => {
+  assert.equal(createAi({ apiKey: '', openaiKey: '' }).provider, null);
+  assert.equal(createAi({ apiKey: '', openaiKey: '' }).configured, false);
+  const o = createAi({ apiKey: '', openaiKey: OKEY });
+  assert.deepEqual([o.configured, o.provider, o.model], [true, 'openai', DEFAULT_OPENAI_MODEL]);
+  const a = createAi({ apiKey: KEY, openaiKey: OKEY });
+  assert.deepEqual([a.provider, a.model], ['anthropic', DEFAULT_MODEL]);
+  assert.equal(createAi({ apiKey: KEY, openaiKey: OKEY, provider: 'openai' }).provider, 'openai');
+  // forcing a provider whose key is missing is "not configured", never a silent switch to the other key
+  assert.equal(createAi({ apiKey: KEY, openaiKey: '', provider: 'openai' }).configured, false);
+  assert.equal(createAi({ apiKey: '', openaiKey: OKEY, provider: 'anthropic' }).configured, false);
+  assert.equal(createAi({ apiKey: '', openaiKey: OKEY, model: ' my-model ' }).model, 'my-model');
+  assert.equal(createAi({ apiKey: '', openaiKey: OKEY, provider: 'nonsense' }).provider, 'openai');
+});
+
+test('OpenAI request shape: Chat Completions, key only in the Authorization header, system prompt first', async () => {
+  const n = net(() => json(200, completion()));
+  const ai = createAi({ apiKey: '', openaiKey: ` ${OKEY} `, fetch: n.fetch });
+  const r = await ai.complete({ ...ask, maxTokens: 900, effort: 'high' });
+  assert.deepEqual(r, { text: 'Hello there', model: 'gpt-6-astra-2026-09-01', stopReason: 'stop', truncated: false });
+  assert.equal(n.calls.length, 1);
+  const c = n.calls[0];
+  assert.equal(c.url, OPENAI_URL);
+  assert.equal(c.method, 'POST');
+  assert.equal(c.headers.get('authorization'), `Bearer ${OKEY}`);
+  assert.equal(c.headers.get('x-api-key'), null);
+  assert.deepEqual(c.body, {
+    model: DEFAULT_OPENAI_MODEL,
+    messages: [{ role: 'system', content: ask.system }, { role: 'user', content: 'Hi' }],
+    max_completion_tokens: 900,
+    reasoning_effort: 'high',
+  });
+  assert.doesNotMatch(JSON.stringify(c.body), new RegExp(OKEY));
+});
+
+test('OpenAI defaults: 16000 tokens, effort only when both providers know the value, no system message when none is given', async () => {
+  const { n, ai } = openai(() => json(200, completion()), { model: 'gpt-x' });
+  await ai.complete({ messages: ask.messages });
+  assert.deepEqual(n.calls[0].body, { model: 'gpt-x', messages: [{ role: 'user', content: 'Hi' }], max_completion_tokens: 16000 });
+  await ai.complete({ ...ask, effort: 'max' });
+  assert.equal('reasoning_effort' in n.calls[1].body, false);
+});
+
+test('OpenAI: a length stop is truncated; a refusal or the content filter is an error; a reply without a choice is ai_failed', async () => {
+  assert.deepEqual(await openai(() => json(200, completion({ finish_reason: 'length' }))).ai.complete(ask), { text: 'Hello there', model: 'gpt-6-astra-2026-09-01', stopReason: 'length', truncated: true });
+  await oFails(openai(() => json(200, completion({}, { content: null, refusal: 'I cannot help with that.' }))).ai.complete(ask), 'ai_refused');
+  await oFails(openai(() => json(200, completion({ finish_reason: 'content_filter' }))).ai.complete(ask), 'ai_refused');
+  await oFails(openai(() => json(200, { choices: [] })).ai.complete(ask), 'ai_failed');
+  await oFails(openai(() => new Response('not json', { status: 200 })).ai.complete(ask), 'ai_failed');
+  assert.equal((await openai(() => json(200, completion({}, { content: null }))).ai.complete(ask)).text, '');
+});
+
+test('OpenAI errors map to codes; the provider text stays on cause; an account without credit is not "rate limited"', async () => {
+  const err = (status, code) => json(status, { error: { message: 'SECRET provider text', type: 'x', code } });
+  const cases = [[401, 'invalid_api_key', 'ai_auth_failed'], [403, 'x', 'ai_auth_failed'], [429, 'rate_limit_exceeded', 'ai_rate_limited'], [429, 'insufficient_quota', 'ai_failed'], [400, 'model_not_found', 'ai_failed'], [404, 'model_not_found', 'ai_failed']];
+  for (const [status, code, want] of cases) {
+    const { n, ai } = openai(() => err(status, code));
+    await assert.rejects(ai.complete(ask), (e) => {
+      assert.equal(e.code, want, `${status} ${code}`);
+      assert.doesNotMatch(e.message, /SECRET/);
+      assert.match(e.cause.message, /SECRET provider text/); // for the server log only
+      assert.doesNotMatch(e.cause.message, new RegExp(OKEY));
+      return true;
+    });
+    assert.equal(n.calls.length, 1, `no retry on ${status}`);
+  }
+});
+
+test('OpenAI: one retry on a 5xx or a connection failure, then success; no retry on a timeout', async () => {
+  const a = openai((i) => (i === 1 ? json(503, { error: { message: 'overloaded' } }) : json(200, completion())));
+  assert.equal((await a.ai.complete(ask)).text, 'Hello there');
+  assert.equal(a.n.calls.length, 2);
+  const b = openai((i) => { if (i === 1) throw new TypeError('fetch failed'); return json(200, completion()); });
+  assert.equal((await b.ai.complete(ask)).text, 'Hello there');
+  const c = openai(() => json(500, { error: { message: 'x' } }), { maxRetries: 0 });
+  await oFails(c.ai.complete(ask), 'ai_failed');
+  assert.equal(c.n.calls.length, 1);
+  const d = openai((_, init) => new Promise((_res, rej) => init.signal.addEventListener('abort', () => rej(init.signal.reason))), { timeoutMs: 30 });
+  await oFails(d.ai.complete(ask), 'ai_timeout');
+  assert.equal(d.n.calls.length, 1);
+});
+
+test('OpenAI through the app: status says configured, and the Director route answers from its reply', async () => {
+  const n = net(() => json(200, completion({}, { content: JSON.stringify({ answer: 'Use approved facts.', support: [], insufficient: false }) })));
+  const at = await start(createAi({ apiKey: '', openaiKey: OKEY, fetch: n.fetch }));
+  const post = (path, cookie, body, method = 'POST') => fetch(at + path, { method, headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: JSON.stringify(body) });
+  const reg = await post('/api/auth/register', null, { email: 'gpt@example.com', password: 'correct horse' });
+  const cookie = reg.headers.getSetCookie()[0].split(';')[0];
+  assert.deepEqual(await (await fetch(`${at}/api/ai/status`, { headers: { cookie } })).json(), { configured: true });
+  const co = (await (await post('/api/companies', cookie, { name: 'GPT Co' })).json()).company.id;
+  const state = {
+    sources: [{ id: 's1', title: 'a.txt', kind: 'document', text: 'x', date: '2026-11-14', demo: false }],
+    findings: [{ id: 'f1', cat: 'product', text: 'Fresh bread daily', type: 'fact', status: 'approved', src: 's1', ev: 'Quote', needs: false, date: '2026-11-14' }],
+    data: {}, imports: [],
+  };
+  assert.equal((await post(`/api/companies/${co}/state`, cookie, { state }, 'PUT')).status, 200);
+  const r = await post(`/api/companies/${co}/director/ask`, cookie, { question: 'What should we post?' });
+  assert.equal(r.status, 200);
+  const b = await r.json();
+  assert.equal(b.answer, 'Use approved facts.');
+  assert.equal(b.model, 'gpt-6-astra-2026-09-01');
+  assert.equal(n.calls.length, 1);
+  assert.equal(n.calls[0].url, OPENAI_URL);
+  assert.match(n.calls[0].body.messages[0].content, /AI Marketing Director/);
+  assert.match(n.calls[0].body.messages[1].content, /Fresh bread daily/);
 });
