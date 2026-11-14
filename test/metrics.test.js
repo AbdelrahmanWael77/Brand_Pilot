@@ -194,3 +194,20 @@ test('route: bad range is 400; other users get 404', async () => {
   assert.equal((await get('?range=all', bob)).status, 404);
   assert.equal((await get('?range=all', null)).status, 401);
 });
+
+test('optional Meta measures: an absent impressions / link_clicks column is not_measured, never 0; a real 0 stays 0', () => {
+  const noCols = (date) => ({ date, platform: 'facebook', reach: 100, engagements: 5, synthetic: false });
+  let m = computeMetrics({ ...empty(), meta: [noCols('2026-11-01'), noCols('2026-11-02')] }, 'all');
+  assert.deepEqual(m.kpis.impressions, { value: null, rows: 2, synthetic: false, reason: 'not_measured', previous: null });
+  assert.equal(m.kpis.link_clicks.reason, 'not_measured');
+  assert.equal(m.kpis.reach.value, 200);
+  // One row carrying the column is enough to measure it; rows without it count as nothing.
+  m = computeMetrics({ ...empty(), meta: [noCols('2026-11-01'), { ...noCols('2026-11-02'), impressions: 0, link_clicks: 3 }] }, 'all');
+  assert.equal(m.kpis.impressions.value, 0);
+  assert.equal(m.kpis.link_clicks.value, 3);
+  // The previous period is judged on its own rows.
+  const rows = [...Array.from({ length: 7 }, (_, i) => noCols(`2026-11-0${i + 1}`)), ...Array.from({ length: 7 }, (_, i) => ({ ...noCols(`2026-11-${String(i + 8).padStart(2, '0')}`), impressions: 50 }))];
+  m = computeMetrics({ ...empty(), meta: rows }, '7');
+  assert.equal(m.kpis.impressions.value, 350);
+  assert.equal(m.kpis.impressions.previous, null);
+});

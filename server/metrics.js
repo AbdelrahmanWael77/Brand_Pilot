@@ -22,6 +22,8 @@ const addDays = (d, n) => {
 };
 const dayDiff = (a, b) => Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 864e5);
 const sum = (rows, k) => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+/** Sum of an optional column, or 'not_measured' when no row carries it (an absent column is not a 0). */
+const sumOpt = (rows, k) => (rows.some((r) => r[k] !== undefined && r[k] !== null) ? sum(rows, k) : 'not_measured');
 const isQualified = (r) => r.status === 'qualified' || r.status === 'customer';
 
 /** First and last date across all datasets, or null when there is no data. */
@@ -58,9 +60,9 @@ function aggregate(data, p) {
     rows: { meta: me.length, ga4: g.length, gsc: s.length, leads: l.length },
     synthetic: { meta: me.some((r) => r.synthetic), ga4: g.some((r) => r.synthetic), gsc: s.some((r) => r.synthetic), leads: l.some((r) => r.synthetic) },
     reach: sum(me, 'reach'),
-    impressions: sum(me, 'impressions'),
+    impressions: sumOpt(me, 'impressions'),
     engagements: sum(me, 'engagements'),
-    link_clicks: sum(me, 'link_clicks'),
+    link_clicks: sumOpt(me, 'link_clicks'),
     spend: sum(me, 'spend'),
     sessions: sum(g, 'sessions'),
     enquiries: sum(g, 'enquiries'),

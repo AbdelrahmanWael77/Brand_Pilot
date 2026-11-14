@@ -3,6 +3,8 @@ import crypto from 'node:crypto';
 import { createKnowledge, STATUSES } from './knowledge.js';
 import { createData } from './data.js';
 import { createCampaigns } from './campaigns.js';
+import { buildReport, renderReport, renderReportHtml, REPORT_LANGS } from './report.js';
+import { createReports } from './reports.js';
 import { campaignQa } from './campaignQa.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
@@ -20,13 +22,32 @@ const MAX_NAME = 120;
  */
 export function createCompanies(
   db,
-  { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 } } = {},
+  { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 }, reportLimit = { max: 30, windowMs: 10 * 60_000 } } = {},
 ) {
   const knowledge = createKnowledge(db);
   const data = createData(db);
   const campaigns = createCampaigns(db);
   const fetchLimiter = createLimiter(fetchLimit); // outbound requests per user
   const askLimiter = createLimiter(askLimit); // AI questions per user
+  const reports = createReports(db);
+  const reportLimiter = createLimiter(reportLimit); // saved reports per user
+  /** One report in the asked format: JSON, a Markdown download, or a printable page. */
+  const sendReport = (res, report, format, lang) => {
+    if (format === 'json') return res.json(report);
+    if (format === 'html') {
+      // A page to print or save as PDF: inline styles only, nothing may load or run.
+      return res
+        .type('text/html; charset=utf-8')
+        .set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'")
+        .set('X-Content-Type-Options', 'nosniff')
+        .set('Cache-Control', 'no-store')
+        .send(renderReportHtml(report, lang));
+    }
+    return res
+      .type('text/markdown; charset=utf-8')
+      .set('Content-Disposition', `attachment; filename="marketing-report-${report.generatedAt.slice(0, 10)}.md"`)
+      .send(renderReport(report, lang));
+  };
   const q = {
     insertCompany: db.prepare('INSERT INTO companies (id, name, created_by, created_at) VALUES (?, ?, ?, ?)'),
     insertMembership: db.prepare('INSERT INTO memberships (user_id, company_id, role) VALUES (?, ?, ?)'),
@@ -39,6 +60,9 @@ export function createCompanies(
        WHERE m.user_id = ? AND c.id = ?`,
     ),
     renameCompany: db.prepare('UPDATE companies SET name = ? WHERE id = ?'),
+    putCurrency: db.prepare(
+      'INSERT INTO company_settings (company_id, currency) VALUES (?, ?) ON CONFLICT(company_id) DO UPDATE SET currency = excluded.currency',
+    ),
     deleteCompany: db.prepare('DELETE FROM companies WHERE id = ?'),
     getState: db.prepare('SELECT data, updated_at FROM company_state WHERE company_id = ?'),
     putState: db.prepare(
@@ -113,6 +137,8 @@ export function createCompanies(
       mirrored = knowledge.mirror(req.company.id, state);
       mirroredData = data.mirror(req.company.id, state);
       mirroredCampaigns = campaigns.mirror(req.company.id, state);
+      // Currency of the money columns: a 3-letter code, or none (then reports show plain numbers).
+      q.putCurrency.run(req.company.id, typeof state.currency === 'string' && /^[A-Z]{3}$/.test(state.currency) ? state.currency : null);
       db.exec('COMMIT');
     } catch (e) {
       db.exec('ROLLBACK');
@@ -139,6 +165,51 @@ export function createCompanies(
     res.json(result);
   });
 
+  // Marketing report: KPIs, audit findings with evidence, open gaps and campaigns. JSON, or Markdown to download.
+  router.get('/:id/report', requireCompany, (req, res) => {
+    const range = req.query.range === undefined ? '28' : req.query.range;
+    if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
+    const format = req.query.format === undefined ? 'json' : req.query.format;
+    if (!['json', 'md', 'html'].includes(format)) return res.status(400).json({ error: 'invalid_format' });
+    const lang = req.query.lang === undefined ? 'en' : req.query.lang;
+    if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
+    sendReport(res, buildReport(db, req.company.id, { range, lang }), format, lang);
+  });
+
+  // Report history: save what the report says now, list the saved ones, read one back (never rebuilt).
+  router.post('/:id/reports', requireCompany, (req, res) => {
+    const range = req.body?.range ?? '28';
+    if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
+    const lang = req.body?.lang ?? 'en';
+    if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
+    const wait = reportLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    reportLimiter.hit(req.user.id);
+    res.status(201).json({ report: reports.save(req.company.id, { range, lang }) });
+  });
+  router.get('/:id/reports', requireCompany, (req, res) => {
+    res.json({ reports: reports.list(req.company.id) });
+  });
+  // Automatic reports: off, weekly or monthly. Declared before `/:rid` so "schedule" is not read as a report id.
+  router.get('/:id/reports/schedule', requireCompany, (req, res) => {
+    res.json({ schedule: reports.getSchedule(req.company.id) });
+  });
+  router.put('/:id/reports/schedule', requireCompany, (req, res) => {
+    const every = req.body?.every;
+    if (!['off', 'weekly', 'monthly'].includes(every)) return res.status(400).json({ error: 'invalid_schedule' });
+    const lang = req.body?.lang ?? 'en';
+    if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
+    res.json({ schedule: reports.setSchedule(req.company.id, { every, lang }) });
+  });
+  router.get('/:id/reports/:rid', requireCompany, (req, res) => {
+    const format = req.query.format === undefined ? 'json' : req.query.format;
+    if (!['json', 'md', 'html'].includes(format)) return res.status(400).json({ error: 'invalid_format' });
+    const saved = reports.get(req.company.id, req.params.rid);
+    if (!saved) return res.status(404).json({ error: 'not_found' });
+    if (format === 'json') return res.json(saved);
+    sendReport(res, saved.report, format, saved.lang); // in the language it was saved in
+  });
+
   // What imported data the server holds for this company, per dataset.
   router.get('/:id/data/summary', requireCompany, (req, res) => {
     res.json({ data: data.summary(req.company.id) });
@@ -153,7 +224,9 @@ export function createCompanies(
 
   // Audit items from validated rows and approved facts; each states its basis and evidence.
   router.get('/:id/audit', requireCompany, (req, res) => {
-    res.json(audit(db, req.company.id));
+    const lang = req.query.lang === undefined ? 'en' : req.query.lang;
+    if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
+    res.json(audit(db, req.company.id, { lang }));
   });
 
   // What the AI Marketing Director is allowed to know about this company: approved facts, KPIs, audit items.

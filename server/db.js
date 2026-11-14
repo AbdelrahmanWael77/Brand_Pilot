@@ -106,6 +106,31 @@ CREATE TABLE IF NOT EXISTS campaign_mirror (
   hash       TEXT NOT NULL,
   result     TEXT NOT NULL
 );
+-- Per-company settings the server needs to trust (mirrored from the state on save).
+CREATE TABLE IF NOT EXISTS company_settings (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  currency   TEXT
+);
+-- Saved marketing reports: a snapshot of what the report said at that moment (never rebuilt).
+CREATE TABLE IF NOT EXISTS reports (
+  id         TEXT PRIMARY KEY,
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  range      TEXT NOT NULL,
+  lang       TEXT NOT NULL,
+  auto       INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  data       TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS reports_company ON reports (company_id, created_at);
+-- Automatic reports: when the next snapshot of a company is due (no row = off).
+CREATE TABLE IF NOT EXISTS report_schedules (
+  company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  every      TEXT NOT NULL,
+  range      TEXT NOT NULL,
+  lang       TEXT NOT NULL,
+  next_due   TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 `;
 
 export function initSchema(db) {
