@@ -85,6 +85,8 @@ const toCSV = (rows, cols) => [cols.join(','), ...rows.map((r) => cols.map((c) =
 
 const sets = {
   meta: [posts(['facebook', 'instagram'], 2), 'date,platform,post_id,theme,language,reach,impressions,engagements,link_clicks,spend,campaign'],
+  facebook: [posts(['facebook'], 4), 'date,platform,post_id,theme,language,reach,impressions,engagements,link_clicks,spend,campaign'],
+  instagram: [posts(['instagram'], 5), 'date,platform,post_id,theme,language,reach,impressions,engagements,link_clicks,spend,campaign'],
   linkedin: [posts(['linkedin'], 3), 'date,platform,post_id,theme,language,reach,impressions,engagements,link_clicks,spend,campaign'],
   ga4: [ga4(), 'date,channel,landing_page,device,sessions,engaged_sessions,enquiries,campaign'],
   gsc: [gsc(), 'date,query,page,clicks,impressions,position'],

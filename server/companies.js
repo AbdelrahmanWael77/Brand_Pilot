@@ -12,6 +12,7 @@ import { buildContext, ask, ASK } from './director.js';
 import { suggestThemes, cleanPosts } from './themes.js';
 import { extractFacts, cleanRequest } from './extract.js';
 import { websitePages } from './website.js';
+import { websiteBrand } from './brand.js';
 import { AiError } from './ai.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
@@ -330,6 +331,23 @@ export function createCompanies(
     fetchLimiter.hit(req.user.id);
     try {
       res.json(await websitePages(fetchUrl, ai, url));
+    } catch (e) {
+      if (e instanceof FetchUrlError) return res.status(e.status).json({ error: e.code });
+      throw e;
+    }
+  });
+
+  // Colour, font and logo candidates from the website's page, its style sheets and one logo image (brand.js).
+  // Every one of those reads goes through the guarded reader. Counted as one read against the website
+  // reader's allowance. No model call; nothing is stored — the browser shows the result for approval.
+  router.post('/:id/website/brand', requireCompany, async (req, res) => {
+    const url = req.body?.url;
+    if (typeof url !== 'string' || !url.trim() || url.length > 2000) return res.status(400).json({ error: 'invalid_url' });
+    const wait = fetchLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    fetchLimiter.hit(req.user.id);
+    try {
+      res.json(await websiteBrand(fetchUrl, url));
     } catch (e) {
       if (e instanceof FetchUrlError) return res.status(e.status).json({ error: e.code });
       throw e;

@@ -10,6 +10,10 @@
  *   - the connection is pinned to the address that was checked, so a second DNS
  *     answer cannot redirect it elsewhere (no DNS-rebinding window);
  *   - text/html or text/plain only, at most `maxBytes`, `timeoutMs` in total.
+ *
+ * Server code (never the browser) may ask for other content types for one read through the second
+ * argument: `fetchUrl(url, { types, binary, maxBytes, accept })` — used by brand.js for stylesheets and
+ * the logo image. Every rule above still applies to such a read; the size limit can only get smaller.
  */
 import dns from 'node:dns';
 import http from 'node:http';
@@ -70,7 +74,7 @@ export function isBlockedAddress(ip) {
 }
 
 /** Default transport: one GET, connection pinned to `address` (already checked by the caller). */
-export function pinnedRequest(url, { address, family, signal }) {
+export function pinnedRequest(url, { address, family, signal, accept }) {
   return new Promise((resolve, reject) => {
     const req = (url.protocol === 'https:' ? https : http).request(
       url,
@@ -78,7 +82,7 @@ export function pinnedRequest(url, { address, family, signal }) {
         method: 'GET',
         agent: false,
         signal,
-        headers: { 'user-agent': 'BrandPilot-website-reader/0.1', accept: 'text/html,text/plain;q=0.9', 'accept-encoding': 'identity' },
+        headers: { 'user-agent': 'BrandPilot-website-reader/0.1', accept: accept || 'text/html,text/plain;q=0.9', 'accept-encoding': 'identity' },
         // Never resolve the name again: connect to the address that passed the check.
         lookup: (_host, opts, cb) => (opts && opts.all ? cb(null, [{ address, family }]) : cb(null, address, family)),
       },
@@ -138,7 +142,16 @@ export function createFetchUrl({ lookup = defaultLookup, request = pinnedRequest
     return Buffer.concat(chunks);
   }
 
-  return async function fetchUrl(rawUrl) {
+  /**
+   * @param {string} rawUrl
+   * @param {object} [o] server-side callers only
+   * @param {string[]} [o.types] allowed content types (prefix match); default HTML and plain text
+   * @param {boolean} [o.binary] return `{ url, type, bytes }` instead of `{ url, title, text }`
+   * @param {number} [o.maxBytes] a smaller size limit for this read
+   * @param {string} [o.accept] Accept header for this read
+   */
+  return async function fetchUrl(rawUrl, { types = TEXT_TYPES, binary = false, maxBytes: cap = maxBytes, accept } = {}) {
+    const limit = Math.min(cap, maxBytes);
     let url;
     try {
       url = new URL(String(rawUrl).trim());
@@ -151,7 +164,7 @@ export function createFetchUrl({ lookup = defaultLookup, request = pinnedRequest
     try {
       for (let hop = 0; ; hop++) {
         const target = await withAbort(check(url), ac.signal);
-        res = await withAbort(request(url, { ...target, signal: ac.signal }), ac.signal);
+        res = await withAbort(request(url, { ...target, signal: ac.signal, accept }), ac.signal);
         const status = res.status;
         if (status >= 300 && status < 400 && res.headers.location) {
           res.body?.destroy?.();
@@ -165,9 +178,10 @@ export function createFetchUrl({ lookup = defaultLookup, request = pinnedRequest
         }
         if (status < 200 || status >= 300) throw fail('fetch_failed', 502);
         const type = String(res.headers['content-type'] || '').toLowerCase();
-        if (!TEXT_TYPES.some((t) => type.startsWith(t))) throw fail('unsupported_type', 415);
-        if (Number(res.headers['content-length']) > maxBytes) throw fail('too_large', 413);
-        const buf = await withAbort(read(res.body, maxBytes), ac.signal);
+        if (!types.some((t) => type.startsWith(t))) throw fail('unsupported_type', 415);
+        if (Number(res.headers['content-length']) > limit) throw fail('too_large', 413);
+        const buf = await withAbort(read(res.body, limit), ac.signal);
+        if (binary) return { url: url.href, type: type.split(';')[0].trim(), bytes: buf };
         let text;
         try {
           text = new TextDecoder(/charset=["']?([\w-]+)/.exec(type)?.[1] || 'utf-8').decode(buf);
