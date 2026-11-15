@@ -35,6 +35,8 @@ const REST = 'https://api.canva.com/rest/v1/';
 
 const isObj = (x) => x !== null && typeof x === 'object' && !Array.isArray(x);
 const isUrl = (v) => typeof v === 'string' && /^https:\/\/[^\s]+$/.test(v) && v.length < 2000;
+/** A link that can be a picture file: any https link except a page of Canva's own site (a design's edit / view / preview page). */
+const isPic = (v) => isUrl(v) && !/^https:\/\/(www\.)?canva\.(com|cn)\//i.test(v);
 const scalar = (v) => (typeof v === 'string' && v !== '') || typeof v === 'number';
 const one = (s, max) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
@@ -93,6 +95,12 @@ function* walk(o, key = '', depth = 0) {
   if (Array.isArray(o)) for (const x of o.slice(0, 50)) yield* walk(x, key, depth + 1);
   else if (isObj(o)) for (const [k, v] of Object.entries(o)) yield* walk(v, k, depth + 1);
 }
+/** The preview picture inside one item: a picture link under a thumbnail / preview / image key first, else any picture link. */
+function picUnder(x) {
+  for (const [k, v] of walk(x)) if (/thumb|preview|image/i.test(k)) for (const [, u] of walk(v)) if (isPic(u)) return u;
+  for (const [, u] of walk(x)) if (isPic(u)) return u;
+  return null;
+}
 const first = (o, re, ok = scalar) => {
   for (const [k, v] of walk(o)) if (re.test(k) && ok(v)) return v;
   return null;
@@ -118,7 +126,7 @@ export function readResult(result) {
   let candidates = [];
   for (const [, v] of walk(o)) {
     if (Array.isArray(v) && v.length && v.every(isObj) && v.some((x) => Object.keys(x).some((k) => /candidate_?id/i.test(k)))) {
-      candidates = v.slice(0, STUDIO_LIMITS.shown).map((x) => ({ id: String(first(x, /candidate_?id/i) ?? ''), thumb: first(x, /thumb|preview|image|url/i, isUrl) })).filter((c) => c.id);
+      candidates = v.slice(0, STUDIO_LIMITS.shown).map((x) => ({ id: String(first(x, /candidate_?id/i) ?? ''), thumb: picUnder(x) })).filter((c) => c.id);
       break;
     }
   }
@@ -128,7 +136,7 @@ export function readResult(result) {
   const designId = first(o, /^design_?id$/i) ?? (isObj(o.design) && scalar(o.design.id) ? o.design.id : null) ?? (fromLink ? fromLink[1] : null);
   const images = [];
   const thumbs = new Set(candidates.map((c) => c.thumb));
-  for (const [k, v] of walk(o)) if (isUrl(v) && /url|thumb|image|download|preview/i.test(k) && !/edit|view/i.test(k) && !thumbs.has(v) && !images.includes(v)) images.push(v);
+  for (const [k, v] of walk(o)) if (isPic(v) && /url|thumb|image|download|preview/i.test(k) && !/edit|view/i.test(k) && !thumbs.has(v) && !images.includes(v)) images.push(v);
   for (const u of found) if (!isEdit(u) && !isView(u) && !/canva\.com\/design\//.test(u) && !images.includes(u)) images.push(u);
   const status = String(first(o, /^status$/i) ?? '').toLowerCase();
   let credits = null;
@@ -371,13 +379,13 @@ CREATE TABLE IF NOT EXISTS canva_logos (
   };
   const view = (r) => ({
     id: r.id, campaignId: r.campaign_id, assetId: r.asset_id, kind: r.kind, lang: r.lang, status: r.status, note: r.note,
-    candidates: arr(r.candidates), images: arr(r.images), designId: r.design_id, editUrl: r.edit_url, viewUrl: r.view_url,
+    candidates: arr(r.candidates).map((c) => ({ id: c.id, thumb: isPic(c.thumb) ? c.thumb : null })), images: arr(r.images).filter(isPic), designId: r.design_id, editUrl: r.edit_url, viewUrl: r.view_url,
     credits: r.credits, logo: r.logo, error: r.error, said: r.said, createdAt: new Date(r.created_at).toISOString(),
   });
   /** Writes what Canva answered into the record. An answer without a field keeps what the record had; `chosen` empties the proposals. */
   function store(row, got, result, status, chosen = false) {
     const merged = {
-      job: got.jobId ?? row.job_id, candidates: chosen ? [] : got.candidates.length ? got.candidates : arr(row.candidates), images: got.images.length ? got.images : arr(row.images),
+      job: got.jobId ?? row.job_id, candidates: chosen ? [] : got.candidates.length ? got.candidates : arr(row.candidates), images: got.images.length ? got.images : arr(row.images).filter(isPic),
       design: got.designId ?? row.design_id, edit: got.editUrl ?? row.edit_url, view: got.viewUrl ?? row.view_url, credits: got.credits ?? row.credits,
     };
     q.set.run(status, merged.job === null ? null : String(merged.job), JSON.stringify(merged.candidates), JSON.stringify(merged.images), merged.design, merged.edit, merged.view, merged.credits, null, null, JSON.stringify(result).slice(0, STUDIO_LIMITS.raw), now(), row.id);
@@ -395,7 +403,10 @@ CREATE TABLE IF NOT EXISTS canva_logos (
     q.set.run('failed', row.job_id, row.candidates, row.images, row.design_id, row.edit_url, row.view_url, row.credits, e.code, e.said ? one(e.said, 300) : null, row.raw, now(), row.id);
   }
   const fail = (res, e, req, row) => {
-    if (e instanceof FetchUrlError) return res.status(502).json({ error: 'canva_image_unreadable' });
+    if (e instanceof FetchUrlError) {
+      console.error(`Canva studio: a picture link could not be read (${e.code})`);
+      return res.status(502).json({ error: 'canva_image_unreadable' });
+    }
     if (!(e instanceof CanvaError)) throw e;
     if (e.detail) console.error(`Canva studio: ${e.code} (${e.detail})`);
     if (e.code === 'canva_reauth') {
@@ -545,8 +556,8 @@ CREATE TABLE IF NOT EXISTS canva_logos (
       else if (row.design_id) result = await mcp.callTool(key(req), await token(req), TOOLS.get, { designId: row.design_id, intent: 'Open a campaign design from BrandPilot' }, STUDIO_LIMITS.quickMs);
       else return res.json({ asset: view(row) });
       const got = readResult(result);
-      // a design's own thumbnail is not a new picture of the record
-      if (row.design_id) got.images = [];
+      // a design's own thumbnail does not replace a picture the record already has (an export, the chosen proposal)
+      if (row.design_id && arr(row.images).some(isPic)) got.images = [];
       const status = row.design_id ? row.status : got.failed ? 'failed' : got.images.length && !/progress|pending|queued|running/.test(got.status) ? 'ready' : 'working';
       store(row, got, result, status);
       res.json({ asset: view(q.get.get(row.id, req.company.id, req.user.id)) });
@@ -565,8 +576,16 @@ CREATE TABLE IF NOT EXISTS canva_logos (
       const result = await mcp.callTool(key(req), await token(req), TOOLS.pick, { jobId: row.job_id, candidateId: cand.id, intent: 'Keep a campaign design proposal from BrandPilot' });
       const got = readResult(result);
       got.candidates = [];
-      got.images = cand.thumb ? [cand.thumb] : [];
+      if (isPic(cand.thumb)) got.images = [cand.thumb];
       if (!got.designId && !got.editUrl) throw new CanvaError('canva_unreadable', 502, `${TOOLS.pick} answered without a design: ${one(JSON.stringify(result), 400)}`);
+      // no preview came with the proposal or the new design: ask Canva for the design's thumbnail (a courtesy, never fatal)
+      if (!got.images.length && got.designId) {
+        try {
+          got.images = readResult(await mcp.callTool(key(req), await token(req), TOOLS.get, { designId: got.designId, intent: 'Preview a campaign design in BrandPilot' }, STUDIO_LIMITS.quickMs)).images;
+        } catch (e) {
+          if (!(e instanceof CanvaError)) throw e;
+        }
+      }
       store(row, got, result, 'ready', true);
       res.json({ asset: view(q.get.get(row.id, req.company.id, req.user.id)) });
     } catch (e) {
@@ -597,11 +616,28 @@ CREATE TABLE IF NOT EXISTS canva_logos (
   router.post('/assets/:aid/image', async (req, res) => {
     const row = own(req, res);
     if (!row) return;
-    const list = [...arr(row.images), ...arr(row.candidates).map((c) => c.thumb)].filter(isUrl);
+    const list = [...arr(row.images), ...arr(row.candidates).map((c) => c.thumb)].filter(isPic);
     const url = list[Number.isInteger(isObj(req.body) ? req.body.i : null) ? req.body.i : 0];
-    if (!url) return res.status(400).json({ error: 'bad_request' });
+    if (!url && !row.design_id) return res.status(400).json({ error: 'bad_request' });
+    const read = (u) => fetchUrl(u, { types: ['image/png', 'image/jpeg', 'image/webp'], binary: true, maxBytes: STUDIO_LIMITS.imageBytes, accept: 'image/*' });
     try {
-      const r = await fetchUrl(url, { types: ['image/png', 'image/jpeg', 'image/webp'], binary: true, maxBytes: STUDIO_LIMITS.imageBytes, accept: 'image/*' });
+      let r = null;
+      if (url) {
+        try {
+          r = await read(url);
+        } catch (e) {
+          if (!(e instanceof FetchUrlError) || !row.design_id) throw e;
+          console.error(`Canva studio: preview link unreadable (${e.code}); exporting the design instead`);
+        }
+      }
+      // A design without a readable preview (none given, or the link has expired): a fresh PNG export of the design.
+      if (!r) {
+        const result = await mcp.callTool(key(req), await token(req), TOOLS.export, { designId: row.design_id, format: { pick: ['png'] }, intent: 'Export a campaign design to BrandPilot' });
+        const got = readResult(result);
+        if (!got.images.length) throw new CanvaError('canva_unreadable', 502, `${TOOLS.export} answered without a file link: ${one(JSON.stringify(result), 400)}`);
+        store(row, { ...got, designId: null, editUrl: null, viewUrl: null }, result, row.status);
+        r = await read(got.images[0]);
+      }
       res.json({ type: r.type, dataUrl: `data:${r.type};base64,${Buffer.from(r.bytes).toString('base64')}` });
     } catch (e) {
       return fail(res, e, req, null);

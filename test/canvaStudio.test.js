@@ -156,6 +156,17 @@ test('readResult: structured or text JSON or plain text; unknown shapes give emp
   assert.equal(readResult(null).text, '');
 });
 
+test('readResult: a Canva page link is never taken for a picture; the thumbnail is found wherever it sits', () => {
+  const r = readResult(textResult({ job: { id: 'J', status: 'success', result: { generated_designs: [
+    { candidate_id: 'C1', url: 'https://www.canva.com/design/DAGx/preview?x=1', thumbnails: [{ url: 'https://cdn.canva.test/t1.png' }] },
+    { candidate_id: 'C2', url: 'https://www.canva.com/design/DAGy/preview' },
+  ] } } }));
+  assert.deepEqual(r.candidates, [{ id: 'C1', thumb: 'https://cdn.canva.test/t1.png' }, { id: 'C2', thumb: null }]);
+  assert.deepEqual(r.images, []);
+  const d = readResult(textResult({ design: { id: 'DAGz', url: 'https://www.canva.com/design/DAGz/watch', urls: { edit_url: 'https://www.canva.com/design/DAGz/edit' }, thumbnail: { url: 'https://cdn.canva.test/z.png' } } }));
+  assert.deepEqual([d.designId, d.images], ['DAGz', ['https://cdn.canva.test/z.png']]);
+});
+
 test('toolErrorCode and canvaBrief', () => {
   assert.deepEqual(toolErrorCode('license_required: premium element'), ['canva_plan', 402]);
   assert.deepEqual(toolErrorCode('You have no AI credits left'), ['canva_credits', 402]);
