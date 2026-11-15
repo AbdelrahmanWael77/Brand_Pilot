@@ -212,3 +212,14 @@ test('route: unknown campaign 404, another user 404, signed out 401', async () =
   assert.equal((await qa('k1', bob)).status, 404);
   assert.equal((await qa('k1', null)).status, 401);
 });
+
+test("claims: the brief's own offer wording is not a claim, the same wording elsewhere still is (10.1)", () => {
+  const offer = '20% off annual plans';
+  const facts = [...FACTS, fact('offers', offer)];
+  const mk = (body) => campaign({ brief: { offerEn: offer, offerAr: '' }, assets: [asset('en1', 'en', { fields: { headline: f('20% Off annual plans'), body: f(body) } })] });
+  // The offer appears as written (capital letter differs): not flagged.
+  assert.deepEqual(by(run(mk(`${offer}. ${EN.cta}`), facts)).claims.affected, []);
+  // A different percentage, or a guarantee beside the offer, is still flagged.
+  assert.deepEqual(by(run(mk(`${offer}. Save 35% more. ${EN.cta}`), facts)).claims.affected, ['en1']);
+  assert.deepEqual(by(run(mk(`${offer}, guaranteed. ${EN.cta}`), facts)).claims.affected, ['en1']);
+});
