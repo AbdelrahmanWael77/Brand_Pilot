@@ -11,6 +11,7 @@ import { audit } from './audit.js';
 import { buildContext, ask, ASK } from './director.js';
 import { suggestThemes, cleanPosts } from './themes.js';
 import { extractFacts, cleanRequest } from './extract.js';
+import { websitePages } from './website.js';
 import { AiError } from './ai.js';
 import { createFetchUrl, FetchUrlError } from './fetchUrl.js';
 import { createLimiter } from './auth.js';
@@ -312,6 +313,23 @@ export function createCompanies(
     fetchLimiter.hit(req.user.id);
     try {
       res.json(await fetchUrl(url));
+    } catch (e) {
+      if (e instanceof FetchUrlError) return res.status(e.status).json({ error: e.code });
+      throw e;
+    }
+  });
+
+  // Read the website's first page and propose which of its own pages to read next (website.js).
+  // One outbound read, counted against the same allowance as `fetch-url`; the pages themselves are read
+  // later, one `fetch-url` each, after the user has ticked them. Nothing is stored.
+  router.post('/:id/website/pages', requireCompany, async (req, res) => {
+    const url = req.body?.url;
+    if (typeof url !== 'string' || !url.trim() || url.length > 2000) return res.status(400).json({ error: 'invalid_url' });
+    const wait = fetchLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    fetchLimiter.hit(req.user.id);
+    try {
+      res.json(await websitePages(fetchUrl, ai, url));
     } catch (e) {
       if (e instanceof FetchUrlError) return res.status(e.status).json({ error: e.code });
       throw e;
