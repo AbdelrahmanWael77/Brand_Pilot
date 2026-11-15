@@ -35,6 +35,11 @@ const REST = 'https://api.canva.com/rest/v1/';
 
 const isObj = (x) => x !== null && typeof x === 'object' && !Array.isArray(x);
 const isUrl = (v) => typeof v === 'string' && /^https:\/\/[^\s]+$/.test(v) && v.length < 2000;
+/** A Canva page (a design, a share link) — not a picture file. Seen for real on 2026-11-15: a proposal's `url` is https://www.canva.com/d/… */
+const pageLink = (v) => /^https:\/\/(?:www\.)?canva\.(?:com\/(?:d|design|api\/design)\/|link\/)/.test(String(v));
+const isPic = (v) => isUrl(v) && !pageLink(v);
+/** A real Canva design id, as the REST API and the MCP tools want it (D + 10 characters). */
+const DESIGN_ID = /^D[A-Za-z0-9_-]{10}$/;
 const scalar = (v) => (typeof v === 'string' && v !== '') || typeof v === 'number';
 const one = (s, max) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
@@ -118,17 +123,18 @@ export function readResult(result) {
   let candidates = [];
   for (const [, v] of walk(o)) {
     if (Array.isArray(v) && v.length && v.every(isObj) && v.some((x) => Object.keys(x).some((k) => /candidate_?id/i.test(k)))) {
-      candidates = v.slice(0, STUDIO_LIMITS.shown).map((x) => ({ id: String(first(x, /candidate_?id/i) ?? ''), thumb: first(x, /thumb|preview|image|url/i, isUrl) })).filter((c) => c.id);
+      candidates = v.slice(0, STUDIO_LIMITS.shown).map((x) => ({ id: String(first(x, /candidate_?id/i) ?? ''), thumb: first(x, /thumb/i, isPic) ?? first(x, /preview|image/i, isPic) ?? first(x, /url/i, isPic) })).filter((c) => c.id);
       break;
     }
   }
   const editUrl = first(o, /edit_?url/i, isUrl) || found.find(isEdit) || null;
   const viewUrl = first(o, /view_?url/i, isUrl) || found.find(isView) || null;
   const fromLink = (editUrl || viewUrl || '').match(/\/design\/([A-Za-z0-9_-]{6,})/);
-  const designId = first(o, /^design_?id$/i) ?? (isObj(o.design) && scalar(o.design.id) ? o.design.id : null) ?? (fromLink ? fromLink[1] : null);
+  // Canva's real answer to create-design-from-candidate is { design_summary: { id: 'D…', urls } }; the token inside an /api/design/ link is NOT an id.
+  const designId = first(o, /^design_?id$/i) ?? (isObj(o.design) && scalar(o.design.id) ? o.design.id : null) ?? first(o, /^id$/i, (v) => typeof v === 'string' && DESIGN_ID.test(v)) ?? (fromLink && DESIGN_ID.test(fromLink[1]) ? fromLink[1] : null);
   const images = [];
   const thumbs = new Set(candidates.map((c) => c.thumb));
-  for (const [k, v] of walk(o)) if (isUrl(v) && /url|thumb|image|download|preview/i.test(k) && !/edit|view/i.test(k) && !thumbs.has(v) && !images.includes(v)) images.push(v);
+  for (const [k, v] of walk(o)) if (isUrl(v) && /url|thumb|image|download|preview/i.test(k) && !/edit|view/i.test(k) && !pageLink(v) && !thumbs.has(v) && !images.includes(v)) images.push(v);
   for (const u of found) if (!isEdit(u) && !isView(u) && !/canva\.com\/design\//.test(u) && !images.includes(u)) images.push(u);
   const status = String(first(o, /^status$/i) ?? '').toLowerCase();
   let credits = null;
@@ -448,6 +454,21 @@ CREATE TABLE IF NOT EXISTS canva_logos (
     return String(id);
   }
 
+  /** The design's current preview picture, from Canva's REST API (scope design:meta:read; the link lives about 15 minutes). Null when Canva gives none. */
+  async function designThumb(tok, designId) {
+    if (!DESIGN_ID.test(String(designId))) return null;
+    try {
+      const res = await canva.fetch(`${REST}designs/${encodeURIComponent(designId)}`, { headers: { authorization: `Bearer ${tok}` }, signal: AbortSignal.timeout(STUDIO_LIMITS.quickMs) });
+      if (!res.ok) return null;
+      const u = JSON.parse(await res.text())?.design?.thumbnail?.url;
+      return isPic(u) ? u : null;
+    } catch {
+      return null;
+    }
+  }
+  /** The real design id of a record: its own when it is one, else the one in Canva's stored answer (records made before 10.6 kept a link token). */
+  const realDesignId = (row) => (DESIGN_ID.test(String(row.design_id)) ? row.design_id : (String(row.raw || '').match(/\\?"id\\?":\s*\\?"(D[A-Za-z0-9_-]{10})\\?"/) || [])[1] || null);
+
   const router = express.Router({ mergeParams: true });
   router.use((req, res, next) => {
     if (!canva.config.configured) return res.status(503).json({ error: 'canva_not_configured' });
@@ -542,11 +563,26 @@ CREATE TABLE IF NOT EXISTS canva_logos (
     try {
       let result;
       if (row.kind === 'image' && row.status === 'working' && row.job_id) result = await mcp.callTool(key(req), await token(req), TOOLS.imageJob, { jobId: row.job_id, intent: 'Check a campaign picture in BrandPilot' }, STUDIO_LIMITS.quickMs);
-      else if (row.design_id) result = await mcp.callTool(key(req), await token(req), TOOLS.get, { designId: row.design_id, intent: 'Open a campaign design from BrandPilot' }, STUDIO_LIMITS.quickMs);
-      else return res.json({ asset: view(row) });
+      else if (row.design_id) {
+        // A design: its current preview from Canva (also after the user edited it there). The record keeps its links.
+        const did = realDesignId(row);
+        const tok = await token(req);
+        let got = readResult({});
+        let answer = { refreshed: true, design_id: did };
+        if (did) {
+          try {
+            answer = await mcp.callTool(key(req), tok, TOOLS.get, { designId: did, intent: 'Open a campaign design from BrandPilot' }, STUDIO_LIMITS.quickMs);
+            got = readResult(answer); // fresh edit / view links
+          } catch (e) {
+            if (!(e instanceof CanvaError)) throw e; // the links stay as they were; the preview below may still work
+          }
+        }
+        const thumb = await designThumb(tok, did);
+        got = { ...got, candidates: [], designId: did, images: thumb ? [thumb] : [] };
+        store(row, got, answer, row.status);
+        return res.json({ asset: view(q.get.get(row.id, req.company.id, req.user.id)) });
+      } else return res.json({ asset: view(row) });
       const got = readResult(result);
-      // a design's own thumbnail is not a new picture of the record
-      if (row.design_id) got.images = [];
       const status = row.design_id ? row.status : got.failed ? 'failed' : got.images.length && !/progress|pending|queued|running/.test(got.status) ? 'ready' : 'working';
       store(row, got, result, status);
       res.json({ asset: view(q.get.get(row.id, req.company.id, req.user.id)) });
@@ -565,7 +601,8 @@ CREATE TABLE IF NOT EXISTS canva_logos (
       const result = await mcp.callTool(key(req), await token(req), TOOLS.pick, { jobId: row.job_id, candidateId: cand.id, intent: 'Keep a campaign design proposal from BrandPilot' });
       const got = readResult(result);
       got.candidates = [];
-      got.images = cand.thumb ? [cand.thumb] : [];
+      const thumb = await designThumb(await token(req), got.designId);
+      got.images = thumb ? [thumb] : cand.thumb ? [cand.thumb] : [];
       if (!got.designId && !got.editUrl) throw new CanvaError('canva_unreadable', 502, `${TOOLS.pick} answered without a design: ${one(JSON.stringify(result), 400)}`);
       store(row, got, result, 'ready', true);
       res.json({ asset: view(q.get.get(row.id, req.company.id, req.user.id)) });

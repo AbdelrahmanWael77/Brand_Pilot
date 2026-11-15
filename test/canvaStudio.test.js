@@ -364,3 +364,17 @@ test('not configured: every route answers 503 and nothing is called', async () =
     db2.close();
   }
 });
+
+test("readResult: Canva's real answers of 2026-11-15 — design_summary gives the design id, a link token is not an id, a canva.com page is not a picture", () => {
+  const token = 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0';
+  const real = readResult({ content: [{ type: 'text', text: JSON.stringify({ design_summary: { id: 'DAHa_afhb2c', title: 'Post 1', urls: { edit_url: `https://www.canva.com/api/design/${token}/edit?utm_source=x`, view_url: `https://www.canva.com/api/design/${token}/view?utm_source=x` }, page_count: 1 } }) }] });
+  assert.equal(real.designId, 'DAHa_afhb2c');
+  assert.match(real.editUrl, /\/edit\?/);
+  assert.deepEqual(real.images, []);
+  // without any id in the answer, the token inside the link is not taken for one
+  assert.equal(readResult({ content: [{ type: 'text', text: JSON.stringify({ urls: { edit_url: `https://www.canva.com/api/design/${token}/edit` } }) }] }).designId, null);
+  // a proposal carries a page link and a thumbnail: the thumbnail is the preview, the page is never a picture
+  const prop = readResult({ structuredContent: { job: { id: 'J1' }, candidates: [{ candidate_id: 'C1', url: 'https://www.canva.com/d/ThlLGWm6LRJ7076', thumbnail: { url: 'https://design.canva.ai/thumb1.png' } }, { candidate_id: 'C2', url: 'https://www.canva.com/d/abc' }] } });
+  assert.deepEqual(prop.candidates, [{ id: 'C1', thumb: 'https://design.canva.ai/thumb1.png' }, { id: 'C2', thumb: null }]);
+  assert.deepEqual(prop.images, []);
+});
