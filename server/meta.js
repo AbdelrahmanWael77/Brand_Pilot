@@ -114,8 +114,13 @@ export function fbRow(post, insights) {
   if (clicks && typeof clicks === 'object') row.link_clicks = num(clicks['link clicks']) ?? 0;
   const lang = scriptLang(post.message);
   if (lang) row.language = lang;
+  const text = caption(post.message);
+  if (text) row.text = text;
   return row;
 }
+
+/** The post's own words for theme suggestions (task 9.16): one line, at most 500 characters; nothing when empty. */
+const caption = (v) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, 500) : '');
 
 /** Instagram media + its insights → one Meta row, or null when Meta gave no reach. */
 export function igRow(media, insights) {
@@ -128,6 +133,8 @@ export function igRow(media, insights) {
   if (views !== undefined) row.impressions = views;
   const lang = scriptLang(media.caption);
   if (lang) row.language = lang;
+  const text = caption(media.caption);
+  if (text) row.text = text;
   return row;
 }
 
