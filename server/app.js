@@ -7,6 +7,7 @@ import { createCompanies } from './companies.js';
 import { createAi } from './ai.js';
 import { createMeta } from './meta.js';
 import { createGoogle } from './google.js';
+import { createCanva } from './canva.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -24,7 +25,7 @@ export function parseTrustProxy(v) {
  * production uses the defaults (`ai` is built from ANTHROPIC_API_KEY / AI_MODEL). `meta` and `google` take
  * { config, fetch, syncLimit, now } for createMeta / createGoogle (tests pass a stubbed network).
  */
-export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
+export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, canva: canvaOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
   const app = express();
   app.disable('x-powered-by');
   // Behind a reverse proxy the client's address is in X-Forwarded-For; trusted only when the owner says so
@@ -57,6 +58,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   // goes back to the app instead of answering JSON. The company routes need membership, like every company route.
   const meta = createMeta(db, metaOptions);
   const google = createGoogle(db, googleOptions);
+  const canva = createCanva(db, canvaOptions);
   const signedInOrBack = (name) => (req, res, next) => {
     const user = auth.currentUser(req);
     if (!user) return res.redirect(302, `/?${name}=signin`);
@@ -65,9 +67,11 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   };
   app.get('/api/integrations/meta/callback', signedInOrBack('meta'), meta.callback);
   app.get('/api/integrations/google/callback', signedInOrBack('google'), google.callback);
-  app.get('/api/integrations/status', auth.requireAuth, (_req, res) => res.json({ meta: { configured: meta.config.configured }, google: { configured: google.config.configured } }));
+  app.get('/api/integrations/canva/callback', signedInOrBack('canva'), canva.callback);
+  app.get('/api/integrations/status', auth.requireAuth, (_req, res) => res.json({ meta: { configured: meta.config.configured }, google: { configured: google.config.configured }, canva: { configured: canva.config.configured } }));
   app.use('/api/companies/:id/integrations/meta', auth.requireAuth, companies.requireCompany, meta.company);
   app.use('/api/companies/:id/integrations/google', auth.requireAuth, companies.requireCompany, google.company);
+  app.use('/api/companies/:id/integrations/canva', auth.requireAuth, companies.requireCompany, canva.company);
   app.use('/api/companies', auth.requireAuth, companies.router);
   // Whether an AI key is set on this server. Says nothing else: no key, no model, no provider detail.
   app.get('/api/ai/status', auth.requireAuth, (_req, res) => res.json({ configured: ai.configured }));
