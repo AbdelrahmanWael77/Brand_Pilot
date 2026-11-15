@@ -8,6 +8,9 @@ import { createAi } from './ai.js';
 import { createMeta } from './meta.js';
 import { createGoogle } from './google.js';
 import { createCanva } from './canva.js';
+import { createImageAi } from './imageAi.js';
+import { campaignImageRoute } from './campaignImage.js';
+import { createLimiter } from './auth.js';
 import { createCanvaStudio } from './canvaStudio.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -26,7 +29,7 @@ export function parseTrustProxy(v) {
  * production uses the defaults (`ai` is built from ANTHROPIC_API_KEY / AI_MODEL). `meta` and `google` take
  * { config, fetch, syncLimit, now } for createMeta / createGoogle (tests pass a stubbed network).
  */
-export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, canva: canvaOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
+export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), imageAi = createImageAi(), imageLimit = { max: 10, windowMs: 10 * 60_000 }, askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, canva: canvaOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
   const app = express();
   app.disable('x-powered-by');
   // Behind a reverse proxy the client's address is in X-Forwarded-For; trusted only when the owner says so
@@ -75,9 +78,11 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   app.use('/api/companies/:id/integrations/google', auth.requireAuth, companies.requireCompany, google.company);
   app.use('/api/companies/:id/integrations/canva', auth.requireAuth, companies.requireCompany, canva.company);
   app.use('/api/companies/:id/canva', auth.requireAuth, companies.requireCompany, canvaStudio.router);
+  // A picture for one campaign post (campaignImage.js, image model in imageAi.js). Own allowance: images cost more than text.
+  app.post('/api/companies/:id/campaigns/:cid/assets/:aid/image', auth.requireAuth, companies.requireCompany, campaignImageRoute(db, imageAi, createLimiter(imageLimit)));
   app.use('/api/companies', auth.requireAuth, companies.router);
   // Whether an AI key is set on this server. Says nothing else: no key, no model, no provider detail.
-  app.get('/api/ai/status', auth.requireAuth, (_req, res) => res.json({ configured: ai.configured }));
+  app.get('/api/ai/status', auth.requireAuth, (_req, res) => res.json({ configured: ai.configured, images: imageAi.configured }));
 
   // Browsers ask for /favicon.ico on their own; answer with the app icon instead of a 404.
   app.get('/favicon.ico', (_req, res) => res.sendFile(path.join(root, 'public', 'favicon.svg')));

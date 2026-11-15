@@ -138,7 +138,7 @@ after(() => {
   db.close();
 });
 
-test('GET /api/ai/status: 401 signed out; { configured } only, never the key or model', async () => {
+test('GET /api/ai/status: 401 signed out; { configured, images } only, never the key or model', async () => {
   const n = net(() => json(200, message()));
   const off = await start(createAi({ apiKey: '' }));
   const on = await start(createAi({ apiKey: KEY, fetch: n.fetch }));
@@ -148,9 +148,9 @@ test('GET /api/ai/status: 401 signed out; { configured } only, never the key or 
   const cookie = reg.headers.getSetCookie()[0].split(';')[0];
   const a = await fetch(`${off}/api/ai/status`, { headers: { cookie } });
   assert.equal(a.status, 200);
-  assert.deepEqual(await a.json(), { configured: false });
+  assert.deepEqual(await a.json(), { configured: false, images: false });
   const b = await (await fetch(`${on}/api/ai/status`, { headers: { cookie } })).text(); // same DB, same session
-  assert.deepEqual(JSON.parse(b), { configured: true });
+  assert.deepEqual(JSON.parse(b), { configured: true, images: false });
   assert.doesNotMatch(b, new RegExp(KEY));
   assert.equal(n.calls.length, 0); // asking for the status never calls the provider
 });
@@ -265,7 +265,7 @@ test('OpenAI through the app: status says configured, and the Director route ans
   const post = (path, cookie, body, method = 'POST') => fetch(at + path, { method, headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: JSON.stringify(body) });
   const reg = await post('/api/auth/register', null, { email: 'gpt@example.com', password: 'correct horse' });
   const cookie = reg.headers.getSetCookie()[0].split(';')[0];
-  assert.deepEqual(await (await fetch(`${at}/api/ai/status`, { headers: { cookie } })).json(), { configured: true });
+  assert.deepEqual(await (await fetch(`${at}/api/ai/status`, { headers: { cookie } })).json(), { configured: true, images: false });
   const co = (await (await post('/api/companies', cookie, { name: 'GPT Co' })).json()).company.id;
   const state = {
     sources: [{ id: 's1', title: 'a.txt', kind: 'document', text: 'x', date: '2026-11-14', demo: false }],

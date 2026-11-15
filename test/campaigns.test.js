@@ -30,7 +30,7 @@ test('cleanBrief keeps known wording only, with caps; wrong types become empty',
   assert.deepEqual(b.why.slice(0, 2), ['ok', 'more']);
   assert.deepEqual(b.channels, ['email', 'facebook']);
   assert.deepEqual(b.pointsAr, []);
-  assert.equal(b.colors, undefined);
+  assert.deepEqual(b.colors, {}); // 9.12: brand colours are mirrored, validated per role
   assert.equal(b.font, undefined);
   assert.deepEqual(Object.keys(cleanBrief(null)).length, Object.keys(b).length);
 });
@@ -112,7 +112,7 @@ test('round trip: PUT state → GET campaigns returns the validated copy', async
   assert.equal(c.brief.ctaAr, 'اطلب قائمة الأسعار');
   assert.deepEqual(c.brief.channels, ['facebook', 'email']);
   assert.deepEqual(c.brief.why, ['Clinics: 70% qualified (30 leads)']);
-  assert.equal(c.brief.colors, undefined);
+  assert.deepEqual(c.brief.colors, {}); // 9.12: mirrored; this test state has none
   assert.equal(c.versions, undefined);
   assert.equal(c.target, undefined);
   assert.deepEqual(c.assets, [

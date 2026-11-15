@@ -6,7 +6,7 @@
  * server features must be able to trust (name, recommendation link, brief wording, asset
  * text and status) into company-scoped tables — the same pattern as knowledge.js and data.js:
  * malformed items are skipped and counted, never fatal, and server code reads the tables,
- * never the blob. Not mirrored: design settings, colours, fonts, versions, uploaded images.
+ * never the blob. Not mirrored: design settings, fonts, versions, uploaded images. Brand colours are mirrored since 9.12 (brief.colors).
  */
 import crypto from 'node:crypto';
 
@@ -15,6 +15,7 @@ export const CHANNELS = ['facebook', 'instagram', 'linkedin', 'email'];
 export const ASSET_TYPES = ['post', 'landing', 'email', 'guide'];
 export const ASSET_CHANNELS = [...CHANNELS, 'web', 'internal'];
 export const LANGS = ['en', 'ar'];
+export const COLOR_ROLES = ['primary', 'secondary', 'ink', 'surface', 'accent'];
 export const ASSET_STATUSES = ['draft', 'approved'];
 const BRIEF_TEXT = ['objective', 'concept', 'metric', 'audienceEn', 'audienceAr', 'messageEn', 'messageAr', 'offerEn', 'offerAr', 'ctaEn', 'ctaAr', 'url', 'tone'];
 const BRIEF_LISTS = ['why', 'pointsEn', 'pointsAr'];
@@ -32,6 +33,9 @@ export function cleanBrief(b) {
     out[k] = (Array.isArray(src[k]) ? src[k] : []).filter((x) => typeof x === 'string' && x.trim() !== '').slice(0, LIMITS.list).map((x) => x.slice(0, LIMITS.text));
   }
   out.channels = [...new Set((Array.isArray(src.channels) ? src.channels : []).filter((x) => CHANNELS.includes(x)))];
+  // Brand colours (9.12): five roles, each a 6-digit hex or left out. The image prompt reads them from here.
+  const col = isObj(src.colors) ? src.colors : {};
+  out.colors = Object.fromEntries(COLOR_ROLES.filter((k) => typeof col[k] === 'string' && /^#[0-9A-Fa-f]{6}$/.test(col[k])).map((k) => [k, col[k].toUpperCase()]));
   return out;
 }
 
