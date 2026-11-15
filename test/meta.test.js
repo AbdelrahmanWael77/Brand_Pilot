@@ -203,6 +203,19 @@ test('sync: posts and media in the window become Meta rows; gaps are counted, no
   assert.equal(info.lastSyncAt, new Date(NOW).toISOString());
 });
 
+test('sync with only: each platform card reads just its own platform; anything else is 400', async () => {
+  baseGraph();
+  calls.length = 0;
+  const fb = await (await call('POST', `/api/companies/${co}/integrations/meta/sync`, alice, { days: 30, only: 'facebook' })).json();
+  assert.deepEqual(fb.rows.map((x) => x.platform), ['facebook', 'facebook']);
+  assert.equal(calls.some((u) => u.pathname.endsWith('IG1/media')), false); // Instagram was not asked for
+  calls.length = 0;
+  const ig = await (await call('POST', `/api/companies/${co}/integrations/meta/sync`, alice, { days: 30, only: 'instagram' })).json();
+  assert.deepEqual(ig.rows.map((x) => x.platform), ['instagram']);
+  assert.equal(calls.some((u) => u.pathname.endsWith('P1/feed')), false); // the Page feed was not asked for
+  assert.equal((await call('POST', `/api/companies/${co}/integrations/meta/sync`, alice, { only: 'linkedin' })).status, 400);
+});
+
 test('sync errors: expired token asks to reconnect, throttling is 429, bad input 400, isolation 404', async () => {
   baseGraph();
   assert.equal((await call('POST', `/api/companies/${co}/integrations/meta/sync`, alice, { days: 0 })).status, 400);

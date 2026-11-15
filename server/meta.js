@@ -9,7 +9,7 @@
  *        manages (with each Page token and linked Instagram account), stores everything encrypted
  *        (AES-256-GCM, key TOKEN_KEY) and redirects back to the app.
  *   GET  /api/companies/:id/integrations/meta → connection info (never a token).
- *   POST /api/companies/:id/integrations/meta/sync { days } → reads posts and their insights and
+ *   POST /api/companies/:id/integrations/meta/sync { days, only?: facebook|instagram } → reads posts and their insights and
  *        RETURNS rows in the Meta import schema; the browser imports them through the same pipeline
  *        as a file (validation, server mirror, audit and reports are unchanged). Nothing is written
  *        to data_rows here.
@@ -290,6 +290,9 @@ CREATE TABLE IF NOT EXISTS meta_connections (
     if (!row) return res.status(404).json({ error: 'not_connected' });
     const days = req.body && req.body.days !== undefined ? Number(req.body.days) : 90;
     if (!Number.isInteger(days) || days < 1 || days > 365) return res.status(400).json({ error: 'invalid_days' });
+    // 9.14: the Facebook and Instagram cards each sync only their own platform. One connection serves both.
+    const only = req.body && req.body.only !== undefined ? req.body.only : null;
+    if (only !== null && only !== 'facebook' && only !== 'instagram') return res.status(400).json({ error: 'invalid_only' });
     const wait = limiter.retryAfter(req.user.id);
     if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
     limiter.hit(req.user.id);
@@ -305,7 +308,7 @@ CREATE TABLE IF NOT EXISTS meta_connections (
         accounts.pages++;
         // Facebook: the Page feed, newest first, until posts are older than the window.
         const posts = [];
-        let feed = await graph(`${p.id}/feed`, { fields: 'id,created_time,message,shares', limit: 100 }, pageToken);
+        let feed = only === 'instagram' ? null : await graph(`${p.id}/feed`, { fields: 'id,created_time,message,shares', limit: 100 }, pageToken);
         outer: while (feed) {
           for (const post of feed.data || []) {
             if (String(post.created_time) < sinceIso) break outer;
@@ -325,7 +328,7 @@ CREATE TABLE IF NOT EXISTS meta_connections (
         });
         for (const r of fb) if (r) rows.push(r); else if (r === null) skipped.noInsights++;
         // Instagram: the linked professional account's media in the window.
-        if (p.ig && !capped) {
+        if (p.ig && !capped && only !== 'facebook') {
           accounts.instagram++;
           const media = [];
           let page = await graph(`${p.ig}/media`, { fields: 'id,timestamp,media_type,caption', since: Math.floor(since / 1000), limit: 100 }, pageToken);
