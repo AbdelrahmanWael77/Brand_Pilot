@@ -8,6 +8,7 @@ import { createAi } from './ai.js';
 import { createMeta } from './meta.js';
 import { createGoogle } from './google.js';
 import { createCanva } from './canva.js';
+import { createCanvaStudio } from './canvaStudio.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -59,6 +60,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   const meta = createMeta(db, metaOptions);
   const google = createGoogle(db, googleOptions);
   const canva = createCanva(db, canvaOptions);
+  const canvaStudio = createCanvaStudio(db, canva, { ...(fetchUrl ? { fetchUrl } : {}), ...((canvaOptions && canvaOptions.studio) || {}) });
   const signedInOrBack = (name) => (req, res, next) => {
     const user = auth.currentUser(req);
     if (!user) return res.redirect(302, `/?${name}=signin`);
@@ -72,6 +74,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   app.use('/api/companies/:id/integrations/meta', auth.requireAuth, companies.requireCompany, meta.company);
   app.use('/api/companies/:id/integrations/google', auth.requireAuth, companies.requireCompany, google.company);
   app.use('/api/companies/:id/integrations/canva', auth.requireAuth, companies.requireCompany, canva.company);
+  app.use('/api/companies/:id/canva', auth.requireAuth, companies.requireCompany, canvaStudio.router);
   app.use('/api/companies', auth.requireAuth, companies.router);
   // Whether an AI key is set on this server. Says nothing else: no key, no model, no provider detail.
   app.get('/api/ai/status', auth.requireAuth, (_req, res) => res.json({ configured: ai.configured }));

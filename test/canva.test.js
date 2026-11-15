@@ -27,7 +27,7 @@ let refreshes = 0;
 function baseCanva() {
   refreshes = 0;
   C = {
-    'POST api.canva.com/rest/v1/oauth/token': (b) => (b.grant_type === 'authorization_code'
+    'POST api.canva.com/auth/v1/oauth/token': (b) => (b.grant_type === 'authorization_code'
       ? { access_token: 'ACCESS-1', refresh_token: 'REFRESH-1', token_type: 'Bearer', expires_in: 14400, scope: CANVA_SCOPES.join(' ') }
       : b.refresh_token === `REFRESH-${refreshes + 1}`
         ? { access_token: `ACCESS-${++refreshes + 1}`, refresh_token: `REFRESH-${refreshes + 1}`, token_type: 'Bearer', expires_in: 14400, scope: CANVA_SCOPES.join(' ') }
@@ -162,15 +162,15 @@ test('callback refusals: used / unknown / expired state, another user, denied co
   clock = NOW;
   assert.equal(await go(`error=access_denied&state=${(await start()).searchParams.get('state')}`), '/?canva=denied');
   assert.equal(await go('code=x&state=whatever', null), '/?canva=signin');
-  C['POST api.canva.com/rest/v1/oauth/token'] = { access_token: 'A', expires_in: 10 };
+  C['POST api.canva.com/auth/v1/oauth/token'] = { access_token: 'A', expires_in: 10 };
   assert.equal(await go(`code=x&state=${(await start()).searchParams.get('state')}`), '/?canva=no_refresh');
-  C['POST api.canva.com/rest/v1/oauth/token'] = { status: 400, body: { error: 'invalid_request', error_description: 'bad verifier' } };
+  C['POST api.canva.com/auth/v1/oauth/token'] = { status: 400, body: { error: 'invalid_request', error_description: 'bad verifier' } };
   assert.equal(await go(`code=x&state=${(await start()).searchParams.get('state')}`), '/?canva=failed');
 });
 
 test('a failing profile read does not stop the connection; fewer granted scopes are recorded as granted', async () => {
   baseCanva();
-  C['POST api.canva.com/rest/v1/oauth/token'] = { access_token: 'ACCESS-1', refresh_token: 'REFRESH-1', expires_in: 14400, scope: 'asset:write design:content:write' };
+  C['POST api.canva.com/auth/v1/oauth/token'] = { access_token: 'ACCESS-1', refresh_token: 'REFRESH-1', expires_in: 14400, scope: 'asset:write design:content:write' };
   C['GET api.canva.com/rest/v1/users/me/profile'] = () => assert.fail('profile must not be read without profile:read');
   const st = (await start()).searchParams.get('state');
   assert.equal((await call('GET', `/api/integrations/canva/callback?code=CODE&state=${st}`, alice)).headers.get('location'), '/?canva=connected');
@@ -203,7 +203,7 @@ test('check: uses the stored access token while it is valid, then refreshes once
 test('check: a revoked connection asks to reconnect (409) and says so afterwards; Canva 429 → 429, 403 → 403; own allowance; isolation', async () => {
   await connect();
   clock = NOW + 5 * 3600_000;
-  C['POST api.canva.com/rest/v1/oauth/token'] = { status: 400, body: { error: 'invalid_grant', error_description: 'revoked' } };
+  C['POST api.canva.com/auth/v1/oauth/token'] = { status: 400, body: { error: 'invalid_grant', error_description: 'revoked' } };
   const r = await call('POST', K() + '/check', alice);
   assert.equal(r.status, 409);
   assert.deepEqual(await r.json(), { error: 'canva_reauth' });

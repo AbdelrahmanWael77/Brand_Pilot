@@ -1,5 +1,6 @@
 /**
- * Canva connection (task 10.4a): each company connects its own Canva account. Sign-in only — no design calls yet.
+ * Canva connection (task 10.4a, per user since 10.4c): every user connects their own Canva account, once per
+ * company they work in. The connection is what server/canvaStudio.js uses to call Canva's MCP server for that user.
  *
  * Same design as server/google.js, with what Canva asks for (docs read 2026-11-15, canva.dev/docs/apps/rest-apis):
  *   POST /api/companies/:id/integrations/canva/start → { url } of Canva's consent screen. Authorization code
@@ -15,18 +16,26 @@
  *   DELETE /api/companies/:id/integrations/canva → revokes the token at Canva (best effort) and forgets it.
  *
  * Canva's refresh tokens are single use: every refresh returns a new one, which replaces the stored one in the
- * same statement as the new access token. `accessToken(companyId)` is what later design calls use.
+ * same statement as the new access token. `accessToken(companyId, userId)` is what the design calls use.
+ *
+ * The sign-in follows what Canva's MCP server publishes (read 2026-11-15 without credentials):
+ *   https://api.canva.com/.well-known/oauth-protected-resource/connect/v1/mcp → authorization server www.canva.com,
+ *   whose metadata names the authorize URL below and the token URL https://api.canva.com/auth/v1/oauth/token, PKCE S256.
+ * The `resource` parameter (RFC 8707) names the MCP server, as the MCP authorization rules ask of a client.
  *
  * Config: CANVA_CLIENT_ID, CANVA_CLIENT_SECRET, CANVA_REDIRECT_URI (full URL of /api/integrations/canva/callback,
  * registered in the Canva Developer Portal), optional CANVA_SCOPES (space separated; each must be enabled on the
- * integration), TOKEN_KEY (64 hex).
+ * integration), optional CANVA_TOKEN_URL, TOKEN_KEY (64 hex).
  */
 import crypto from 'node:crypto';
 import express from 'express';
 import { createLimiter } from './auth.js';
 import { sealer } from './meta.js';
 
-export const CANVA_SCOPES = ['profile:read', 'design:meta:read', 'design:content:read', 'design:content:write', 'asset:read', 'asset:write', 'brandtemplate:meta:read', 'brandtemplate:content:read'];
+// From the scopes Canva's MCP server asks for in its 401 answer (read 2026-11-15), without comments, folders and help.
+export const CANVA_SCOPES = ['profile:read', 'design:meta:read', 'design:content:read', 'design:content:write', 'asset:read', 'asset:write', 'brandtemplate:meta:read', 'brandtemplate:content:read', 'brandkit:read'];
+export const CANVA_MCP_URL = 'https://api.canva.com/connect/v1/mcp';
+const TOKEN_URL = 'https://api.canva.com/auth/v1/oauth/token';
 export const CANVA_LIMITS = { stateMs: 10 * 60_000, timeoutMs: 20_000, name: 200 };
 const AUTH_URL = 'https://www.canva.com/api/oauth/authorize';
 const API = 'https://api.canva.com/rest/v1/';
@@ -49,6 +58,7 @@ export function canvaConfig(env = process.env) {
     redirectUri: String(env.CANVA_REDIRECT_URI || '').trim(),
     tokenKey: String(env.TOKEN_KEY || '').trim(),
     scopes: asked.length ? asked : CANVA_SCOPES,
+    tokenUrl: /^https:\/\/api\.canva\.com\//.test(String(env.CANVA_TOKEN_URL || '').trim()) ? String(env.CANVA_TOKEN_URL).trim() : TOKEN_URL,
   };
   c.configured = !!(c.clientId && c.clientSecret && /^https?:\/\//.test(c.redirectUri) && /^[0-9a-f]{64}$/i.test(c.tokenKey));
   return c;
@@ -71,7 +81,7 @@ CREATE TABLE IF NOT EXISTS canva_states (
   expires_at INTEGER NOT NULL
 );
 CREATE TABLE IF NOT EXISTS canva_connections (
-  company_id     TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
+  company_id     TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
   user_id        TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   refresh_token  TEXT NOT NULL,
   access_token   TEXT,
@@ -79,8 +89,19 @@ CREATE TABLE IF NOT EXISTS canva_connections (
   scopes         TEXT NOT NULL DEFAULT '',
   name           TEXT,
   connected_at   INTEGER NOT NULL,
-  last_error     TEXT
+  last_error     TEXT,
+  PRIMARY KEY (company_id, user_id)
 );`);
+  // 10.4a kept one connection per company. A connection now belongs to one user in one company: rebuild the old table.
+  if (db.prepare('PRAGMA table_info(canva_connections)').all().filter((c) => c.pk > 0).length === 1) {
+    db.exec(`ALTER TABLE canva_connections RENAME TO canva_connections_old;
+CREATE TABLE canva_connections (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  refresh_token TEXT NOT NULL, access_token TEXT, access_expires INTEGER, scopes TEXT NOT NULL DEFAULT '', name TEXT,
+  connected_at INTEGER NOT NULL, last_error TEXT, PRIMARY KEY (company_id, user_id));
+INSERT INTO canva_connections SELECT company_id, user_id, refresh_token, access_token, access_expires, scopes, name, connected_at, last_error FROM canva_connections_old;
+DROP TABLE canva_connections_old;`);
+  }
   const q = {
     addState: db.prepare('INSERT INTO canva_states (state_hash, user_id, company_id, verifier, expires_at) VALUES (?, ?, ?, ?, ?)'),
     takeState: db.prepare('DELETE FROM canva_states WHERE state_hash = ? RETURNING user_id, company_id, verifier, expires_at'),
@@ -88,13 +109,13 @@ CREATE TABLE IF NOT EXISTS canva_connections (
     member: db.prepare('SELECT 1 FROM memberships WHERE user_id = ? AND company_id = ?'),
     save: db.prepare(`INSERT INTO canva_connections (company_id, user_id, refresh_token, access_token, access_expires, scopes, name, connected_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(company_id) DO UPDATE SET user_id = excluded.user_id, refresh_token = excluded.refresh_token, access_token = excluded.access_token,
+      ON CONFLICT(company_id, user_id) DO UPDATE SET refresh_token = excluded.refresh_token, access_token = excluded.access_token,
         access_expires = excluded.access_expires, scopes = excluded.scopes, name = excluded.name, connected_at = excluded.connected_at, last_error = NULL`),
-    get: db.prepare('SELECT * FROM canva_connections WHERE company_id = ?'),
-    rotate: db.prepare('UPDATE canva_connections SET refresh_token = ?, access_token = ?, access_expires = ?, last_error = NULL WHERE company_id = ?'),
-    named: db.prepare('UPDATE canva_connections SET name = ? WHERE company_id = ?'),
-    failed: db.prepare('UPDATE canva_connections SET last_error = ? WHERE company_id = ?'),
-    drop: db.prepare('DELETE FROM canva_connections WHERE company_id = ?'),
+    get: db.prepare('SELECT * FROM canva_connections WHERE company_id = ? AND user_id = ?'),
+    rotate: db.prepare('UPDATE canva_connections SET refresh_token = ?, access_token = ?, access_expires = ?, last_error = NULL WHERE company_id = ? AND user_id = ?'),
+    named: db.prepare('UPDATE canva_connections SET name = ? WHERE company_id = ? AND user_id = ?'),
+    failed: db.prepare('UPDATE canva_connections SET last_error = ? WHERE company_id = ? AND user_id = ?'),
+    drop: db.prepare('DELETE FROM canva_connections WHERE company_id = ? AND user_id = ?'),
   };
   const box = config.configured ? sealer(config.tokenKey) : null;
   const limiter = createLimiter(checkLimit);
@@ -123,26 +144,27 @@ CREATE TABLE IF NOT EXISTS canva_connections (
     throw new CanvaError('canva_failed', 502, `HTTP ${res.status} ${msg}`);
   }
 
-  /** One refresh at a time per company: Canva's refresh tokens are single use, so two parallel refreshes would lose the connection. */
+  /** One refresh at a time per connection: Canva's refresh tokens are single use, so two parallel refreshes would lose the connection. */
   const refreshing = new Map();
   /** A valid access token for this company's connection, refreshed (and the refresh token replaced) when it is about to expire. */
-  async function accessToken(companyId) {
+  async function accessToken(companyId, userId) {
     if (!config.configured) throw new CanvaError('canva_not_configured', 503);
-    const row = q.get.get(companyId);
+    const row = q.get.get(companyId, userId);
+    const key = companyId + ' ' + userId;
     if (!row) throw new CanvaError('canva_reauth', 409, 'not connected');
     if (row.access_token && row.access_expires > now() + 60_000) return box.open(row.access_token);
-    if (refreshing.has(companyId)) return refreshing.get(companyId);
+    if (refreshing.has(key)) return refreshing.get(key);
     const p = (async () => {
       try {
-        const t = await call(`${API}oauth/token`, { method: 'POST', form: { grant_type: 'refresh_token', refresh_token: box.open(row.refresh_token) } });
+        const t = await call(config.tokenUrl, { method: 'POST', form: { grant_type: 'refresh_token', refresh_token: box.open(row.refresh_token) } });
         if (!t.access_token || !t.refresh_token) throw new CanvaError('canva_failed', 502, 'no tokens on refresh');
-        q.rotate.run(box.seal(t.refresh_token), box.seal(t.access_token), now() + (Number(t.expires_in) || 14_400) * 1000, companyId);
+        q.rotate.run(box.seal(t.refresh_token), box.seal(t.access_token), now() + (Number(t.expires_in) || 14_400) * 1000, companyId, userId);
         return t.access_token;
       } finally {
-        refreshing.delete(companyId);
+        refreshing.delete(key);
       }
     })();
-    refreshing.set(companyId, p);
+    refreshing.set(key, p);
     return p;
   }
 
@@ -156,10 +178,12 @@ CREATE TABLE IF NOT EXISTS canva_connections (
     if (!row) return { connected: false };
     return { connected: true, name: row.name || null, scopes: row.scopes ? row.scopes.split(' ') : [], connectedAt: new Date(row.connected_at).toISOString(), needsReconnect: row.last_error === 'reauth' };
   };
-  const fail = (res, e, companyId) => {
+  /** Canva refused the stored permission: the screens show "Connect again" until the user does. */
+  const needsReconnect = (companyId, userId) => q.failed.run('reauth', companyId, userId);
+  const fail = (res, e, companyId, userId) => {
     if (!(e instanceof CanvaError)) throw e;
     if (e.detail) console.error(`Canva: ${e.code} (${e.detail})`);
-    if (e.code === 'canva_reauth' && companyId) q.failed.run('reauth', companyId);
+    if (e.code === 'canva_reauth' && companyId) needsReconnect(companyId, userId);
     return res.status(e.status).json({ error: e.code });
   };
 
@@ -171,7 +195,7 @@ CREATE TABLE IF NOT EXISTS canva_connections (
     if (!st || st.user_id !== req.user.id || st.expires_at < now() || !q.member.get(req.user.id, st.company_id)) return back('invalid');
     if (req.query.error || !req.query.code) return back('denied');
     try {
-      const t = await call(`${API}oauth/token`, { method: 'POST', form: { grant_type: 'authorization_code', code: String(req.query.code), code_verifier: box.open(st.verifier), redirect_uri: config.redirectUri } });
+      const t = await call(config.tokenUrl, { method: 'POST', form: { grant_type: 'authorization_code', code: String(req.query.code), code_verifier: box.open(st.verifier), redirect_uri: config.redirectUri, resource: CANVA_MCP_URL } });
       if (!t.access_token || !t.refresh_token) return back('no_refresh');
       const granted = String(t.scope || '').split(/\s+/).filter((s) => SCOPE_OK.test(s));
       let name = null;
@@ -192,7 +216,7 @@ CREATE TABLE IF NOT EXISTS canva_connections (
   };
 
   const company = express.Router({ mergeParams: true });
-  company.get('/', (req, res) => res.json({ configured: config.configured, ...info(q.get.get(req.company.id)) }));
+  company.get('/', (req, res) => res.json({ configured: config.configured, ...info(q.get.get(req.company.id, req.user.id)) }));
 
   company.post('/start', (req, res) => {
     if (!config.configured) return res.status(503).json({ error: 'canva_not_configured' });
@@ -208,26 +232,27 @@ CREATE TABLE IF NOT EXISTS canva_connections (
     u.searchParams.set('client_id', config.clientId);
     u.searchParams.set('state', state);
     u.searchParams.set('redirect_uri', config.redirectUri);
+    u.searchParams.set('resource', CANVA_MCP_URL);
     res.json({ url: u.toString() });
   });
 
   company.post('/check', async (req, res) => {
     if (!config.configured) return res.status(503).json({ error: 'canva_not_configured' });
-    if (!q.get.get(req.company.id)) return res.status(404).json({ error: 'not_connected' });
+    if (!q.get.get(req.company.id, req.user.id)) return res.status(404).json({ error: 'not_connected' });
     const wait = limiter.retryAfter(req.user.id);
     if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
     limiter.hit(req.user.id);
     try {
-      const name = await displayName(await accessToken(req.company.id));
-      if (name) q.named.run(name, req.company.id);
+      const name = await displayName(await accessToken(req.company.id, req.user.id));
+      if (name) q.named.run(name, req.company.id, req.user.id);
       res.json({ ok: true, name });
     } catch (e) {
-      return fail(res, e, req.company.id);
+      return fail(res, e, req.company.id, req.user.id);
     }
   });
 
   company.delete('/', async (req, res) => {
-    const row = q.get.get(req.company.id);
+    const row = q.get.get(req.company.id, req.user.id);
     if (row && box) {
       try {
         await call(`${API}oauth/revoke`, { method: 'POST', form: { token: box.open(row.refresh_token) } });
@@ -235,9 +260,9 @@ CREATE TABLE IF NOT EXISTS canva_connections (
         if (!(e instanceof CanvaError)) throw e; // revoking is best effort: the token is forgotten either way
       }
     }
-    q.drop.run(req.company.id);
+    q.drop.run(req.company.id, req.user.id);
     res.json({ ok: true });
   });
 
-  return { callback, company, config, accessToken };
+  return { callback, company, config, accessToken, needsReconnect, connected: (companyId, userId) => !!q.get.get(companyId, userId), fetch: fetchImpl, now };
 }
