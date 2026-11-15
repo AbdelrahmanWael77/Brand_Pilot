@@ -366,3 +366,65 @@ Do:
 
 Acceptance: browser run — for each of the three platforms: import, the step opens, suggestions with reasons appear, confirm some, AI suggestions with the real key, reload, Analytics theme breakdown and the audit use only confirmed themes; a stand-in Meta sync brings captions and opens the step; a re-sync keeps confirmed themes; EN and AR. `npm test` passes.
 ```
+
+## 9.18 — Knowledge Hub: "Approve all" and a category approve that works for one fact
+
+```
+You are continuing the BrandPilot implementation. Read AGENTS.md and IMPLEMENTATION_STATUS.md, then do exactly task 9.18. General rules: top of TASK_PROMPTS.md.
+
+Owner request (2026-11-15): "add approve all in the Knowledge Hub" and "add approve to each Knowledge Hub category as a whole, even if only one fact needs approval".
+
+Today (public/index.html, view `knowView`, actions `kBulk` and `kCat`, filter `supF`):
+- The header button "Approve N source-stated facts" (`kBulk`) appears only when N > 0, approves the facts `supF` allows and publishes a version.
+- Each category card has "Approve the N source-stated facts here" (`kCat`) only when N > 1, and does not publish.
+- `supF(f,c)` = pending, type fact, not `needs` (flagged claim), not `noEv`, not part of an open conflict (`confOpts`). It is the single filter for bulk approval — never copy it inline. Facts flagged "Needs your decision" (promotional claims) can therefore never be approved in bulk, and unanswered questions (`type:'unknown'`) have nothing to approve.
+
+Decisions for this task (reversible — record them in IMPLEMENTATION_STATUS.md and tell the owner):
+- One button at the top and one per category: "Approve all N pending" / "Approve the N pending here" — shown whenever N >= 1 (a single fact is enough). N counts the pending facts of that scope that CAN be approved: `type:'fact'`, pending, not part of an open conflict, not `noEv`. Unanswered questions and conflicts are never counted (a question needs an answer; a conflict needs a choice) — say so in a line under the button when any are skipped.
+- Flagged claims (`needs`) are the owner's call. When the scope holds M >= 1 of them, the button opens a confirmation dialog (use the existing `MODAL` function pattern, as `recPick` does) saying "N facts are ready, M of them are claims (numbers, 'best', guarantees…) that need your decision", listing the M claims with their quotes, and offering three buttons: "Approve all N, including the M claims" / "Approve only the N-M source-stated facts" (the old behaviour, through `supF`) / "Cancel". With M = 0 there is no dialog: one click approves. Every approval is still a user click; the page never approves on its own.
+- The top button keeps today's behaviour of publishing a version (`publishK`); the category button keeps not publishing (its toast already says to publish when the review is done). Both act on the whole scope regardless of the filter tab, and the label shows the count.
+- `approveF(c,f)` stays the only way a fact becomes approved (it also applies brand data from 9.9 — check that approving a brand-identity finding in bulk still sets `c.brand` the same way a single click does).
+
+Do:
+1. Add a pure helper (e.g. `kScope(c,cat?)` returning { ready, claims, skippedUnknown, skippedConflict }) next to `supF`; the buttons, the dialog and the actions all use it so the counts cannot disagree. Do not change `supF`.
+2. Replace the two buttons and extend `kBulk` / `kCat` (or add new actions and keep the old behaviour as the dialog's "only source-stated" choice). Arabic in the singular; counts in EN and AR.
+3. The setup screen has its own bulk button (search `supL` in `setupView`) — keep it consistent or leave it and say why. Update `journey(c)` only if its wording no longer matches.
+
+Acceptance: browser run on a throwaway account with sources that give (a) plain facts in several categories, (b) one category with exactly ONE pending fact, (c) a flagged claim ("cut no-shows by 40%"), (d) an unanswered question, (e) a conflict if you can produce one. Check: the category with one fact shows the button and approves it; "Approve all" with only plain facts approves in one click and publishes the version; with a claim present the dialog appears and each of its three buttons does what it says (the claim stays pending after "only source-stated"); questions and conflicts stay pending and are mentioned; the approved facts show up in `GET /api/companies/:id/facts?status=approved` with their evidence; EN and AR, 375 px, reload keeps everything. `npm test` passes; page script passes `node --check`.
+```
+
+## 9.19 — Knowledge Hub: an honest card for a question nobody has answered
+
+```
+You are continuing the BrandPilot implementation. Read AGENTS.md and IMPLEMENTATION_STATUS.md, then do exactly task 9.19. General rules: top of TASK_PROMPTS.md.
+
+Owner report (2026-11-15, screenshot of the "Calls to action" category): the card for the missing-information question "What is the one action you most want visitors to take?" opens "Source and evidence" and shows Source: "Derived across sources", Evidence: "No provided source mentions this.", Extracted: <date>, Status: "Awaiting review". The owner says the sentence is weird: there is no evidence — that is the whole point of the card.
+
+Where (public/index.html): `extract(c)` ends with `REQ.forEach(([cat,q])=>…add({cat,type:'unknown',text:q,ev:'No provided source mentions this.'}))` — the placeholder `ev` keeps every finding shaped the same; `findCard(c,f)` draws the "Source and evidence" `<details>` for every finding, so an unknown question gets a source line ("Derived across sources" is just the fallback for a finding with no source) and a quoted "evidence" that is not evidence.
+
+Do:
+1. For `f.type==='unknown'` the card's details block must not say "Source" or "Evidence" at all. Replace it with a short panel, e.g. summary "Why am I being asked this?" and one line: "None of your sources says this yet, so nothing is claimed. Your answer becomes an approved fact with you as its source." Rows: Asked on <date>, Status "Waiting for your answer" (not "Awaiting review" — nothing is awaiting review). If a source exists for some reason, keep showing it.
+2. Do NOT change the stored placeholder `ev` in a way that breaks anything that reads it: grep server/ and test/ for `No provided source` (none today, grep again), and read the action behind "Save answer" — the answered fact must still be saved with the person as its source (`f.type==='user'`), and the 2.3 rule (no approved fact without evidence) must still hold. If emptying the placeholder is simpler and safe, do that and keep a fallback so old stored findings (which still carry the old sentence) render correctly too — old data must look right without a migration.
+3. Check every other place that shows a finding's evidence: the review list, the setup screen's questions, the Director / audit evidence lines, the exports (strategy.md, knowledge export). None may print "No provided source mentions this." as if it were a quote.
+4. Arabic equivalent in the singular, written naturally (not a literal translation).
+
+Acceptance: browser run EN and AR on a fresh account with a source that leaves several questions open: the unknown cards show the new panel and no "Evidence" row or quoted placeholder anywhere; answering one still produces an approved fact with the right source and evidence (`GET …/facts?status=approved`); a company saved before this change (old placeholder text in storage) shows the new wording; reload keeps it. `npm test` passes; page script passes `node --check`.
+```
+
+## 9.20 — Tag posts: read the whole post in a popup
+
+```
+You are continuing the BrandPilot implementation. Read AGENTS.md and IMPLEMENTATION_STATUS.md, then do exactly task 9.20. General rules: top of TASK_PROMPTS.md.
+
+Owner report (2026-11-15): in the theme-approval step of Data & Integrations ("Tag posts by theme"), a long post cannot be read in full. Keep the table concise as it is, but let a click open a popup with the full post. The popup has a fixed, sensible size and scrolls inside when the post is long.
+
+Where (public/index.html): `tagView(c)`, the `row` function — the Post cell is `<td class="cap" dir="auto" title="…">` showing the caption cut at 150 characters with "…" (the `title` tooltip is the only way to see the rest, and it does not exist on touch screens). The existing dialog mechanism is the global `MODAL` (a string, or a function redrawn on every render — see `recPick`, `sitePick`); `closeModal` and the `.ov` / `.modal` markup in `render()` are shared.
+
+Do:
+1. In the Post cell make the text a real button (`<button class="linklike" data-a="tagPost" data-v="<row index>">`, keyboard-focusable, Enter / Space work) that looks like the text, not like a heavy button; show a small hint only when the caption was actually cut ("Read all" / «اقرأ المنشور كاملاً»). A caption of 150 characters or less may use the same trigger for consistency — pick one and be consistent. The "No caption in the file" case has nothing to open.
+2. `A.tagPost(i)` sets `MODAL=()=>postModal(C(), i)` and renders. `postModal` shows: platform, date, theme (confirmed / suggested, if any) and language as small read-only badges, then the full caption in a scroll box (`dir="auto"`, `white-space:pre-wrap`, long unbroken strings wrap with `overflow-wrap:anywhere`), and a Close button. Size: fixed width about 560 px but never wider than the viewport minus a 16 px gutter; text area a fixed height (about 50vh, never over 60vh) with its own vertical scroll, so the dialog size does not change between short and long posts. Use the existing modal styles; add a class only if needed. Esc and a click on the backdrop close it (check what `closeModal` already does); focus moves into the dialog and returns to the trigger.
+3. Do not add theme-picking inside the popup (out of scope) and do not change the table, the filters or the bulk actions. Reading a post changes no data.
+4. Captions are untrusted file content: escape with `esc()`. EN and AR labels; an Arabic caption in the English interface and an English one in the Arabic interface both read correctly.
+
+Acceptance: browser run with a posts file holding a short caption, a 3,000-character caption, a caption with one 300-character word and an Arabic caption (make the file yourself in git-ignored data/): each opens in a popup of the same size, the long ones scroll inside it, nothing overflows at 375 px, Esc / backdrop / Close work, focus returns to the row, the table behind it is unchanged and no theme changes by reading. EN and AR. `npm test` passes; page script passes `node --check`.
+```

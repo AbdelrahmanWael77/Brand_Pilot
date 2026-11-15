@@ -1,0 +1,5 @@
+﻿"Post ID","Account ID","Account username","Account name",Description,"Duration (sec)","Publish time",Permalink,"Post type","Data comment",Date,Views,Reach,Likes,Shares,Follows,Comments,Saves
+9000000000000001,1,example_account,"Example Co","Autumn offer
+
+Two lines of caption",0,"10/02/2026 09:30",https://www.instagram.com/p/EXAMPLE1/,"IG image",,Lifetime,"1,540",830,52,4,1,6,9
+9000000000000002,1,example_account,"Example Co","وصف عربي للمنشور",0,"10/16/2026 18:05",https://www.instagram.com/p/EXAMPLE2/,"IG carousel",,Lifetime,720,410,20,1,0,2,3
