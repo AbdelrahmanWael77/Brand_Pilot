@@ -428,3 +428,11 @@ Do:
 
 Acceptance: browser run with a posts file holding a short caption, a 3,000-character caption, a caption with one 300-character word and an Arabic caption (make the file yourself in git-ignored data/): each opens in a popup of the same size, the long ones scroll inside it, nothing overflows at 375 px, Esc / backdrop / Close work, focus returns to the row, the table behind it is unchanged and no theme changes by reading. EN and AR. `npm test` passes; page script passes `node --check`.
 ```
+
+## 9.21 — Brand identity cards can be edited (done 2026-11-15)
+
+Owner request (2026-11-15, screenshot of the Brand identity category): "there is no edit for the brand identity cards, add support for edit". Done — see the Task queue row 9.21 in IMPLEMENTATION_STATUS.md for what was built and checked.
+
+## 9.22 — Knowledge Hub: a Rejected tab with Edit and Back to review (done 2026-11-15)
+
+Owner request (2026-11-15): "add a rejected tab in knowledge hub and support actions on it, like edit and to put back to review". Done — see the Task queue row 9.22 in IMPLEMENTATION_STATUS.md.
