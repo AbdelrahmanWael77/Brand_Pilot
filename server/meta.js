@@ -119,8 +119,8 @@ export function fbRow(post, insights) {
   return row;
 }
 
-/** The post's own words for theme suggestions (task 9.16): one line, at most 500 characters; nothing when empty. */
-const caption = (v) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, 500) : '');
+/** The post's own words for theme suggestions (task 9.16): one line, at most 2000 characters (the Tag posts popup shows it; the theme model reads the first 500); nothing when empty. */
+const caption = (v) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, 2000) : '');
 
 /** Instagram media + its insights → one Meta row, or null when Meta gave no reach. */
 export function igRow(media, insights) {
