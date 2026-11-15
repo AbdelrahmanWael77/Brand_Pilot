@@ -1,6 +1,7 @@
-// Brand identity read from a company's website: colour, font and logo CANDIDATES (task 9.8).
+// Brand identity read from a company's website: colour, font and logo CANDIDATES (task 9.8; every logo
+// version, task 9.23: images, <picture> sources, CSS backgrounds and inline SVG — found by rules, no model).
 // The page is read through the guarded reader (fetchUrl.js); so is every stylesheet it links and the one
-// logo image that is downloaded — the same address checks apply to each of those reads, whatever host
+// logo images that are downloaded — the same address checks apply to each of those reads, whatever host
 // they point at. No model is called and nothing is stored: the browser shows the result as pending
 // findings and the user approves or rejects them (task 9.9).
 //
@@ -9,7 +10,7 @@
 // into a page as markup. An SVG over the size limit is refused like any other image.
 import { FetchUrlError } from './fetchUrl.js';
 
-export const BRAND = { colors: 8, neutrals: 4, fonts: 4, sheets: 5, sheetBytes: 1024 * 1024, logoBytes: 500_000, logoTries: 4, notes: 20, url: 2000 };
+export const BRAND = { colors: 8, neutrals: 4, fonts: 4, sheets: 5, sheetBytes: 1024 * 1024, logoBytes: 500_000, logoTries: 8, logos: 4, notes: 20, url: 2000 };
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'image/gif'];
 const BRAND_NAME = /primary|brand|accent|secondary|main|theme|highlight|cta|link|action/i;
 const GENERIC = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded', 'emoji', 'math', 'fangsong', '-apple-system', 'blinkmacsystemfont', 'inherit', 'initial', 'unset', 'revert']);
@@ -185,39 +186,155 @@ export function stylesheetLinks(html, pageUrl) {
   return out;
 }
 
+// A word in the site's own naming → which background the logo was drawn for. NEVER used to decide anything:
+// sites use "logo-dark" both for a dark logo (made to sit on a light background) and for a logo made for dark
+// backgrounds, so the word is only shown to the user as a hint. A dark word and a light word together → no hint.
+const word = (w) => new RegExp('(?<![a-z])(?:' + w + ')(?![a-z])', 'i');
+const DARK_WORD = word('dark|black|mono');
+const LIGHT_WORD = word('light|white|inverse|inverted|negative|reversed');
+export function logoHint(...parts) {
+  const text = parts.map((p) => p ?? '').join(' ');
+  const d = DARK_WORD.test(text);
+  const l = LIGHT_WORD.test(text);
+  return d && !l ? 'dark' : l && !d ? 'light' : null;
+}
+const firstSrcset = (v) => (v ?? '').split(',')[0].trim().split(/\s+/)[0] || null;
+
 /**
- * Pure: where the logo may be, best first: an image named "logo" inside <header> or <nav>, an image named
- * "logo" elsewhere on the page, the apple-touch-icon, the largest icon, and last the share image (og:image),
- * which is often a picture and not the logo. → `[{ url, from }]`, once each.
+ * Pure: where the logo may be, as `{ url, from, hint }` once each, in this order:
+ *  1 an image named "logo" in <header> / <nav>, then elsewhere on the page (its src; the first address of its
+ *    srcset only when it has no usable src — a 2x file is the same logo, not another version);
+ *  2 inside a <picture> that holds a logo-named image, each <source srcset> that has a media query or no type
+ *    (a source with only a type is the same logo in another file format); prefers-color-scheme: dark →
+ *    hint 'dark-scheme';
+ *  3 a style rule whose selector contains "logo" with background / background-image: url(…), resolved against
+ *    the address of its style sheet (`sheets` = `[{ name, css, url }]`);
+ *  4 fallbacks, flagged `fallback: true`: the apple-touch-icon, the largest icon, and last the share image
+ *    (og:image), which is often a picture and not the logo.
  */
-export function logoCandidates(html, pageUrl) {
+export function logoCandidates(html, pageUrl, sheets = []) {
   const out = [];
-  const add = (href, from) => {
-    const u = href && !/^data:/i.test(href) ? resolve(href, pageUrl) : null;
-    if (u && !out.some((c) => c.url === u)) out.push({ url: u, from });
+  const add = (href, from, hint, fallback = false, base = pageUrl) => {
+    const u = href && !/^data:/i.test(href) ? resolve(href, base) : null;
+    if (u && !out.some((c) => c.url === u)) out.push({ url: u, from, hint: hint ?? logoHint(href), ...(fallback ? { fallback: true } : {}) });
   };
+  const names = (tag) => ['src', 'alt', 'class', 'id'].map((a) => attr(tag, a) ?? '').join(' ');
   const logoImgs = (part, from) => {
     for (const tag of tags(part, 'img')) {
-      if (/logo/i.test(['src', 'alt', 'class', 'id'].map((a) => attr(tag, a) ?? '').join(' '))) add(attr(tag, 'src'), from);
+      if (!/logo/i.test(names(tag))) continue;
+      const src = attr(tag, 'src');
+      const hint = logoHint(names(tag));
+      if (src && !/^data:/i.test(src)) add(src, from, hint);
+      else add(firstSrcset(attr(tag, 'srcset')), from, hint);
     }
   };
-  for (const m of html.matchAll(/<(header|nav)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi)) logoImgs(m[2], `img in ${m[1].toLowerCase()}`);
+  for (const m of html.matchAll(/<(header|nav)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi)) logoImgs(m[2], 'img in ' + m[1].toLowerCase());
   logoImgs(html, 'img on the page');
+  for (const m of html.matchAll(/<picture\b[^>]*>([\s\S]*?)<\/picture\s*>/gi)) {
+    if (!tags(m[1], 'img').some((t) => /logo/i.test(names(t)))) continue;
+    for (const tag of tags(m[1], 'source')) {
+      const media = attr(tag, 'media') ?? '';
+      if (!media && attr(tag, 'type')) continue;
+      const address = firstSrcset(attr(tag, 'srcset'));
+      add(address, 'source in picture', /prefers-color-scheme\s*:\s*dark/i.test(media) ? 'dark-scheme' : logoHint(address, media));
+    }
+  }
+  for (const sh of sheets) {
+    for (const r of rules(String(sh.css ?? '').replace(/\/\*[\s\S]*?\*\//g, ' '))) {
+      if (!/logo/i.test(r.selector)) continue;
+      for (const [k, v] of declarations(r.body)) {
+        if (k !== 'background' && k !== 'background-image') continue;
+        for (const u of v.matchAll(/url\(\s*(["']?)(.*?)\1\s*\)/gi)) {
+          add(decode(u[2].trim()), 'background of ' + r.selector.replace(/\s+/g, ' ').slice(0, 80) + ' in ' + sh.name, logoHint(r.selector, u[2]), false, sh.url ?? pageUrl);
+        }
+      }
+    }
+  }
   const links = tags(html, 'link').map((tag) => ({ rel: (attr(tag, 'rel') ?? '').toLowerCase(), href: attr(tag, 'href'), size: Math.max(0, ...(attr(tag, 'sizes') ?? '').split(/\s+/).map((s) => parseInt(s, 10) || 0)) }));
-  for (const l of links.filter((x) => /apple-touch-icon/.test(x.rel)).sort((a, b) => b.size - a.size)) add(l.href, 'apple-touch-icon');
-  for (const l of links.filter((x) => /(?:^|\s)icon(?:\s|$)/.test(x.rel)).sort((a, b) => b.size - a.size)) add(l.href, 'icon');
-  for (const tag of tags(html, 'meta')) if ((attr(tag, 'property') ?? attr(tag, 'name') ?? '').toLowerCase() === 'og:image') add(attr(tag, 'content'), 'og:image');
+  for (const l of links.filter((x) => /apple-touch-icon/.test(x.rel)).sort((a, b) => b.size - a.size)) add(l.href, 'apple-touch-icon', null, true);
+  for (const l of links.filter((x) => /(?:^|\s)icon(?:\s|$)/.test(x.rel)).sort((a, b) => b.size - a.size)) add(l.href, 'icon', null, true);
+  for (const tag of tags(html, 'meta')) if ((attr(tag, 'property') ?? attr(tag, 'name') ?? '').toLowerCase() === 'og:image') add(attr(tag, 'content'), 'og:image', null, true);
   return out;
+}
+
+/**
+ * Pure: the logo drawn in the page as an inline <svg> in <header> / <nav> (its own class / id / aria-label /
+ * <title>, or the element or link around it, contains "logo"), made into stand-alone SVG images.
+ * → `{ found: [{ from, hint, versions: [{ svg, recoloured? }] }], skipped: [reason] }`
+ * An SVG with a script, an event attribute, <foreignObject>, or any reference that is not "#…" (href, url(),
+ * <use> to another file, @import) is refused: reason 'script' | 'event_attribute' | 'foreign_object' |
+ * 'external_reference' | 'too_large' | 'no_viewbox'. Its colour may come from the page (currentColor, or no
+ * fill of its own) and cannot be known here: then TWO versions are returned, with #111111 and with #FFFFFF,
+ * both `recoloured: true`.
+ */
+export function inlineLogos(html) {
+  const found = [];
+  const skipped = [];
+  const seen = new Set();
+  for (const m of html.matchAll(/<(header|nav)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi)) {
+    const part = m[2];
+    for (const sm of part.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg\s*>/gi)) {
+      const before = part.slice(0, sm.index);
+      const around = [];
+      const prev = /<\w+\b([^>]*)>\s*$/.exec(before);
+      if (prev) around.push(prev[1]);
+      const openA = before.lastIndexOf('<a ');
+      if (openA >= 0 && openA > before.lastIndexOf('</a')) around.push(before.slice(openA, before.indexOf('>', openA) + 1));
+      const own = ['class', 'id', 'aria-label'].map((a) => attr(sm[1], a) ?? '').join(' ') + ' ' + (/<title\b[^>]*>([\s\S]*?)<\/title\s*>/i.exec(sm[2])?.[1] ?? '');
+      const ctx = around.map((t) => ['class', 'id'].map((a) => attr(t, a) ?? '').join(' ')).join(' ');
+      if (!/logo/i.test(own + ' ' + ctx)) continue;
+      const svg = sm[0];
+      if (seen.has(svg)) continue;
+      seen.add(svg);
+      const bad = /<script/i.test(svg) ? 'script'
+        : /\son[a-z]+\s*=/i.test(svg) ? 'event_attribute'
+        : /<foreignObject/i.test(svg) ? 'foreign_object'
+        : /\b(?:xlink:)?href\s*=\s*(?!["']?#)/i.test(svg) || /url\(\s*(?!["']?#)/i.test(svg) || /@import/i.test(svg) ? 'external_reference'
+        : null;
+      if (bad) {
+        skipped.push(bad);
+        continue;
+      }
+      let open = '<svg' + sm[1].replace(/\/\s*$/, '');
+      if (!/\sxmlns\s*=/i.test(' ' + sm[1])) open += ' xmlns="http://www.w3.org/2000/svg"';
+      if (/xlink:/i.test(svg) && !/xmlns:xlink/i.test(sm[1])) open += ' xmlns:xlink="http://www.w3.org/1999/xlink"';
+      if (!attr(sm[1], 'viewBox')) {
+        const w = parseFloat(attr(sm[1], 'width') ?? '');
+        const h = parseFloat(attr(sm[1], 'height') ?? '');
+        if (!(w > 0 && h > 0)) {
+          skipped.push('no_viewbox');
+          continue;
+        }
+        open += ' viewBox="0 0 ' + w + ' ' + h + '"';
+      }
+      const base = open + '>' + sm[2] + '</svg>';
+      const fromPage = /currentColor/i.test(base) || !/\b(?:fill|stroke|stop-color)\s*[=:]/i.test(base);
+      const versions = fromPage
+        ? ['#111111', '#FFFFFF'].map((c) => ({ svg: /currentColor/i.test(base) ? base.replace(/currentColor/gi, c) : base.replace(/^<svg/, '<svg fill="' + c + '"'), recoloured: true }))
+        : [{ svg: base }];
+      if (versions.some((v) => Buffer.byteLength(v.svg) > BRAND.logoBytes)) {
+        skipped.push('too_large');
+        continue;
+      }
+      found.push({ from: 'inline svg in header', hint: logoHint(own, ctx), versions });
+    }
+  }
+  return { found, skipped };
 }
 
 const code = (e) => (e instanceof FetchUrlError ? e.code : 'fetch_failed');
 
+const ACCEPT = 'image/png,image/svg+xml,image/webp,image/jpeg,image/gif';
+
 /**
  * Brand candidates of one website page. `fetchUrl` is the guarded reader; a failure to read the page
  * itself passes through as its error, a failed style sheet or logo becomes a note.
- * → `{ url, colors, neutrals, fonts, logo: { url, type, dataUrl, from } | null, notes: [{ code, … }] }`
+ * → `{ url, colors, neutrals, fonts, logo, logos: [{ url, type, dataUrl, from, hint, recoloured? }], notes }`
+ * `logos` is every logo version found, best first, at most `BRAND.logos`; `logo` = `logos[0] ?? null`
+ * (what the 9.9 screen reads). An inline SVG has `url: null`. The icon and og:image are tried only when no
+ * logo-named image or inline SVG was kept.
  * Note codes: stylesheet_failed { url, error }, stylesheets_skipped { count }, logo_failed { url, error },
- * logo_share_image, no_logo, no_colors, no_fonts.
+ * logo_inline_skipped { reason }, logos_more { count }, logo_share_image, no_logo, no_colors, no_fonts.
  */
 export async function websiteBrand(fetchUrl, rawUrl) {
   const page = await fetchUrl(rawUrl);
@@ -230,30 +347,60 @@ export async function websiteBrand(fetchUrl, rawUrl) {
   const read = await Promise.all(
     hrefs.slice(0, BRAND.sheets).map((u) =>
       fetchUrl(u, { types: ['text/css'], maxBytes: BRAND.sheetBytes, accept: 'text/css,*/*;q=0.1' }).then(
-        (r) => ({ name: fileName(r.url), css: r.text }),
+        (r) => ({ name: fileName(r.url), css: r.text, url: r.url }),
         (e) => ({ failed: { code: 'stylesheet_failed', url: u, error: code(e) } }),
       ),
     ),
   );
   for (const r of read) if (r.failed) note(r.failed); // in page order, whichever answered first
   const inline = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style\s*>/gi)].map((m) => m[1]).join('\n');
-  const sheets = [...read.filter((r) => !r.failed), ...(inline.trim() ? [{ name: 'the page', css: inline }] : [])];
+  const sheets = [...read.filter((r) => !r.failed), ...(inline.trim() ? [{ name: 'the page', css: inline, url: page.url }] : [])];
   const { colors, neutrals, fonts } = readStyles(html, sheets);
   if (!colors.length) note({ code: 'no_colors' });
   if (!fonts.length) note({ code: 'no_fonts' });
 
-  let logo = null;
-  for (const c of logoCandidates(html, page.url).slice(0, BRAND.logoTries)) {
+  const logos = [];
+  const seen = new Set();
+  let tries = 0;
+  let left = 0;
+  const keep = (v) => {
+    if (seen.has(v.dataUrl)) return false; // the same bytes under another address
+    seen.add(v.dataUrl);
+    logos.push(v);
+    return true;
+  };
+  const download = async (c) => {
+    tries++;
     try {
-      const r = await fetchUrl(c.url, { types: IMAGE_TYPES, binary: true, maxBytes: BRAND.logoBytes, accept: 'image/png,image/svg+xml,image/webp,image/jpeg,image/gif' });
+      const r = await fetchUrl(c.url, { types: IMAGE_TYPES, binary: true, maxBytes: BRAND.logoBytes, accept: ACCEPT });
       if (!r.bytes.length) throw new FetchUrlError('fetch_failed', 502);
-      logo = { url: r.url, type: r.type, dataUrl: `data:${r.type};base64,${r.bytes.toString('base64')}`, from: c.from };
-      if (c.from === 'og:image') note({ code: 'logo_share_image' });
-      break;
+      return keep({ url: r.url, type: r.type, dataUrl: `data:${r.type};base64,${r.bytes.toString('base64')}`, from: c.from, hint: c.hint });
     } catch (e) {
       note({ code: 'logo_failed', url: c.url, error: code(e) });
+      return false;
+    }
+  };
+  const all = logoCandidates(html, page.url, sheets);
+  for (const c of all.filter((x) => !x.fallback)) {
+    if (logos.length >= BRAND.logos || tries >= BRAND.logoTries) left++;
+    else await download(c);
+  }
+  const svgs = inlineLogos(html);
+  for (const reason of svgs.skipped) note({ code: 'logo_inline_skipped', reason });
+  for (const s of svgs.found) {
+    if (logos.length + s.versions.length > BRAND.logos) left++;
+    else for (const v of s.versions) keep({ url: null, type: 'image/svg+xml', dataUrl: 'data:image/svg+xml;base64,' + Buffer.from(v.svg).toString('base64'), from: s.from, hint: s.hint, ...(v.recoloured ? { recoloured: true } : {}) });
+  }
+  if (left) note({ code: 'logos_more', count: left });
+  if (!logos.length) {
+    for (const c of all.filter((x) => x.fallback)) {
+      if (tries >= BRAND.logoTries) break;
+      if (await download(c)) {
+        if (c.from === 'og:image') note({ code: 'logo_share_image' });
+        break;
+      }
     }
   }
-  if (!logo) note({ code: 'no_logo' });
-  return { url: page.url, colors, neutrals, fonts, logo, notes };
+  if (!logos.length) note({ code: 'no_logo' });
+  return { url: page.url, colors, neutrals, fonts, logo: logos[0] ?? null, logos, notes };
 }

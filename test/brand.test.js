@@ -4,7 +4,7 @@ import { Readable } from 'node:stream';
 import { createApp } from '../server/app.js';
 import { openDb } from '../server/db.js';
 import { createFetchUrl, FetchUrlError } from '../server/fetchUrl.js';
-import { parseColor, colorRole, readStyles, stylesheetLinks, logoCandidates, websiteBrand, BRAND } from '../server/brand.js';
+import { parseColor, colorRole, readStyles, stylesheetLinks, logoCandidates, websiteBrand, logoHint, inlineLogos, BRAND } from '../server/brand.js';
 
 // Brand identity from a website (task 9.8). Nothing here touches the real network: the reader's DNS and
 // transport are stubbed as in test/fetchUrl.test.js.
@@ -86,13 +86,13 @@ test('stylesheetLinks and logoCandidates: what the page points at, in order', ()
   const page = PAGE.replace(/<!--[\s\S]*?-->/g, '');
   assert.deepEqual(stylesheetLinks(page, 'https://site.test/'), ['https://site.test/css/main.css?v=3', 'https://cdn.test/lib/theme.css']);
   assert.deepEqual(logoCandidates(page, 'https://site.test/'), [
-    { url: 'https://site.test/img/brand.svg', from: 'img in header' },
-    { url: 'https://img.test/nav-logo.png', from: 'img in nav' },
-    { url: 'https://site.test/banner-logo-partners.png', from: 'img on the page' },
-    { url: 'https://site.test/touch.png', from: 'apple-touch-icon' },
-    { url: 'https://site.test/fav-192.png', from: 'icon' },
-    { url: 'https://site.test/fav-32.png', from: 'icon' },
-    { url: 'https://img.test/share.jpg', from: 'og:image' },
+    { url: 'https://site.test/img/brand.svg', from: 'img in header', hint: null },
+    { url: 'https://img.test/nav-logo.png', from: 'img in nav', hint: null },
+    { url: 'https://site.test/banner-logo-partners.png', from: 'img on the page', hint: null },
+    { url: 'https://site.test/touch.png', from: 'apple-touch-icon', hint: null, fallback: true },
+    { url: 'https://site.test/fav-192.png', from: 'icon', hint: null, fallback: true },
+    { url: 'https://site.test/fav-32.png', from: 'icon', hint: null, fallback: true },
+    { url: 'https://img.test/share.jpg', from: 'og:image', hint: null, fallback: true },
   ]);
   assert.deepEqual(logoCandidates('<img src="javascript:alert(1)" class="logo"><img src="file:///etc/passwd" id="logo">', 'https://site.test/'), []);
 });
@@ -138,14 +138,17 @@ test('websiteBrand: page, style sheets and the first logo, each through the guar
   assert.equal(r.url, 'https://site.test/');
   assert.deepEqual(r.colors.map((c) => c.hex), ['#E11D48', '#1D4ED8', '#38BDF8', '#2563EB', '#10B981', '#4338CA', '#F59E0B']);
   assert.deepEqual(r.fonts.map((f) => f.family), ['Inter', 'Playfair Display']);
-  assert.deepEqual(r.logo, { url: 'https://site.test/img/brand.svg', type: 'image/svg+xml', dataUrl: 'data:image/svg+xml;base64,' + Buffer.from(SVG).toString('base64'), from: 'img in header' });
-  assert.deepEqual(r.notes, []);
+  assert.deepEqual(r.logo, { url: 'https://site.test/img/brand.svg', type: 'image/svg+xml', dataUrl: 'data:image/svg+xml;base64,' + Buffer.from(SVG).toString('base64'), from: 'img in header', hint: null });
+  assert.equal(r.logos[0], r.logo);
   assert.deepEqual(calls.map((c) => [c.url, c.address]), [
     ['https://site.test/', PUBLIC],
     ['https://site.test/css/main.css?v=3', PUBLIC],
     ['https://cdn.test/lib/theme.css', '8.8.8.8'], // another host: allowed, and address-checked like any read
     ['https://site.test/img/brand.svg', PUBLIC],
+    ['https://img.test/nav-logo.png', '1.1.1.1'], // the other versions are tried too (not served by this stand-in site)
+    ['https://site.test/banner-logo-partners.png', PUBLIC],
   ]);
+  assert.deepEqual(r.notes.map((n) => n.code), ['logo_failed', 'logo_failed']);
 });
 
 test('websiteBrand: logo order — too large, wrong type and missing files are skipped and noted', async () => {
@@ -158,14 +161,15 @@ test('websiteBrand: logo order — too large, wrong type and missing files are s
     'https://site.test/touch.png': res(PNG, 'image/png'),
   });
   const r = await websiteBrand(fetchUrl, 'https://site.test/');
-  assert.deepEqual(r.logo, { url: 'https://site.test/touch.png', type: 'image/png', dataUrl: 'data:image/png;base64,' + PNG.toString('base64'), from: 'apple-touch-icon' });
+  assert.deepEqual(r.logo, { url: 'https://site.test/touch.png', type: 'image/png', dataUrl: 'data:image/png;base64,' + PNG.toString('base64'), from: 'apple-touch-icon', hint: null });
+  assert.deepEqual(r.logos, [r.logo]);
   assert.deepEqual(r.notes, [
     { code: 'logo_failed', url: 'https://site.test/img/brand.svg', error: 'too_large' },
     { code: 'logo_failed', url: 'https://img.test/nav-logo.png', error: 'unsupported_type' },
     { code: 'logo_failed', url: 'https://site.test/banner-logo-partners.png', error: 'fetch_failed' },
   ]);
   assert.equal(calls.find((c) => c.url === 'https://img.test/nav-logo.png').address, '1.1.1.1');
-  assert.equal(calls.filter((c) => /png|svg|jpg/.test(c.url)).length, BRAND.logoTries); // then it stops trying
+  assert.equal(calls.filter((c) => /png|svg|jpg/.test(c.url)).length, 4); // three logo-named images, then the apple-touch-icon; the other icons are never tried
 });
 
 test('websiteBrand: private addresses are never requested; the share image is flagged; an empty page says so', async () => {
@@ -190,7 +194,7 @@ test('websiteBrand: private addresses are never requested; the share image is fl
   assert.ok(!calls.some((c) => /internal|169\.254|127\.0/.test(c.url)));
 
   const bare = reader({ 'https://site.test/': html('<p>Hello</p>') });
-  assert.deepEqual(await websiteBrand(bare.fetchUrl, 'https://site.test/'), { url: 'https://site.test/', colors: [], neutrals: [], fonts: [], logo: null, notes: [{ code: 'no_colors' }, { code: 'no_fonts' }, { code: 'no_logo' }] });
+  assert.deepEqual(await websiteBrand(bare.fetchUrl, 'https://site.test/'), { url: 'https://site.test/', colors: [], neutrals: [], fonts: [], logo: null, logos: [], notes: [{ code: 'no_colors' }, { code: 'no_fonts' }, { code: 'no_logo' }] });
   await assert.rejects(websiteBrand(bare.fetchUrl, 'http://internal.test/'), (e) => e instanceof FetchUrlError && e.code === 'blocked_host');
 });
 
@@ -233,7 +237,7 @@ test('route: members only; input validated; nothing stored; errors mapped; allow
   const ok = await brand({ url: 'https://site.test/' }); // 1
   assert.equal(ok.status, 200);
   const j = await ok.json();
-  assert.deepEqual(Object.keys(j), ['url', 'colors', 'neutrals', 'fonts', 'logo', 'notes']);
+  assert.deepEqual(Object.keys(j), ['url', 'colors', 'neutrals', 'fonts', 'logo', 'logos', 'notes']);
   assert.equal(j.colors[1].from, '--color-primary in main.css');
   assert.equal(j.logo.type, 'image/svg+xml');
   const state = await (await call('GET', `/api/companies/${companyId}/state`, alice)).json();
@@ -249,4 +253,117 @@ test('route: members only; input validated; nothing stored; errors mapped; allow
   const limited = await brand({ url: 'https://site.test/' });
   assert.equal(limited.status, 429);
   assert.deepEqual(await limited.json(), { error: 'too_many_attempts' });
+});
+
+// ---- task 9.23: every logo version ----
+const PNG2 = Buffer.from([0x89, 0x50, 0x4e, 0x47, 9, 9, 9, 9]);
+const PNG3 = Buffer.from([0x89, 0x50, 0x4e, 0x47, 7, 7, 7, 7]);
+const png = (b) => res(b, 'image/png');
+const dataUrl = (type, body) => `data:${type};base64,${Buffer.from(body).toString('base64')}`;
+const unurl = (l) => Buffer.from(l.dataUrl.split(',')[1], 'base64').toString();
+const brandOf = (page, routes = {}) => websiteBrand(reader({ 'https://site.test/': html(page), ...routes }).fetchUrl, 'https://site.test/');
+
+test('logo versions: header images in page order, srcset only when there is no src, hint words, logo = logos[0]', async () => {
+  const page = `<header><a class="logo"><img class="logo-dark" src="/a.png"></a><img alt="Site logo white" src="/b.png">
+    <img class="logo" srcset="/c.png 1x, /c2.png 2x"><img class="logo" src="/d.png" srcset="/d2.png 2x"><img src="/menu.png"></header>`;
+  const r = await brandOf(page, { 'https://site.test/a.png': png(PNG), 'https://site.test/b.png': png(PNG2), 'https://site.test/c.png': png(PNG3), 'https://site.test/d.png': png(Buffer.from([0x89, 5, 5])) });
+  assert.deepEqual(r.logos.map((l) => [l.url, l.hint]), [['https://site.test/a.png', 'dark'], ['https://site.test/b.png', 'light'], ['https://site.test/c.png', null], ['https://site.test/d.png', null]]);
+  assert.equal(r.logo, r.logos[0]);
+  assert.ok(r.logos.every((l) => l.type === 'image/png' && l.from === 'img in header'));
+  assert.equal(logoHint('logo-dark-white'), null);
+  assert.equal(logoHint('darkroom'), null); // whole words only
+  assert.equal(logoHint('x/logo_inverted.svg'), 'light');
+});
+
+test('logo versions: a <picture> with a dark-scheme source; format-only sources are not versions', () => {
+  const page = `<picture><source media="(prefers-color-scheme: dark)" srcset="/dark.png 1x, /dark2.png 2x"><source type="image/webp" srcset="/l.webp"><img class="logo" src="/main.png"></picture>
+    <picture><source media="(prefers-color-scheme: dark)" srcset="/other.png"><img src="/photo.jpg"></picture>`;
+  const c = logoCandidates(page, 'https://site.test/');
+  assert.deepEqual(c.map((x) => [x.url, x.hint]), [['https://site.test/main.png', null], ['https://site.test/dark.png', 'dark-scheme']]);
+  assert.equal(c[1].from, 'source in picture');
+});
+
+test('logo versions: a CSS background logo, relative to its own style sheet; private addresses refused', async () => {
+  const page = '<link rel="stylesheet" href="https://cdn.test/css/site.css"><style>.logo-mark{background-image:url(/inline.png)}</style>';
+  const sheet = '/* .logo{background:url(/no.png)} */ .nav .logo, .foot-logo{background: #fff url("../img/bg-logo.png") no-repeat}.logo-white{background-image:url(data:image/png;base64,AAAA)}@media (min-width:1px){.logo.dark{background:url(http://127.0.0.1/x.png)}}.hero{background:url(/hero.png)}';
+  const r = await brandOf(page, { 'https://cdn.test/css/site.css': css(sheet), 'https://cdn.test/img/bg-logo.png': png(PNG), 'https://site.test/inline.png': png(PNG2) });
+  assert.deepEqual(r.logos.map((l) => l.url), ['https://cdn.test/img/bg-logo.png', 'https://site.test/inline.png']);
+  assert.equal(r.logos[0].from, 'background of .nav .logo, .foot-logo in site.css');
+  assert.equal(r.logos[1].from, 'background of .logo-mark in the page');
+  assert.deepEqual(r.notes.filter((n) => n.code === 'logo_failed'), [{ code: 'logo_failed', url: 'http://127.0.0.1/x.png', error: 'blocked_host' }]);
+});
+
+test('logo versions: identical bytes kept once; cap of 4 with logos_more; eight tries at most', async () => {
+  const imgs = Array.from({ length: 7 }, (_, i) => `<img class="logo" src="/l${i}.png">`).join('');
+  const routes = { 'https://site.test/l0.png': png(PNG), 'https://site.test/l1.png': png(PNG) }; // same bytes
+  for (let i = 2; i < 7; i++) routes[`https://site.test/l${i}.png`] = png(Buffer.from([0x89, i]));
+  const r = await brandOf(`<header>${imgs}</header>`, routes);
+  assert.deepEqual(r.logos.map((l) => l.url), ['l0', 'l2', 'l3', 'l4'].map((n) => `https://site.test/${n}.png`));
+  assert.deepEqual(r.notes.filter((n) => n.code === 'logos_more'), [{ code: 'logos_more', count: 2 }]);
+
+  const many = Array.from({ length: 12 }, (_, i) => `<img class="logo" src="/m${i}.png">`).join('');
+  const { fetchUrl, calls } = reader({ 'https://site.test/': html(`<header>${many}</header>`) }); // none of them exists
+  const q = await websiteBrand(fetchUrl, 'https://site.test/');
+  assert.equal(calls.length - 1, BRAND.logoTries);
+  assert.equal(q.notes.filter((n) => n.code === 'logo_failed').length, 8);
+  assert.deepEqual(q.notes.filter((n) => n.code === 'logos_more'), [{ code: 'logos_more', count: 4 }]);
+  assert.equal(q.logo, null);
+});
+
+test('logo versions: the icon and the share image are fallbacks — not added when a logo was kept', async () => {
+  const links = '<link rel="apple-touch-icon" href="/t.png"><link rel="icon" href="/i.png"><meta property="og:image" content="/s.png">';
+  const routes = { 'https://site.test/a.png': png(PNG), 'https://site.test/t.png': png(PNG2), 'https://site.test/s.png': png(PNG3) };
+  const kept = await brandOf(`${links}<header><img class="logo" src="/a.png"></header>`, routes);
+  assert.deepEqual(kept.logos.map((l) => l.url), ['https://site.test/a.png']);
+  const none = await brandOf(`${links}<p>no logo</p>`, routes);
+  assert.deepEqual(none.logos.map((l) => l.from), ['apple-touch-icon']);
+});
+
+const wrap = (svg) => `<header><a href="/" class="brand-logo">${svg}</a></header>`;
+const OWN = '<svg viewBox="0 0 10 10"><title>Nile logo</title><path fill="#e11d48" d="M0 0h10v10z"/></svg>';
+
+test('inline svg logo: own colours → one stand-alone version; currentColor or no fill → two recoloured versions', async () => {
+  const r = await brandOf(wrap(OWN));
+  assert.equal(r.logos.length, 1);
+  assert.deepEqual(r.logos[0], { url: null, type: 'image/svg+xml', dataUrl: dataUrl('image/svg+xml', OWN.replace('<svg viewBox="0 0 10 10">', '<svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">')), from: 'inline svg in header', hint: null });
+
+  const cc = '<svg xmlns="http://www.w3.org/2000/svg" class="logo" viewBox="0 0 4 4"><path fill="currentColor" d="M0 0h4v4z"/></svg>';
+  const two = await brandOf(wrap(cc));
+  assert.deepEqual(two.logos.map(unurl), [cc.replace('currentColor', '#111111'), cc.replace('currentColor', '#FFFFFF')]);
+  assert.ok(two.logos.every((l) => l.recoloured === true && l.url === null));
+
+  const nofill = await brandOf(wrap('<svg aria-label="logo" width="20" height="10"><path d="M0 0h4v4z"/></svg>'));
+  const d2 = nofill.logos.map(unurl);
+  assert.equal(d2.length, 2);
+  assert.ok(d2[0].includes('viewBox="0 0 20 10"') && d2[0].includes('xmlns="http://www.w3.org/2000/svg"') && d2[0].includes('fill="#111111"') && d2[1].includes('fill="#FFFFFF"'));
+});
+
+test('inline svg logo: unsafe or unusable → refused with a note; other svgs ignored', async () => {
+  const bads = {
+    script: '<svg viewBox="0 0 1 1" class="logo"><script>alert(1)</script></svg>',
+    event_attribute: '<svg viewBox="0 0 1 1" class="logo"><rect fill="red" onload="x()"/></svg>',
+    foreign_object: '<svg viewBox="0 0 1 1" class="logo"><foreignObject><p>x</p></foreignObject></svg>',
+    external_reference: '<svg viewBox="0 0 1 1" class="logo"><use href="https://evil.test/a.svg#x"/></svg>',
+    no_viewbox: '<svg class="logo"><rect fill="red"/></svg>',
+  };
+  for (const [reason, svg] of Object.entries(bads)) {
+    const r = await brandOf(wrap(svg));
+    assert.deepEqual(r.logos, [], reason);
+    assert.ok(r.notes.some((n) => n.code === 'logo_inline_skipped' && n.reason === reason), reason);
+  }
+  for (const svg of ['<svg viewBox="0 0 1 1" class="logo"><image href="data:image/png;base64,AAAA"/></svg>', '<svg viewBox="0 0 1 1" class="logo"><rect fill="url(https://evil.test/p)"/></svg>']) {
+    assert.equal(inlineLogos(wrap(svg)).skipped[0], 'external_reference');
+  }
+  assert.equal(inlineLogos(wrap('<svg viewBox="0 0 1 1" class="logo"><use href="#a"/><rect id="a" fill="url(#g)"/></svg>')).found.length, 1); // inside itself is fine
+  assert.equal(inlineLogos(wrap(`<svg viewBox="0 0 1 1" class="logo"><path fill="red" d="${'M0 0'.repeat(BRAND.logoBytes / 3)}"/></svg>`)).skipped[0], 'too_large');
+  assert.equal(inlineLogos('<header><svg viewBox="0 0 1 1" class="menu-icon"><path fill="red"/></svg></header><svg class="logo" viewBox="0 0 1 1"><path fill="red"/></svg>').found.length, 0);
+});
+
+test('inline svg logo: shares the cap of 4 (a recoloured pair needs two places)', async () => {
+  const routes = {};
+  for (let i = 0; i < 3; i++) routes[`https://site.test/p${i}.png`] = png(Buffer.from([0x89, i]));
+  const page = `<header>${[0, 1, 2].map((i) => `<img class="logo" src="/p${i}.png">`).join('')}</header>` + wrap('<svg viewBox="0 0 1 1" class="logo"><path d="M0 0"/></svg>');
+  const r = await brandOf(page, routes);
+  assert.equal(r.logos.length, 3);
+  assert.deepEqual(r.notes.filter((n) => n.code === 'logos_more'), [{ code: 'logos_more', count: 1 }]);
 });
