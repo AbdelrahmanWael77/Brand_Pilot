@@ -1,6 +1,8 @@
 # Continue BrandPilot — owner input first
 
-Read AGENTS.md and IMPLEMENTATION_STATUS.md (Next atomic task; Task queue rows 9.12, 9.13, 10.4a–10.4c). Run `git status`, `npm install`, `npm test` first (260 pass on 2026-11-15).
+Read AGENTS.md and IMPLEMENTATION_STATUS.md (Next atomic task; Task queue rows 9.12, 9.13, 10.4a–10.4c). Run `git status`, `npm install`, `npm test` first (263 pass on 2026-11-15, after task 11).
+
+Task 11 — Creative studio (2026-11-15, Fable 5.2), UNCOMMITTED on local `dev` — read the "Newest — 11" entry under Next atomic task in IMPLEMENTATION_STATUS.md before touching `public/index.html`: fitted headlines and new layouts in `bannerSVG`, 8 looks (`DIRS`, `PDIR`), company templates (`c.styles`), the three-tab post editor (`edSide`), the short-headline suggestion (`server/visualCopy.js`), the Canva gallery with a large preview and self-watching jobs (`cvCard`, `cvZoomHTML`, `cvPoll`), the company library (`libHTML`). Checked with a stand-in Canva and a stub text model only (`data/check-11*.mjs`, 31/31). Next single task: 10.4d, the real Canva check described below. Ask the owner before committing.
 
 State (2026-11-15, Claude Opus 5.5): 9.12 + 9.13 done — AI pictures for campaign posts with Cloudflare Workers AI FLUX.1 [schnell] (`server/imageAi.js`, `server/campaignImage.js`, `aiImgBox` / `A.aiImg` in `public/index.html`). Tested with a stubbed network and a stand-in reply in the browser only.
 

@@ -233,6 +233,9 @@ test('design: the user’s own token calls Canva, the logo goes as a file, propo
   const f = (await (await call('POST', `${S()}/assets/${a.id}/refresh`, alice)).json()).asset;
   assert.equal(f.editUrl, 'https://www.canva.com/design/DAGdesign01/edit?t=2');
   assert.deepEqual(f.images, ['https://cdn.canva.test/c2.png']);
+  // the browser reports that the stored picture no longer loads: the design's fresh thumbnail takes its place
+  const st = (await (await call('POST', `${S()}/assets/${a.id}/refresh`, alice, { stale: true })).json()).asset;
+  assert.deepEqual(st.images, ['https://cdn.canva.test/thumb.png']);
 
   const x = (await (await call('POST', `${S()}/assets/${a.id}/export`, alice)).json()).asset;
   assert.deepEqual(x.images, ['https://export.canva.test/out.png']);

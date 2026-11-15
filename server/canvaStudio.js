@@ -557,7 +557,8 @@ CREATE TABLE IF NOT EXISTS canva_logos (
       else return res.json({ asset: view(row) });
       const got = readResult(result);
       // a design's own thumbnail does not replace a picture the record already has (an export, the chosen proposal)
-      if (row.design_id && arr(row.images).some(isPic)) got.images = [];
+      // … unless the browser reports that picture no longer loads (`stale`: Canva's links expire) — then the fresh thumbnail takes its place
+      if (row.design_id && arr(row.images).some(isPic) && !(isObj(req.body) && req.body.stale === true)) got.images = [];
       const status = row.design_id ? row.status : got.failed ? 'failed' : got.images.length && !/progress|pending|queued|running/.test(got.status) ? 'ready' : 'working';
       store(row, got, result, status);
       res.json({ asset: view(q.get.get(row.id, req.company.id, req.user.id)) });
