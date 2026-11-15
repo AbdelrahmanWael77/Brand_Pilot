@@ -56,7 +56,10 @@ export function computeCampaignQa(campaign, facts, auditItems) {
     'Durations stated in assets match the number in the English offer.',
   );
 
-  chk('claims', 'campaign', ids(copy.filter((a) => RISK.test(txt(a)))), 'No ranking, guarantee, percentage or customer-count wording in any text field (pattern check).');
+  // The brief's own offer wording is checked by 'offer-approved', so it is taken out before the pattern check (10.1).
+  const offers = [b.offerEn, b.offerAr].filter((o) => o.trim()).map((o) => o.toLowerCase());
+  const withoutOffer = (t) => offers.reduce((r, o) => r.split(o).join(' '), t.toLowerCase());
+  chk('claims', 'campaign', ids(copy.filter((a) => RISK.test(withoutOffer(txt(a))))), 'No ranking, guarantee, percentage or customer-count wording in any text field outside the brief offer (pattern check).');
 
   chk(
     'placeholders',
