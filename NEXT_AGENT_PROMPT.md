@@ -1,9 +1,11 @@
-# Continue BrandPilot with task 9.25
+# Continue BrandPilot — ask the owner for the next task
 
-Read AGENTS.md, IMPLEMENTATION_STATUS.md (Next atomic task and 9.25 queue entry), then the 9.25 prompt in TASK_PROMPTS.md. Inspect git status and retain the current frontend work.
+Read AGENTS.md and IMPLEMENTATION_STATUS.md (Next atomic task, Task queue rows 9.24, 9.25, 10.4b). Run `git status`, `npm install`, `npm test` first.
 
-Recovery point: feat/9.24-logo-versions-ui at ec22bb2 (also local dev), with uncommitted public/index.html, IMPLEMENTATION_STATUS.md and NEXT_AGENT_PROMPT.md. Cached origin/dev was 38efd13, an ancestor. Sync with origin/dev where Git writes and GitHub access are available. The last attempt could not write .git/FETCH_HEAD, GitHub DNS failed, and Git could not create .git/index.lock.
+State (2026-11-15, Claude Opus 5.5): local `dev` holds 9.23, 9.24 and 9.25, not pushed — ask the owner before pushing. `origin/feat/9.23-logo-versions` was fast-forwarded into `dev`.
 
-9.23 is already in ec22bb2. 9.24 is implemented in public/index.html. It converts logo versions to PNG, measures contrast, exposes per-version overrides, and snapshots version IDs and overrides for new campaigns and explicit Change impact updates. Keep those semantics. Scratch browser fixture: run node data/check-9.24.mjs and open data/check-9.24.html in Chrome (the headless DOM showed PASS 29). Syntax check and git diff --check passed. The 17 non-HTTP brand tests passed against a stubbed reader. Full npm test hit connect EACCES for all 222 failures (19 of 241 passed); rerun it with loopback access before integrating. No live website was read.
+- 9.24 (several logo versions): `c.brand.logos = [{ id, lum, tone, box, use, from }]`, at most 4, `c.brand.logo` = the first. Every version is stored as PNG (`logoPng`) and measured (`logoTone`); `logoFor(c, brief, bg)` picks by contrast with the background; new campaigns snapshot `logos` + `logoUses` (`logoBrief`), existing campaigns change only through Change impact. Codex finished this part in the same checkout; keep its semantics.
+- 9.25 (Create content): a Logo card (`mkLogoCard`) and a Colours card (`mkColourCard`). The colour editor is the 9.21 one on the user's own approved colours card with id `user`.
+- Browser checks: launch config `brandpilot-check` (port 3100, `data/browser-check.db`), dev account from `npm run seed:dev` with `PORT=3100`.
 
-Next single task: 9.25, split Create content into Logo and Colours cards. Reuse the Knowledge Hub logo version picker and the brand colours editor. Verify adding/replacing/removing/assigning a logo version affects only that version and keeps campaign media, and that colour editing/reset affects only colours. Verify separate pending counts and EN/AR. Run acceptance checks and update both handoff files.
+No task is left that needs no owner input: 10.4b needs the Canva keys, 9.10–9.13 / 10.2 need approval, 7.2 / 7.4 need the Meta and Google apps. Ask the owner what is next. Reply in at most 6 lines: changed / tested / blocker / next.
