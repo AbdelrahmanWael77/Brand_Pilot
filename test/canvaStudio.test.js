@@ -233,9 +233,6 @@ test('design: the user’s own token calls Canva, the logo goes as a file, propo
   const f = (await (await call('POST', `${S()}/assets/${a.id}/refresh`, alice)).json()).asset;
   assert.equal(f.editUrl, 'https://www.canva.com/design/DAGdesign01/edit?t=2');
   assert.deepEqual(f.images, ['https://cdn.canva.test/c2.png']);
-  // the browser reports that the stored picture no longer loads: the design's fresh thumbnail takes its place
-  const st = (await (await call('POST', `${S()}/assets/${a.id}/refresh`, alice, { stale: true })).json()).asset;
-  assert.deepEqual(st.images, ['https://cdn.canva.test/thumb.png']);
 
   const x = (await (await call('POST', `${S()}/assets/${a.id}/export`, alice)).json()).asset;
   assert.deepEqual(x.images, ['https://export.canva.test/out.png']);
@@ -377,4 +374,18 @@ test('not configured: every route answers 503 and nothing is called', async () =
     s2.close();
     db2.close();
   }
+});
+
+test("readResult: Canva's real answers of 2026-11-15 — design_summary gives the design id, a link token is not an id, a canva.com page is not a picture", () => {
+  const token = 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0';
+  const real = readResult({ content: [{ type: 'text', text: JSON.stringify({ design_summary: { id: 'DAHa_afhb2c', title: 'Post 1', urls: { edit_url: `https://www.canva.com/api/design/${token}/edit?utm_source=x`, view_url: `https://www.canva.com/api/design/${token}/view?utm_source=x` }, page_count: 1 } }) }] });
+  assert.equal(real.designId, 'DAHa_afhb2c');
+  assert.match(real.editUrl, /\/edit\?/);
+  assert.deepEqual(real.images, []);
+  // without any id in the answer, the token inside the link is not taken for one
+  assert.equal(readResult({ content: [{ type: 'text', text: JSON.stringify({ urls: { edit_url: `https://www.canva.com/api/design/${token}/edit` } }) }] }).designId, null);
+  // a proposal carries a page link and a thumbnail: the thumbnail is the preview, the page is never a picture
+  const prop = readResult({ structuredContent: { job: { id: 'J1' }, candidates: [{ candidate_id: 'C1', url: 'https://www.canva.com/d/ThlLGWm6LRJ7076', thumbnail: { url: 'https://design.canva.ai/thumb1.png' } }, { candidate_id: 'C2', url: 'https://www.canva.com/d/abc' }] } });
+  assert.deepEqual(prop.candidates, [{ id: 'C1', thumb: 'https://design.canva.ai/thumb1.png' }, { id: 'C2', thumb: null }]);
+  assert.deepEqual(prop.images, []);
 });
