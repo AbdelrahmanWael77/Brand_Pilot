@@ -179,15 +179,15 @@ test('toolErrorCode and canvaBrief', () => {
   assert.ok(!img.includes('Apply today') && !img.includes('We are hiring\n')); // a picture carries no wording
   assert.match(img, /#1D4ED8/);
   assert.match(img, /Extra direction from the user \(style only\): bright/);
-  const des = canvaBrief({ company: 'Nile Dental', campaign: camp, asset, kind: 'design', lang: 'en', colors: [], note: '', logoAttached: false });
+  const des = canvaBrief({ company: 'Nile Dental', campaign: camp, asset, kind: 'design', lang: 'en', colors: [], note: '' });
   assert.match(des, /- headline: We are hiring\n- cta: Apply today/);
   assert.ok(!des.includes('⟦') && !des.includes('Long caption')); // unfilled placeholders and the caption are not design wording
-  assert.match(des, /Do not draw, invent or imitate a company logo/);
+  assert.match(des, /Do not draw, write, invent or imitate any logo/);
   assert.match(des, /Do not add prices, discounts, offers/);
-  const ar = canvaBrief({ company: 'Nile Dental', campaign: camp, asset: null, kind: 'design', lang: 'ar', colors: [], logoAttached: true });
+  const ar = canvaBrief({ company: 'Nile Dental', campaign: camp, asset: null, kind: 'design', lang: 'ar', colors: [] });
   assert.match(ar, /Arabic \(right to left\)/);
   assert.match(ar, /Audience: مساعدون/);
-  assert.match(ar, /Place the attached company logo unchanged/);
+  assert.match(ar, /the real logo is placed there afterwards/); // never "place the attached logo": Canva redrew it
 });
 
 test('without a connection: tools and generate answer 409, the list is empty; outsiders 404; signed out 401', async () => {
@@ -214,7 +214,8 @@ test('design: the user’s own token calls Canva, the logo goes as a file, propo
   assert.deepEqual(mcpCalls.slice(0, 3).map((c) => c.method), ['initialize', 'notifications/initialized', 'tools/list']);
   const g = toolCalls(TOOLS.design)[0].params.arguments;
   assert.equal(g.design_type, 'instagram_post');
-  assert.deepEqual(g.asset_ids, ['ASSET-LOGO']);
+  assert.equal(g.asset_ids, undefined); // the logo is uploaded to the user's Canva but not handed to the generator
+  assert.match(g.query, /Do not draw, write, invent or imitate any logo/);
   assert.match(g.query, /"Nile Dental"/);
   assert.match(g.query, /- headline: We are hiring dental assistants/);
   assert.match(g.query, /#1D4ED8, #0F172A\./); // 'red' is not a colour value BrandPilot passes on

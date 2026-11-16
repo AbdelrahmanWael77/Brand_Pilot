@@ -179,7 +179,7 @@ const hexes = (list) => (Array.isArray(list) ? list : []).map((x) => (typeof x =
  * wording (both from the validated campaign mirror), approved colours, the user's extra direction.
  * An image is asked without any text or logo; a design is asked to use the wording as given and to add no claim.
  */
-export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpose, note, logoAttached }) {
+export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpose, note }) {
   const ar = lang === 'ar';
   const b = campaign.brief || {};
   const pick = (en, arv) => one((ar ? arv : en) || en || arv, STUDIO_LIMITS.field);
@@ -218,7 +218,9 @@ export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpo
     if (words.length) lines.push('Use this wording as given; shorten it if needed, but add no other text:', ...words);
     else lines.push(`Headline: ${one(campaign.name, 200)}. Add no other text.`);
     if (colors.length) lines.push(`Brand colours: ${colors.join(', ')}.`);
-    lines.push(logoAttached ? 'Place the attached company logo unchanged. Do not draw, alter or imitate any other logo.' : 'Do not draw, invent or imitate a company logo; leave a clear corner where the real logo will be placed.');
+    // Seen with the owner's account on 2026-11-16: with the logo attached as an asset, every proposal still carried a redrawn, wrong logo. So Canva is asked
+    // for NO logo at all, and BrandPilot places the real file on top when the design is used (bannerSVG, design.fill = 'full').
+    lines.push('Do not draw, write, invent or imitate any logo, logo mark, emblem or company wordmark, not even for this company, and do not set the company name as a logo. Keep the top of the design free of text and marks: the real logo is placed there afterwards.');
     lines.push('Do not add prices, discounts, offers, dates, numbers, awards, testimonials or claims that are not in the wording above. No logos of other companies.');
   }
   const extra = one(note, STUDIO_LIMITS.note);
@@ -515,7 +517,7 @@ CREATE TABLE IF NOT EXISTS canva_logos (
       const name = b.kind === 'image' ? TOOLS.image : TOOLS.design;
       const tool = tools.get(name);
       if (!tool) throw new CanvaError('canva_tool_missing', 501, `tool ${name} is not offered; offered: ${[...tools.keys()].join(', ')}`);
-      // The real logo goes to Canva as a file, never as a description. Only when the design tool takes assets.
+      // The real logo is uploaded to the user's Canva (so it is in their uploads when they edit the design there), but it is NOT handed to the generator: see canvaBrief.
       let logo = 'none';
       let logoId = null;
       if (b.kind === 'design' && brand.logo) {
@@ -532,14 +534,14 @@ CREATE TABLE IF NOT EXISTS canva_logos (
           }
         }
       }
-      const brief = canvaBrief({ company: req.company.name, campaign, asset, kind: b.kind, lang, colors: brand.colors, purpose: brand.kindOf(campaign.id), note, logoAttached: !!logoId });
+      const brief = canvaBrief({ company: req.company.name, campaign, asset, kind: b.kind, lang, colors: brand.colors, purpose: brand.kindOf(campaign.id), note });
       const id = crypto.randomUUID();
       q.add.run(id, req.company.id, req.user.id, campaign.id, asset ? asset.id : null, b.kind, lang, 'working', note, brief, logo, now(), now());
       row = q.get.get(id, req.company.id, req.user.id);
       const channel = asset ? asset.channel : (campaign.brief.channels || [])[0];
       const want = b.kind === 'image'
         ? { prompt: brief, aspect: { pick: ['1:1', 'square', '1024x1024'] }, intent: 'Create a campaign picture in BrandPilot' }
-        : { prompt: brief, designType: { pick: [`${channel || 'instagram'}_post`, 'instagram_post', 'facebook_post', 'social_media', 'poster'] }, assets: logoId ? [logoId] : undefined, intent: 'Create a campaign post design in BrandPilot' };
+        : { prompt: brief, designType: { pick: [`${channel || 'instagram'}_post`, 'instagram_post', 'facebook_post', 'social_media', 'poster'] }, intent: 'Create a campaign post design in BrandPilot' };
       const result = await mcp.callTool(key(req), tok, name, want);
       const got = readResult(result);
       const status = statusOf(b.kind, got);
