@@ -1,3 +1,11 @@
+# On branch `redesign/new-product-identity` — owner review of the full UI redesign
+
+This branch holds the "Ledger" redesign of `public/index.html` (see the REDESIGN line at the top of IMPLEMENTATION_STATUS.md and `design-system/brandpilot/MASTER.md`). It must not reach `dev` until the owner approves. Next on this branch, only if the owner asks: recompose the screens still listed as "restyled only" (start with Knowledge Hub review flow, then Analytics), then dark mode. Run `npm test` and check EN + AR in the browser after each change.
+
+If you are working on `dev` instead, ignore this section and continue below.
+
+---
+
 # Continue BrandPilot — Analytics channel comparison (task 15), next slice
 
 Read AGENTS.md and IMPLEMENTATION_STATUS.md ("Newest — 15" under Next atomic task, and "In progress / uncommitted"). Run `git status`, `npm install`, `npm test` first. If a test fails with `fetch failed … bad port`, re-run it: that is a pre-existing flaky random port (`listen(0)`), not a regression.
