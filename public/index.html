@@ -1131,6 +1131,61 @@ td:has(>.shb){white-space:nowrap}
 :is(.gk,.ledger)>.kpi.na>b{display:inline-flex;align-items:center;gap:6px;font:600 15px/1.3 var(--f-ui);color:var(--ink-3);margin:6px 0 2px}
 :is(.gk,.ledger)>.kpi>span.muted{font-size:13px;color:var(--ink-3);margin-top:auto}
 section.ledger{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+
+/* Campaign "Calendar & links" tab: timeline with previews + readable tracking links */
+.pl{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}
+.pl .card{padding:22px 24px}
+.pl-h{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.pl-h h2{margin:0 0 4px;font-size:19px}
+.pl-h p{margin:0;max-width:52ch;font-size:13.5px}
+.pl-sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 8px;border:1px solid var(--rule);border-radius:var(--r-2);background:var(--surface-2)}
+.pl-sum div{padding:12px 16px}
+.pl-sum div+div{border-inline-start:1px solid var(--rule)}
+.pl-sum dt{font-size:12.5px;color:var(--ink-3);font-weight:550}
+.pl-sum dd{margin:2px 0 0;font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pl-sum dd small{font-size:13px;font-weight:550;color:var(--ink-3);letter-spacing:0;margin-inline-start:2px}
+.pl-sum dd.ok{color:var(--pos)}
+.pl-wk{font-size:13px;font-weight:650;color:var(--ink-3);margin:20px 0 8px;display:flex;align-items:center;gap:10px}
+.pl-wk::after{content:"";flex:1;height:1px;background:var(--rule)}
+.pl-tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pl-it{display:grid;grid-template-columns:56px 64px minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r-2);background:var(--surface);transition:border-color .14s var(--ease),box-shadow .14s var(--ease)}
+.pl-it:hover{border-color:var(--rule-2);box-shadow:0 6px 18px -12px rgba(14,23,38,.25)}
+.pl-d{display:flex;flex-direction:column;align-items:center;line-height:1.1;padding:6px 0;border-radius:10px;background:var(--signal-soft);color:var(--signal)}
+.pl-d span{font-size:11.5px;font-weight:600}
+.pl-d b{font-size:22px;font-weight:700;color:var(--ink);margin:1px 0}
+.pl-th{width:64px;height:64px;border-radius:10px;overflow:hidden;background:var(--paper-2);border:1px solid var(--rule)}
+.pl-th svg{width:100%;height:100%;display:block}
+.pl-th-i{display:grid;place-items:center;color:var(--ink-3)}
+.pl-b{display:flex;flex-direction:column;gap:5px;min-width:0}
+.pl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.pl-t{font-size:15px;font-weight:650;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-ch{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:650;padding:3px 9px;border-radius:99px;background:#EEF0F4;color:#3A4556}
+.pl-ch i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.pl-ch.ch-facebook{background:#E7F0FE;color:#0B5BD3}
+.pl-ch.ch-instagram{background:#FCE8F1;color:#B0235A}
+.pl-ch.ch-linkedin{background:#E4EFF9;color:#0A5AA8}
+.pl-ch.ch-email{background:#F1ECFB;color:#5B3DB5}
+.pl-lg{font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:6px;border:1px solid var(--rule-2);color:var(--ink-2)}
+.pl-tm{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.pl-st{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--warn);font-weight:550}
+.pl-st.ok{color:var(--pos)}
+.pl-open{white-space:nowrap}
+[dir=rtl] .pl-open svg,[dir=rtl] .pl-row .pl-open svg{transform:scaleX(-1)}
+.pl-tag{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 14px;border-radius:var(--r-2);background:var(--signal-soft);border:1px solid color-mix(in srgb,var(--signal) 20%,transparent)}
+.pl-tag span{display:block;font-size:12.5px;font-weight:600;color:var(--signal)}
+.pl-tag code{font-size:14px;font-weight:600;color:var(--ink);word-break:break-all}
+.pl-dest{font-size:13px;color:var(--ink-2);margin:10px 0 0}
+.pl-dest span{font-weight:600;color:var(--ink);word-break:break-all}
+.pl-ln{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pl-ln li{border:1px solid var(--rule);border-radius:var(--r-2);padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.pl-ln .pl-row{flex-wrap:nowrap}.pl-ln .pl-t{flex:0 1 auto;min-width:0}.pl-ln .pl-row .btn{flex:none;white-space:nowrap}
+.pl-ps{display:flex;gap:6px;flex-wrap:wrap}
+.pl-ps span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink);background:var(--surface-2);border:1px solid var(--rule);border-radius:7px;padding:3px 8px}
+.pl-ps i{font-style:normal;font-weight:550;color:var(--ink-3)}
+.pl-full summary{font-size:12.5px;color:var(--ink-3);cursor:pointer;width:fit-content}
+.pl-full code{display:block;margin-top:6px;font-size:12.5px;line-height:1.5;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:8px 10px;word-break:break-all}
+@media(max-width:1100px){.pl{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.pl .card{padding:16px}.pl-sum{grid-template-columns:repeat(2,minmax(0,1fr))}.pl-sum div:nth-child(3){border-inline-start:0}.pl-sum div:nth-child(n+3){border-top:1px solid var(--rule)}.pl-it{grid-template-columns:48px 52px minmax(0,1fr);gap:10px}.pl-th{width:52px;height:52px}.pl-open{grid-column:1/-1;justify-self:end}}
 </style>
 </head>
 <body>
@@ -2631,8 +2686,20 @@ V.studio=c=>{if(!c.mk&&!curCamp(c))c.mk=mkNew();if(c.mk)return makerView(c);cons
   <section class="card"><div class="row" style="margin-bottom:10px"><h2>${aTitle(a)}</h2><span class="badge ${a.status==='approved'?'b-ok':'b-unk'}">${a.status==='approved'?L('Approved','معتمد'):L('Draft','مسودة')}</span><span class="sp"></span>${a.type==='post'?`<select data-c="fm" style="width:auto" aria-label="${L('Format','المقاس')}">${Object.entries(FMT).map(([k,f])=>`<option value="${k}" ${(S.ui.fm||'sq')===k?'selected':''}>${f[2]}</option>`).join('')}</select>`:''}${a.type==='landing'?`<div class="tabs"><button class="${S.ui.lpw!=='m'?'on':''}" data-a="lpw" data-v="d">${L('Desktop','كمبيوتر')}</button><button class="${S.ui.lpw==='m'?'on':''}" data-a="lpw" data-v="m">${L('Mobile','موبايل')}</button></div>`:''}</div>
   ${a.flag?`<div class="note b" style="margin-bottom:10px">${L('A campaign change touched text you edited by hand and BrandPilot could not update it safely. Check it, then mark it reviewed.','تغيير في الحملة مسّ نصاً عدّلته يدوياً ولم يستطع BrandPilot تحديثه بأمان. راجعه ثم علّمه كمُراجَع.')} <button class="btn sm" data-a="aReview" data-v="${a.id}">${L('Mark reviewed','علّم كمُراجَع')}</button></div>`:''}<div id="pv">${assetPreview(a,camp,c)}</div>${dirStrip(c,camp,a)}${a.type==='post'?canvaShelf(c,camp,a):''}</section>
   ${edSide(c,camp,a)}</div>`}
- if(tab==='plan'){const cal=calendar(c,camp);return top+`<div class="grid g2"><section class="card"><div class="row"><h2>${L('Suggested content calendar','تقويم المحتوى المقترح')}</h2><span class="sp"></span><button class="btn sm" data-a="ex" data-v="calendar">CSV</button></div><p class="muted">${L('A suggestion for your team to schedule. BrandPilot does not publish.','اقتراح ليجدوله فريقك. BrandPilot لا ينشر.')}</p><div class="tw"><table><thead><tr><th>${L('Date','التاريخ')}</th><th>${L('Time','الوقت')}</th><th>${L('Channel','القناة')}</th><th>${L('Asset','المادة')}</th></tr></thead><tbody>${cal.map(r=>`<tr><td>${r.date}</td><td>${r.time}</td><td>${CHN[r.a.channel]}</td><td>${aTitle(r.a)}</td></tr>`).join('')}</tbody></table></div></section>
-  <section class="card"><div class="row"><h2>${L('Tracking links','روابط التتبع')}</h2><span class="sp"></span><button class="btn sm" data-a="ex" data-v="utm">CSV</button></div><p class="muted">${L('Import results carrying this utm_campaign value and BrandPilot ties them back to this campaign.','استورد النتائج الحاملة لقيمة utm_campaign هذه وسيربطها BrandPilot بهذه الحملة.')}</p><div class="tw"><table><thead><tr><th>${L('Asset','المادة')}</th><th>URL</th></tr></thead><tbody>${camp.assets.filter(a=>a.type==='post'||a.type==='email').map(a=>`<tr><td>${aTitle(a)}</td><td style="word-break:break-all;font-size:12px" dir="ltr">${esc(utm(camp,a))}</td></tr>`).join('')}</tbody></table></div></section></div>`}
+ if(tab==='plan'){const cal=calendar(c,camp),loc=S.lang==='ar'?'ar-u-nu-latn':'en-GB',fd=(d,o)=>new Date(d+'T00:00:00Z').toLocaleDateString(loc,Object.assign({timeZone:'UTC'},o)),
+  nm=a=>a.type==='post'?L('Post','منشور')+' '+a.n:aTitle(a),chip=a=>`<span class="pl-ch ch-${a.channel}"><i aria-hidden="true"></i>${CHN[a.channel]||esc(a.channel)}</span>`,lang=a=>`<span class="pl-lg">${a.lang==='ar'?'ع':'EN'}</span>`,
+  thumb=a=>{if(a.type!=='post')return`<div class="pl-th pl-th-i" aria-hidden="true">${ic(a.type==='email'?'send':'file',20)}</div>`;const im=a.design&&a.design.img&&c.media.find(x=>x.id===a.design.img);try{return`<div class="pl-th" aria-hidden="true">${bannerSVG({...a,id:a.id+'-cal',design:{...a.design,img:im&&im.data&&im.data.length<2e5?a.design.img:null}},camp,c,FMT.sq)}</div>`}catch(e){return`<div class="pl-th pl-th-i" aria-hidden="true">${ic('file',20)}</div>`}},
+  wk=d=>addDays(d,-new Date(d+'T00:00:00Z').getUTCDay()),weeks=[];cal.forEach(r=>{const w=wk(r.date),g=weeks.find(x=>x.w===w);g?g.rows.push(r):weeks.push({w,rows:[r]})});
+  const span=cal.length?dayDiff(cal[0].date,cal[cal.length-1].date)+1:0,chs=new Set(cal.map(r=>r.a.channel)).size,ok=cal.filter(r=>r.a.status==='approved').length,
+  links=camp.assets.filter(a=>a.type==='post'||a.type==='email');
+  return top+`<div class="pl">
+  <section class="card pl-cal"><header class="pl-h"><div><h2>${L('Suggested content calendar','تقويم المحتوى المقترح')}</h2><p class="muted">${L('A suggestion for your team to schedule. BrandPilot does not publish.','اقتراح ليجدوله فريقك. BrandPilot لا ينشر.')}</p></div><button class="btn sm" data-a="ex" data-v="calendar">${ic('dl',15)}CSV</button></header>
+  ${cal.length?`<dl class="pl-sum"><div><dt>${L('Pieces','مواد')}</dt><dd>${cal.length}</dd></div><div><dt>${L('Over','على مدى')}</dt><dd>${span} <small>${L('days','يوماً')}</small></dd></div><div><dt>${L('Channels','القنوات')}</dt><dd>${chs}</dd></div><div><dt>${L('Approved','معتمد')}</dt><dd class="${ok===cal.length?'ok':''}">${ok}<small>/${cal.length}</small></dd></div></dl>
+  ${weeks.map(g=>`<h3 class="pl-wk">${L('Week of','أسبوع')} ${fd(g.w,{day:'numeric',month:'long'})}</h3><ol class="pl-tl">${g.rows.map(r=>`<li class="pl-it"><time class="pl-d" datetime="${r.date}T${r.time}"><span>${fd(r.date,{weekday:'short'})}</span><b>${fd(r.date,{day:'numeric'})}</b><span>${fd(r.date,{month:'short'})}</span></time>${thumb(r.a)}<div class="pl-b"><div class="pl-row">${chip(r.a)}${lang(r.a)}<span class="pl-tm">${ic('clock',14)}${r.time}</span></div><b class="pl-t">${nm(r.a)}</b><span class="pl-st ${r.a.status==='approved'?'ok':''}">${r.a.status==='approved'?ic('check',13)+L('Approved','معتمد'):L('Not approved yet','لم يُعتمد بعد')}</span></div><button class="btn sm ghost pl-open" data-a="calOpen" data-v="${r.a.id}">${L('Open','افتح')}${ic('next',14)}</button></li>`).join('')}</ol>`).join('')}`:`<p class="muted">${L('No posts or emails in this campaign yet.','لا منشورات أو رسائل في هذه الحملة بعد.')}</p>`}</section>
+  <section class="card pl-links"><header class="pl-h"><div><h2>${L('Tracking links','روابط التتبع')}</h2><p class="muted">${L('Import results carrying this utm_campaign value and BrandPilot ties them back to this campaign.','استورد النتائج الحاملة لقيمة utm_campaign هذه وسيربطها BrandPilot بهذه الحملة.')}</p></div><button class="btn sm" data-a="ex" data-v="utm">${ic('dl',15)}CSV</button></header>
+  <div class="pl-tag"><div><span>${L('Campaign tag','وسم الحملة')}</span><code dir="ltr">utm_campaign=${esc(camp.slug)}</code></div><button class="btn sm" data-a="copyLink" data-v="${esc(camp.slug)}" aria-label="${L('Copy campaign tag','انسخ وسم الحملة')}">${ic('copy',15)}${L('Copy','انسخ')}</button></div>
+  ${camp.brief.url?`<p class="pl-dest">${L('Every link opens','كل رابط يفتح')} <span dir="ltr">${esc(camp.brief.url)}</span></p>`:''}
+  <ul class="pl-ln">${links.map(a=>{const u=utm(camp,a),q=new URLSearchParams(u.split('?')[1]||'');return`<li><div class="pl-row">${chip(a)}${lang(a)}<b class="pl-t">${nm(a)}</b><span class="sp"></span><button class="btn sm" data-a="copyLink" data-v="${esc(u)}" aria-label="${L('Copy link for','انسخ رابط')} ${aTitle(a)}">${ic('copy',15)}${L('Copy link','انسخ الرابط')}</button></div><div class="pl-ps" dir="ltr">${['utm_source','utm_medium','utm_content'].map(k=>`<span><i>${k.slice(4)}</i>${esc(q.get(k)||'')}</span>`).join('')}</div><details class="pl-full"><summary>${L('Full link','الرابط كاملاً')}</summary><code dir="ltr">${esc(u)}</code></details></li>`}).join('')}</ul></section></div>`}
  const last=camp.versions.filter(v=>v.rec).pop(),ci=(k,ta)=>`<label class="f">${L(BLBL[k][0],BLBL[k][1])}${ta?`<textarea name="${k}" rows="${ta>1?ta:2}" dir="auto">${esc(Array.isArray(b[k])?b[k].join('\n'):b[k])}</textarea>`:`<input name="${k}" value="${esc(b[k])}" dir="auto">`}</label>`;
  return top+`<div class="grid g2"><form class="card stack" data-s="changes"><h2>${L('Change the campaign','غيّر الحملة')}</h2><p class="muted">${L('Edit anything below and apply once. BrandPilot finds every affected asset, updates what it safely can, keeps your manual edits, and flags the rest.','عدّل أي شيء بالأسفل وطبّق مرة واحدة. BrandPilot يجد كل مادة متأثرة ويحدّث ما يمكن بأمان ويحافظ على تعديلاتك ويعلّم الباقي.')}</p><div class="grid g2">${ci('ctaEn')}${ci('ctaAr')}${ci('offerEn')}${ci('offerAr')}${ci('messageEn')}${ci('messageAr')}${ci('audienceEn')}${ci('audienceAr')}</div>${ci('objective')}<div class="grid g2">${ci('pointsEn',4)}${ci('pointsAr',4)}</div>${ci('tone',1)}
  <div><span class="small" style="font-weight:600;color:var(--ink2)">${L('Brand colours','ألوان العلامة')}</span><div class="row" style="margin-top:4px">${Object.entries(b.colors).map(([k,v])=>`<label class="small ctr">${k}<br><input type="color" name="col_${k}" value="${hex6(v).toLowerCase()}" style="width:44px;height:38px;padding:2px"></label>`).join('')}</div></div>
@@ -3382,6 +3449,9 @@ addEventListener('keydown',e=>{if(!S||!S.ui||!S.ui.kEv||S.ui.view!=='know'||CK.o
  if(e.key==='Tab'){const d=document.querySelector('.kev');if(!d)return;const f=[...d.querySelectorAll(FOC)].filter(x=>x.offsetParent!==null);if(!f.length)return;const a=f[0],z=f[f.length-1],ae=document.activeElement;
   if(e.shiftKey&&(ae===a||!d.contains(ae))){e.preventDefault();z.focus()}else if(!e.shiftKey&&(ae===z||!d.contains(ae))){e.preventDefault();a.focus()}}},true);
 {const o=A.navT;A.navT=()=>{o();if(!matchMedia('(max-width:900px)').matches)return;requestAnimationFrame(()=>{const el=document.querySelector(S.ui.nav?'.gside .gs-i.on, .gside .gs-i':'.wmenu');if(el)el.focus({preventScroll:true})})}}
+/* Calendar & links tab: open a piece in the editor, copy a link or the campaign tag. */
+A.calOpen=id=>{S.ui.aid=id;S.ui.st='assets';R();scrollTo(0,0)};
+A.copyLink=v=>{(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast(L('Copied','تم النسخ'),'ok'),()=>toast(L('Could not copy — open “Full link” and copy it by hand.','تعذّر النسخ — افتح «الرابط كاملاً» وانسخه يدوياً.'),'err'))};
 start();
 
 </script>
