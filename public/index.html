@@ -482,6 +482,107 @@ main.auth{max-width:none;margin:0;padding:0}.auth-cover{gap:32px}
 [dir=rtl] .eyebrow,[dir=rtl] .ng,[dir=rtl] th,[dir=rtl] .kpi span,[dir=rtl] .hl h4,[dir=rtl] .rec dt,[dir=rtl] .prio dt,[dir=rtl] .find dt,[dir=rtl] .rail h2,[dir=rtl] .desk-rail h3,[dir=rtl] .jl,[dir=rtl] .tl time,[dir=rtl] .cx-t tr.cx-g td{font-size:12.5px;text-transform:none;letter-spacing:0;font-weight:600}
 [dir=rtl] svg.i.flip{transform:scaleX(-1)}
 
+
+/* ==========================================================================
+   Evidence Desk layer (STRATEGY.md): the navigation is the workflow, one Next
+   strip, a decision queue, a command menu and keyboard triage.
+   ========================================================================== */
+.app{display:block}.side,.mbar{display:none!important}
+.tb{position:sticky;top:0;z-index:30;background:rgba(245,242,236,.94);backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--rule)}
+.tb1{display:flex;align-items:center;gap:10px;padding:10px 24px 6px;max-width:1440px;margin:0 auto}
+.tb1 .logo{padding:0;font-size:19px;margin-inline-end:6px}.tb1 .logo i{width:28px;height:28px}
+.cosel{display:flex;align-items:center;gap:2px;border:1px solid var(--rule-2);border-radius:var(--r-1);background:var(--surface);padding:0 2px 0 10px;min-height:36px;max-width:240px}
+[dir=rtl] .cosel{padding:0 10px 0 2px}
+.cosel select{border:0;min-height:34px;padding:0 4px;background:transparent;font-weight:600;font-size:14px;max-width:180px;box-shadow:none!important}
+.cosel .btn{border:0;min-height:30px;padding:4px 7px}
+.cmdb{display:flex;align-items:center;gap:10px;flex:0 1 380px;min-width:0;min-height:36px;border:1px solid var(--rule-2);background:var(--surface);border-radius:var(--r-1);padding:0 8px 0 12px;color:var(--ink-3);font-size:13.5px;cursor:text;transition:border-color .14s var(--ease),box-shadow .14s var(--ease)}
+[dir=rtl] .cmdb{padding:0 12px 0 8px}
+.cmdb:hover{border-color:var(--ink-3)}.cmdb span{flex:1;min-width:0;text-align:start;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+kbd{font:600 11px/1 var(--f-mono);background:var(--paper-2);border:1px solid var(--rule-2);border-bottom-width:2px;border-radius:4px;padding:3px 5px;color:var(--ink-2);white-space:nowrap}
+.tb1 .badge{max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.acct{position:relative;border:0;margin:0;padding:0}.gear.on{color:var(--signal);background:var(--signal-soft)}
+.acct>summary{list-style:none;width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:600 13px/1 var(--f-ui);cursor:pointer;text-transform:uppercase}
+.acct>summary::-webkit-details-marker{display:none}.acct>summary:hover{color:#fff;background:#2C2C36}
+.acct-m{position:absolute;inset-inline-end:0;top:42px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-2);box-shadow:var(--lift);padding:12px;display:grid;gap:10px;min-width:240px;z-index:40;animation:pop .18s var(--ease) both}
+.acct-m span{font-size:13px;color:var(--ink-2);overflow-wrap:anywhere}
+.wnav{display:flex;gap:0;padding:0 24px;max-width:1440px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+.wnav::-webkit-scrollbar{display:none}
+.wg{display:flex;flex-direction:column;padding:4px 14px 0;border-inline-start:1px solid var(--rule);flex:none}
+.wg:first-child{border-inline-start:0;padding-inline-start:0}
+.wl{font:500 10.5px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--ink-4);padding:2px 8px 4px;white-space:nowrap}
+.wg.on .wl{color:var(--signal)}
+.wi{display:flex;gap:2px}
+.wt{position:relative;display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:7px 9px 11px;cursor:pointer;font-size:14px;font-weight:500;color:var(--ink-2);white-space:nowrap;border-radius:6px 6px 0 0;transition:color .14s var(--ease),background .14s var(--ease)}
+.wt svg{color:var(--ink-4);transition:color .14s var(--ease)}
+.wt:hover{color:var(--ink);background:rgba(22,22,29,.04)}.wt:hover svg{color:var(--ink-2)}
+.wt.on{color:var(--ink);font-weight:600}.wt.on svg{color:var(--signal)}
+.wt.on::after{content:"";position:absolute;inset-inline:9px;bottom:-1px;height:2px;border-radius:2px 2px 0 0;background:var(--signal);animation:in .2s var(--ease)}
+.wt em{font:600 10.5px/1 var(--f-mono);font-style:normal;background:var(--signal);color:#fff;border-radius:99px;padding:3px 6px}
+.nxs{display:flex;align-items:center;gap:12px;padding:8px 24px;max-width:1440px;margin:0 auto;font-size:13.5px;min-width:0;padding-top:2px}
+.nxs .jl{flex:none}.nxs b{flex:none;max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nxs .muted{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nxp{display:flex;gap:3px;align-items:center;flex:none}
+.nxp button{width:18px;height:6px;border-radius:2px;border:0;padding:0;background:var(--paper-3);cursor:pointer}
+.nxp button.d{background:var(--pos)}.nxp button.a{background:var(--signal)}
+.nxp button:hover{transform:scaleY(1.5)}
+.nxp span{font:500 11px/1 var(--f-mono);color:var(--ink-3);margin-inline-start:6px}
+.nxs .btn{flex:none}
+main{max-width:1320px;padding-top:28px}
+.tb1,.wnav,.nxs{max-width:1320px;padding-inline:36px}
+@media(max-width:1100px){.tb1,.wnav,.nxs{padding-inline:24px}}
+/* decision queue */
+.needs{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-2);overflow:hidden}
+.needs>header{display:flex;align-items:baseline;gap:10px;padding:14px 18px;border-bottom:1px solid var(--rule)}
+.needs>header h2{font-family:var(--f-display);font-weight:600;font-size:20px;letter-spacing:-.01em}
+.needs>header b{font:600 12px/1 var(--f-mono);background:var(--signal);color:#fff;border-radius:99px;padding:4px 8px}
+.needs ol{list-style:none;margin:0;padding:0}
+.needs li{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--rule);transition:background .14s var(--ease)}
+.needs li:last-child{border-bottom:0}.needs li:hover{background:var(--surface-2)}
+.needs li>i{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--paper-2);color:var(--ink-2)}
+.needs li.hot>i{background:var(--signal-soft);color:var(--signal-2)}.needs li.ok>i{background:var(--pos-bg);color:var(--pos)}
+.needs li b{display:block;font-weight:600}.needs li span{display:block;font-size:13px;color:var(--ink-3)}
+.needs .clear{padding:16px 18px;color:var(--pos);font-weight:600;display:flex;gap:10px;align-items:center}
+/* quieter containers: side rails become ruled sections, not boxes */
+.rail .card,.desk-rail .card{background:none;border:0;border-top:2px solid var(--ink);border-radius:0;padding:12px 0 0}
+.rail{gap:28px}.desk-rail{gap:24px}
+/* command menu */
+#cmdk[hidden]{display:none}
+.ck-ov{position:fixed;inset:0;background:rgba(22,22,29,.42);backdrop-filter:blur(2px);z-index:70;animation:fade .14s var(--ease)}
+.ck{position:fixed;z-index:71;top:12vh;left:0;right:0;margin-inline:auto;width:min(680px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-3);box-shadow:0 40px 90px -30px rgba(22,22,29,.6);overflow:hidden;animation:pop .18s var(--ease) both}
+.ck-in{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--rule)}
+.ck-in svg{color:var(--ink-3)}
+.ck-in input{border:0!important;box-shadow:none!important;padding:4px 0;min-height:32px;font-size:16.5px;background:transparent}
+.ck ul{list-style:none;margin:0;padding:6px;max-height:min(56vh,460px);overflow:auto}
+.ck li.gh{font:500 10.5px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--ink-4);padding:12px 10px 6px}
+[dir=rtl] .ck li.gh{font-size:12px;letter-spacing:0}
+.ck li[role=option]{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px;min-height:40px}
+.ck li[role=option] svg{color:var(--ink-3);flex:none}
+.ck li[role=option] .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ck li[role=option] .m{font-size:12px;color:var(--ink-4);flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ck li[aria-selected=true]{background:var(--ink);color:#fff}.ck li[aria-selected=true] svg,.ck li[aria-selected=true] .m{color:#C9C5BD}
+.ck li.ask .t{font-weight:600}
+.ck .nores{padding:18px 12px;color:var(--ink-3);font-size:13.5px}
+.ck-f{display:flex;gap:16px;padding:9px 16px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink-3);background:var(--surface-2);flex-wrap:wrap}
+.ck-f span{display:inline-flex;gap:4px;align-items:center}
+/* fact triage */
+.find.kf{outline:2px solid var(--ink);outline-offset:2px;box-shadow:var(--lift)}
+.find.flash{animation:flash 1.6s var(--ease)}
+@keyframes flash{0%,40%{background:var(--signal-soft)}100%{background:var(--surface)}}
+.kh{position:sticky;bottom:14px;z-index:6;margin:22px auto 0;width:max-content;max-width:100%;display:flex;gap:14px;flex-wrap:wrap;align-items:center;background:var(--ink);color:#E9E5DD;border-radius:99px;padding:8px 16px;font-size:12.5px;box-shadow:0 16px 36px -16px rgba(22,22,29,.6)}
+.kh kbd{background:#2C2C36;color:#fff;border-color:#45454F}
+@media(pointer:coarse){.kh,.cmdb kbd{display:none}}
+@media(max-width:1100px){.tb1 .badge{display:none}}
+@media(max-width:820px){
+ .tb1{padding:8px 12px 4px;flex-wrap:wrap;row-gap:8px}.tb1 .logo span{display:none}
+ .cmdb{order:5;flex:1 1 100%}.cosel{max-width:none;flex:1 1 auto}
+ .wnav{padding:0 12px}.wg{padding:4px 8px 0}.wt{padding:6px 7px 10px;font-size:13.5px}
+ .nxs{padding:8px 12px;flex-wrap:wrap;row-gap:6px}.nxs .muted{display:none}.nxs b{max-width:none;flex:1 1 60%;white-space:normal}
+ .needs li{grid-template-columns:32px minmax(0,1fr);}
+ .tb1 [data-a=lang] span{display:none}.tb1 .gear{display:none}.needs>header{flex-wrap:wrap}.needs>header h2{white-space:nowrap}.needs>header .muted{flex-basis:100%}
+ .wnav{mask-image:linear-gradient(90deg,#000 85%,transparent);-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent)}
+ [dir=rtl] .wnav{mask-image:linear-gradient(270deg,#000 85%,transparent);-webkit-mask-image:linear-gradient(270deg,#000 85%,transparent)}.needs li .btn{grid-column:2;justify-self:start}
+}
+
 /* ---------- Responsive ---------- */
 @media(max-width:1100px){.studio{grid-template-columns:minmax(0,1fr)}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.g21{grid-template-columns:minmax(0,1fr)}.alist{display:flex;gap:6px;overflow-x:auto}.alist button{width:auto;white-space:nowrap;flex:none}.alist h4{display:none}.desk{grid-template-columns:minmax(0,1fr)}.desk-rail{position:static;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}main{padding:24px 24px 96px}}
 @media(max-width:900px){.auth{grid-template-columns:1fr}.auth-cover{padding:28px 22px}.auth-cover h1{font-size:34px;margin:24px 0 10px}.auth-cover ol{display:none}}
@@ -1231,6 +1332,23 @@ const IC={"dash":"<rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\"/> <rec
 const ic=(n,z=18)=>`<svg class="i${n==='next'||n==='out'?' flip':''}" width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]||''}</svg>`;
 const nav=()=>[[L('Understand','افهم'),[['dash',L('Dashboard','لوحة القيادة')],['onboard',L('Company sources','مصادر الشركة')],['know',L('Knowledge Hub','مركز المعرفة')],['integ',L('Data & Integrations','البيانات والتكاملات')]]],[L('Diagnose & decide','شخّص وقرّر'),[['audit',L('Marketing Audit','التدقيق التسويقي')],['director',L('Marketing Director','مدير التسويق')],['growth',L('Growth & Leads','النمو والعملاء')]]],[L('Create','أنشئ'),[['studio',L('Campaign Studio','استوديو الحملات')],['qa',L('Brand QA & History','الجودة والسجل')],['export',L('Export & Delivery','التصدير والتسليم')]]],[L('Measure & improve','قِس وحسّن'),[['analytics',L('Analytics','التحليلات')],['auto',L('Automation','الأتمتة والتحسين')]]],[L('System','النظام'),[['trust',L('Trust & AI settings','الثقة وإعدادات الذكاء')]]]];
 const V={},A={};
+/* Workflow bar labels: short, because the stage label above already gives the context; the full name is the button's title. */
+const SHORT=k=>({dash:L('Briefing','الإحاطة'),onboard:L('Sources','المصادر'),know:L('Knowledge','المعرفة'),integ:L('Data','البيانات'),audit:L('Audit','التدقيق'),director:L('Director','المدير'),growth:L('Growth','النمو'),studio:L('Studio','الاستوديو'),qa:L('Brand QA','الجودة'),export:L('Export','التصدير'),analytics:L('Analytics','التحليلات'),auto:L('Automation','الأتمتة'),trust:L('Settings','الإعدادات')}[k]||k);
+/* One-line Next strip under the workflow bar: the same journey() as the old progress bar (each segment still opens its stage), plus the single next step. */
+function nextStrip(c,v){if(v==='dash')return'';const J=journey(c),cur=J.stages.findIndex(s=>!s[2]),n=J.next,here=n&&(n.go||n.view)===v,done=J.stages.filter(s=>s[2]).length;
+ return`<div class="nxs" role="region" aria-label="${L('Your progress','تقدّمك')}"><div class="nxp">${J.stages.map((s,i)=>`<button class="${s[2]?'d':i===cur?'a':''}" data-a="go" data-v="${s[0]}" aria-label="${esc(s[1])}: ${s[2]?L('done','تم'):L('not done yet','لم يتم بعد')}" title="${esc(s[1])}"></button>`).join('')}<span>${done}/${J.stages.length}</span></div>${n?`<span class="jl">${L('Next','التالي')}</span><b dir="auto">${esc(n.t)}</b><span class="muted" dir="auto">${esc(n.w)}</span>${n.b&&!here?`<button class="btn sm pri" data-a="${n.act||'go'}" data-v="${esc(n.v||n.go||'')}">${n.b}${ic('next',15)}</button>`:''}`:`<span class="muted">${L('Every stage has what it needs.','كل مرحلة لديها ما تحتاجه.')}</span>`}</div>`}
+/* "Needs you": every open decision in one queue, each with the one action that resolves it. Read-only over existing state. */
+function needs(c){const F=c.findings.filter(f=>f.status==='pending'),r=[],P=(f)=>F.filter(f).length,
+ ready=P(f=>f.type!=='unknown'&&f.type!=='conflict'&&!f.noEv),conf=P(f=>f.type==='conflict'),q=P(f=>f.type==='unknown'),st=c.campaigns.reduce((n,k)=>n+stale(k).length,0),D=c.data||{};
+ if(conf)r.push(['hot','alert',L(`${conf} conflict(s) between your sources`,`${conf} تعارض بين مصادرك`),L('Two sources say different things — choose which one is true.','مصدران يقولان شيئين مختلفين — اختر الصحيح.'),'go','know',L('Resolve','احسم')]);
+ if(ready)r.push(['hot','know',L(`${ready} fact(s) ready for your approval`,`${ready} حقيقة جاهزة لاعتمادك`),L('Each is quoted from a source. Campaigns only use approved knowledge.','كلٌّ مقتبس من مصدر. الحملات تستخدم المعرفة المعتمدة فقط.'),'go','know',L('Review','راجع')]);
+ if(q)r.push(['','bulb',L(`${q} question(s) only you can answer`,`${q} سؤال لا يجيب عنه غيرك`),L('No source covers them; your answer becomes an approved fact.','لا يغطيها أي مصدر؛ إجابتك تصبح حقيقة معتمدة.'),'go','know',L('Answer','أجب')]);
+ if(st)r.push(['hot','qa',L(`${st} campaign item(s) changed by new knowledge`,`${st} عنصر حملة تغيّر بمعرفة جديدة`),L('An approved fact they used was edited or rejected.','حقيقة معتمدة استخدمتها عُدّلت أو رُفضت.'),'go','qa',L('Check','افحص')]);
+ const miss=[['ga4',L('website (GA4)','الموقع (GA4)')],['meta',L('social posts','منشورات التواصل')],['leads',L('leads','العملاء المحتملين')]].filter(x=>!(D[x[0]]||[]).length);
+ if(c.sources.length&&miss.length)r.push(['','db',L('Missing data: ','بيانات ناقصة: ')+miss.map(x=>x[1]).join(', '),L('Without it the audit says “not measured” instead of guessing.','بدونها يقول التدقيق «غير مُقاس» بدلاً من التخمين.'),'go','integ',L('Import','استورد')]);
+ const un=(D.meta||[]).filter(x=>!tagged(x)).length;if(un)r.push(['','list',L(`${un} post(s) without a content theme`,`${un} منشور بلا موضوع محتوى`),L('Themes let the audit compare what content works.','الموضوعات تتيح للتدقيق مقارنة المحتوى الناجح.'),'tagOpen','',L('Tag posts','صنّف')]);
+ return r}
+const needsHTML=c=>{const r=needs(c);return`<section class="needs" aria-labelledby="needs-h"><header><h2 id="needs-h">${L('Needs you','بانتظارك')}</h2>${r.length?`<b>${r.length}</b>`:''}<span class="muted">${L('Open decisions across the whole workflow','القرارات المفتوحة في كل مراحل العمل')}</span></header>${r.length?`<ol class="stagger">${r.map(x=>`<li class="${x[0]}"><i aria-hidden="true">${ic(x[1],17)}</i><div><b dir="auto">${x[2]}</b><span>${x[3]}</span></div><button class="btn sm ${x[0]==='hot'?'pri':''}" data-a="${x[4]}" data-v="${x[5]}">${x[6]}${ic('next',15)}</button></li>`).join('')}</ol>`:`<div class="clear">${ic('check',18)}${L('Nothing is waiting for you. Ask the Director or start a campaign.','لا شيء بانتظارك. اسأل المدير أو ابدأ حملة.')}</div>`}</section>`};
 const TYPES={fact:['Stated in source','مذكور في المصدر','b-fact'],interp:['Interpretation','تفسير','b-int'],hyp:['Hypothesis','فرضية','b-hyp'],unknown:['Unknown','غير معروف','b-unk'],claim:['Claim — needs proof','ادعاء يحتاج إثباتاً','b-bad'],conflict:['Conflict between sources','تعارض بين المصادر','b-bad'],user:['Provided by you','مقدَّم منك','b-fact']};
 const CLSB={measured:'b-fact',obs:'b-int',gap:'b-unk',hyp:'b-hyp',fact:'b-fact',interp:'b-int',rec:'b-ok',unknown:'b-unk'};
 const KIND=k=>({strong:L('Strength','نقطة قوة'),weak:L('Weakness','نقطة ضعف'),opp:L('Opportunity','فرصة'),risk:L('Risk','خطر'),gap:L('Information gap','فجوة معلومات')}[k]);
@@ -1266,9 +1384,8 @@ function bidiPass(root){if(S.lang!=='ar'||!root)return;const re=new RegExp(BD.so
 function render(){const ae=document.activeElement,fk=fKey(ae),fsel=fk&&ae.selectionStart!=null?(()=>{try{return[ae.selectionStart,ae.selectionEnd]}catch(e){return null}})():null;render0();bidiPass($('#app'));fRestore(fk,fsel)}
 function render0(){const c=C(),v=S.ui.view||'dash';const brief=curCamp(c)?.brief,logoIds=new Set([...(c.brand.logos||[]).map(x=>x.id),...(brief?.logos||[]),brief?.logo]);for(const m of c.media)if(m.logo&&m.lum===undefined&&logoIds.has(m.id))logoFix(c,m.id);document.documentElement.lang=S.lang;document.documentElement.dir=S.lang==='ar'?'rtl':'ltr';
  const pend=c.findings.filter(f=>f.status==='pending'&&f.type!=='unknown').length,st=c.campaigns.reduce((s,k)=>s+stale(k).length,0),bad={know:pend,qa:st};
- $('#app').innerHTML=`<a class="skip" href="#main">${L('Skip to content','تخطَّ إلى المحتوى')}</a><div class="app ${S.ui.nav?'navopen':''} ${S.ui.guide&&c.demo?'gopen':''}"><aside class="side" aria-label="${L('Main navigation','التنقل الرئيسي')}"><div class="logo"><i>${ic('logo',17)}</i>BrandPilot</div><div class="dossier"><label class="eyebrow" for="coSel">${L('Company','الشركة')}</label><select id="coSel" data-c="setCo" aria-label="${L('Company','الشركة')}">${Object.values(S.companies).map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${esc(x.name||L('Untitled','بدون اسم'))}</option>`).join('')}</select><button class="btn sm" data-a="newCo">${ic('plus',15)}${L('New company','شركة جديدة')}</button></div><nav>${nav().map(([g,items],gi)=>`<div class="ng">${gi<4?`<b>0${gi+1}</b>`:''}${g}</div>${items.map(([k,l])=>`<button class="nv ${v===k?'on':''}" data-a="go" data-v="${k}" ${v===k?'aria-current="page"':''}>${ic(k)}<span>${l}</span>${bad[k]?`<em>${bad[k]}</em>`:''}</button>`).join('')}`).join('')}</nav><div class="sfoot">${aiBadge()}${USER?`<div class="who">${ic('user',16)}<span dir="ltr">${esc(USER.email)}</span></div>`:''}<div class="row"><button class="btn sm" data-a="lang" aria-label="${L('Switch to Arabic','التبديل إلى الإنجليزية')}">${ic('lang',15)}${S.lang==='ar'?'English':'العربية'}</button>${USER?`<button class="btn sm ghost" data-a="logout">${ic('out',15)}${L('Sign out','تسجيل الخروج')}</button>`:''}</div></div></aside>
- <div><header class="mbar"><button class="btn sm menu" data-a="navT" aria-label="${L('Menu','القائمة')}" aria-expanded="${!!S.ui.nav}">${ic('menu',20)}</button><div class="logo"><i>${ic('logo',14)}</i>BrandPilot</div><span class="co">${esc(c.name||L('Untitled','بدون اسم'))}</span></header>
- <main id="main" tabindex="-1" class="${S.ui.enter?'enter':''}">${journeyBar(c,v)}${V[v](c)}</main></div></div>${guideHTML(c)}${MODAL?`<div class="ov" data-a="closeModal"><div class="modal" role="dialog" aria-modal="true" data-a="noop">${typeof MODAL==='function'?MODAL():MODAL}</div></div>`:''}`;S.ui.enter=0;save()}
+ $('#app').innerHTML=`<a class="skip" href="#main">${L('Skip to content','تخطَّ إلى المحتوى')}</a><div class="app ${S.ui.guide&&c.demo?'gopen':''}"><header class="tb"><div class="tb1"><div class="logo"><i>${ic('logo',16)}</i><span>BrandPilot</span></div><div class="cosel">${ic('building',16)}<select id="coSel" data-c="setCo" aria-label="${L('Company','الشركة')}">${Object.values(S.companies).map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${esc(x.name||L('Untitled','بدون اسم'))}</option>`).join('')}</select><button class="btn sm ghost" data-a="newCo" aria-label="${L('New company','شركة جديدة')}" title="${L('New company','شركة جديدة')}">${ic('plus',16)}</button></div><button class="cmdb" data-a="cmdk" aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K /">${ic('search',16)}<span>${L('Search, jump to anything, or ask the Director…','ابحث أو انتقل إلى أي شيء أو اسأل المدير…')}</span><kbd>${/Mac|iPhone|iPad/.test(navigator.platform)?'⌘':'Ctrl'} K</kbd></button><span class="sp"></span>${aiBadge()}<button class="btn sm ghost gear ${v==='trust'?'on':''}" data-a="go" data-v="trust" aria-label="${L('Trust & AI settings','الثقة وإعدادات الذكاء')}" title="${L('Trust & AI settings','الثقة وإعدادات الذكاء')}" ${v==='trust'?'aria-current="page"':''}>${ic('trust',17)}</button><button class="btn sm ghost" data-a="lang" aria-label="${L('Switch to Arabic','التبديل إلى الإنجليزية')}">${ic('lang',16)}<span>${S.lang==='ar'?'English':'العربية'}</span></button>${USER?`<details class="acct"><summary aria-label="${L('Account','الحساب')}">${esc((USER.email||'?').charAt(0))}</summary><div class="acct-m"><span dir="ltr">${esc(USER.email)}</span><button class="btn sm" data-a="go" data-v="trust">${ic('trust',15)}${L('Trust & AI settings','الثقة وإعدادات الذكاء')}</button><button class="btn sm" data-a="logout">${ic('out',15)}${L('Sign out','تسجيل الخروج')}</button></div></details>`:''}</div><nav class="wnav" aria-label="${L('Main navigation','التنقل الرئيسي')}">${nav().slice(0,4).map(([g,items],gi)=>`<div class="wg ${items.some(x=>x[0]===v)?'on':''}"><span class="wl" aria-hidden="true">${gi<4?'0'+(gi+1)+' ':''}${g}</span><div class="wi">${items.map(([k,l])=>`<button class="wt ${v===k?'on':''}" data-a="go" data-v="${k}" title="${esc(l)}" ${v===k?'aria-current="page"':''}>${ic(k,16)}<span>${SHORT(k)}</span>${bad[k]?`<em aria-label="${bad[k]} ${L('waiting','بانتظارك')}">${bad[k]}</em>`:''}</button>`).join('')}</div></div>`).join('')}</nav>${nextStrip(c,v)}</header>
+ <main id="main" tabindex="-1" class="${S.ui.enter?'enter':''}">${V[v](c)}${v==='know'&&c.findings.some(f=>f.status==='pending'&&f.type!=='unknown'&&f.type!=='conflict')?`<div class="kh" aria-hidden="true"><span><kbd>J</kbd> <kbd>K</kbd> ${L('move','تنقّل')}</span><span><kbd>A</kbd> ${L('approve','اعتمد')}</span><span><kbd>R</kbd> ${L('reject','ارفض')}</span><span><kbd>/</kbd> ${L('search','بحث')}</span></div>`:''}</main></div>${guideHTML(c)}${MODAL?`<div class="ov" data-a="closeModal"><div class="modal" role="dialog" aria-modal="true" data-a="noop">${typeof MODAL==='function'?MODAL():MODAL}</div></div>`:''}`;S.ui.enter=0;save()}
 
 /* Guided demo checklist */
 function guideSteps(c){const s=S.ui.seen||{},k=c.campaigns;return[
@@ -1314,8 +1431,8 @@ const kpi=(l,v,p,note)=>{const d=p&&typeof v!=='string'&&typeof p!=='string'?(v-
 V.dash=c=>{const A_=audit(c),H=health(c,A_),P=periods(c),a=P&&agg(c,P.cur),b=P&&P.prev&&agg(c,P.prev);
  if(!c.sources.length&&!P)return`<div class="hero"><div class="eyebrow" style="color:#CFCAC0;margin-bottom:18px"><i></i>${L('First run','البداية')} · ${esc(c.name||L('This company','هذه الشركة'))}</div><h1>${L('Connect your business. Understand your opportunities.','اربط نشاطك. افهم فرصك.')}</h1><p>${L(`${c.name||'This company'} has no sources yet, so there is nothing to analyse — and BrandPilot will not make anything up. Provide the website, documents and any performance exports once; the profile, audit, strategy and campaigns are built from them.`,`${c.name||'هذه الشركة'} بلا مصادر بعد، فلا يوجد ما يُحلَّل — وBrandPilot لن يختلق شيئاً. قدّم الموقع والمستندات وأي تصديرات أداء مرة واحدة؛ ومنها يُبنى الملف والتدقيق والاستراتيجية والحملات.`)}</p><button class="btn sig" data-a="go" data-v="onboard">${L('Start onboarding','ابدأ الإعداد')}${ic('next',16)}</button><div class="flow">${[L('Business understanding','فهم النشاط'),L('Diagnosis','التشخيص'),L('Strategy','الاستراتيجية'),L('Creative production','الإنتاج الإبداعي'),L('Analytics','التحليلات'),L('Learning','التعلّم')].map(x=>`<span>${x}</span>`).join('')}</div></div>`;
  const top=A_.filter(x=>x.kind!=='strong').slice(0,3),pend=c.findings.filter(f=>f.status==='pending'&&f.type!=='unknown').length,day=(()=>{try{return new Date().toLocaleDateString(S.lang==='ar'?'ar-EG':'en-GB',{weekday:'long',day:'numeric',month:'long'})}catch(e){return''}})();
- return`<header class="brief-head"><div><div class="eyebrow"><i></i>${L('Executive briefing','الإحاطة التنفيذية')}${day?' · '+esc(day):''}</div><h1 dir="auto">${esc(c.name)}</h1><p dir="auto">${esc(c.objective||L('No business objective set yet.','لم يُحدَّد هدف العمل بعد.'))}</p></div><div class="row">${syn(c)}${P?rangeSel():''}</div></header>
- <div class="stack">${pend?`<div class="note w row" style="justify-content:space-between"><span>${L(`${pend} extracted finding(s) are waiting for your approval. Campaigns only use approved knowledge.`,`${pend} نتيجة مستخرجة بانتظار اعتمادك. الحملات تستخدم المعرفة المعتمدة فقط.`)}</span><button class="btn sm" data-a="go" data-v="know">${L('Review','راجع')}${ic('next',15)}</button></div>`:''}
+ return`<header class="brief-head"><div><div class="eyebrow"><i></i>${L('Executive briefing','الإحاطة التنفيذية')}${day?' · '+esc(day):''}</div><h1><bdi>${esc(c.name)}</bdi></h1><p><bdi>${esc(c.objective||L('No business objective set yet.','لم يُحدَّد هدف العمل بعد.'))}</bdi></p></div><div class="row">${syn(c)}${P?rangeSel():''}</div></header>
+ <div class="stack">${needsHTML(c)}
  ${a?`<section class="ledger" aria-label="${L('Key numbers','الأرقام الرئيسية')}">${a.g.length?kpi(L('Website sessions','جلسات الموقع'),a.sessions,b&&b.sessions):''}${tracked(c)?kpi(L('Enquiries (GA4)','الاستفسارات (GA4)'),a.enq,b&&b.enq):''}${a.l.length?kpi(L('Leads','العملاء المحتملون'),a.leads,b&&b.leads)+kpi(L('Qualified leads','العملاء المؤهلون'),a.qual,b&&b.qual):''}${a.me.length?kpi(L('Social engagements','تفاعلات السوشيال'),a.eng,b&&b.eng):''}${a.s.length?kpi(L('Search clicks','نقرات البحث'),a.sclicks,b&&b.sclicks):''}</section>`:''}
  <div class="grid g21" style="margin-top:28px"><section><div class="sec-h"><h2>${L('Priorities this week','أولويات هذا الأسبوع')}</h2><span class="muted">${L('From the audit — each with its evidence','من التدقيق — كلٌّ بدليله')}</span></div>${top.length?`<div class="stagger">${top.map((x,i)=>prioRow(c,x,i)).join('')}</div>`:empty(L('No priorities yet','لا أولويات بعد'),L('Add a source or import data to get evidence-backed priorities.','أضف مصدراً أو استورد بيانات للحصول على أولويات مدعومة بالدليل.'),L('Company sources','مصادر الشركة'),'onboard')}<div class="row" style="margin-top:14px"><button class="btn" data-a="go" data-v="audit">${L('Open full audit','افتح التدقيق الكامل')}${ic('next',15)}</button></div>
  <div class="sec-h" style="margin-top:40px"><h2>${L('Marketing health','الصحة التسويقية')}</h2></div><p class="muted" style="margin:-4px 0 14px">${L('Each rating is the share of named evidence checks that pass — never an invented score.','كل تقييم هو نسبة الفحوص المسمّاة الناجحة — وليس رقماً مختلقاً.')}</p><div class="score stagger">${H.map(healthTile).join('')}</div></section>
@@ -2413,7 +2530,7 @@ function setupView(c){const d=S.ui.disc,F=c.findings,read=c.sources.filter(s=>s.
  <div class="row"><button class="btn pri" ${busy?'disabled':''}>${busy?L('Reading your website…','جارٍ قراءة موقعك…'):L('Build my company profile','ابنِ ملف شركتي')}</button><span class="muted small">${L('One public page of the website is read. Nothing is approved without you.','تُقرأ صفحة عامة واحدة من الموقع. لا يُعتمد شيء بدونك.')}</span></div></form></div>${how}`}
 const dash0=V.dash;V.dash=c=>{if(inSetup(c))return setupView(c);
  const ask=`<form data-s="ask" class="row card askb">${ic('director')}<input name="q" required maxlength="1000" dir="auto" aria-label="${L('Ask the Marketing Director','اسأل مدير التسويق')}" placeholder="${L('Ask your Marketing Director — for example: why do we get traffic but few enquiries?','اسأل مدير التسويق — مثلاً: لماذا نحصل على زيارات واستفسارات قليلة؟')}" style="flex:1;min-width:180px"><button class="btn pri">${L('Ask','اسأل')}</button></form>`;
- return dash0(c).replace('<div class="stack">',m=>m+ask)};
+ const h=dash0(c),i=h.indexOf('</section>',h.indexOf('<section class="needs"'));return i>0?h.slice(0,i+10)+ask+h.slice(i+10):h.replace('<div class="stack">',m=>m+ask)};
 /* Tag posts (8.5). A post's `theme` is set only by the user (a click or a choice); suggestions live in `theme_suggested` / `theme_why` / `theme_src` and never reach the audit. `theme_ok` marks a post the user has decided on, including “no theme”. */
 const TH_STOP=new Set('the and for with our your from about how what why you are this that into has have was were will can not all one new its out'.split(' ')),thStem=w=>w.length>4?w.replace(/(ies|es|s)$/,''):w,thRe=k=>new RegExp('(^|[^\\p{L}\\p{N}])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'u'),
  tagged=r=>!!(r.theme||r.theme_ok),tagLangOf=r=>r.language||(r.text?(isAr(r.text)?'ar':'en'):'');
@@ -2552,6 +2669,49 @@ async function startApp(){let p=null;try{p=JSON.parse(localStorage.getItem(KEY))
 async function start(){try{AUTH.lang=localStorage.getItem(LKEY)||(JSON.parse(localStorage.getItem(KEY))||{}).lang||'en'}catch(e){}if(AUTH.lang!=='ar')AUTH.lang='en';
  let r=null;try{r=await fetch('/api/auth/me')}catch(e){}
  if(r&&r.ok){USER=(await r.json()).user;await startApp()}else{if(!r||r.status!==401)AUTH.err=r?'other':'network';authRender()}}
+
+/* ---------- Command menu (Ctrl/⌘ K or /): pages, companies, actions, campaigns, audit findings, facts — and "Ask the Director" for anything typed. Uses the existing actions only. ---------- */
+const CK={open:false,q:'',i:0,list:[],ret:null};
+function ckItems(q){const c=C(),out=[],G=(g,arr)=>arr.forEach(x=>out.push(Object.assign({g},x)));
+ G(L('Go to','انتقل إلى'),nav().flatMap(([g,items])=>items.map(([k,l])=>({t:l,m:g,i:k,run:()=>A.go(k)}))));
+ G(L('Actions','إجراءات'),[{t:L('New campaign','حملة جديدة'),i:'plus',run:()=>A.campNew()},{t:L('Import performance data','استورد بيانات الأداء'),i:'upload',run:()=>A.go('integ')},{t:L('Add a source','أضف مصدراً'),i:'onboard',run:()=>A.go('onboard')},{t:L('New company','شركة جديدة'),i:'building',run:()=>A.newCo()},{t:S.lang==='ar'?'Switch to English':'التبديل إلى العربية',i:'lang',run:()=>A.lang()}]);
+ G(L('Companies','الشركات'),Object.values(S.companies).filter(x=>x.id!==c.id).map(x=>({t:x.name||L('Untitled','بدون اسم'),m:L('Switch company','بدّل الشركة'),i:'building',run:()=>{S.active=x.id;S.ui.disc=null;S.ui.discDone=null;S.ui.aid=null;S.ui.enter=1;R()}})));
+ G(L('Campaigns','الحملات'),c.campaigns.map(k=>({t:k.name,m:k.assets.length?L('Campaign','حملة'):L('Draft brief','مسودة'),i:'studio',run:()=>A.campOpen(k.id)})));
+ let A_=[];try{A_=audit(c)}catch(e){}
+ G(L('Audit findings','نتائج التدقيق'),A_.map(x=>({t:x.title,m:KIND(x.kind),i:'audit',run:()=>A.go('audit')})));
+ G(L('Knowledge','المعرفة'),c.findings.filter(f=>f.status!=='rejected'&&f.type!=='unknown'&&f.text).map(f=>({t:f.text,m:f.status==='approved'?L('Approved fact','حقيقة معتمدة'):L('Awaiting review','بانتظار المراجعة'),i:'know',run:()=>{A.go('know');setTimeout(()=>ckFlash(f.id),50)}})));
+ const w=q.trim().toLowerCase().split(/\s+/).filter(Boolean);let r=out;
+ if(w.length){r=out.filter(x=>{const h=(x.t+' '+(x.m||'')+' '+x.g).toLowerCase();return w.every(t=>h.includes(t))}).sort((a,b)=>(b.t.toLowerCase().startsWith(w[0])?1:0)-(a.t.toLowerCase().startsWith(w[0])?1:0)).slice(0,40);
+  r.push({g:L('Marketing Director','مدير التسويق'),t:L('Ask the Director: ','اسأل المدير: ')+'“'+q.trim()+'”',i:'director',ask:1,run:()=>A.askQ(q.trim())})}
+ else r=r.filter(x=>x.g===L('Go to','انتقل إلى')||x.g===L('Actions','إجراءات')||x.g===L('Companies','الشركات')||x.g===L('Campaigns','الحملات'));
+ return r}
+function ckFlash(id){const b=document.querySelector(`#main .find [data-v="${CSS.escape(id)}"]`),el=b&&b.closest('.find');if(el){el.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});el.classList.add('flash')}}
+function ckList(){const ul=document.getElementById('ckl');if(!ul)return;CK.list=ckItems(CK.q);CK.i=Math.min(CK.i,Math.max(0,CK.list.length-1));let g='',h='';
+ CK.list.forEach((x,n)=>{if(x.g!==g){g=x.g;h+=`<li class="gh" role="presentation">${esc(g)}</li>`}h+=`<li role="option" id="ck-${n}" data-n="${n}" class="${x.ask?'ask':''}" aria-selected="${n===CK.i}">${ic(x.i,16)}<span class="t" dir="auto">${esc(x.t)}</span>${x.m?`<span class="m">${esc(x.m)}</span>`:''}</li>`});
+ ul.innerHTML=h||`<li class="nores" role="presentation">${L('Nothing matches. Type a question to ask the Director.','لا نتائج. اكتب سؤالاً لتسأل المدير.')}</li>`;
+ const inp=document.getElementById('ckq');if(inp)inp.setAttribute('aria-activedescendant',CK.list.length?'ck-'+CK.i:'');const sel=document.getElementById('ck-'+CK.i);if(sel)sel.scrollIntoView({block:'nearest'})}
+function ckOpen(){if(!S||!USER)return;let el=document.getElementById('cmdk');if(!el){el=document.createElement('div');el.id='cmdk';document.body.appendChild(el)}
+ CK.open=true;CK.q='';CK.i=0;CK.ret=document.activeElement;el.hidden=false;
+ el.innerHTML=`<div class="ck-ov" data-ck="x"></div><div class="ck" role="dialog" aria-modal="true" aria-label="${L('Command menu','قائمة الأوامر')}"><div class="ck-in">${ic('search',18)}<input id="ckq" role="combobox" aria-expanded="true" aria-controls="ckl" aria-autocomplete="list" autocomplete="off" spellcheck="false" dir="auto" placeholder="${L('Search pages, campaigns, facts — or type a question…','ابحث في الصفحات والحملات والحقائق — أو اكتب سؤالاً…')}"><kbd>Esc</kbd></div><ul id="ckl" role="listbox" aria-label="${L('Results','النتائج')}"></ul><div class="ck-f"><span><kbd>↑</kbd><kbd>↓</kbd> ${L('move','تنقّل')}</span><span><kbd>Enter</kbd> ${L('open','افتح')}</span><span><kbd>Esc</kbd> ${L('close','أغلق')}</span></div></div>`;
+ const inp=document.getElementById('ckq');inp.addEventListener('input',()=>{CK.q=inp.value;CK.i=0;ckList()});ckList();inp.focus()}
+function ckClose(back){const el=document.getElementById('cmdk');CK.open=false;if(el){el.hidden=true;el.innerHTML=''}if(back&&CK.ret&&CK.ret.focus)try{CK.ret.focus()}catch(e){}}
+function ckRun(n){const x=CK.list[n];if(!x)return;ckClose(false);x.run()}
+A.cmdk=()=>ckOpen();
+document.addEventListener('click',e=>{if(!CK.open)return;if(e.target.closest('[data-ck="x"]'))return ckClose(true);const li=e.target.closest('#ckl li[role=option]');if(li)ckRun(+li.dataset.n)});
+document.addEventListener('mousemove',e=>{if(!CK.open)return;const li=e.target.closest&&e.target.closest('#ckl li[role=option]');if(li&&+li.dataset.n!==CK.i){CK.i=+li.dataset.n;document.querySelectorAll('#ckl li[role=option]').forEach(x=>x.setAttribute('aria-selected',+x.dataset.n===CK.i));document.getElementById('ckq').setAttribute('aria-activedescendant','ck-'+CK.i)}});
+const typing=t=>t&&t.closest&&t.closest('input,textarea,select,[contenteditable="true"]');
+addEventListener('keydown',e=>{
+ if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='k'&&S&&USER){e.preventDefault();CK.open?ckClose(true):ckOpen();return}
+ if(CK.open){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();ckClose(true)}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const n=CK.list.length;if(n){CK.i=(CK.i+(e.key==='ArrowDown'?1:n-1))%n;ckList()}}else if(e.key==='Enter'){e.preventDefault();ckRun(CK.i)}else if(e.key==='Tab'){e.preventDefault();document.getElementById('ckq').focus()}return}
+ if(e.key==='/'&&!typing(e.target)&&!MODAL&&S&&USER&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();ckOpen()}},true);
+/* ---------- Fact triage on the Knowledge Hub: J/K move between facts that can be decided, A approves, R rejects (the same kApprove / kReject actions as the buttons). ---------- */
+let KF=-1;
+function kfCards(){return[...document.querySelectorAll('#main .find')].filter(x=>x.querySelector('[data-a="kApprove"],[data-a="kReject"]'))}
+function kfMark(focus){const cs=kfCards();document.querySelectorAll('#main .find.kf').forEach(x=>x.classList.remove('kf'));if(!cs.length){KF=-1;return}KF=Math.max(0,Math.min(KF,cs.length-1));const el=cs[KF];el.classList.add('kf');el.tabIndex=-1;if(focus){el.focus({preventScroll:true});el.scrollIntoView({block:'nearest'})}}
+addEventListener('keydown',e=>{if(!S||CK.open||MODAL||S.ui.view!=='know'||typing(e.target)||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();if(!['j','k','a','r'].includes(k))return;const cs=kfCards();if(!cs.length)return;e.preventDefault();
+ if(KF<0||!cs[KF]||!cs[KF].classList.contains('kf')){if(k==='j'||k==='k'){KF=Math.max(0,KF);kfMark(true);return}}
+ if(k==='j'){KF=Math.min(cs.length-1,KF+1);kfMark(true)}else if(k==='k'){KF=Math.max(0,KF-1);kfMark(true)}
+ else{const b=cs[KF]&&cs[KF].querySelector(`[data-a="${k==='a'?'kApprove':'kReject'}"]`);if(!b){toast(k==='a'?L('This one cannot be approved here.','لا يمكن اعتماد هذا هنا.'):L('This one cannot be rejected here.','لا يمكن رفض هذا هنا.'),'err');return}const id=b.dataset.v;A[b.dataset.a](id);toast(k==='a'?L('Approved','اعتُمد'):L('Rejected','رُفض'),'ok');setTimeout(()=>{const n=kfCards(),j=n.findIndex(x=>x.querySelector(`[data-v="${CSS.escape(id)}"]`));KF=j>=0?j+1:KF;kfMark(true)},0)}});
 start();
 
 </script>

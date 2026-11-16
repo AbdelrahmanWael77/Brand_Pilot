@@ -76,14 +76,15 @@ Arabic: Fraunces has no Arabic glyphs, so Arabic headings fall through to Plex S
 - Skeleton shimmer for every server wait (Director answer, server audit check, reports).
 - `prefers-reduced-motion`: all of it off.
 
-## 4. Shell
-- **Workflow spine (sidebar).** Company dossier switcher on top (the company is the context of every screen), then the four stages as numbered sections `01 Understand · 02 Diagnose · 03 Create · 04 Measure` + `System`, with Lucide icons, counts for pending work, a vermilion marker on the current page. Language, AI status and account at the foot.
-- **No top bar on desktop.** Each page owns its header: mono eyebrow (stage), serif title, lede, actions.
-- **Mobile (<820px):** a slim top bar (menu, wordmark, company) and the spine as an off-canvas drawer (mirrors in RTL).
-- **Journey track:** the old pill bar becomes a slim segmented progress track with one "Next" callout.
+## 4. Shell (revised 2026-11-16, "Evidence Desk" — see STRATEGY.md)
+- **Workflow bar instead of a sidebar.** Top row: wordmark, company switcher (+ new company), command button (Ctrl/⌘ K, `/`), AI status, settings gear, language, account menu (email, settings, sign out). Second row: the four stages `01 Understand · 02 Diagnose & decide · 03 Create · 04 Measure & improve`, each with its pages (short labels; full name in `title`), pending counts, a vermilion underline on the current page.
+- **Next strip** (every page except the Briefing): the six journey segments (each opens its stage) + the single next step and its button.
+- **Command menu**: pages, actions, companies, campaigns, audit findings, facts; anything typed can be sent to the Director.
+- **Knowledge triage keys**: J/K move, A approve, R reject (legend pinned at the bottom of the Knowledge Hub; hidden on touch).
+- **Mobile (<820px):** the top row wraps (search on its own line), the stage bar scrolls sideways with a fade edge; Settings via the account menu.
 
 ## 5. Screen compositions
-- **Dashboard → "Briefing".** Masthead (date, company, objective) · KPI ledger strip (numbers on hairlines, not cards) · numbered priorities (01/02/03) with evidence and the same actions · health scorecard rows with segmented meters · campaigns and an activity timeline in a side rail.
+- **Dashboard → "Briefing".** "Needs you" decision queue first, then masthead (date, company, objective) · KPI ledger strip (numbers on hairlines, not cards) · numbered priorities (01/02/03) with evidence and the same actions · health scorecard rows with segmented meters · campaigns and an activity timeline in a side rail.
 - **Marketing Director → "Advisor desk".** Conversation in a reading column (question in ink, answer as a sheet with a signal rule, citations as footnotes, proposed actions in a tray), a sticky composer, and a context rail (what the Director knows, how answers are made, suggested questions, Claude import/export).
 - **Audit → "Findings dossier".** Each finding is a sheet with a coloured kind spine, serif title, and a two-column spec list.
 - **Auth → split cover.** Brand statement on ink, form on paper.
