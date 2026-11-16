@@ -606,6 +606,59 @@ main{max-width:1320px;padding-top:28px}
  .ph{margin-bottom:18px;padding-bottom:16px}
  .composer{bottom:10px}
 }
+
+/* Knowledge review desk (pass 3) */
+.kd-head{display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--rule);padding-bottom:12px}
+.kd-tabs{display:flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:var(--r-2);background:var(--surface);overflow:hidden;width:fit-content;max-width:100%}
+.kd-tabs button{border:0;border-inline-end:1px solid var(--rule);background:none;padding:9px 16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:96px;color:var(--ink-2);position:relative;transition:background .14s var(--ease);font:inherit}
+.kd-tabs button:last-child{border-inline-end:0}
+.kd-tabs button b{font:600 21px/1.15 var(--f-display);color:var(--ink);font-variant-numeric:tabular-nums}
+.kd-tabs button span{font-size:12.5px;font-weight:550}
+.kd-tabs button.z b{color:var(--ink-3)}
+.kd-tabs button:hover{background:var(--surface-2)}
+.kd-tabs button.on{background:var(--paper-2);color:var(--ink)}
+.kd-tabs button.on::after{content:"";position:absolute;inset-inline:0;bottom:0;height:2px;background:var(--signal)}
+.kd-prog{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-2)}
+.kd-prog .kbar{margin:0;flex:0 0 180px}
+.kd{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:20px;align-items:start}
+.kd-list{border:1px solid var(--rule);border-radius:var(--r-2);background:var(--surface);overflow:hidden}
+.kd-g+.kd-g{border-top:1px solid var(--rule)}
+.kd-gh{display:flex;align-items:center;gap:8px;padding:10px 14px 4px}
+.kd-gh h2{font:600 11.5px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:0}
+.kd-n{font:500 11.5px var(--f-mono);color:var(--ink-3)}
+.kd-gh .btn.sm{padding:3px 9px;font-size:12px}
+.kd-row{display:flex;gap:10px;width:100%;text-align:start;border:0;background:none;padding:8px 14px;cursor:pointer;align-items:flex-start;border-inline-start:2px solid transparent;font:inherit;color:inherit;transition:background .12s var(--ease)}
+.kd-row:hover{background:var(--surface-2)}
+.kd-row.on{background:var(--signal-soft);border-inline-start-color:var(--signal)}
+.kd-row:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.kd-st{flex:0 0 18px;height:18px;border-radius:50%;border:1.5px solid var(--rule-2);display:grid;place-items:center;font:700 10.5px/1 var(--f-ui);font-style:normal;margin-top:1px;box-sizing:border-box}
+.kd-row.s-ok .kd-st{background:var(--pos);border-color:var(--pos);color:#fff}
+.kd-row.s-no .kd-st{background:var(--paper-2);color:var(--ink-3)}
+.kd-row.s-q .kd-st{border-color:var(--info);color:var(--info)}
+.kd-row.s-cf .kd-st,.kd-row.s-dec .kd-st{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+.kd-tx{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.kd-t{font-size:14px;line-height:1.45;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.kd-row.s-no .kd-t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--rule-2)}
+.kd-m{display:flex;gap:8px;font-size:12px;color:var(--ink-3);min-width:0}
+.kd-m span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kd-m b{font-weight:600;color:var(--warn);white-space:nowrap}
+.kd-more{padding:4px 14px 12px}
+.kd-more summary{cursor:pointer;font-size:13px;color:var(--ink-2);padding:4px 0}
+.kd-pane{position:sticky;top:140px;max-height:calc(100vh - 156px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:2px}
+.kd-nav{display:flex;align-items:center;gap:6px}
+.kd-nav .eyebrow{margin:0}
+.kd-pos{font:500 12px var(--f-mono);color:var(--ink-3);margin-inline-end:4px}
+.kd-pane .find{padding:20px 22px;box-shadow:var(--lift)}
+.kd-pane .find .ft{font-size:18px;line-height:1.45;font-weight:550}
+.kd-pane .find .fev{border-inline-start:2px solid var(--signal);padding-inline-start:12px;margin:12px 0;font-size:14px}
+.kd-pane .find>.row:last-child{margin-top:14px!important}
+.kd-pane .find>.row:last-child .btn.sm{padding:8px 16px;font-size:14px}
+.kd-hint{font:500 11.5px var(--f-mono);color:var(--ink-3);margin:0}
+.kd-done,.kd-none{display:flex;flex-direction:column;gap:4px;padding:28px 20px;border:1px dashed var(--rule-2);border-radius:var(--r-2);color:var(--ink-2);text-align:center}
+.kd-none{border:0}
+@media(hover:none){.kd-hint{display:none}}
+@media(max-width:900px){.kd{grid-template-columns:minmax(0,1fr)}.kd-pane{position:static;max-height:none;order:-1}.kd-tabs{width:100%}.kd-tabs button{flex:1 1 30%;min-width:0;padding:8px 10px}.kd-prog .kbar{flex-basis:90px}}
+[dir=rtl] .kd-gh h2,[dir=rtl] .kd-hint{letter-spacing:0;text-transform:none;font-family:var(--f-ui)}
 </style>
 </head>
 <body>
@@ -1476,15 +1529,28 @@ function findCard(c,f){const src=c.sources.find(s=>s.id===f.src),ty=f.status==='
  ${unk?unkPanel(f,src):`<details><summary>${L('Source and evidence','المصدر والدليل')}</summary><dl><dt>${L('Source','المصدر')}</dt><dd dir="auto">${src?esc(src.title):f.web==='brand'?esc(L('Found on your website','وُجد على موقعك')+' — '+(f.pageUrl||'')):f.type==='user'?L('Typed by a user','كتبه مستخدم'):L('Derived across sources','مشتق من عدة مصادر')}</dd><dt>${L('Evidence','الدليل')}</dt><dd dir="auto"><q>${esc(f.ev)}</q></dd><dt>${L('Extracted','استُخرج')}</dt><dd>${f.date}</dd><dt>${L('Status','الحالة')}</dt><dd>${f.status==='approved'?L('Approved by a person','اعتمده شخص'):f.status==='rejected'?L('Rejected','مرفوض'):L('Awaiting review','بانتظار المراجعة')}${f.edited?' · '+L('edited','معدَّل'):''}</dd></dl></details>`}
  ${f.type==='conflict'&&f.status==='pending'&&confOpts(c).length?`<div class="grid g2 copts">${confOpts(c).map(x=>{const s2=c.sources.find(s=>s.id===x.src);return`<div class="copt"><p class="ft" dir="auto">${esc(x.text)}</p><p class="fev" dir="auto"><q>${esc(x.ev||'')}</q></p><p class="small muted" dir="auto">${L('Source','المصدر')}: ${s2?esc(s2.title)+' · '+s2.date:'—'}</p><button class="btn sm pri" data-a="kKeep" data-v="${x.id}">${L('Keep this one','أبقِ على هذا')}</button></div>`}).join('')}</div><p class="small muted">${L('Keeping one approves it, rejects the other version(s) and closes the conflict.','الإبقاء على أحدها يعتمده ويرفض النسخ الأخرى ويغلق التعارض.')}</p>`:''}
  ${unk?'':`<div class="row" style="margin-top:8px">${f.status==='rejected'?`<button class="btn sm pri" data-a="kUnreject" data-v="${f.id}">${L('Back to review','أعِدها للمراجعة')}</button>`:''}${f.type==='conflict'?`<button class="btn sm" data-a="kReject" data-v="${f.id}">${L('Mark resolved','علّم كمحلول')}</button>`:`${f.status!=='approved'?`<button class="btn sm pri" data-a="kApprove" data-v="${f.id}">${L('Approve','اعتمد')}</button>`:''}${f.status!=='rejected'?`<button class="btn sm" data-a="kReject" data-v="${f.id}">${L('Reject','ارفض')}</button>`:''}${f.web==='brand'?`<button class="btn sm" data-a="brandEdit" data-v="${f.id}">${S.ui.bEdit===f.id?L('Done','تم'):L('Edit','عدّل')}</button>`:`<button class="btn sm" data-a="kEdit" data-v="${f.id}">${L('Edit','عدّل')}</button>`}${f.cat==='ctas'&&f.status==='approved'&&!f.primary?`<button class="btn sm" data-a="kPrimary" data-v="${f.id}">${L('Make primary','اجعلها الأساسية')}</button>`:''}`}</div>`}</div>`}
+/* Knowledge Hub as a review desk (redesign pass 3): filters with counts in one strip, a dense list grouped by category, and the selected item in a sticky pane with the same findCard (and the same actions) as before. Approving or rejecting moves to the next item that still needs review. */
+const KD={ids:[]};
+function kdRow(c,f,on){const src=c.sources.find(s=>s.id===f.src),unk=f.type==='unknown',pend=f.status==='pending',st=f.status==='approved'?'ok':f.status==='rejected'?'no':unk?'q':f.type==='conflict'?'cf':f.needs?'dec':'pend',
+ tag=pend&&f.type==='conflict'?L('Conflict','تعارض'):pend&&unk?L('Your answer','إجابتك'):pend&&f.needs?L('Needs decision','يحتاج قراراً'):f.by==='ai'?L('AI suggested','اقتراح الذكاء الاصطناعي'):f.isNew&&pend?L('Update','تحديث'):'',
+ t=unk?(reqQ(f.cat)||esc(f.text)):esc(f.text.length>180?f.text.slice(0,180)+'…':f.text);
+ return`<button type="button" class="kd-row s-${st}${on?' on':''}" data-a="kSel" data-v="${f.id}" aria-current="${on?'true':'false'}" id="kd-${f.id}"><i class="kd-st" aria-hidden="true">${{ok:'✓',no:'✕',q:'?',cf:'!',dec:'!',pend:''}[st]}</i><span class="kd-tx"><span class="kd-t" dir="auto">${t}</span><span class="kd-m">${tag?`<b>${tag}</b>`:''}<span dir="auto">${src?esc(src.title):f.web==='brand'?L('Your website','موقعك'):f.type==='user'?L('Added by you','أضفتها أنت'):L('Across sources','من عدة مصادر')}</span></span></span></button>`}
 V.know=c=>{if(!c.findings.length)return ph(L('Company Knowledge Hub','مركز معرفة الشركة'),L('The single source of truth every campaign draws from.','مصدر الحقيقة الوحيد الذي تعتمد عليه كل حملة.'))+empty(L('No knowledge yet','لا معرفة بعد'),L('Add your website or a document — it is analysed as soon as it is added. BrandPilot never fills this in on its own.','أضف موقعك أو مستنداً — يُحلَّل فور إضافته. BrandPilot لا يملأ هذا من تلقاء نفسه.'),L('Company sources','مصادر الشركة'),'onboard');
- const F=c.findings,n=k=>F.filter(k).length,toRev=F.some(f=>f.status==='pending'&&f.type!=='unknown'),flt=S.ui.kf||(toRev?'pending':'all'),show=f=>flt==='all'?true:flt==='pending'?f.status==='pending'&&f.type!=='unknown':flt==='approved'?f.status==='approved':flt==='flag'?(f.needs&&f.status==='pending'):flt==='rejected'?f.status==='rejected':f.type==='unknown',sup=n(f=>supF(f,c)),last=c.kver[c.kver.length-1];
- return ph(L('Company Knowledge Hub','مركز معرفة الشركة'),L('Every statement keeps its source, evidence, date and review status. Only approved knowledge reaches campaigns.','كل عبارة تحتفظ بمصدرها ودليلها وتاريخها وحالة مراجعتها. المعرفة المعتمدة فقط تصل إلى الحملات.'),`${(()=>{const r=kScope(c).ready.length;return r?`<button class="btn pri" data-a="kBulk">${L(`Approve all ${r} pending`,`اعتمد كل المعلّق (${r})`)}</button>`:''})()}${c.kdirty?`<button class="btn" data-a="kPublish">${L('Publish as version','انشر كإصدار')} v${c.kver.length+1}</button>`:''}`)+
- `<div class="stack"><div class="grid gk">${[[L('Approved','معتمد'),n(f=>f.status==='approved')],[L('Awaiting review','بانتظار المراجعة'),n(f=>f.status==='pending'&&f.type!=='unknown')],[L('Need your decision','تحتاج قرارك'),n(f=>f.needs&&f.status==='pending')],[L('Open questions','أسئلة مفتوحة'),n(f=>f.type==='unknown'&&f.status==='pending')]].map(([l,v])=>kpi(l,v)).join('')}</div>
- ${(()=>{const tot=n(f=>f.type!=='unknown'),done=n(f=>f.type!=='unknown'&&f.status!=='pending');return tot?`<div class="kprog" role="status"><div class="row"><b>${L(`${done} of ${tot} findings reviewed`,`تمت مراجعة ${done} من ${tot} نتيجة`)}</b><span class="sp"></span><span class="muted small">${done<tot?L('Approve what is true, reject what is not. Evidence is shown under each statement.','اعتمد الصحيح وارفض غيره. الدليل ظاهر تحت كل عبارة.'):c.kdirty?L('All reviewed — publish this version so campaigns use it.','تمت المراجعة — انشر هذا الإصدار لتستخدمه الحملات.'):L('All reviewed and published.','تمت المراجعة والنشر.')}</span></div><div class="kbar"><i style="width:${Math.round(done/tot*100)}%"></i></div></div>`:''})()}
+ const F=c.findings,n=k=>F.filter(k).length,toRev=F.some(f=>f.status==='pending'&&f.type!=='unknown'),flt=S.ui.kf||(toRev?'pending':'all'),show=f=>flt==='all'?true:flt==='pending'?f.status==='pending'&&f.type!=='unknown':flt==='approved'?f.status==='approved':flt==='flag'?(f.needs&&f.status==='pending'):flt==='rejected'?f.status==='rejected':f.type==='unknown',last=c.kver[c.kver.length-1];
+ const list=CAT_ORDER.flatMap(cat=>F.filter(f=>f.cat===cat&&show(f))),ids=list.map(f=>f.id);let sel=S.ui.kSel;
+ if(!ids.includes(sel)){const i=KD.ids.indexOf(sel);sel=null;if(i>=0)for(let j=i+1;j<KD.ids.length&&!sel;j++)if(ids.includes(KD.ids[j]))sel=KD.ids[j];if(!sel)sel=((list.find(f=>f.status==='pending')||list[0])||{}).id||null;S.ui.kSel=sel}
+ KD.ids=ids;const cur=list.find(f=>f.id===sel),pos=ids.indexOf(sel),tot=n(f=>f.type!=='unknown'),done=n(f=>f.type!=='unknown'&&f.status!=='pending');
+ const tabs=[['pending',L('To review','للمراجعة'),n(f=>f.status==='pending'&&f.type!=='unknown')],['flag',L('Need your decision','تحتاج قرارك'),n(f=>f.needs&&f.status==='pending')],['unknown',L('Open questions','أسئلة مفتوحة'),n(f=>f.type==='unknown'&&f.status==='pending')],['approved',L('Approved','معتمد'),n(f=>f.status==='approved')],['rejected',L('Rejected','مرفوضة'),n(f=>f.status==='rejected')],['all',L('All','الكل'),F.length]];
+ const groups=CAT_ORDER.map(cat=>{const xs=list.filter(f=>f.cat===cat),th=cat==='themes'&&(flt==='all'||flt==='approved'||flt==='pending');if(!xs.length&&!th)return'';const r=kScope(c,cat).ready.length;
+  return`<section class="kd-g"${cat==='themes'?' id="k-themes"':cat==='brandid'?' id="k-brandcat"':''}><div class="kd-gh"><h2>${catName(cat)}</h2><span class="kd-n">${xs.length}</span><span class="sp"></span>${r&&flt!=='approved'&&flt!=='rejected'?`<button class="btn sm" data-a="kCat" data-v="${cat}" title="${L('Approve the pending items in this category','اعتمد العناصر المعلّقة في هذه الفئة')}">${L(`Approve ${r}`,`اعتمد ${r}`)}</button>`:''}</div>${xs.map(f=>kdRow(c,f,f.id===sel)).join('')}${th?`<details class="kd-more"><summary>${L('About post themes · add one','عن موضوعات المنشورات · أضف موضوعاً')}</summary>${themeHint(c)}${themeForm()}</details>`:''}</section>`}).join('');
+ return ph(L('Company Knowledge Hub','مركز معرفة الشركة'),L('Every statement keeps its source, evidence, date and review status. Only approved knowledge reaches campaigns.','كل عبارة تحتفظ بمصدرها ودليلها وتاريخها وحالة مراجعتها. المعرفة المعتمدة فقط تصل إلى الحملات.'),`${(()=>{const r=kScope(c).ready.length;return r?`<button class="btn" data-a="kBulk">${L(`Approve all ${r} pending`,`اعتمد كل المعلّق (${r})`)}</button>`:''})()}${c.kdirty?`<button class="btn pri" data-a="kPublish">${L('Publish as version','انشر كإصدار')} v${c.kver.length+1}</button>`:''}`)+
+ `<div class="stack"><div class="kd-head"><div class="kd-tabs" role="tablist" aria-label="${L('Show','اعرض')}">${tabs.map(([k,l,v])=>`<button role="tab" aria-selected="${flt===k}" class="${flt===k?'on':''}${v?'':' z'}" data-a="kFilter" data-v="${k}"><b>${v}</b><span>${l}</span></button>`).join('')}</div>
+ ${tot?`<div class="kd-prog" role="status"><div class="kbar"><i style="width:${Math.round(done/tot*100)}%"></i></div><span><b>${L(`${done} of ${tot} reviewed`,`تمت مراجعة ${done} من ${tot}`)}</b> · ${done<tot?L('approve what is true, reject what is not','اعتمد الصحيح وارفض غيره'):c.kdirty?L('all reviewed — publish this version so campaigns use it','تمت المراجعة — انشر هذا الإصدار لتستخدمه الحملات'):L('all reviewed and published','تمت المراجعة والنشر')}</span></div>`:''}</div>
  ${n(f=>f.isNew&&f.status==='pending')?`<div class="note">${L(`New sources changed the picture: ${n(f=>f.isNew&&f.status==='pending')} proposed update(s) since version v${c.kver.length}. Nothing is applied until you approve it.`,`المصادر الجديدة غيّرت الصورة: ${n(f=>f.isNew&&f.status==='pending')} تحديث مقترح منذ الإصدار v${c.kver.length}. لا يُطبَّق شيء قبل اعتمادك.`)}</div>`:''}
- ${(()=>{const t=kSkip(kScope(c));return t?`<p class="small muted" data-k-skip>${t}</p>`:''})()}${brandBox(c)}
- <div class="tabs" role="tablist">${[['all',L('All','الكل')],['pending',L('To review','للمراجعة')],['flag',L('Needs decision','يحتاج قراراً')],['unknown',L('Open questions','أسئلة مفتوحة')],['approved',L('Approved','معتمد')],['rejected',L('Rejected','مرفوضة')]].map(([k,l])=>`<button role="tab" aria-selected="${flt===k}" class="${flt===k?'on':''}" data-a="kFilter" data-v="${k}">${l}</button>`).join('')}</div>
- ${CAT_ORDER.map(cat=>{const xs=F.filter(f=>f.cat===cat&&show(f));const ok=xs.filter(f=>supF(f,c)).length,th=cat==='themes'&&(flt==='all'||flt==='approved'||flt==='pending');return xs.length||th?`<section class="card"${cat==='themes'?' id="k-themes"':cat==='brandid'?' id="k-brandcat"':''}><div class="row" style="margin-bottom:10px"><h2>${catName(cat)}</h2><span class="muted small">${xs.length}</span><span class="sp"></span>${(()=>{const sc=kScope(c,cat),r=sc.ready.length;return(r?`<button class="btn sm" data-a="kCat" data-v="${cat}">${L(`Approve the ${r} pending here`,`اعتمد ${r} معلّقة هنا`)}</button>`:'')+(kSkip(sc)?` <span class="muted small">${kSkip(sc)}</span>`:'')})()}</div>${th?themeHint(c):''}<div class="grid g2">${xs.map(f=>findCard(c,f)).join('')}</div>${th?themeForm():''}</section>`:''}).join('')||`<p class="muted">${L('Nothing in this view.','لا شيء في هذا العرض.')}</p>`}
+ ${(()=>{const t=kSkip(kScope(c));return t?`<p class="small muted" data-k-skip>${t}</p>`:''})()}
+ <div class="kd${list.length?'':' kd-0'}"><div class="kd-list">${groups||`<p class="muted kd-none">${L('Nothing in this view.','لا شيء في هذا العرض.')}</p>`}</div>
+ <div class="kd-pane" aria-live="polite">${cur?`<div class="kd-nav"><span class="eyebrow">${catName(cur.cat)}</span><span class="sp"></span><span class="kd-pos">${pos+1} / ${list.length}</span><button class="btn sm" data-a="kSel" data-v="${ids[pos-1]||''}"${pos>0?'':' disabled'} title="K">${L('Previous','السابق')}</button><button class="btn sm" data-a="kSel" data-v="${ids[pos+1]||''}"${pos<ids.length-1?'':' disabled'} title="J">${L('Next','التالي')}</button></div>${findCard(c,cur)}`:`<div class="kd-done"><b>${L('Nothing to show here','لا شيء هنا')}</b><span>${flt==='pending'?L('Everything has been reviewed.','تمت مراجعة كل شيء.'):L('Choose another filter above.','اختر عرضاً آخر بالأعلى.')}</span></div>`}</div></div>
+ ${brandBox(c)}
  <div class="grid g2"><section class="card"><h2>${L('Add a fact yourself','أضف حقيقة بنفسك')}</h2><form data-s="kAdd" class="stack"><select name="cat" aria-label="${L('Category','الفئة')}">${CAT_ORDER.map(k=>`<option value="${k}">${catName(k)}</option>`).join('')}</select><input name="t" required dir="auto" aria-label="${L('Fact','الحقيقة')}" placeholder="${L('Stated in your own words; recorded as provided by you','بكلماتك؛ تُسجَّل كمقدَّمة منك')}"><button class="btn">${L('Add approved fact','أضف حقيقة معتمدة')}</button></form></section>
  <section class="card"><h2>${L('Knowledge versions','إصدارات المعرفة')}</h2>${c.kver.length?c.kver.slice().reverse().map(v=>`<p class="small"><b>v${v.n}</b> · ${dt(v.at)} — ${v.count} ${L('approved facts','حقيقة معتمدة')} (+${v.added} / −${v.removed})</p>`).join(''):`<p class="muted">${L('No version published yet. Publishing records exactly which facts were approved at that moment.','لم يُنشر إصدار بعد. النشر يسجل بدقة الحقائق المعتمدة في تلك اللحظة.')}</p>`}${last?`<button class="btn sm" data-a="ex" data-v="knowledge">${L('Export knowledge (JSON)','صدّر المعرفة (JSON)')}</button>`:''}</section></div></div>`};
 
@@ -2704,14 +2770,12 @@ addEventListener('keydown',e=>{
  if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='k'&&S&&USER){e.preventDefault();CK.open?ckClose(true):ckOpen();return}
  if(CK.open){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();ckClose(true)}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const n=CK.list.length;if(n){CK.i=(CK.i+(e.key==='ArrowDown'?1:n-1))%n;ckList()}}else if(e.key==='Enter'){e.preventDefault();ckRun(CK.i)}else if(e.key==='Tab'){e.preventDefault();document.getElementById('ckq').focus()}return}
  if(e.key==='/'&&!typing(e.target)&&!MODAL&&S&&USER&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();ckOpen()}},true);
-/* ---------- Fact triage on the Knowledge Hub: J/K move between facts that can be decided, A approves, R rejects (the same kApprove / kReject actions as the buttons). ---------- */
-let KF=-1;
-function kfCards(){return[...document.querySelectorAll('#main .find')].filter(x=>x.querySelector('[data-a="kApprove"],[data-a="kReject"]'))}
-function kfMark(focus){const cs=kfCards();document.querySelectorAll('#main .find.kf').forEach(x=>x.classList.remove('kf'));if(!cs.length){KF=-1;return}KF=Math.max(0,Math.min(KF,cs.length-1));const el=cs[KF];el.classList.add('kf');el.tabIndex=-1;if(focus){el.focus({preventScroll:true});el.scrollIntoView({block:'nearest'})}}
-addEventListener('keydown',e=>{if(!S||CK.open||MODAL||S.ui.view!=='know'||typing(e.target)||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();if(!['j','k','a','r'].includes(k))return;const cs=kfCards();if(!cs.length)return;e.preventDefault();
- if(KF<0||!cs[KF]||!cs[KF].classList.contains('kf')){if(k==='j'||k==='k'){KF=Math.max(0,KF);kfMark(true);return}}
- if(k==='j'){KF=Math.min(cs.length-1,KF+1);kfMark(true)}else if(k==='k'){KF=Math.max(0,KF-1);kfMark(true)}
- else{const b=cs[KF]&&cs[KF].querySelector(`[data-a="${k==='a'?'kApprove':'kReject'}"]`);if(!b){toast(k==='a'?L('This one cannot be approved here.','لا يمكن اعتماد هذا هنا.'):L('This one cannot be rejected here.','لا يمكن رفض هذا هنا.'),'err');return}const id=b.dataset.v;A[b.dataset.a](id);toast(k==='a'?L('Approved','اعتُمد'):L('Rejected','رُفض'),'ok');setTimeout(()=>{const n=kfCards(),j=n.findIndex(x=>x.querySelector(`[data-v="${CSS.escape(id)}"]`));KF=j>=0?j+1:KF;kfMark(true)},0)}});
+/* ---------- Knowledge review desk keys: J / K move the selection, A / R press the pane's own Approve / Reject (the same kApprove / kReject actions as the buttons). Approving or rejecting moves on to the next item that still needs review. ---------- */
+A.kSel=v=>{if(!v)return;S.ui.kSel=v;R();const r=document.getElementById('kd-'+v);if(r)r.scrollIntoView({block:'nearest'});if(matchMedia('(max-width:900px)').matches){const p=document.querySelector('#main .kd-pane');if(p)p.scrollIntoView({block:'start'})}};
+['kApprove','kReject'].forEach(k=>{const o=A[k];A[k]=(id,...r)=>{if(S.ui.view!=='know')return o(id,...r);const c=C(),f0=c.findings.find(y=>y.id===id),st=f0&&f0.status,i=KD.ids.indexOf(id),nx=i<0?null:KD.ids.slice(i+1).find(x=>{const f=c.findings.find(y=>y.id===x);return f&&f.status==='pending'&&f.type!=='unknown'});S.ui.kSel=nx||id;o(id,...r);if(f0&&f0.status===st&&S.ui.kSel!==id){S.ui.kSel=id;R()}}});
+addEventListener('keydown',e=>{if(!S||CK.open||MODAL||S.ui.view!=='know'||typing(e.target)||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();if(!['j','k','a','r'].includes(k)||!KD.ids.length)return;e.preventDefault();
+ if(k==='j'||k==='k'){const i=KD.ids.indexOf(S.ui.kSel),j=Math.max(0,Math.min(KD.ids.length-1,i+(k==='j'?1:-1)));A.kSel(KD.ids[j]);const r=document.getElementById('kd-'+KD.ids[j]);if(r)r.focus({preventScroll:true});return}
+ const b=document.querySelector(`#main .kd-pane .find [data-a="${k==='a'?'kApprove':'kReject'}"]`);if(!b){toast(k==='a'?L('This one cannot be approved here.','لا يمكن اعتماد هذا هنا.'):L('This one cannot be rejected here.','لا يمكن رفض هذا هنا.'),'err');return}A[b.dataset.a](b.dataset.v);toast(k==='a'?L('Approved','اعتُمد'):L('Rejected','رُفض'),'ok');const r=document.getElementById('kd-'+S.ui.kSel);if(r)r.focus({preventScroll:true})});
 start();
 
 </script>

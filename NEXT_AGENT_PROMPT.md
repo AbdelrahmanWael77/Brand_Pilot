@@ -1,8 +1,6 @@
-# On branch `redesign/new-product-identity` — owner review of the full UI redesign
+# On branch `redesign/new-product-identity` — redesign pass 3 (recomposing screens), owner review
 
-This branch holds the "Ledger" / "Evidence Desk" redesign of `public/index.html` (read `design-system/brandpilot/STRATEGY.md` first) (see the REDESIGN line at the top of IMPLEMENTATION_STATUS.md and `design-system/brandpilot/MASTER.md`). It must not reach `dev` until the owner approves. Next on this branch, only if the owner asks: recompose the screens still listed as "restyled only" (start with Knowledge Hub review flow, then Analytics), then dark mode. Run `npm test` and check EN + AR in the browser after each change.
-
-If you are working on `dev` instead, ignore this section and continue below.
+Read `design-system/brandpilot/STRATEGY.md`, `MASTER.md` and the "REDESIGN — pass 3" line at the top of IMPLEMENTATION_STATUS.md. The owner wants **one commit and a push to `origin/redesign/new-product-identity` per screen**; never merge into `dev` until the owner approves. Done in pass 3: Knowledge Hub review desk. Next single screen: Analytics "Compare channels" — a channel scoreboard first (headline numbers per channel with data sufficiency and the "Best eligible" / "Highest observed" explanation inline), the findings as a compact ruled list instead of six identical cards; keep every number, label and action from `public/compare.js` / `cxView`. Then Sources intake, Studio review, QA. After each: `npm test`, check EN + AR in the browser (a copy of the DB on another port is safest), update both handoff files, commit, push.
 
 ---
 
