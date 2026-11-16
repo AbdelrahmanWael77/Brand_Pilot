@@ -107,6 +107,11 @@ CREATE TABLE IF NOT EXISTS campaign_mirror (
   result     TEXT NOT NULL
 );
 -- Per-company settings the server needs to trust (mirrored from the state on save).
+-- Server-wide settings (key / value), e.g. the AI model chosen in Settings.
+CREATE TABLE IF NOT EXISTS app_settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS company_settings (
   company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
   currency   TEXT

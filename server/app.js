@@ -85,7 +85,25 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   app.post('/api/companies/:id/campaigns/:cid/assets/:aid/visual-copy', auth.requireAuth, companies.requireCompany, visualCopyRoute(db, ai, createLimiter(visualLimit)));
   app.use('/api/companies', auth.requireAuth, companies.router);
   // Whether an AI key is set on this server. Says nothing else: no key, no model, no provider detail.
-  app.get('/api/ai/status', auth.requireAuth, (_req, res) => res.json({ configured: ai.configured, images: imageAi.configured }));
+  // AI model choice (owner's request 2026-11-16): every provider / model with a key is an option; the choice
+  // is server-wide and saved in app_settings, so it survives a restart. Keys never leave the server.
+  const canPick = typeof ai.select === 'function' && typeof ai.options === 'function';
+  if (canPick) {
+    const saved = db.prepare("SELECT value FROM app_settings WHERE key = 'ai_model'").get();
+    if (saved) ai.select(saved.value);
+  }
+  const aiStatus = () => ({
+    configured: ai.configured,
+    images: imageAi.configured,
+    ...(canPick ? { provider: ai.provider, model: ai.model, selected: ai.selected, options: ai.options() } : {}),
+  });
+  app.get('/api/ai/status', auth.requireAuth, (_req, res) => res.json(aiStatus()));
+  app.put('/api/ai/model', auth.requireAuth, (req, res) => {
+    const id = typeof req.body?.id === 'string' ? req.body.id : '';
+    if (!canPick || !ai.select(id)) return res.status(400).json({ error: 'unknown_model' });
+    db.prepare("INSERT INTO app_settings (key, value) VALUES ('ai_model', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(id);
+    res.json(aiStatus());
+  });
 
   // Browsers ask for /favicon.ico on their own; answer with the app icon instead of a 404.
   app.get('/favicon.ico', (_req, res) => res.sendFile(path.join(root, 'public', 'favicon.svg')));

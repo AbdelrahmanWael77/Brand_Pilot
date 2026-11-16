@@ -2,7 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
 import { openDb } from '../server/db.js';
-import { createAi, AiError, DEFAULT_MODEL, DEFAULT_OPENAI_MODEL, OPENAI_URL } from '../server/ai.js';
+import { createAi, AiError, DEFAULT_MODEL, DEFAULT_OPENAI_MODEL, OPENAI_URL, OPENROUTER_URL, DEFAULT_OPENROUTER_MODEL } from '../server/ai.js';
 
 const KEY = 'test-key-never-real';
 const json = (status, body, headers = {}) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } });
@@ -138,7 +138,7 @@ after(() => {
   db.close();
 });
 
-test('GET /api/ai/status: 401 signed out; { configured, images } only, never the key or model', async () => {
+test('GET /api/ai/status: 401 signed out; configured, images and the model choice — never the key', async () => {
   const n = net(() => json(200, message()));
   const off = await start(createAi({ apiKey: '' }));
   const on = await start(createAi({ apiKey: KEY, fetch: n.fetch }));
@@ -148,9 +148,10 @@ test('GET /api/ai/status: 401 signed out; { configured, images } only, never the
   const cookie = reg.headers.getSetCookie()[0].split(';')[0];
   const a = await fetch(`${off}/api/ai/status`, { headers: { cookie } });
   assert.equal(a.status, 200);
-  assert.deepEqual(await a.json(), { configured: false, images: false });
+  assert.deepEqual(await a.json(), { configured: false, images: false, provider: null, model: null, selected: null, options: [] });
   const b = await (await fetch(`${on}/api/ai/status`, { headers: { cookie } })).text(); // same DB, same session
-  assert.deepEqual(JSON.parse(b), { configured: true, images: false });
+  const sel = `anthropic:${DEFAULT_MODEL}`;
+  assert.deepEqual(JSON.parse(b), { configured: true, images: false, provider: 'anthropic', model: DEFAULT_MODEL, selected: sel, options: [{ id: sel, provider: 'anthropic', model: DEFAULT_MODEL }] });
   assert.doesNotMatch(b, new RegExp(KEY));
   assert.equal(n.calls.length, 0); // asking for the status never calls the provider
 });
@@ -265,7 +266,8 @@ test('OpenAI through the app: status says configured, and the Director route ans
   const post = (path, cookie, body, method = 'POST') => fetch(at + path, { method, headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: JSON.stringify(body) });
   const reg = await post('/api/auth/register', null, { email: 'gpt@example.com', password: 'correct horse' });
   const cookie = reg.headers.getSetCookie()[0].split(';')[0];
-  assert.deepEqual(await (await fetch(`${at}/api/ai/status`, { headers: { cookie } })).json(), { configured: true, images: false });
+  const st = await (await fetch(`${at}/api/ai/status`, { headers: { cookie } })).json();
+  assert.deepEqual([st.configured, st.images, st.provider, st.selected], [true, false, 'openai', `openai:${DEFAULT_OPENAI_MODEL}`]);
   const co = (await (await post('/api/companies', cookie, { name: 'GPT Co' })).json()).company.id;
   const state = {
     sources: [{ id: 's1', title: 'a.txt', kind: 'document', text: 'x', date: '2026-11-14', demo: false }],
@@ -282,4 +284,69 @@ test('OpenAI through the app: status says configured, and the Director route ans
   assert.equal(n.calls[0].url, OPENAI_URL);
   assert.match(n.calls[0].body.messages[0].content, /AI Marketing Director/);
   assert.match(n.calls[0].body.messages[1].content, /Fresh bread daily/);
+});
+
+// ---------------------------------------------------------------------------------------------
+// OpenRouter + switching models in Settings (owner's request 2026-11-16).
+// ---------------------------------------------------------------------------------------------
+const RKEY = 'openrouter-test-key-never-real';
+
+test('OpenRouter: Chat Completions at openrouter.ai, max_tokens, reasoning.effort, key only in Authorization', async () => {
+  const n = net(() => json(200, completion({}, {})));
+  const ai = createAi({ apiKey: '', openaiKey: '', openrouterKey: RKEY, openrouterModel: 'anthropic/claude-opus-5.5', fetch: n.fetch });
+  assert.deepEqual([ai.configured, ai.provider, ai.model], [true, 'openrouter', 'anthropic/claude-opus-5.5']);
+  const r = await ai.complete({ ...ask, maxTokens: 700, effort: 'medium' });
+  assert.equal(r.text, 'Hello there');
+  const c = n.calls[0];
+  assert.equal(c.url, OPENROUTER_URL);
+  assert.equal(c.headers.get('authorization'), `Bearer ${RKEY}`);
+  assert.equal(c.body.model, 'anthropic/claude-opus-5.5');
+  assert.equal(c.body.max_tokens, 700);
+  assert.equal(c.body.max_completion_tokens, undefined);
+  assert.deepEqual(c.body.reasoning, { effort: 'medium' });
+  assert.equal(c.body.messages[0].role, 'system');
+  // no model listed → OpenRouter's own router
+  assert.equal(createAi({ apiKey: '', openaiKey: '', openrouterKey: RKEY, openrouterModel: '' }).model, DEFAULT_OPENROUTER_MODEL);
+  await assert.rejects(
+    createAi({ apiKey: '', openaiKey: '', openrouterKey: RKEY, fetch: async () => json(401, { error: { message: 'bad' } }) }).complete(ask),
+    (e) => e.code === 'ai_auth_failed' && !e.message.includes(RKEY),
+  );
+});
+
+test('options and select: every keyed provider / model is an option; select switches; unknown ids change nothing', async () => {
+  const n = net((_, init) => json(200, String(init.body).includes('"model"') && JSON.parse(init.body).messages ? completion() : message()));
+  const ai = createAi({ apiKey: KEY, openaiKey: OKEY, openrouterKey: RKEY, openrouterModel: 'a/one, b/two ,a/one', fetch: n.fetch });
+  assert.deepEqual(ai.options().map((o) => o.id), [`anthropic:${DEFAULT_MODEL}`, `openai:${DEFAULT_OPENAI_MODEL}`, 'openrouter:a/one', 'openrouter:b/two']);
+  assert.ok(ai.options().every((o) => !('key' in o)));
+  assert.equal(ai.selected, `anthropic:${DEFAULT_MODEL}`);
+  assert.equal(ai.select('openrouter:b/two'), true);
+  assert.deepEqual([ai.provider, ai.model], ['openrouter', 'b/two']);
+  await ai.complete(ask);
+  assert.equal(n.calls.at(-1).url, OPENROUTER_URL);
+  assert.equal(n.calls.at(-1).body.model, 'b/two');
+  assert.equal(ai.select('openrouter:not-listed'), false);
+  assert.equal(ai.selected, 'openrouter:b/two');
+  // AI_MODEL applies to the starting provider only
+  const m = createAi({ apiKey: '', openaiKey: OKEY, openrouterKey: RKEY, model: 'gpt-x' });
+  assert.deepEqual(m.options().map((o) => o.model), ['gpt-x', DEFAULT_OPENROUTER_MODEL]);
+});
+
+test('PUT /api/ai/model: signed in only; known ids switch and are remembered after a restart; unknown → 400', async () => {
+  const db = openDb(':memory:');
+  const mk = () => createAi({ apiKey: KEY, openaiKey: '', openrouterKey: RKEY, openrouterModel: 'x/fast,x/smart' });
+  const startOn = (ai) => new Promise((ok) => { const s = createApp({ db, ai }).listen(0, () => { servers.push(s); ok(`http://127.0.0.1:${s.address().port}`); }); });
+  const base = await startOn(mk());
+  const put = (url, id, cookie) => fetch(`${url}/api/ai/model`, { method: 'PUT', headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: JSON.stringify({ id }) });
+  assert.equal((await put(base, 'openrouter:x/smart')).status, 401);
+  const reg = await fetch(`${base}/api/auth/register`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'pick@example.com', password: 'correct horse' }) });
+  const cookie = reg.headers.getSetCookie()[0].split(';')[0];
+  assert.equal((await put(base, 'openrouter:nope', cookie)).status, 400);
+  const ok = await put(base, 'openrouter:x/smart', cookie);
+  assert.equal(ok.status, 200);
+  const j = await ok.json();
+  assert.deepEqual([j.selected, j.provider, j.model], ['openrouter:x/smart', 'openrouter', 'x/smart']);
+  assert.doesNotMatch(JSON.stringify(j), new RegExp(`${KEY}|${RKEY}`));
+  const again = await startOn(mk()); // a fresh client on the same database = a restart
+  const s = await (await fetch(`${again}/api/ai/status`, { headers: { cookie } })).json();
+  assert.equal(s.selected, 'openrouter:x/smart');
 });
