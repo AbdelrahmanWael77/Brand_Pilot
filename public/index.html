@@ -1117,6 +1117,20 @@ td:has(>.shb){white-space:nowrap}
 .needs li.nk-list>i{background:#F1EAFE;color:#6D28D9}.needs li.nk-list .btn:not(.pri){background:#F1EAFE;border-color:#DDD0FB;color:#5B21B6}
 .needs li.nk-alert>i{background:#FEE2E2;color:#B91C1C}.needs li.nk-know>i,.needs li.nk-qa>i{background:var(--signal-soft);color:var(--brand)}
 .needs li .btn:not(.pri):hover{filter:brightness(.96)}
+
+/* KPI tiles (owner, 2026-11-16): separate cards, trend pills, a quiet placeholder for "Not measured" */
+.gk:has(>.kpi),section.ledger{display:grid;gap:12px;background:none;border:0;border-radius:0;overflow:visible;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+:is(.gk,.ledger)>.kpi{border:1px solid var(--rule)!important;border-radius:14px!important;background:var(--surface)!important;padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-height:118px;transition:border-color .14s var(--ease),box-shadow .14s var(--ease)}
+:is(.gk,.ledger)>.kpi:hover{border-color:var(--rule-2);box-shadow:0 8px 24px -16px rgba(14,23,38,.35)}
+:is(.gk,.ledger)>.kpi>span:first-child{font:600 13.5px/1.3 var(--f-ui);color:var(--ink-3);text-transform:none;letter-spacing:0}
+:is(.gk,.ledger)>.kpi>b{font:700 30px/1.1 var(--f-ui);margin:2px 0 4px;color:var(--ink);letter-spacing:-.01em}
+:is(.gk,.ledger)>.kpi>i{align-self:flex-start;border-radius:99px;padding:3px 9px;font-size:13px;gap:6px}
+:is(.gk,.ledger)>.kpi>i.up{background:var(--pos-bg);color:var(--pos)}:is(.gk,.ledger)>.kpi>i.dn{background:var(--neg-bg);color:var(--neg)}
+:is(.gk,.ledger)>.kpi>i .muted{color:inherit;opacity:.8;font-size:12.5px}
+:is(.gk,.ledger)>.kpi.na{background:var(--surface-2)!important;border-style:dashed!important;border-color:var(--rule-2)!important}
+:is(.gk,.ledger)>.kpi.na>b{display:inline-flex;align-items:center;gap:6px;font:600 15px/1.3 var(--f-ui);color:var(--ink-3);margin:6px 0 2px}
+:is(.gk,.ledger)>.kpi>span.muted{font-size:13px;color:var(--ink-3);margin-top:auto}
+section.ledger{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 </style>
 </head>
 <body>
@@ -1986,7 +2000,7 @@ const healthTile=h=>{const lv=LV();return`<div class="hl s${h.level}"><h4>${h.na
 /* An optional column (impressions, link clicks) that no row carries is "Not measured", never 0 — same rule as server/metrics.js. */
 const hasCol=(rs,k)=>rs.some(r=>r[k]!==undefined&&r[k]!==null&&r[k]!=='');
 const optV=(rs,k,v)=>hasCol(rs,k)?v:L('Not measured','غير مُقاس'),optP=(rs,k,v)=>rs&&hasCol(rs,k)?v:null;
-const kpi=(l,v,p,note)=>{const d=p&&typeof v!=='string'&&typeof p!=='string'?(v-p)/p:null;return`<div class="card kpi"><span>${l}</span><b>${typeof v==='string'?v:fmt(v)}</b>${d!=null?`<i class="${d>=0?'up':'dn'}">${sgn(d)} <span class="muted" style="font-weight:400">${L('vs previous','عن السابق')}</span></i>`:note?`<span class="muted" style="font-weight:400">${note}</span>`:''}</div>`};
+const kpi=(l,v,p,note)=>{const d=p&&typeof v!=='string'&&typeof p!=='string'?(v-p)/p:null,na=typeof v==='string'&&['Not measured','غير مُقاس','n/a','—'].includes(v.trim());return`<div class="card kpi${na?' na':''}"><span>${l}</span><b>${na?`${ic('clock',16)}${v}`:typeof v==='string'?v:fmt(v)}</b>${d!=null?`<i class="${d>=0?'up':'dn'}">${sgn(d)} <span class="muted" style="font-weight:400">${L('vs previous','عن السابق')}</span></i>`:note?`<span class="muted" style="font-weight:400">${note}</span>`:''}</div>`};
 
 /* 1 — Executive dashboard */
 V.dash=c=>{const A_=audit(c),H=health(c,A_),P=periods(c),a=P&&agg(c,P.cur),b=P&&P.prev&&agg(c,P.prev);
