@@ -1,10 +1,10 @@
 # START HERE — BrandPilot redesign pass 4 (branch `redesign/new-product-identity`)
 
-The owner rejected passes 1–3 as a "visual reskin". **Read `design-system/brandpilot/PASS4_BRIEF.md` first**: it has the owner's brief, the chosen direction (goal workspace: dark sidebar with the 6 customer goals, Plus Jakarta Sans + Noto Sans Arabic, cobalt `#2F55E4` on slate neutrals — from ui-ux-pro-max) and two ready-to-build tasks with exact code pointers and checks:
-- **4.1** new identity + goal shell (`public/index.html`: fonts link, `:root` override at the end of `<style>`, `render0()` shell → `.side` + `.wtop`)
-- **4.2** Knowledge Hub rebuilt as a "Company profile" (summary band, "Needs you first" lane for conflicts / questions / missing essentials, chapters with inline review, bulk bar that never confirms claims, evidence drawer showing the quote inside the source text)
+The owner rejected passes 1–3 as a "visual reskin". Read `design-system/brandpilot/PASS4_BRIEF.md` first (owner brief, chosen direction, exact tasks), then AGENTS.md and the "REDESIGN — pass 4" line at the top of IMPLEMENTATION_STATUS.md.
 
-Nothing of pass 4 is implemented yet. Rules: change UI only (same `data-a` actions, same server), EN + AR equal, no text smaller than now. **Commit and `git push` after each task** (owner's rule); never merge into `dev`. Run `npm test` (545 pass) and check in the browser on a copy of the DB. After each task update IMPLEMENTATION_STATUS.md (the "REDESIGN" lines at the top) and this file.
+State: **4.1 done** (new identity + goal sidebar shell, committed and pushed). **Next single task: 4.2** — rebuild `V.know` as the "Company profile" exactly as PASS4_BRIEF §4 describes (summary band, "Needs you first" lane, chapters with inline review and source quotes, bulk bar that never confirms claims, evidence drawer with the quote inside its source text). Remove pass 3's `KD` / `kdRow` / `.kd-*` / `A.kSel` / J-K-A-R handler at the bottom of the script; keep the actions listed in the brief. The `know0` portfolio wrapper further down (`const know0=V.know`) appends to whatever `V.know` returns — keep it working.
+
+Rules: UI only in `public/index.html`; keep every `data-a` action, the server and the data; EN + AR/RTL; no text smaller than now. Test on a COPY of the DB (`cp data/brandpilot.db* <tmp>/`, `PORT=3100 BRANDPILOT_DB=<tmp>/brandpilot.db npm start`, `PORT=3100 npm run seed:dev`, demo: `const c=C();c.demo='flownest';A.loadDemo();R()`). Browser checks: headless Chrome with `--remote-debugging-port=9333`, then `PORT=3100 SHOTS=data/shots/p4 node data/check-11-run.mjs data/check-p4-41.mjs` (git-ignored helpers in `data/`). `npm test` = 280 pass on this branch. After each task: update both handoff files, commit, `git push origin redesign/new-product-identity`. Never merge into `dev`/`main`. After 4.2: same shell/look for onboarding/brand → analytics → audit + Director → Studio/Canva → QA/approvals → integrations/settings.
 
 ---
 

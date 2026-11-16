@@ -1,6 +1,6 @@
 # Pass 4 — replace the UX model (owner brief of 2026-11-16 + ready-to-build plan)
 
-**Status: nothing of pass 4 is implemented yet. Start here.**
+**Status: 4.1 done (shell + identity). 4.2 next.**
 Branch `redesign/new-product-identity`. Push after every screen (`git push`). **Never merge into `dev`** until the owner approves.
 Previous passes ("Ledger" look, "Evidence Desk" workflow bar, pass-3 Knowledge review desk) were **rejected by the owner** as a visual reskin. Do not polish them; replace them.
 
