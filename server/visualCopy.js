@@ -12,8 +12,7 @@
  * approved), passed as data. The answer is checked before it is returned: length, language, no placeholder, and
  * every number in it must be a number that is in the source, no ranking / guarantee / percentage wording the source
  * does not have (task 10.5), not the same headline again — an answer that fails is refused, not repaired.
- * Two screens call it: task 11's "Suggest a short headline" (the user reviews, then applies) and 10.5's "Shorten it
- * with AI" (applied at once, marked "AI draft").
+ * Called by "Suggest a short headline" in the editor: the user reviews the answer, then applies it.
  */
 import { createCampaigns } from './campaigns.js';
 import { RISK } from './campaignQa.js';
