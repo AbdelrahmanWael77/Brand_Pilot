@@ -607,58 +607,6 @@ main{max-width:1320px;padding-top:28px}
  .composer{bottom:10px}
 }
 
-/* Knowledge review desk (pass 3) */
-.kd-head{display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--rule);padding-bottom:12px}
-.kd-tabs{display:flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:var(--r-2);background:var(--surface);overflow:hidden;width:fit-content;max-width:100%}
-.kd-tabs button{border:0;border-inline-end:1px solid var(--rule);background:none;padding:9px 16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:96px;color:var(--ink-2);position:relative;transition:background .14s var(--ease);font:inherit}
-.kd-tabs button:last-child{border-inline-end:0}
-.kd-tabs button b{font:600 21px/1.15 var(--f-display);color:var(--ink);font-variant-numeric:tabular-nums}
-.kd-tabs button span{font-size:12.5px;font-weight:550}
-.kd-tabs button.z b{color:var(--ink-3)}
-.kd-tabs button:hover{background:var(--surface-2)}
-.kd-tabs button.on{background:var(--paper-2);color:var(--ink)}
-.kd-tabs button.on::after{content:"";position:absolute;inset-inline:0;bottom:0;height:2px;background:var(--signal)}
-.kd-prog{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-2)}
-.kd-prog .kbar{margin:0;flex:0 0 180px}
-.kd{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:20px;align-items:start}
-.kd-list{border:1px solid var(--rule);border-radius:var(--r-2);background:var(--surface);overflow:hidden}
-.kd-g+.kd-g{border-top:1px solid var(--rule)}
-.kd-gh{display:flex;align-items:center;gap:8px;padding:10px 14px 4px}
-.kd-gh h2{font:600 11.5px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:0}
-.kd-n{font:500 11.5px var(--f-mono);color:var(--ink-3)}
-.kd-gh .btn.sm{padding:3px 9px;font-size:12px}
-.kd-row{display:flex;gap:10px;width:100%;text-align:start;border:0;background:none;padding:8px 14px;cursor:pointer;align-items:flex-start;border-inline-start:2px solid transparent;font:inherit;color:inherit;transition:background .12s var(--ease)}
-.kd-row:hover{background:var(--surface-2)}
-.kd-row.on{background:var(--signal-soft);border-inline-start-color:var(--signal)}
-.kd-row:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
-.kd-st{flex:0 0 18px;height:18px;border-radius:50%;border:1.5px solid var(--rule-2);display:grid;place-items:center;font:700 10.5px/1 var(--f-ui);font-style:normal;margin-top:1px;box-sizing:border-box}
-.kd-row.s-ok .kd-st{background:var(--pos);border-color:var(--pos);color:#fff}
-.kd-row.s-no .kd-st{background:var(--paper-2);color:var(--ink-3)}
-.kd-row.s-q .kd-st{border-color:var(--info);color:var(--info)}
-.kd-row.s-cf .kd-st,.kd-row.s-dec .kd-st{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
-.kd-tx{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-.kd-t{font-size:14px;line-height:1.45;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.kd-row.s-no .kd-t{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--rule-2)}
-.kd-m{display:flex;gap:8px;font-size:12px;color:var(--ink-3);min-width:0}
-.kd-m span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kd-m b{font-weight:600;color:var(--warn);white-space:nowrap}
-.kd-more{padding:4px 14px 12px}
-.kd-more summary{cursor:pointer;font-size:13px;color:var(--ink-2);padding:4px 0}
-.kd-pane{position:sticky;top:140px;max-height:calc(100vh - 156px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:2px}
-.kd-nav{display:flex;align-items:center;gap:6px}
-.kd-nav .eyebrow{margin:0}
-.kd-pos{font:500 12px var(--f-mono);color:var(--ink-3);margin-inline-end:4px}
-.kd-pane .find{padding:20px 22px;box-shadow:var(--lift)}
-.kd-pane .find .ft{font-size:18px;line-height:1.45;font-weight:550}
-.kd-pane .find .fev{border-inline-start:2px solid var(--signal);padding-inline-start:12px;margin:12px 0;font-size:14px}
-.kd-pane .find>.row:last-child{margin-top:14px!important}
-.kd-pane .find>.row:last-child .btn.sm{padding:8px 16px;font-size:14px}
-.kd-hint{font:500 11.5px var(--f-mono);color:var(--ink-3);margin:0}
-.kd-done,.kd-none{display:flex;flex-direction:column;gap:4px;padding:28px 20px;border:1px dashed var(--rule-2);border-radius:var(--r-2);color:var(--ink-2);text-align:center}
-.kd-none{border:0}
-@media(hover:none){.kd-hint{display:none}}
-@media(max-width:900px){.kd{grid-template-columns:minmax(0,1fr)}.kd-pane{position:static;max-height:none;order:-1}.kd-tabs{width:100%}.kd-tabs button{flex:1 1 30%;min-width:0;padding:8px 10px}.kd-prog .kbar{flex-basis:90px}}
-[dir=rtl] .kd-gh h2,[dir=rtl] .kd-hint{letter-spacing:0;text-transform:none;font-family:var(--f-ui)}
 
 /* ==========================================================================
    Pass 4 identity (PASS4_BRIEF.md): Plus Jakarta Sans + Noto Sans Arabic, cobalt
@@ -678,7 +626,7 @@ h2{font-weight:700}
 .num{font-family:var(--f-ui);font-variation-settings:normal}
 ::selection{background:#C9D6FF}
 .btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}.btn.pri:hover{background:var(--brand-ink);border-color:var(--brand-ink)}
-.eyebrow,.ng,.kpi span,.hl h4,.rec dt,.find dt,th,.desk-rail h3,.rail h2,.alist h4,.jl,.auth-cover small,.cx-t tr.cx-g td,.prio dt,.wl,.ck li.gh,.kd-gh h2{text-transform:none;letter-spacing:0}
+.eyebrow,.ng,.kpi span,.hl h4,.rec dt,.find dt,th,.desk-rail h3,.rail h2,.alist h4,.jl,.auth-cover small,.cx-t tr.cx-g td,.prio dt,.wl,.ck li.gh{text-transform:none;letter-spacing:0}
 .ph .eyebrow{font:700 13px/1.2 var(--f-ui);color:var(--brand);letter-spacing:0}.ph .eyebrow i{display:none}
 .ph h1{font-family:var(--f-ui)}
 
@@ -707,7 +655,7 @@ h2{font-weight:700}
 .gs-i em{font:700 12.5px/1 var(--f-ui);font-style:normal;background:var(--brand);color:#fff;border-radius:99px;padding:4px 8px;flex:none}
 .gside :focus-visible{outline:2px solid #9DB2FF;outline-offset:1px}
 .gs-foot{margin-top:auto;border-top:1px solid #1E2A40;padding-top:12px;display:grid;gap:2px}
-.gs-acct{position:relative}
+.gside{overflow-x:hidden}.gs-acct{position:relative;min-width:0}.gs-acct>summary{max-width:100%}
 .gs-acct>summary{width:100%;height:auto;border-radius:8px;background:none!important;display:flex;align-items:center;gap:12px;padding:8px 12px;min-height:44px;text-transform:none;color:#C3CCDC!important;font:500 14px/1.3 var(--f-ui)}
 .gs-acct>summary:hover{background:#16223A!important}
 .gs-acct .av{width:26px;height:26px;border-radius:50%;background:#2A3A5C;color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none;text-transform:uppercase}
@@ -749,6 +697,129 @@ h2{font-weight:700}
  .work>main{padding:20px 16px 80px}
 }
 @media(prefers-reduced-motion:reduce){.gside{transition:none!important}}
+/* Pass 4.2 — Company profile (Knowledge Hub) */
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.lk{border:0;background:none;padding:0;font:inherit;color:var(--brand);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.lk:hover{color:var(--brand-ink)}
+.ksum{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(220px,300px);gap:24px;align-items:center;background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:22px 24px;margin-bottom:20px}
+.kring{position:relative;width:92px;height:92px;flex:none}
+.kring svg{width:100%;height:100%;transform:rotate(-90deg)}
+[dir=rtl] .kring svg{transform:rotate(-90deg) scaleY(-1)}
+.kring circle{fill:none;stroke-width:5}
+.kring .bg{stroke:var(--paper-2)}.kring .fg{stroke:var(--pos);stroke-linecap:round}
+.kring b{position:absolute;inset:0;display:grid;place-items:center;font:700 20px/1 var(--f-ui)}
+.ksum-m h2{font-size:20px;line-height:1.35;margin-bottom:6px}
+.ksum-n{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--ink-2);font-size:15.5px}
+.ksum-n b{color:var(--ink);font-weight:700}
+.ksum-u{margin-top:10px;color:var(--ink-3);font-size:15px}
+.kver{border-inline-start:1px solid var(--rule);padding-inline-start:22px;display:grid;gap:4px;align-content:start}
+.kv-l{font-size:13.5px;font-weight:600;color:var(--ink-3)}
+.kv-n{font:700 22px/1.15 var(--f-ui)}
+.kv-d{font-size:14px;color:var(--ink-2)}
+.kver>.btn{justify-self:start;margin-top:6px}
+.kv-new{font-size:14px;color:var(--info);background:var(--info-bg);border-radius:8px;padding:8px 10px;margin-top:6px}
+.kv-h summary{cursor:pointer;font-size:14px;color:var(--ink-2);margin-top:6px}
+.kv-h ul{margin:8px 0;padding-inline-start:18px;font-size:14px;color:var(--ink-2);display:grid;gap:4px}
+.kneed{background:#FFF8EC;border:1px solid #F1D9A8;border-radius:16px;padding:20px 22px;margin-bottom:28px;display:grid;gap:14px}
+.kneed>header{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.kneed>header h2{font-size:20px}
+.kcount{font:700 13px/1 var(--f-ui);background:#9A5B00;color:#fff;border-radius:99px;padding:5px 9px}
+.kneed>header p{flex-basis:100%;color:var(--ink-2);font-size:15px}
+.kn{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;display:grid;gap:10px}
+.kn-h{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.kn-tag{display:inline-flex;gap:6px;align-items:center;font-weight:700;font-size:14px;color:#9A5B00}
+.kn-q .kn-tag{color:var(--info)}.kn-miss .kn-tag{color:var(--ink-2)}
+.kn-cat{font-size:14px;color:var(--ink-3);font-weight:600}
+.kn-t{font-size:17px;font-weight:600;line-height:1.45}
+.kn-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.kn-opt{border:1px solid var(--rule-2);border-radius:10px;padding:14px;display:grid;gap:8px;align-content:start}
+.kn-f input{flex:1;min-width:200px}
+.kp{display:grid;grid-template-columns:232px minmax(0,1fr);gap:32px;align-items:start}
+.ktoc{position:sticky;top:84px;max-height:calc(100vh - 100px);overflow-y:auto;display:grid;gap:16px;padding:2px 2px 20px}
+.ktoc-q{display:flex;align-items:center;gap:8px;border:1px solid var(--rule-2);border-radius:10px;background:var(--surface);padding:0 10px;color:var(--ink-3)}
+.ktoc-q:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--signal-soft)}
+.ktoc-q input{border:0!important;box-shadow:none!important;padding:8px 0;min-height:42px;background:transparent;width:100%;font-size:15px;outline:0}
+.ktoc ol{list-style:none;margin:0;padding:0}
+.ktoc>ol{display:grid;gap:14px}
+.ktoc-c{display:block;font-size:13.5px;font-weight:700;color:var(--ink-3);padding:0 8px 4px}
+.ktoc li button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:start;padding:6px 8px;border-radius:8px;font:500 14.5px/1.3 var(--f-ui);color:var(--ink-2);cursor:pointer;min-height:36px}
+.ktoc li button:hover{background:var(--surface);color:var(--ink)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--rule-2)}
+.dot.ok{background:var(--pos)}.dot.pend{background:#D99A00}.dot.miss{background:transparent;border:2px solid var(--rule-2)}
+.kp-doc{display:grid;gap:30px;min-width:0}
+.kch{display:grid;gap:14px}
+.kch-h{font-size:22px;font-weight:700;padding-bottom:10px;border-bottom:1px solid var(--rule-2)}
+.ks{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px 20px;display:grid;gap:12px;scroll-margin-top:84px;min-width:0}
+.kanc{display:block;height:0;scroll-margin-top:84px}
+.ks-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.ks-h h3{font-size:17px;font-weight:700}.ks-h h3:focus{outline:none}
+.kchip{font:600 13px/1 var(--f-ui);border-radius:99px;padding:5px 10px;white-space:nowrap}
+.kchip.ok{background:var(--pos-bg);color:var(--pos)}.kchip.pend{background:#FFF1D6;color:#7A4D00}.kchip.miss{background:var(--paper-2);color:var(--ink-3)}
+.ks-use{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink-3)}
+.ks-use svg{color:var(--brand)}
+.kl{list-style:none;margin:0;padding:0;display:grid}
+.kr{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-top:1px solid var(--rule)}
+.kl>.kr:first-child{border-top:0;padding-top:4px}
+.kr-b{flex:1;min-width:0;display:grid;gap:8px}
+.kr-t{font-size:15.5px;line-height:1.55;color:var(--ink);overflow-wrap:anywhere}
+.kp-p .kr-t{font-weight:550}
+.kr-ck{flex:none;display:grid;place-items:center;width:28px;height:28px;cursor:pointer}
+.kr-ck input{width:18px;height:18px;min-height:0;accent-color:var(--brand);cursor:pointer;margin:0}
+.kp-p.on{background:var(--signal-soft);margin-inline:-12px;padding-inline:12px;border-radius:10px;border-top-color:transparent}
+.kr-q{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 8px;border-inline-start:3px solid var(--brand);background:var(--surface-2);border-radius:0 8px 8px 0;padding:10px 12px;font-size:15px;color:var(--ink-2);line-height:1.55}
+[dir=rtl] .kr-q{border-radius:8px 0 0 8px}
+.kr-q svg{color:var(--ink-4);margin-top:3px}
+.kr-q span{overflow-wrap:anywhere}
+.kr-q cite{grid-column:2;font-style:normal;font-size:14px;color:var(--ink-3);font-weight:600}
+.kr-s{font-size:14px;color:var(--ink-3)}.kr-same{display:flex;gap:6px;align-items:center}.kr-same svg{color:var(--brand);flex:none}.kr-same b{color:var(--ink-2);font-weight:600}
+.kr-why{display:flex;gap:8px;align-items:flex-start;font-size:14.5px;color:#6B4400;background:#FFF6E0;border-radius:8px;padding:8px 10px}
+.kr-why svg{margin-top:2px}
+.kr-a{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.kr-a .btn.sm{min-height:38px;padding:6px 14px;font-size:14px}
+.kr-ok{flex:none;width:22px;height:22px;border-radius:50%;background:var(--pos-bg);color:var(--pos);display:grid;place-items:center;margin-top:2px}
+.kp-c>.btn{flex:none}
+.ks-more{justify-self:start}
+.ks-empty{color:var(--ink-2);font-size:15px;background:var(--surface-2);border:1px dashed var(--rule-2);border-radius:10px;padding:12px 14px}
+.ks-add summary{cursor:pointer;display:inline-flex;gap:6px;align-items:center;font-weight:600;color:var(--brand);font-size:14.5px;padding:4px 0;list-style:none}
+.ks-add summary::-webkit-details-marker{display:none}
+.ks-add form{margin-top:8px}.ks-add input[name=t],.ks-th input[name=t]{flex:1;min-width:200px}
+.kdis{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:14px 20px}
+.kdis summary{cursor:pointer;font-weight:600;color:var(--ink-2)}
+.kdis .kr-t{color:var(--ink-3)}
+.kq-n{color:var(--ink-2);font-size:15px}
+.kbulk{position:fixed;z-index:50;bottom:16px;inset-inline-start:calc(248px + 24px);inset-inline-end:24px;max-width:880px;margin-inline:auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;background:var(--side);color:#fff;border-radius:14px;padding:12px 14px;padding-inline-start:18px;box-shadow:0 20px 40px -16px rgba(12,20,34,.55)}
+.kb-m{display:grid;gap:2px;flex:1 1 240px;min-width:0}
+.kb-m span{font-size:14px;color:#C3CCDC}
+.kb-a{display:flex;gap:8px;flex-wrap:wrap}
+.kbulk .btn:not(.pri){background:#1D2B47;border-color:#2A3A5C;color:#fff}
+.kbulk .btn[disabled]{opacity:.5;cursor:not-allowed}
+.kbulk :focus-visible{outline-color:#9DB2FF}
+.kev-scrim{position:fixed;inset:0;background:rgba(12,20,34,.45);z-index:60;animation:fade .18s}
+.kev{position:fixed;z-index:61;top:0;bottom:0;inset-inline-end:0;width:min(600px,100vw);background:var(--paper);box-shadow:-24px 0 60px -20px rgba(12,20,34,.45);display:flex;flex-direction:column;animation:kevin .22s var(--ease) both}
+@keyframes kevin{from{transform:translateX(24px);opacity:0}}
+@keyframes kevinr{from{transform:translateX(-24px);opacity:0}}
+[dir=rtl] .kev{animation-name:kevinr}
+.kev-hd{display:flex;align-items:flex-start;gap:12px;padding:18px 22px;border-bottom:1px solid var(--rule);background:var(--surface)}
+.kev-hd>div{flex:1;min-width:0}
+.kev-c{font-size:14px;font-weight:700;color:var(--brand)}
+.kev-hd h2{font-size:20px}.kev-hd h2:focus{outline:none}
+.kev-x{min-width:44px;min-height:44px;justify-content:center}
+.kev-b{flex:1;overflow-y:auto;padding:20px 22px 40px;display:grid;gap:14px;align-content:start}
+.kev-b .find .ft{font-size:17px}
+.kev-sh{font-size:16px;font-weight:700;margin-top:6px}
+.kev-ctx{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;font-size:15.5px;line-height:1.7;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:anywhere}
+.kev-ctx mark{background:#FFE58A;color:var(--ink);padding:1px 2px;border-radius:3px}
+@media(prefers-reduced-motion:reduce){.kev,.kev-scrim{animation:none}}
+@media(max-width:1100px){.ksum{grid-template-columns:auto minmax(0,1fr)}.kver{grid-column:1/-1;border-inline-start:0;border-top:1px solid var(--rule);padding:14px 0 0}}
+@media(max-width:900px){
+ .kp{grid-template-columns:minmax(0,1fr);gap:18px}
+ .ktoc{position:static;max-height:none;overflow:visible;padding:0}.ktoc>ol{display:none}
+ .kbulk{inset-inline:12px;bottom:12px}
+ .kev{width:100vw}
+ .ksum{grid-template-columns:minmax(0,1fr);padding:18px;gap:14px}.kring{width:76px;height:76px}
+ .ks{padding:16px}.kneed{padding:16px}
+ .kp-p.on{margin-inline:-8px;padding-inline:8px}
+}
 </style>
 </head>
 <body>
@@ -1623,37 +1694,73 @@ function kDialog(c,cat){const s=kScope(c,cat),close=`<button class="btn" data-a=
  return`<h2>${L('Approve pending findings','اعتماد النتائج المعلّقة')}</h2><p>${L(`${s.ready.length} findings are ready, ${s.claims.length} of them need your decision: claims such as numbers, “best” or guarantees, interpretations, hypotheses, or brand identity read from your website.`,`${s.ready.length} نتيجة جاهزة، منها ${s.claims.length} تحتاج قرارك: ادعاءات مثل الأرقام أو «الأفضل» أو الضمانات، أو تفسيرات، أو فرضيات، أو هوية علامة قُرئت من موقعك.`)}</p><ul class="small" style="max-height:38vh;overflow-y:auto;padding-inline-start:18px;margin:10px 0">${s.claims.map(f=>`<li dir="auto" style="margin-bottom:6px"><b>${esc(f.text.length>200?f.text.slice(0,200)+'…':f.text)}</b>${f.ev&&!f.web?`<br><q class="muted">${esc(f.ev.length>160?f.ev.slice(0,160)+'…':f.ev)}</q>`:''}</li>`).join('')}</ul>${kSkip(s)?`<p class="small muted">${kSkip(s)}</p>`:''}<div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn pri" data-a="kGo" data-v="all|${esc(cat||'')}">${L(`Approve all ${s.ready.length}, including the ${s.claims.length}`,`اعتمد الكل (${s.ready.length}) بما فيها ${s.claims.length}`)}</button><button class="btn" data-a="kGo" data-v="plain|${esc(cat||'')}" ${s.plain.length?'':'disabled'}>${L(`Approve only the ${s.plain.length} source-stated`,`اعتمد فقط ${s.plain.length} المذكورة في المصادر`)}</button>${close}</div>`}
 /* 9.19: an open question has no evidence — say why it is asked instead of showing a source and a quoted placeholder. The stored placeholder `ev` is never shown for it. */
 const unkPanel=(f,src)=>`<details><summary>${L('Why am I being asked this?','لماذا أُسأل عن هذا؟')}</summary><p class="small">${L('None of your sources says this yet, so nothing is claimed. Your answer becomes an approved fact with you as its source.','لا يذكر أي مصدر من مصادرك هذا بعد، لذلك لا نفترض شيئاً. تصبح إجابتك حقيقة معتمدة ومصدرها أنت.')}</p><dl><dt>${L('Asked on','سُئل في')}</dt><dd>${f.date}</dd><dt>${L('Status','الحالة')}</dt><dd>${f.status==='pending'?L('Waiting for your answer','بانتظار إجابتك'):f.status==='rejected'?L('Rejected','مرفوض'):L('Answered','تمت الإجابة')}</dd>${src?`<dt>${L('Source','المصدر')}</dt><dd dir="auto">${esc(src.title)}</dd>`:''}</dl></details>`;
-function findCard(c,f){const src=c.sources.find(s=>s.id===f.src),ty=f.status==='approved'?['Approved','معتمد','b-ok']:TYPES[f.type],unk=f.type==='unknown';
- return`<div class="find ${f.status}${f.type==='conflict'?' conf':''}"><div class="row"><span class="badge ${ty[2]}">${L(ty[0],ty[1])}</span>${f.status==='approved'&&f.type!=='fact'?`<span class="badge ${TYPES[f.type][2]}">${L(TYPES[f.type][0],TYPES[f.type][1])}</span>`:''}${f.isNew&&f.status==='pending'?`<span class="badge b-new">${L('Proposed update','تحديث مقترح')}</span>`:''}${f.web==='brand'?`<span class="badge b-int">${L('Found on your website','وُجد على موقعك')}</span>${f.edited?`<span class="badge">${L('Edited by you','عدّلتها أنت')}</span>`:''}${f.share?`<span class="badge b-hyp">${L('may be a share image, not the logo','قد تكون صورة مشاركة وليست الشعار')}</span>`:''}`:''}${f.by==='ai'?`<span class="badge b-int" data-ai-badge>${L('Suggested by AI','اقتراح الذكاء الاصطناعي')}</span>`:''}${f.needs&&f.status==='pending'?`<span class="badge b-hyp">${L('Needs your decision','يحتاج قرارك')}</span>`:''}${f.primary&&f.status==='approved'?`<span class="badge">${L('Primary CTA','الدعوة الأساسية')}</span>`:''}${f.status==='rejected'?`<span class="badge b-unk">${L('Rejected','مرفوض')}</span>`:''}${f.noEv&&f.status==='pending'?`<span class="badge b-bad">${L('No source evidence — cannot be approved','بلا دليل من المصادر — لا يمكن اعتمادها')}</span>`:''}</div>
+function findCard(c,f){const src=c.sources.find(s=>s.id===f.src),ty=f.status==='approved'?['Confirmed','مؤكدة','b-ok']:TYPES[f.type],unk=f.type==='unknown';
+ return`<div class="find ${f.status}${f.type==='conflict'?' conf':''}"><div class="row"><span class="badge ${ty[2]}">${L(ty[0],ty[1])}</span>${f.status==='approved'&&f.type!=='fact'?`<span class="badge ${TYPES[f.type][2]}">${L(TYPES[f.type][0],TYPES[f.type][1])}</span>`:''}${f.isNew&&f.status==='pending'?`<span class="badge b-new">${L('Proposed update','تحديث مقترح')}</span>`:''}${f.web==='brand'?`<span class="badge b-int">${L('Found on your website','وُجد على موقعك')}</span>${f.edited?`<span class="badge">${L('Edited by you','عدّلتها أنت')}</span>`:''}${f.share?`<span class="badge b-hyp">${L('may be a share image, not the logo','قد تكون صورة مشاركة وليست الشعار')}</span>`:''}`:''}${f.by==='ai'?`<span class="badge b-int" data-ai-badge>${L('Suggested by AI','اقتراح الذكاء الاصطناعي')}</span>`:''}${f.needs&&f.status==='pending'?`<span class="badge b-hyp">${L('Needs your decision','يحتاج قرارك')}</span>`:''}${f.primary&&f.status==='approved'?`<span class="badge">${L('Primary CTA','الدعوة الأساسية')}</span>`:''}${f.status==='rejected'?`<span class="badge b-unk">${L('Dismissed','مستبعدة')}</span>`:''}${f.noEv&&f.status==='pending'?`<span class="badge b-bad">${L('No source evidence — cannot be approved','بلا دليل من المصادر — لا يمكن اعتمادها')}</span>`:''}</div>
  ${unk?`<p class="ft">${reqQ(f.cat)||esc(f.text)}</p><form data-s="kAnswer" data-v="${f.id}" class="row"><input name="t" required dir="auto" aria-label="${L('Your answer','إجابتك')}" placeholder="${L('Your answer becomes an approved fact','إجابتك تصبح حقيقة معتمدة')}" style="flex:1;min-width:160px"><button class="btn sm pri">${L('Save answer','احفظ الإجابة')}</button></form>`:S.ui.editF===f.id?`<form data-s="kSave" data-v="${f.id}" class="row" style="margin:6px 0"><select name="cat" aria-label="${L('Category','الفئة')}">${(CAT_ORDER.includes(f.cat)?CAT_ORDER:[f.cat,...CAT_ORDER]).map(k=>`<option value="${esc(k)}"${k===f.cat?' selected':''}>${esc(catName(k))}</option>`).join('')}</select><input name="t" value="${esc(f.text)}" dir="auto" aria-label="${L('Edit finding','تعديل النتيجة')}" style="flex:1;min-width:160px"><button class="btn sm pri">${L('Save','احفظ')}</button></form>`:f.web==='brand'?brandBody(c,f):`<p class="ft" dir="auto">${esc(f.text)}${f.colors?' '+f.colors.map(h=>`<span class="sw" style="background:${h}" title="${h}"></span>`).join(' '):''}</p>`}
  ${f.status==='pending'&&!unk&&f.ev?`<p class="fev" dir="auto"><q>${esc(f.ev.length>220?f.ev.slice(0,220)+'…':f.ev)}</q>${src?` <span class="muted">— ${esc(src.title)}</span>`:''}</p>`:''}
- ${unk?unkPanel(f,src):`<details><summary>${L('Source and evidence','المصدر والدليل')}</summary><dl><dt>${L('Source','المصدر')}</dt><dd dir="auto">${src?esc(src.title):f.web==='brand'?esc(L('Found on your website','وُجد على موقعك')+' — '+(f.pageUrl||'')):f.type==='user'?L('Typed by a user','كتبه مستخدم'):L('Derived across sources','مشتق من عدة مصادر')}</dd><dt>${L('Evidence','الدليل')}</dt><dd dir="auto"><q>${esc(f.ev)}</q></dd><dt>${L('Extracted','استُخرج')}</dt><dd>${f.date}</dd><dt>${L('Status','الحالة')}</dt><dd>${f.status==='approved'?L('Approved by a person','اعتمده شخص'):f.status==='rejected'?L('Rejected','مرفوض'):L('Awaiting review','بانتظار المراجعة')}${f.edited?' · '+L('edited','معدَّل'):''}</dd></dl></details>`}
+ ${unk?unkPanel(f,src):`<details><summary>${L('Source and evidence','المصدر والدليل')}</summary><dl><dt>${L('Source','المصدر')}</dt><dd dir="auto">${src?esc(src.title):f.web==='brand'?esc(L('Found on your website','وُجد على موقعك')+' — '+(f.pageUrl||'')):f.type==='user'?L('Typed by a user','كتبه مستخدم'):L('Derived across sources','مشتق من عدة مصادر')}</dd><dt>${L('Evidence','الدليل')}</dt><dd dir="auto"><q>${esc(f.ev)}</q></dd><dt>${L('Extracted','استُخرج')}</dt><dd>${f.date}</dd><dt>${L('Status','الحالة')}</dt><dd>${f.status==='approved'?L('Approved by a person','اعتمده شخص'):f.status==='rejected'?L('Dismissed','مستبعدة'):L('Awaiting review','بانتظار المراجعة')}${f.edited?' · '+L('edited','معدَّل'):''}</dd></dl></details>`}
  ${f.type==='conflict'&&f.status==='pending'&&confOpts(c).length?`<div class="grid g2 copts">${confOpts(c).map(x=>{const s2=c.sources.find(s=>s.id===x.src);return`<div class="copt"><p class="ft" dir="auto">${esc(x.text)}</p><p class="fev" dir="auto"><q>${esc(x.ev||'')}</q></p><p class="small muted" dir="auto">${L('Source','المصدر')}: ${s2?esc(s2.title)+' · '+s2.date:'—'}</p><button class="btn sm pri" data-a="kKeep" data-v="${x.id}">${L('Keep this one','أبقِ على هذا')}</button></div>`}).join('')}</div><p class="small muted">${L('Keeping one approves it, rejects the other version(s) and closes the conflict.','الإبقاء على أحدها يعتمده ويرفض النسخ الأخرى ويغلق التعارض.')}</p>`:''}
- ${unk?'':`<div class="row" style="margin-top:8px">${f.status==='rejected'?`<button class="btn sm pri" data-a="kUnreject" data-v="${f.id}">${L('Back to review','أعِدها للمراجعة')}</button>`:''}${f.type==='conflict'?`<button class="btn sm" data-a="kReject" data-v="${f.id}">${L('Mark resolved','علّم كمحلول')}</button>`:`${f.status!=='approved'?`<button class="btn sm pri" data-a="kApprove" data-v="${f.id}">${L('Approve','اعتمد')}</button>`:''}${f.status!=='rejected'?`<button class="btn sm" data-a="kReject" data-v="${f.id}">${L('Reject','ارفض')}</button>`:''}${f.web==='brand'?`<button class="btn sm" data-a="brandEdit" data-v="${f.id}">${S.ui.bEdit===f.id?L('Done','تم'):L('Edit','عدّل')}</button>`:`<button class="btn sm" data-a="kEdit" data-v="${f.id}">${L('Edit','عدّل')}</button>`}${f.cat==='ctas'&&f.status==='approved'&&!f.primary?`<button class="btn sm" data-a="kPrimary" data-v="${f.id}">${L('Make primary','اجعلها الأساسية')}</button>`:''}`}</div>`}</div>`}
-/* Knowledge Hub as a review desk (redesign pass 3): filters with counts in one strip, a dense list grouped by category, and the selected item in a sticky pane with the same findCard (and the same actions) as before. Approving or rejecting moves to the next item that still needs review. */
-const KD={ids:[]};
-function kdRow(c,f,on){const src=c.sources.find(s=>s.id===f.src),unk=f.type==='unknown',pend=f.status==='pending',st=f.status==='approved'?'ok':f.status==='rejected'?'no':unk?'q':f.type==='conflict'?'cf':f.needs?'dec':'pend',
- tag=pend&&f.type==='conflict'?L('Conflict','تعارض'):pend&&unk?L('Your answer','إجابتك'):pend&&f.needs?L('Needs decision','يحتاج قراراً'):f.by==='ai'?L('AI suggested','اقتراح الذكاء الاصطناعي'):f.isNew&&pend?L('Update','تحديث'):'',
- t=unk?(reqQ(f.cat)||esc(f.text)):esc(f.text.length>180?f.text.slice(0,180)+'…':f.text);
- return`<button type="button" class="kd-row s-${st}${on?' on':''}" data-a="kSel" data-v="${f.id}" aria-current="${on?'true':'false'}" id="kd-${f.id}"><i class="kd-st" aria-hidden="true">${{ok:'✓',no:'✕',q:'?',cf:'!',dec:'!',pend:''}[st]}</i><span class="kd-tx"><span class="kd-t" dir="auto">${t}</span><span class="kd-m">${tag?`<b>${tag}</b>`:''}<span dir="auto">${src?esc(src.title):f.web==='brand'?L('Your website','موقعك'):f.type==='user'?L('Added by you','أضفتها أنت'):L('Across sources','من عدة مصادر')}</span></span></span></button>`}
-V.know=c=>{if(!c.findings.length)return ph(L('Company Knowledge Hub','مركز معرفة الشركة'),L('The single source of truth every campaign draws from.','مصدر الحقيقة الوحيد الذي تعتمد عليه كل حملة.'))+empty(L('No knowledge yet','لا معرفة بعد'),L('Add your website or a document — it is analysed as soon as it is added. BrandPilot never fills this in on its own.','أضف موقعك أو مستنداً — يُحلَّل فور إضافته. BrandPilot لا يملأ هذا من تلقاء نفسه.'),L('Company sources','مصادر الشركة'),'onboard');
- const F=c.findings,n=k=>F.filter(k).length,toRev=F.some(f=>f.status==='pending'&&f.type!=='unknown'),flt=S.ui.kf||(toRev?'pending':'all'),show=f=>flt==='all'?true:flt==='pending'?f.status==='pending'&&f.type!=='unknown':flt==='approved'?f.status==='approved':flt==='flag'?(f.needs&&f.status==='pending'):flt==='rejected'?f.status==='rejected':f.type==='unknown',last=c.kver[c.kver.length-1];
- const list=CAT_ORDER.flatMap(cat=>F.filter(f=>f.cat===cat&&show(f))),ids=list.map(f=>f.id);let sel=S.ui.kSel;
- if(!ids.includes(sel)){const i=KD.ids.indexOf(sel);sel=null;if(i>=0)for(let j=i+1;j<KD.ids.length&&!sel;j++)if(ids.includes(KD.ids[j]))sel=KD.ids[j];if(!sel)sel=((list.find(f=>f.status==='pending')||list[0])||{}).id||null;S.ui.kSel=sel}
- KD.ids=ids;const cur=list.find(f=>f.id===sel),pos=ids.indexOf(sel),tot=n(f=>f.type!=='unknown'),done=n(f=>f.type!=='unknown'&&f.status!=='pending');
- const tabs=[['pending',L('To review','للمراجعة'),n(f=>f.status==='pending'&&f.type!=='unknown')],['flag',L('Need your decision','تحتاج قرارك'),n(f=>f.needs&&f.status==='pending')],['unknown',L('Open questions','أسئلة مفتوحة'),n(f=>f.type==='unknown'&&f.status==='pending')],['approved',L('Approved','معتمد'),n(f=>f.status==='approved')],['rejected',L('Rejected','مرفوضة'),n(f=>f.status==='rejected')],['all',L('All','الكل'),F.length]];
- const groups=CAT_ORDER.map(cat=>{const xs=list.filter(f=>f.cat===cat),th=cat==='themes'&&(flt==='all'||flt==='approved'||flt==='pending');if(!xs.length&&!th)return'';const r=kScope(c,cat).ready.length;
-  return`<section class="kd-g"${cat==='themes'?' id="k-themes"':cat==='brandid'?' id="k-brandcat"':''}><div class="kd-gh"><h2>${catName(cat)}</h2><span class="kd-n">${xs.length}</span><span class="sp"></span>${r&&flt!=='approved'&&flt!=='rejected'?`<button class="btn sm" data-a="kCat" data-v="${cat}" title="${L('Approve the pending items in this category','اعتمد العناصر المعلّقة في هذه الفئة')}">${L(`Approve ${r}`,`اعتمد ${r}`)}</button>`:''}</div>${xs.map(f=>kdRow(c,f,f.id===sel)).join('')}${th?`<details class="kd-more"><summary>${L('About post themes · add one','عن موضوعات المنشورات · أضف موضوعاً')}</summary>${themeHint(c)}${themeForm()}</details>`:''}</section>`}).join('');
- return ph(L('Company Knowledge Hub','مركز معرفة الشركة'),L('Every statement keeps its source, evidence, date and review status. Only approved knowledge reaches campaigns.','كل عبارة تحتفظ بمصدرها ودليلها وتاريخها وحالة مراجعتها. المعرفة المعتمدة فقط تصل إلى الحملات.'),`${(()=>{const r=kScope(c).ready.length;return r?`<button class="btn" data-a="kBulk">${L(`Approve all ${r} pending`,`اعتمد كل المعلّق (${r})`)}</button>`:''})()}${c.kdirty?`<button class="btn pri" data-a="kPublish">${L('Publish as version','انشر كإصدار')} v${c.kver.length+1}</button>`:''}`)+
- `<div class="stack"><div class="kd-head"><div class="kd-tabs" role="tablist" aria-label="${L('Show','اعرض')}">${tabs.map(([k,l,v])=>`<button role="tab" aria-selected="${flt===k}" class="${flt===k?'on':''}${v?'':' z'}" data-a="kFilter" data-v="${k}"><b>${v}</b><span>${l}</span></button>`).join('')}</div>
- ${tot?`<div class="kd-prog" role="status"><div class="kbar"><i style="width:${Math.round(done/tot*100)}%"></i></div><span><b>${L(`${done} of ${tot} reviewed`,`تمت مراجعة ${done} من ${tot}`)}</b> · ${done<tot?L('approve what is true, reject what is not','اعتمد الصحيح وارفض غيره'):c.kdirty?L('all reviewed — publish this version so campaigns use it','تمت المراجعة — انشر هذا الإصدار لتستخدمه الحملات'):L('all reviewed and published','تمت المراجعة والنشر')}</span></div>`:''}</div>
- ${n(f=>f.isNew&&f.status==='pending')?`<div class="note">${L(`New sources changed the picture: ${n(f=>f.isNew&&f.status==='pending')} proposed update(s) since version v${c.kver.length}. Nothing is applied until you approve it.`,`المصادر الجديدة غيّرت الصورة: ${n(f=>f.isNew&&f.status==='pending')} تحديث مقترح منذ الإصدار v${c.kver.length}. لا يُطبَّق شيء قبل اعتمادك.`)}</div>`:''}
- ${(()=>{const t=kSkip(kScope(c));return t?`<p class="small muted" data-k-skip>${t}</p>`:''})()}
- <div class="kd${list.length?'':' kd-0'}"><div class="kd-list">${groups||`<p class="muted kd-none">${L('Nothing in this view.','لا شيء في هذا العرض.')}</p>`}</div>
- <div class="kd-pane" aria-live="polite">${cur?`<div class="kd-nav"><span class="eyebrow">${catName(cur.cat)}</span><span class="sp"></span><span class="kd-pos">${pos+1} / ${list.length}</span><button class="btn sm" data-a="kSel" data-v="${ids[pos-1]||''}"${pos>0?'':' disabled'} title="K">${L('Previous','السابق')}</button><button class="btn sm" data-a="kSel" data-v="${ids[pos+1]||''}"${pos<ids.length-1?'':' disabled'} title="J">${L('Next','التالي')}</button></div>${findCard(c,cur)}`:`<div class="kd-done"><b>${L('Nothing to show here','لا شيء هنا')}</b><span>${flt==='pending'?L('Everything has been reviewed.','تمت مراجعة كل شيء.'):L('Choose another filter above.','اختر عرضاً آخر بالأعلى.')}</span></div>`}</div></div>
- ${brandBox(c)}
- <div class="grid g2"><section class="card"><h2>${L('Add a fact yourself','أضف حقيقة بنفسك')}</h2><form data-s="kAdd" class="stack"><select name="cat" aria-label="${L('Category','الفئة')}">${CAT_ORDER.map(k=>`<option value="${k}">${catName(k)}</option>`).join('')}</select><input name="t" required dir="auto" aria-label="${L('Fact','الحقيقة')}" placeholder="${L('Stated in your own words; recorded as provided by you','بكلماتك؛ تُسجَّل كمقدَّمة منك')}"><button class="btn">${L('Add approved fact','أضف حقيقة معتمدة')}</button></form></section>
- <section class="card"><h2>${L('Knowledge versions','إصدارات المعرفة')}</h2>${c.kver.length?c.kver.slice().reverse().map(v=>`<p class="small"><b>v${v.n}</b> · ${dt(v.at)} — ${v.count} ${L('approved facts','حقيقة معتمدة')} (+${v.added} / −${v.removed})</p>`).join(''):`<p class="muted">${L('No version published yet. Publishing records exactly which facts were approved at that moment.','لم يُنشر إصدار بعد. النشر يسجل بدقة الحقائق المعتمدة في تلك اللحظة.')}</p>`}${last?`<button class="btn sm" data-a="ex" data-v="knowledge">${L('Export knowledge (JSON)','صدّر المعرفة (JSON)')}</button>`:''}</section></div></div>`};
+ ${unk?'':`<div class="row" style="margin-top:8px">${f.status==='rejected'?`<button class="btn sm pri" data-a="kUnreject" data-v="${f.id}">${L('Back to review','أعِدها للمراجعة')}</button>`:''}${f.type==='conflict'?`<button class="btn sm" data-a="kReject" data-v="${f.id}">${L('Mark resolved','علّم كمحلول')}</button>`:`${f.status!=='approved'?`<button class="btn sm pri" data-a="kApprove" data-v="${f.id}">${L('Confirm','أكّد')}</button>`:''}${f.status!=='rejected'?`<button class="btn sm" data-a="kReject" data-v="${f.id}">${L('Dismiss','استبعد')}</button>`:''}${f.web==='brand'?`<button class="btn sm" data-a="brandEdit" data-v="${f.id}">${S.ui.bEdit===f.id?L('Done','تم'):L('Edit','عدّل')}</button>`:`<button class="btn sm" data-a="kEdit" data-v="${f.id}">${L('Edit','عدّل')}</button>`}${f.cat==='ctas'&&f.status==='approved'&&!f.primary?`<button class="btn sm" data-a="kPrimary" data-v="${f.id}">${L('Make primary','اجعلها الأساسية')}</button>`:''}`}</div>`}</div>`}
+/* Pass 4.2 — Knowledge Hub as a "Company profile" (PASS4_BRIEF §4): a summary band, a "Needs you first" lane (conflicts, questions, missing essentials), chapters with inline review and the source quote, a bulk bar that never confirms claims, and an evidence drawer that shows the quote inside its source text. Every decision goes through the existing actions (kApprove, kReject, kKeep, kAnswer, kAdd, kGo, kBulk, kPublish, kUnreject …). */
+const KCH=()=>[[L('Who you are','من أنتم'),['overview','model','markets','competitors']],[L('What you sell','ما تبيعونه'),['products','offers','value','diff','claims']],[L('Who you serve','من تخدمون'),['audiences','acquisition','channels','campaigns']],[L('How you sound','كيف تتحدثون'),['positioning','personality','tone','pillars','themes','restrictions']],[L('Brand identity & calls to action','الهوية البصرية والدعوات لاتخاذ إجراء'),['brandid','ctas']]];
+const KUSE=k=>({products:L('proof points in campaigns','نقاط الإثبات في الحملات'),offers:L('the campaign offer, checked by Brand QA','عرض الحملة، ويفحصه فحص الجودة'),ctas:L('calls to action, checked by Brand QA','الدعوات لاتخاذ إجراء، ويفحصها فحص الجودة'),tone:L('the tone of campaign copy','نبرة نصوص الحملات'),brandid:L('the colours, font and logo of every design','ألوان وخط وشعار كل تصميم'),themes:L('post tags in Analytics','وسوم المنشورات في التحليلات')}[k]||'');
+/* conflict markers, open questions and the options of an open conflict live in "Needs you first", not in the chapters */
+const kLane=(c,f,co)=>f.type==='conflict'||f.type==='unknown'||(f.status==='pending'&&(co||confOpts(c)).includes(f));
+const kSrc=(c,f)=>{const s=c.sources.find(x=>x.id===f.src);return s?s.title:f.web==='brand'?L('Your website','موقعك'):f.type==='user'?L('Added by you','أضفتها أنت'):L('Across your sources','من عدة مصادر')};
+const kSw=f=>f.colors?' '+f.colors.map(h=>`<span class="sw" style="background:${esc(h)}" title="${esc(h)}"></span>`).join(' '):'';
+const kWhy=f=>f.noEv?L('No quote from your sources supports this — it cannot be confirmed until you edit it or add a source that says it.','لا يدعمها اقتباس من مصادرك — لا يمكن تأكيدها حتى تعدّلها أو تضيف مصدراً يذكرها.'):f.web==='brand'?L('Read from your website — check it really is your brand before confirming.','قُرئت من موقعك — تأكد أنها هويتك فعلاً قبل التأكيد.'):(f.type==='claim'||f.needs)?L('A claim — confirm it only if it is true and you can prove it.','ادعاء — أكّده فقط إذا كان صحيحاً ويمكنك إثباته.'):f.type==='interp'?L('An interpretation of your sources — check the wording before confirming.','تفسير لمصادرك — راجع الصياغة قبل التأكيد.'):f.type==='hyp'?L('A hypothesis, not stated in your sources — confirm it only if you know it is true.','فرضية لا تذكرها مصادرك — أكّدها فقط إذا كنت تعرف أنها صحيحة.'):'';
+const kMatch=(f,q)=>!q||(f.text+' '+(f.ev||'')).toLowerCase().includes(q);
+const kSame=(f)=>{const n=x=>String(x||"").toLowerCase().replace(/^[-#*\s]+/,"").replace(/[\s.。…]+$/,"").replace(/\s+/g," ");return n(f.ev)===n(f.text)};
+const kQuote=(ev,cite)=>`<blockquote class="kr-q" dir="auto">${ic('quote',15)}<span>${esc(ev.length>240?ev.slice(0,240)+'…':ev)}</span>${cite?`<cite dir="auto">${esc(cite)}</cite>`:''}</blockquote>`;
+function kStat(c,cat){const xs=c.findings.filter(f=>f.cat===cat&&f.status!=='rejected'&&f.type!=='conflict');return xs.some(f=>f.status==='pending')?'pend':xs.some(f=>f.status==='approved')?'ok':'miss'}
+function kRowP(c,f){const on=(S.ui.kPick||[]).includes(f.id),why=kWhy(f),ev=f.ev&&!f.web?f.ev:'';
+ return`<li class="kr kp-p${on?' on':''}" id="kr-${f.id}"><label class="kr-ck"><input type="checkbox" data-a="kPick" data-v="${f.id}" ${on?'checked':''} aria-label="${esc(L('Select','حدّد')+': '+f.text.slice(0,80))}"></label><div class="kr-b"><p class="kr-t" dir="auto">${esc(f.text)}${kSw(f)}</p>${ev&&kSame(f)?`<p class="kr-s kr-same" dir="auto">${ic('quote',15)}<span>${L('Quoted word for word from','مقتبسة حرفياً من')} <b dir="auto">${esc(kSrc(c,f))}</b></span></p>`:ev?kQuote(ev,kSrc(c,f)):`<p class="kr-s" dir="auto">${esc(kSrc(c,f))}</p>`}${why?`<p class="kr-why">${ic('info',16)}<span>${why}</span></p>`:''}<div class="kr-a">${f.noEv?'':`<button class="btn sm pri" data-a="kApprove" data-v="${f.id}">${ic('check',15)}${L('Confirm','أكّد')}</button>`}<button class="btn sm" data-a="kReject" data-v="${f.id}">${L('Dismiss','استبعد')}</button><button class="btn sm ghost" data-a="kEv" data-v="${f.id}">${L('Evidence & edit','الدليل والتعديل')}</button></div></div></li>`}
+function kRowC(c,f){const ty=f.type!=='fact'&&f.type!=='user'&&TYPES[f.type]?L(TYPES[f.type][0],TYPES[f.type][1]):'';
+ return`<li class="kr kp-c"><i class="kr-ok" aria-hidden="true">${ic('check',14)}</i><div class="kr-b"><p class="kr-t" dir="auto">${esc(f.text)}${kSw(f)}</p><p class="kr-s"><span dir="auto">${esc(kSrc(c,f))}</span>${ty?` · ${ty}`:''}${f.primary?` · <b>${L('Primary CTA','الدعوة الأساسية')}</b>`:''}</p></div><button class="btn sm ghost" data-a="kEv" data-v="${f.id}" aria-label="${esc(L('Details','التفاصيل')+': '+f.text.slice(0,60))}">${L('Details','التفاصيل')}</button></li>`}
+function kSec(c,cat,q,co){const all=c.findings.filter(f=>f.cat===cat&&f.status!=='rejected'&&!kLane(c,f,co)),m=all.filter(f=>kMatch(f,q));if(q&&!m.length)return'';
+ const P=m.filter(f=>f.status==='pending'),OK=m.filter(f=>f.status==='approved'),open=q||(S.ui.kOpen||{})[cat],shown=open?OK:OK.slice(0,5),st=kStat(c,cat),ess=REQ.some(r=>r[0]===cat),plain=kScope(c,cat).plain.length,use=KUSE(cat);
+ const chip=P.length?`<span class="kchip pend">${L(`${P.length} to check`,`${P.length} للتحقق`)}</span>`:st==='pend'?`<span class="kchip pend">${L('Question open','سؤال مفتوح')}</span>`:st==='ok'?`<span class="kchip ok">${L('Confirmed','مؤكدة')}</span>`:`<span class="kchip miss">${ess?L('Missing','ناقصة'):L('Empty','فارغة')}</span>`;
+ return`<section class="ks" id="ks-${esc(cat)}">${cat==='themes'?'<span id="k-themes" class="kanc"></span>':cat==='brandid'?'<span id="k-brandcat" class="kanc"></span>':''}<header class="ks-h"><h3>${catName(cat)}</h3>${chip}<span class="sp"></span>${plain&&!q?`<button class="btn sm" data-a="kGo" data-v="plain|${esc(cat)}" title="${L('Only statements quoted word for word from your sources; claims are left for you','فقط العبارات المقتبسة حرفياً من مصادرك؛ تُترك الادعاءات لك')}">${ic('check',15)}${L(`Confirm the ${plain} quoted`,`أكّد ${plain} المقتبسة`)}</button>`:''}</header>
+ ${use?`<p class="ks-use">${ic('target',15)}<span>${L('Used for','تُستخدم في')}: ${use}</span></p>`:''}
+ ${P.length||shown.length?`<ul class="kl">${P.map(f=>kRowP(c,f)).join('')}${shown.map(f=>kRowC(c,f)).join('')}</ul>`:''}
+ ${!q&&OK.length>5?`<button class="btn sm ghost ks-more" data-a="kMore" data-v="${esc(cat)}" aria-expanded="${!!open}">${open?L('Show fewer','اعرض أقل'):L(`Show all ${OK.length} confirmed`,`اعرض كل المؤكدة (${OK.length})`)}</button>`:''}
+ ${all.length?'':`<p class="ks-empty">${ess&&reqQ(cat)?`<b>${L('Missing','ناقص')}:</b> ${reqQ(cat)}`:L('Nothing in your sources about this yet.','لا شيء عن هذا في مصادرك بعد.')}</p>`}
+ ${cat==='brandid'&&!q?brandBox(c):''}
+ ${q?'':cat==='themes'?`<div class="ks-th">${themeHint(c)}${themeForm()}</div>`:`<details class="ks-add"><summary>${ic('plus',15)}${L('Add a fact','أضف حقيقة')}</summary><form data-s="kAdd" class="row"><input type="hidden" name="cat" value="${esc(cat)}"><input name="t" required dir="auto" aria-label="${esc(L('New fact','حقيقة جديدة')+': '+catName(cat))}" placeholder="${L('In your own words — saved as confirmed, with you as the source','بكلماتك — تُحفظ مؤكدة ومصدرها أنت')}"><button class="btn sm pri">${L('Add','أضف')}</button></form></details>`}
+ </section>`}
+function kNeeds(c,co){const P=c.findings.filter(f=>f.status==='pending'),cf=P.filter(f=>f.type==='conflict'),uq=P.filter(f=>f.type==='unknown'),miss=REQ.map(r=>r[0]).filter(cat=>!c.findings.some(f=>f.cat===cat&&f.status!=='rejected'));
+ if(!cf.length&&!uq.length&&!miss.length)return'';
+ return`<section class="kneed" aria-labelledby="kneed-h"><header><h2 id="kneed-h">${L('Needs you first','يحتاجك أولاً')}</h2><span class="kcount">${cf.length+uq.length+miss.length}</span><p>${L('Only you can settle these. Nothing here reaches your campaigns until you do.','وحدك تستطيع حسم هذه. لا يصل شيء منها إلى حملاتك قبل ذلك.')}</p></header>
+ ${cf.map(f=>`<article class="kn kn-cf"><div class="kn-h"><span class="kn-tag">${ic('alert',16)}${L('Your sources disagree','مصادرك متعارضة')}</span><span class="kn-cat">${catName(f.cat)}</span></div><p class="kn-t" dir="auto">${esc(f.text)}</p>${co.length?`<div class="kn-opts">${co.map(x=>{const s2=c.sources.find(s=>s.id===x.src);return`<div class="kn-opt"><p class="kr-t" dir="auto"><b>${esc(x.text)}</b></p>${x.ev?kQuote(x.ev,''):''}<p class="kr-s" dir="auto">${s2?esc(s2.title)+' · '+esc(s2.date||''):esc(kSrc(c,x))}</p><div class="kr-a"><button class="btn sm pri" data-a="kKeep" data-v="${x.id}">${L('Keep this one','أبقِ على هذا')}</button><button class="btn sm ghost" data-a="kEv" data-v="${x.id}">${L('See it in the source','اعرضه في المصدر')}</button></div></div>`}).join('')}</div>`:''}<div class="kr-a"><button class="btn sm" data-a="kReject" data-v="${f.id}">${L('Neither — mark resolved','لا هذا ولا ذاك — علّمه كمحلول')}</button>${co.length?`<span class="kr-s">${L('Keeping one confirms it and dismisses the others.','الإبقاء على أحدها يؤكده ويستبعد البقية.')}</span>`:''}</div></article>`).join('')}
+ ${uq.map(f=>`<article class="kn kn-q"><div class="kn-h"><span class="kn-tag">${ic('bulb',16)}${L('A question for you','سؤال لك')}</span><span class="kn-cat">${catName(f.cat)}</span></div><p class="kn-t" dir="auto">${reqQ(f.cat)||esc(f.text)}</p><p class="kr-s">${L('None of your sources says this; your answer becomes confirmed knowledge with you as the source.','لا يذكر هذا أي مصدر من مصادرك؛ تصبح إجابتك معرفة مؤكدة ومصدرها أنت.')}</p><form data-s="kAnswer" data-v="${f.id}" class="row kn-f"><input name="t" required dir="auto" aria-label="${esc(reqQ(f.cat)||f.text)}" placeholder="${L('Your answer','إجابتك')}"><button class="btn sm pri">${L('Save answer','احفظ الإجابة')}</button></form></article>`).join('')}
+ ${miss.length?`<div class="kn kn-miss"><div class="kn-h"><span class="kn-tag">${ic('flag',16)}${L('Missing essentials','أساسيات ناقصة')}</span></div><p class="kr-s">${L('Nothing at all is known about these yet. Add a source that covers them, or add a fact yourself.','لا شيء معروف عنها بعد. أضف مصدراً يغطيها أو أضف حقيقة بنفسك.')}</p><div class="chips">${miss.map(cat=>`<button class="chip" data-a="kJump" data-v="${esc(cat)}">${catName(cat)}</button>`).join('')}</div></div>`:''}
+ </section>`}
+function kSum(c){const F=c.findings.filter(f=>f.status!=='rejected'&&f.type!=='unknown'&&f.type!=='conflict'),X=F.filter(f=>f.status==='approved').length,Y=F.length-X,ess=REQ.filter(r=>c.findings.some(f=>f.cat===r[0]&&f.status==='approved')).length,pct=F.length?Math.round(X/F.length*100):0,last=c.kver[c.kver.length-1],nw=c.findings.filter(f=>f.isNew&&f.status==='pending').length;
+ return`<section class="ksum" aria-label="${L('Summary','الملخص')}"><div class="kring" role="img" aria-label="${L(`${pct}% confirmed`,`${pct}% مؤكدة`)}"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20" class="bg"/><circle cx="24" cy="24" r="20" class="fg"${pct?"":" style=\"display:none\""} stroke-dasharray="${(pct/100*125.66).toFixed(2)} 125.66"/></svg><b aria-hidden="true">${pct}%</b></div>
+ <div class="ksum-m"><h2 dir="auto">${L(`BrandPilot has learned ${F.length} things about ${esc(c.name)}`,`تعلّم BrandPilot ${F.length} معلومة عن ${esc(c.name)}`)}</h2><p class="ksum-n"><span><b>${X}</b> ${L('confirmed','مؤكدة')}</span><span><b>${Y}</b> ${L('to check','للتحقق')}</span><span><b>${ess}</b> ${L(`of ${REQ.length} essentials covered`,`من ${REQ.length} أساسيات مغطاة`)}</span></p><p class="ksum-u">${L('Only confirmed knowledge is used by','المعرفة المؤكدة فقط يستخدمها')} <button class="lk" data-a="go" data-v="director">${L('AI Director','مدير التسويق الذكي')}</button>${L(',','،')} <button class="lk" data-a="go" data-v="studio">${L('Campaign Studio','استوديو الحملات')}</button> ${L('and','و')} <button class="lk" data-a="go" data-v="qa">${L('Brand QA','فحص الجودة')}</button>.</p></div>
+ <div class="kver"><span class="kv-l">${L('Version in use','الإصدار المستخدم')}</span>${last?`<b class="kv-n">v${last.n}</b><span class="kv-d">${dt(last.at)} · ${L(`${last.count} confirmed`,`${last.count} مؤكدة`)}</span>`:`<b class="kv-n">—</b><span class="kv-d">${L('None published yet','لم يُنشر إصدار بعد')}</span>`}${c.kdirty?`<span class="kv-d">${L('Changes since then are not in a version yet.','التغييرات منذ ذلك الحين ليست في إصدار بعد.')}</span><button class="btn sm pri" data-a="kPublish">${L(`Publish v${c.kver.length+1}`,`انشر v${c.kver.length+1}`)}</button>`:''}${nw?`<p class="kv-new">${L(`${nw} proposed update(s) from new sources since v${c.kver.length}. Nothing changes until you confirm.`,`${nw} تحديث مقترح من مصادر جديدة منذ v${c.kver.length}. لا يتغير شيء قبل تأكيدك.`)}</p>`:''}${c.kver.length?`<details class="kv-h"><summary>${L('History','السجل')} (${c.kver.length})</summary><ul>${c.kver.slice().reverse().map(v=>`<li><b>v${v.n}</b> · ${dt(v.at)} — ${v.count} (+${v.added} / −${v.removed})</li>`).join('')}</ul><button class="btn sm" data-a="ex" data-v="knowledge">${ic('dl',15)}${L('Export knowledge (JSON)','صدّر المعرفة (JSON)')}</button></details>`:''}</div></section>`}
+function kToc(c,chs){return`<nav class="ktoc" aria-label="${L('Contents','المحتويات')}"><label class="ktoc-q">${ic('search',17)}<input type="search" data-i="kQ" value="${esc(S.ui.kQ||'')}" placeholder="${L('Search statements','ابحث في العبارات')}" aria-label="${L('Search statements','ابحث في العبارات')}"></label><ol>${chs.map(([t,cats])=>`<li><span class="ktoc-c">${t}</span><ol>${cats.map(cat=>{const st=kStat(c,cat);return`<li><button data-a="kJump" data-v="${esc(cat)}"><i class="dot ${st}" aria-hidden="true"></i><span>${catName(cat)}</span><span class="vh">— ${st==='ok'?L('confirmed','مؤكدة'):st==='pend'?L('to check','للتحقق'):L('nothing yet','لا شيء بعد')}</span></button></li>`}).join('')}</ol></li>`).join('')}</ol></nav>`}
+function kBar(c){const P=(S.ui.kPick||[]).map(id=>c.findings.find(f=>f.id===id)).filter(f=>f&&f.status==='pending');S.ui.kPick=P.map(f=>f.id);if(!P.length)return'';const ok=P.filter(f=>supF(f,c)&&brandOk(c,f,true)),sk=P.length-ok.length;
+ return`<div class="kbulk" role="region" aria-label="${L('Selected statements','العبارات المحددة')}"><div class="kb-m" role="status"><b>${L(`${P.length} selected`,`${P.length} محددة`)}</b><span>${sk?L(`${sk} need individual review and will be skipped`,`${sk} تحتاج مراجعة فردية وستُتخطى`):L('All are quoted from your sources','كلها مقتبسة من مصادرك')}</span></div><div class="kb-a"><button class="btn pri" data-a="kPickGo" data-v="ok" ${ok.length?'':'disabled'}>${L(`Confirm ${ok.length}`,`أكّد ${ok.length}`)}</button><button class="btn" data-a="kPickGo" data-v="no">${L(`Dismiss ${P.length}`,`استبعد ${P.length}`)}</button><button class="btn ghost" data-a="kPickGo" data-v="x">${L('Clear','إلغاء التحديد')}</button></div></div>`}
+/* the quote inside its source: ~280 characters either side, the quote marked */
+function kCtx(c,f){const s=c.sources.find(x=>x.id===f.src);if(!s||!s.text||!f.ev||f.web)return'';const T=String(s.text),e=String(f.ev).trim();let i=T.indexOf(e),len=e.length;
+ if(i<0){const lo=T.toLowerCase(),el=e.toLowerCase();i=lo.indexOf(el);if(i<0){const h=el.replace(/[….\s]+$/,'').slice(0,60);i=h.length>=12?lo.indexOf(h):-1;len=h.length}}
+ const head=`<h3 class="kev-sh" dir="auto">${L(`Where it appears in ${esc(s.title)}`,`أين يظهر في ${esc(s.title)}`)}</h3>`;
+ if(i<0)return head+`<p class="ks-empty">${L('The quote is not found word for word in this source — it may have been shortened. Read the source to check it.','الاقتباس غير موجود حرفياً في هذا المصدر — ربما اختُصر. اقرأ المصدر للتحقق.')}</p>`;
+ const a=Math.max(0,i-280),b=Math.min(T.length,i+len+280);
+ return head+`<div class="kev-ctx" dir="auto">${a?'…':''}${esc(T.slice(a,i))}<mark>${esc(T.slice(i,i+len))}</mark>${esc(T.slice(i+len,b))}${b<T.length?'…':''}</div>${s.date?`<p class="kr-s">${L('Source added','أُضيف المصدر')} ${esc(s.date)}</p>`:''}`}
+function kDrawer(c){const f=S.ui.kEv&&c.findings.find(x=>x.id===S.ui.kEv);if(!f)return'';const h=f.status==='approved'?L('Confirmed knowledge','معرفة مؤكدة'):f.status==='rejected'?L('Dismissed statement','عبارة مستبعدة'):L('Check this statement','تحقق من هذه العبارة');
+ return`<div class="kev-scrim" data-a="kEvX"></div><aside class="kev" role="dialog" aria-modal="true" aria-labelledby="kev-h"><header class="kev-hd"><div><span class="kev-c">${catName(f.cat)}</span><h2 id="kev-h" tabindex="-1">${h}</h2></div><button class="btn ghost kev-x" data-a="kEvX" aria-label="${L('Close','أغلق')}">${ic('x',20)}</button></header><div class="kev-b">${findCard(c,f)}${kCtx(c,f)}</div></aside>`}
+V.know=c=>{const lede=L(`What BrandPilot knows about ${esc(c.name||'your company')}, where each statement comes from, and what still needs you.`,`ما يعرفه BrandPilot عن ${esc(c.name||'شركتك')}، ومن أين جاءت كل عبارة، وما الذي لا يزال يحتاجك.`);
+ if(!c.findings.length)return ph(L('Company knowledge','معرفة الشركة'),lede)+empty(L('No knowledge yet','لا معرفة بعد'),L('Add your website or a document — it is analysed as soon as it is added. BrandPilot never fills this in on its own.','أضف موقعك أو مستنداً — يُحلَّل فور إضافته. BrandPilot لا يملأ هذا من تلقاء نفسه.'),L('Add a source','أضف مصدراً'),'onboard');
+ const co=confOpts(c),q=(S.ui.kQ||'').trim().toLowerCase(),chs=KCH(),used=new Set(chs.flatMap(x=>x[1])),oth=[...new Set(c.findings.map(f=>f.cat))].filter(k=>!used.has(k));if(oth.length)chs.push([L('Other','أخرى'),oth]);
+ const r=kScope(c).ready.length,R_=c.findings.filter(f=>f.status==='rejected'),hits=q?c.findings.filter(f=>f.status!=='rejected'&&!kLane(c,f,co)&&kMatch(f,q)).length:0;
+ const body=chs.map(([t,cats])=>{const secs=cats.map(cat=>kSec(c,cat,q,co)).join('');return secs?`<section class="kch"><h2 class="kch-h">${t}</h2>${secs}</section>`:''}).join('');
+ return ph(L('Company knowledge','معرفة الشركة'),lede,`<button class="btn" data-a="go" data-v="onboard">${ic('plus',16)}${L('Add a source','أضف مصدراً')}</button>${r?`<button class="btn pri" data-a="kBulk">${L(`Review all ${r} pending`,`راجع كل المعلّق (${r})`)}</button>`:''}`)
+ +kSum(c)+kNeeds(c,co)
+ +`<div class="kp">${kToc(c,chs)}<div class="kp-doc">${q?`<p class="kq-n" role="status">${L(`${hits} statement(s) match “${esc(S.ui.kQ.trim())}”`,`${hits} عبارة تطابق «${esc(S.ui.kQ.trim())}»`)}</p>`:''}${body||`<p class="ks-empty">${L('No statement matches your search.','لا عبارة تطابق بحثك.')}</p>`}
+ ${R_.length?`<details class="kdis"><summary>${L(`Dismissed (${R_.length})`,`المستبعدة (${R_.length})`)}</summary><ul class="kl">${R_.map(f=>`<li class="kr"><div class="kr-b"><p class="kr-t" dir="auto">${esc(f.type==='unknown'?(reqQ(f.cat)||f.text):f.text)}</p><p class="kr-s"><span>${catName(f.cat)}</span> · <span dir="auto">${esc(kSrc(c,f))}</span></p></div><button class="btn sm" data-a="kUnreject" data-v="${f.id}">${L('Restore','استعِد')}</button></li>`).join('')}</ul></details>`:''}</div></div>`
+ +kBar(c)+kDrawer(c)};
 
 /* 4 — AI Marketing Audit */
 /* Server audit check (3.5): fetched per company, kept in memory only — never stored in the company state */
@@ -2871,12 +2978,29 @@ addEventListener('keydown',e=>{
  if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='k'&&S&&USER){e.preventDefault();CK.open?ckClose(true):ckOpen();return}
  if(CK.open){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();ckClose(true)}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const n=CK.list.length;if(n){CK.i=(CK.i+(e.key==='ArrowDown'?1:n-1))%n;ckList()}}else if(e.key==='Enter'){e.preventDefault();ckRun(CK.i)}else if(e.key==='Tab'){e.preventDefault();document.getElementById('ckq').focus()}return}
  if(e.key==='/'&&!typing(e.target)&&!MODAL&&S&&USER&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();ckOpen()}},true);
-/* ---------- Knowledge review desk keys: J / K move the selection, A / R press the pane's own Approve / Reject (the same kApprove / kReject actions as the buttons). Approving or rejecting moves on to the next item that still needs review. ---------- */
-A.kSel=v=>{if(!v)return;S.ui.kSel=v;R();const r=document.getElementById('kd-'+v);if(r)r.scrollIntoView({block:'nearest'});if(matchMedia('(max-width:900px)').matches){const p=document.querySelector('#main .kd-pane');if(p)p.scrollIntoView({block:'start'})}};
-['kApprove','kReject'].forEach(k=>{const o=A[k];A[k]=(id,...r)=>{if(S.ui.view!=='know')return o(id,...r);const c=C(),f0=c.findings.find(y=>y.id===id),st=f0&&f0.status,i=KD.ids.indexOf(id),nx=i<0?null:KD.ids.slice(i+1).find(x=>{const f=c.findings.find(y=>y.id===x);return f&&f.status==='pending'&&f.type!=='unknown'});S.ui.kSel=nx||id;o(id,...r);if(f0&&f0.status===st&&S.ui.kSel!==id){S.ui.kSel=id;R()}}});
-addEventListener('keydown',e=>{if(!S||CK.open||MODAL||S.ui.view!=='know'||typing(e.target)||e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key.toLowerCase();if(!['j','k','a','r'].includes(k)||!KD.ids.length)return;e.preventDefault();
- if(k==='j'||k==='k'){const i=KD.ids.indexOf(S.ui.kSel),j=Math.max(0,Math.min(KD.ids.length-1,i+(k==='j'?1:-1)));A.kSel(KD.ids[j]);const r=document.getElementById('kd-'+KD.ids[j]);if(r)r.focus({preventScroll:true});return}
- const b=document.querySelector(`#main .kd-pane .find [data-a="${k==='a'?'kApprove':'kReject'}"]`);if(!b){toast(k==='a'?L('This one cannot be approved here.','لا يمكن اعتماد هذا هنا.'):L('This one cannot be rejected here.','لا يمكن رفض هذا هنا.'),'err');return}A[b.dataset.a](b.dataset.v);toast(k==='a'?L('Approved','اعتُمد'):L('Rejected','رُفض'),'ok');const r=document.getElementById('kd-'+S.ui.kSel);if(r)r.focus({preventScroll:true})});
+/* ---------- Company profile (4.2): selection, bulk bar, evidence drawer, contents ---------- */
+Object.assign(A,{
+ kPick(id){const P=S.ui.kPick=S.ui.kPick||[],i=P.indexOf(id);i<0?P.push(id):P.splice(i,1);R()},
+ /* bulk: only source-quoted facts (supF) that pass the brand check are confirmed; claims, interpretations, hypotheses and unevidenced statements stay selected for individual review */
+ kPickGo(v){const c=C(),P=(S.ui.kPick||[]).map(id=>c.findings.find(f=>f.id===id)).filter(f=>f&&f.status==='pending');
+  if(v==='ok'){const ok=P.filter(f=>supF(f,c)&&brandOk(c,f,true)),sk=P.length-ok.length;ok.forEach(f=>approveF(c,f));S.ui.kPick=P.filter(f=>!ok.includes(f)).map(f=>f.id);toast(sk?L(`${ok.length} confirmed. ${sk} still selected — they need your individual review.`,`تم تأكيد ${ok.length}. ${sk} ما زالت محددة — تحتاج مراجعتك الفردية.`):L(`${ok.length} confirmed.`,`تم تأكيد ${ok.length}.`),'ok')}
+  else if(v==='no'){P.forEach(f=>{f.status='rejected';f.primary=false});if(P.length)c.kdirty=true;S.ui.kPick=[];toast(L(`${P.length} dismissed. You can restore them under “Dismissed”.`,`تم استبعاد ${P.length}. يمكنك استعادتها من «المستبعدة».`),'ok')}
+  else S.ui.kPick=[];
+  R()},
+ kEv(id){S.ui.kEv=id;S.ui.editF=null;R();requestAnimationFrame(()=>{const h=document.getElementById('kev-h');if(h)h.focus({preventScroll:true})})},
+ kEvX(){const id=S.ui.kEv;S.ui.kEv=null;S.ui.editF=null;R();requestAnimationFrame(()=>{const b=id&&document.querySelector(`#main [data-a="kEv"][data-v="${CSS.escape(id)}"]`);if(b)b.focus({preventScroll:true})})},
+ kMore(cat){const o=S.ui.kOpen=S.ui.kOpen||{};o[cat]=!o[cat];R()},
+ kJump(cat){if(S.ui.kQ){S.ui.kQ='';R()}const el=document.getElementById('ks-'+cat);if(!el)return;el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches||Math.abs(el.getBoundingClientRect().top)>1200?'auto':'smooth',block:'start'});const h=el.querySelector('h3');if(h){h.tabIndex=-1;h.focus({preventScroll:true})}},
+ kQ(v){S.ui.kQ=v;R()}
+});
+{const o=A.go;A.go=v=>{S.ui.kEv=null;o(v)}}
+/* confirming or dismissing a row in the list moves focus to the next statement to check */
+['kApprove','kReject'].forEach(k=>{const o=A[k];A[k]=(id,el,...r)=>{const inList=S.ui.view==='know'&&!S.ui.kEv&&el&&el.closest&&el.closest('.kl');const rows=inList?[...document.querySelectorAll('#main .kl .kp-p')].map(x=>x.id):[],nx=rows[rows.indexOf('kr-'+id)+1];o(id,el,...r);if(inList&&nx)requestAnimationFrame(()=>{const b=document.querySelector('#'+CSS.escape(nx)+' .kr-a .btn');if(b)b.focus({preventScroll:true})})}});
+/* the drawer: Escape closes it (focus goes back to the button that opened it); Tab stays inside */
+addEventListener('keydown',e=>{if(!S||!S.ui||!S.ui.kEv||S.ui.view!=='know'||CK.open||MODAL)return;
+ if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();A.kEvX();return}
+ if(e.key==='Tab'){const d=document.querySelector('.kev');if(!d)return;const f=[...d.querySelectorAll(FOC)].filter(x=>x.offsetParent!==null);if(!f.length)return;const a=f[0],z=f[f.length-1],ae=document.activeElement;
+  if(e.shiftKey&&(ae===a||!d.contains(ae))){e.preventDefault();z.focus()}else if(!e.shiftKey&&(ae===z||!d.contains(ae))){e.preventDefault();a.focus()}}},true);
 {const o=A.navT;A.navT=()=>{o();if(!matchMedia('(max-width:900px)').matches)return;requestAnimationFrame(()=>{const el=document.querySelector(S.ui.nav?'.gside .gs-i.on, .gside .gs-i':'.wmenu');if(el)el.focus({preventScroll:true})})}}
 start();
 
