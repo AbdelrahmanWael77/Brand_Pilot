@@ -236,7 +236,8 @@ export function createCompanies(
 
   // What the AI Marketing Director is allowed to know about this company: approved facts, KPIs, audit items.
   router.get('/:id/director/context', requireCompany, (req, res) => {
-    res.json(buildContext(db, req.company.id));
+    const range = RANGES.includes(String(req.query.range)) ? String(req.query.range) : '28';
+    res.json(buildContext(db, req.company.id, { range }));
   });
 
   // One question to the AI Marketing Director, answered only from this company's context (director.js).
@@ -250,7 +251,9 @@ export function createCompanies(
     askLimiter.hit(req.user.id);
     if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
     try {
-      res.json(await ask(db, ai, req.company.id, { question, lang }));
+      // The Analytics period the owner is looking at, for the channel comparison in the context (default 28 days).
+      const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
+      res.json(await ask(db, ai, req.company.id, { question, lang, range }));
     } catch (e) {
       if (!(e instanceof AiError)) throw e;
       // The provider's own message stays in the server log.

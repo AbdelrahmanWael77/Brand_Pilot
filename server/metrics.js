@@ -39,7 +39,8 @@ function dataRange(data) {
   return from === null ? null : [from, to];
 }
 
-function periods(data, range) {
+/** Current / previous period for a range — the same rule as the Analytics screen's `periods`. Also used by channels.js. */
+export function periods(data, range) {
   const dr = dataRange(data);
   if (!dr) return null;
   let from = range === 'all' ? dr[0] : addDays(dr[1], -(Number(range) - 1));
