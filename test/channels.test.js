@@ -68,6 +68,17 @@ test('channelSummary: same numbers as the browser module, rules attached, null w
   assert.deepEqual(s.socialWebsiteCombined, { sessions: 400, enq: 8, enqRate: 0.02 });
   assert.deepEqual(s.unassignedLeadSources, [{ source: 'Google', leads: 1, qual: 0 }]);
   assert.equal(s.leaders.engRate.channel, 'instagram');
+  assert.deepEqual(s.ranking.engRate.bestEligible, { channel: 'instagram', value: 0.05 });
+  assert.deepEqual(s.ranking.engRate.notRanked, []);
+  /* The 3.68 % vs 15.9 % case: the model is told who looked higher and why it was left out. */
+  const q = channelSummary({ meta: [post('2026-10-02', 'facebook', 5000, 184, 0), post('2026-10-02', 'instagram', 600, 95.4, 0), post('2026-10-03', 'linkedin', 2000, 40, 0)], ga4: [], gsc: [], leads: [] }, 'all');
+  assert.deepEqual(q.ranking.engRate, {
+    status: 'ranked',
+    bestEligible: { channel: 'facebook', value: 0.0368 },
+    highestObserved: { channel: 'instagram', value: 0.159 },
+    notRanked: [{ channel: 'instagram', value: 0.159, reason: 'reach 600 < 1000 required' }],
+  });
+  assert.match(s.rules.join(' '), /"bestEligible" is the only channel you may call best/);
   assert.ok(s.rules.length >= 5);
   const s28 = channelSummary(data, '28');
   assert.deepEqual(s28.period, { from: '2026-09-23', to: '2026-10-20' });

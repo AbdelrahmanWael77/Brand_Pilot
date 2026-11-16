@@ -95,6 +95,52 @@ test('a leader is named only with enough data in two channels and a clear edge',
   assert.deepEqual(J(r.score.facebook.trails), ['engRate']);
 });
 
+test('ranking explains itself: highest observed vs best eligible, exact unmet minimum (the 3.68 % vs 15.9 % case)', () => {
+  const meta = [post('2026-10-02', 'facebook', 5000, 184), post('2026-10-02', 'instagram', 600, 95.4), post('2026-10-03', 'linkedin', 2000, 40)];
+  const r = B.compare({ meta, ga4: [], gsc: [], leads: [] }, P, null);
+  const I = J(r.rank.engRate);
+  assert.equal(I.status, 'ranked');
+  assert.equal(I.top.c, 'facebook');
+  assert.equal(I.top.v, 0.0368);
+  assert.equal(I.run.c, 'linkedin');
+  assert.equal(I.obs.c, 'instagram', 'the highest observed value is reported even though it is not ranked');
+  assert.equal(I.obs.v, 0.159);
+  assert.deepEqual(I.out, [{ c: 'instagram', v: 0.159, f: 'reach', have: 600, min: 1000 }]);
+  assert.deepEqual(I.eligible, ['facebook', 'linkedin']);
+  const best = J(r.findings.find(f => f.id === 'best' && f.k === 'engRate'));
+  assert.equal(best.c, 'facebook');
+  assert.deepEqual(best.above, { c: 'instagram', v: 0.159, f: 'reach', have: 600, min: 1000 }, 'a winner always carries the higher, unranked channel');
+  const un = J(r.findings.find(f => f.id === 'unranked' && f.k === 'engRate'));
+  assert.deepEqual({ c: un.c, have: un.have, min: un.min, top: un.top }, { c: 'instagram', have: 600, min: 1000, top: 'facebook' });
+});
+
+test('ranking status: "close" when the eligible leader is under 10 % ahead, "few" with under two eligible channels', () => {
+  const close = B.compare({ meta: [post('2026-10-02', 'facebook', 2000, 100), post('2026-10-02', 'instagram', 2000, 105)], ga4: [], gsc: [], leads: [] }, P, null);
+  const c = J(close.rank.engRate);
+  assert.equal(c.status, 'close');
+  assert.equal(c.top.c, 'instagram');
+  assert.ok(c.edge < B.EDGE);
+  assert.equal(close.best.engRate, undefined, 'no "best" mark when too close');
+  const few = B.compare({ meta: [post('2026-10-02', 'facebook', 2000, 100), post('2026-10-02', 'instagram', 300, 60)], ga4: [], gsc: [], leads: [] }, P, null);
+  const f = J(few.rank.engRate);
+  assert.equal(f.status, 'few');
+  assert.equal(f.top, null);
+  assert.equal(f.obs.c, 'instagram');
+  assert.deepEqual(f.eligible, ['facebook']);
+  assert.ok(few.findings.some(x => x.id === 'unranked' && x.c === 'instagram' && x.top === null));
+  assert.equal(B.short('engRate', { reach: 999 }).min, 1000);
+  assert.equal(B.short('engRate', { reach: 1000 }), null, 'the minimum itself is enough');
+  assert.equal(B.short('qshare', { leads: null }).have, null);
+});
+
+test('a winner that is also the highest observed carries no qualification', () => {
+  const r = B.compare({ meta: [post('2026-10-02', 'facebook', 2000, 40), post('2026-10-02', 'instagram', 2000, 100)], ga4: [], gsc: [], leads: [] }, P, null);
+  const best = r.findings.find(f => f.id === 'best' && f.k === 'engRate');
+  assert.equal(best.c, 'instagram');
+  assert.equal(best.above, null);
+  assert.ok(!r.findings.some(f => f.id === 'unranked'));
+});
+
 test('cost rows rank low as better and need spend and a minimum sample', () => {
   const meta = [post('2026-10-02', 'facebook', 3000, 90, { spend: 600, link_clicks: 60 }), post('2026-10-02', 'instagram', 3000, 90, { spend: 300, link_clicks: 50 })];
   const leads = [...Array(6)].map(() => lead('2026-10-05', 'Facebook')).concat([...Array(6)].map(() => lead('2026-10-05', 'Instagram')));

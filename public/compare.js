@@ -105,31 +105,47 @@
     return { cols: out, pool, other: Object.values(other).sort((a, b) => b.leads - a.leads), leadsAll: A.leads.length ? l.length : null, qualAll: A.leads.length ? l.filter(isQ).length : null };
   }
 
-  /* Comparable metrics: how they are ranked and when a channel has enough data to be ranked. */
+  /* Comparable metrics: which way is better, and the minimum data a channel needs to be RANKED on it
+     (`need`: [field, minimum] pairs — the field the rate is computed from). These are BrandPilot's own
+     minimum-sample rules, not a statistical test: a channel below them is shown, never ranked.
+     A rate that exists already implies its other inputs (cpc / cpl exist only with spend > 0). */
   const RANK = {
-    engRate: { better: 'high', ok: o => o.reach >= MIN.reach },
-    clickRate: { better: 'high', ok: o => o.clicks != null && o.reach >= MIN.reach },
-    cpc: { better: 'low', ok: o => o.clicks >= MIN.clicks && o.spend > 0 },
-    enqRate: { better: 'high', ok: o => o.sessions >= MIN.sessions },
-    leads: { better: 'high', ok: o => o.leads != null },
-    qshare: { better: 'high', ok: o => o.leads >= MIN.qual },
-    cpl: { better: 'low', ok: o => o.leads >= MIN.leads && o.spend > 0 }
+    engRate: { better: 'high', need: [['reach', MIN.reach]] },
+    clickRate: { better: 'high', need: [['reach', MIN.reach]] },
+    cpc: { better: 'low', need: [['clicks', MIN.clicks]] },
+    enqRate: { better: 'high', need: [['sessions', MIN.sessions]] },
+    leads: { better: 'high', need: [] },
+    qshare: { better: 'high', need: [['leads', MIN.qual]] },
+    cpl: { better: 'low', need: [['leads', MIN.leads]] }
   };
+  /* The first unmet minimum of channel data `o` for metric k, or null when it may be ranked. */
+  const short = (k, o) => { for (const [f, min] of RANK[k].need) if (!(o[f] >= min)) return { f, have: o[f] == null ? null : o[f], min }; return null; };
+  for (const [k, r] of Object.entries(RANK)) r.ok = o => !short(k, o);
 
+  /* For every rankable metric, the full story behind its ranking:
+     status 'ranked' — `top` is the best eligible channel, at least EDGE ahead of `run` (the next eligible one);
+            'close'  — two or more eligible channels, but the first is less than EDGE ahead (no leader named);
+            'few'    — fewer than two channels have enough data (or, for leads, under MIN.leads in total);
+     `obs` — the highest observed value among ALL channels with a value, eligible or not;
+     `out` — channels with a value that were not ranked, each with the exact unmet minimum. */
   function rank(cols) {
-    const best = {}, worst = {};
+    const best = {}, worst = {}, info = {};
     for (const [k, r] of Object.entries(RANK)) {
-      const xs = COLS.filter(c => cols[c][k] != null && r.ok(cols[c])).map(c => ({ c, v: cols[c][k] }));
-      if (xs.length < 2) continue;
-      if (k === 'leads' && xs.reduce((t, x) => t + x.v, 0) < MIN.leads) continue;
-      xs.sort((a, b) => r.better === 'high' ? b.v - a.v : a.v - b.v);
+      const sort = xs => xs.sort((a, b) => r.better === 'high' ? b.v - a.v : a.v - b.v);
+      const all = sort(COLS.filter(c => cols[c][k] != null).map(c => ({ c, v: cols[c][k] })));
+      if (!all.length) continue;
+      const out = all.filter(x => short(k, cols[x.c])).map(x => ({ ...x, ...short(k, cols[x.c]) }));
+      const xs = all.filter(x => !short(k, cols[x.c]));
+      const I = info[k] = { k, better: r.better, obs: all[0], out, eligible: xs.map(x => x.c), status: 'few', top: null, run: null, edge: null };
+      if (xs.length < 2 || (k === 'leads' && xs.reduce((t, x) => t + x.v, 0) < MIN.leads)) continue;
       const top = xs[0], run = xs[1], end = xs[xs.length - 1];
       const edge = r.better === 'high' ? (run.v ? top.v / run.v - 1 : (top.v > 0 ? Infinity : 0)) : (top.v ? run.v / top.v - 1 : 0);
-      if (edge < EDGE) continue;
+      Object.assign(I, { top, run, edge, status: edge >= EDGE ? 'ranked' : 'close' });
+      if (I.status !== 'ranked') continue;
       best[k] = { c: top.c, v: top.v, run: run.c, rv: run.v, n: xs.length };
       worst[k] = { c: end.c, v: end.v };
     }
-    return { best, worst };
+    return { best, worst, info };
   }
 
   /* Where each channel's data comes from in time: its own first / last date overall and in the period. */
@@ -156,11 +172,17 @@
       const xs = COLS.filter(c => C[c].leads).sort((x, y) => C[y].leads - C[x].leads);
       if (xs.length && C[xs[0]].leads >= MIN.lead) F.push({ id: 'lead-share', cls: 'fact', c: xs[0], v: C[xs[0]].leads, total: m.leadsAll, share: C[xs[0]].leads / m.leadsAll, run: xs[1] || null, rv: xs[1] ? C[xs[1]].leads : null });
     }
-    if (b.qshare) F.push({ id: 'best', k: 'qshare', cls: 'fact', ...b.qshare, n0: C[b.qshare.c].leads });
-    if (b.cpl) F.push({ id: 'best', k: 'cpl', cls: 'interp', ...b.cpl, n0: C[b.cpl.c].leads });
-    if (b.engRate) F.push({ id: 'best', k: 'engRate', cls: 'interp', ...b.engRate, n0: C[b.engRate.c].reach });
-    if (b.clickRate) F.push({ id: 'best', k: 'clickRate', cls: 'interp', ...b.clickRate, n0: C[b.clickRate.c].reach });
-    if (b.cpc) F.push({ id: 'best', k: 'cpc', cls: 'interp', ...b.cpc, n0: C[b.cpc.c].clicks });
+    /* A "best eligible" finding always carries the channel with a better observed value that was not ranked (`above`),
+       so the page can never name a winner without saying who looked higher and why it was left out. */
+    const above = k => { const I = rk.info[k]; return I && I.obs.c !== I.top?.c ? I.out.find(x => x.c === I.obs.c) || null : null; };
+    const bestF = (k, cls, n0) => { if (b[k]) F.push({ id: 'best', k, cls, ...b[k], n0: C[b[k].c][n0], above: above(k) }); };
+    bestF('qshare', 'fact', 'leads'); bestF('cpl', 'interp', 'leads'); bestF('engRate', 'interp', 'reach'); bestF('clickRate', 'interp', 'reach'); bestF('cpc', 'interp', 'clicks');
+    /* The highest observed value belongs to a channel below the minimum: worth knowing, not yet a result. */
+    ['qshare', 'cpl', 'engRate', 'clickRate', 'cpc', 'enqRate'].forEach(k => {
+      const I = rk.info[k], x = I && I.out.find(o => o.c === I.obs.c);
+      const lead = I && I.status === 'ranked';
+      if (x) F.push({ id: 'unranked', cls: 'hyp', k, c: x.c, v: x.v, f: x.f, have: x.have, min: x.min, st: I.status, top: lead ? I.top.c : null, tv: lead ? I.top.v : null });
+    });
     /* Website: organic search against all social together (same GA4 definition on both sides). */
     const se = C.search;
     if (m.pool && se.enqRate != null && m.pool.enqRate != null && se.sessions >= MIN.sessions && m.pool.sessions >= MIN.sessions)
@@ -193,9 +215,9 @@
     const m = measure(D, cur), p = prev ? measure(D, prev) : null, rk = rank(m.cols), cov = coverage(D, cur);
     const score = {};
     COLS.forEach(c => { score[c] = { wins: Object.keys(rk.best).filter(k => rk.best[k].c === c), trails: Object.keys(rk.worst).filter(k => rk.worst[k].c === c) }; });
-    return { cur, prev, cols: COLS, now: m, before: p, best: rk.best, worst: rk.worst, score, cov, findings: findings(m, p, rk, cov) };
+    return { cur, prev, cols: COLS, now: m, before: p, best: rk.best, worst: rk.worst, rank: rk.info, score, cov, findings: findings(m, p, rk, cov) };
   }
 
-  const api = { SOCIAL, COLS, MIN, RANK, leadCol, ga4Col, measure, rank, coverage, findings, compare };
+  const api = { SOCIAL, COLS, MIN, EDGE, RANK, short, leadCol, ga4Col, measure, rank, coverage, findings, compare };
   root.BPCompare = api;
 })(typeof window !== 'undefined' ? window : globalThis);

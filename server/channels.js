@@ -26,6 +26,7 @@ export const CHANNEL_RULES = [
   'sessions / enq / enqRate come from GA4. GA4 does not split social visits by platform unless its channel names the platform; then they are only in "socialWebsiteCombined".',
   'reach, engagements and link clicks are reported by each platform and counted its own way: compare large gaps only. engRate = engagements / reach, clickRate = link clicks / reach.',
   'Rates are fractions (0.033 = 3.3%). "leaders" lists a metric only when two channels have enough data and the leader is at least 10% ahead.',
+  '"ranking" explains every rankable metric: "bestEligible" is the only channel you may call best; "highestObserved" may be a channel in "notRanked" (below BrandPilot\'s minimum data — a rule, not a statistical test). Whenever you name a best channel and a higher (or, for costs, lower) value sits in "notRanked", mention that channel, its value and its reason. status "close" = no leader (under 10% apart); "few" = fewer than two channels have enough data.',
   'spend, cpc and cpl are amounts in "currency" (an ISO code). When "currency" is null, give the amounts without any currency sign.',
 ];
 
@@ -46,6 +47,12 @@ export function channelSummary(data, range = '28', currency = null) {
     socialWebsiteCombined: R.now.pool ? pick(R.now.pool) : null,
     unassignedLeadSources: R.now.other.slice(0, 10).map((x) => ({ source: x.n, leads: x.leads, qual: x.qual })),
     leaders: Object.fromEntries(Object.entries(R.best).map(([k, b]) => [k, { channel: b.c, value: round(b.v), next: b.run, nextValue: round(b.rv) }])),
+    ranking: Object.fromEntries(Object.entries(R.rank).map(([k, I]) => [k, {
+      status: I.status,
+      bestEligible: I.status === 'ranked' ? { channel: I.top.c, value: round(I.top.v) } : null,
+      highestObserved: { channel: I.obs.c, value: round(I.obs.v) },
+      notRanked: I.out.map((x) => ({ channel: x.c, value: round(x.v), reason: `${x.f} ${x.have ?? 'not measured'} < ${x.min} required` })),
+    }])),
     synthetic: Object.values(data).some((rs) => rs.some((r) => r.synthetic)),
   };
 }
