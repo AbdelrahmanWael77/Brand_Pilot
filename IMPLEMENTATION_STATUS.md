@@ -171,6 +171,8 @@
 
 ## Next atomic task
 
+**Newest — 14: Tag posts has a clear finish (2026-11-16, Opus 5.5; owner: "no confirm button when we finish tagging"). Committed and pushed to `dev` on 2026-11-16.** Choices were already saved as they were made; what was missing was an end. The top card (`tagEnd`) now shows "N of M tagged · K left" with "Every choice is saved as you make it" and, after the first decision, "Save and finish later"; when every post is decided it becomes a green finish card with the count per theme and "Done — see what works in the audit" / "Done — back to Data" (`A.tagDone`), and the page scrolls up to it (`tagTop`). The "Ask the AI" box is hidden when nothing is undecided. Checked: `data/check-14-steps.mjs` 6/6 (made-up posts and themes), `npm test` 265 pass.
+
 **Newest — 12: colours, logo position, Canva design as the whole post (2026-11-16, Fable 5.2; six requests from the owner after trying task 11 with the real Canva account). Committed and pushed to `dev` on 2026-11-16. Git-ignored helper: `data/check-12-steps.mjs`.**
 - **Any colour**: a design colour is a brand role or `#RRGGBB` (`dcol`). The Look tab shows swatches for background, text, second background (gradient) and button: brand colours, a wider palette (`MODERN`), and a colour input for any colour (`swPick`, `A.dcol`). Brand QA's contrast check uses the same colours. Company templates keep them.
 - **Logo position**: `design.logo` = `t|b` + `s|c|e` (start = the side the text starts on) or `off`; default top, far side (`logoXY`, `logoPick`, `A.lpos`). The picker is physical (left / centre / right), converted per post language. The text block keeps clear of a bottom logo. Changing the look keeps the position (`keepD`).
