@@ -2,7 +2,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
 import { openDb } from '../server/db.js';
-import { buildVisualCopyPrompt, readVisualCopy, visualSource, VISUAL_LIMITS } from '../server/visualCopy.js';
+import { buildVisualCopyPrompt, readVisualCopy, checkVisualCopy, visualSource, VISUAL_LIMITS } from '../server/visualCopy.js';
 
 // Short wording for a post's artwork: the model is a stub; the checks on its answer are the subject.
 const post = (fields, lang = 'en') => ({ id: 'p1', type: 'post', lang, fields: Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, { v }])) });
@@ -37,6 +37,22 @@ test('readVisualCopy: accepts a short answer in the right language; refuses long
   assert.equal(readVisualCopy('{"headline":""}', src, 'en'), null);
 });
 
+test('checkVisualCopy (10.5 rules): every refusal has a reason; a claim the post does not make and the same headline again are refused', () => {
+  const src = 'headline: ' + LONG;
+  const why = (t, l = 'en', cur = '', from = src) => checkVisualCopy(t, from, l, cur).reason;
+  assert.equal(why('{"headline":"The best platform for your team","sub":""}'), 'new_claim');
+  assert.equal(why('{"headline":"Guaranteed one platform","sub":""}'), 'new_claim');
+  assert.deepEqual(checkVisualCopy('{"headline":"The best custom platform","sub":""}', 'headline: The best custom platform for growing teams in Cairo', 'en'), { ok: { headline: 'The best custom platform', sub: '' } }); // the post says it
+  assert.equal(why('{"headline":"One custom platform."}', 'en', 'One custom platform'), 'unchanged');
+  assert.equal(why('{"headline":"Save 40% with one platform"}'), 'new_number');
+  assert.equal(why('{"headline":"one two three four five six seven eight nine"}'), 'too_long');
+  assert.equal(why('{"headline":"منصة واحدة"}'), 'language');
+  assert.equal(why('{"headline":"{{message}}"}'), 'placeholder');
+  assert.equal(why('no json here'), 'missing');
+  assert.equal(why('{"headline":""}'), 'empty');
+  assert.equal(readVisualCopy('{"headline":"One custom platform"}', src, 'en', 'one custom platform'), null);
+});
+
 let server, base, db, alice, bob, co, answer, asked;
 const call = (method, path, cookie, body) => fetch(base + path, { method, headers: { ...(body !== undefined ? { 'content-type': 'application/json' } : {}), ...(cookie ? { cookie } : {}) }, body: body !== undefined ? JSON.stringify(body) : undefined });
 async function register(email) {
@@ -54,7 +70,7 @@ before(async () => {
   bob = await register('bob@example.com');
   co = (await (await call('POST', '/api/companies', alice, { name: 'MD Labs' })).json()).company.id;
   const asset = (id, type, v) => ({ id, type, lang: 'en', channel: type === 'post' ? 'linkedin' : 'web', n: 1, status: 'draft', flag: null, design: {}, fields: { headline: { tpl: '', v, edited: false } } });
-  const state = { campaigns: [{ id: 'k1', name: 'Intro', slug: 'intro', at: 1, rec: null, approved: true, versions: [], brief: {}, assets: [asset('p1', 'post', LONG), asset('p2', 'post', '⟦message⟧'), asset('l1', 'landing', 'x')] }] };
+  const state = { campaigns: [{ id: 'k1', name: 'Intro', slug: 'intro', at: 1, rec: null, approved: true, versions: [], brief: { offerEn: 'A free discovery call for teams that want one platform instead of many tools' }, assets: [asset('p1', 'post', LONG), asset('p2', 'post', '⟦message⟧'), asset('l1', 'landing', 'x'), asset('p3', 'post', 'A free discovery call for teams that want one platform instead of many tools'), asset('p4', 'post', 'One platform for your team')] }] };
   assert.equal((await call('PUT', `/api/companies/${co}/state`, alice, { state })).status, 200);
 });
 after(() => {
@@ -77,7 +93,11 @@ test('route: a suggestion from the mirror\'s wording; a broken answer is refused
   answer = '{"headline":"Cut costs by 70% today","sub":""}';
   const bad = await VC('p1');
   assert.equal(bad.status, 422);
-  assert.deepEqual(await bad.json(), { error: 'visual_copy_unusable' });
+  assert.deepEqual(await bad.json(), { error: 'visual_copy_unusable', reason: 'new_number' });
+  for (const [aid, err] of [['p3', 'offer_headline'], ['p4', 'short_already']]) {
+    const r409 = await VC(aid); // refused before the model and before the allowance
+    assert.deepEqual([r409.status, (await r409.json()).error], [409, err]);
+  }
   answer = Object.assign(new Error('ai_rate_limited'), { name: 'AiError', code: 'ai_rate_limited', status: 429 });
   assert.equal((await VC('p1')).status, 429);
   answer = '{"headline":"One platform"}';

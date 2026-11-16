@@ -3,17 +3,22 @@
  *
  *   POST /api/companies/:id/campaigns/:cid/assets/:aid/visual-copy
  *   → { headline, sub, model }      a SUGGESTION — nothing is stored or changed here; the user applies it in the editor
- *   404 unknown campaign or asset · 409 not a post, or a post without a headline · 429 own allowance ·
- *   503 no AI key · 422 the model's answer broke a rule below (`visual_copy_unusable`) · AiError codes as elsewhere.
+ *   404 unknown campaign or asset · 409 `not_a_post`, `no_headline`, `offer_headline` (the headline is the brief's
+ *   approved offer, which must stay word for word), `short_already` · 429 own allowance · 503 no AI key ·
+ *   422 the model's answer broke a rule below (`{ error: 'visual_copy_unusable', reason }`) · AiError codes as elsewhere.
  *
  * A post's artwork carries a visual headline and one supporting line; everything else belongs in the caption.
  * The model only SHORTENS: the source is the post's own fields from the server mirror (wording the user wrote or
  * approved), passed as data. The answer is checked before it is returned: length, language, no placeholder, and
- * every number in it must be a number that is in the source — an answer that fails is refused, not repaired.
+ * every number in it must be a number that is in the source, no ranking / guarantee / percentage wording the source
+ * does not have (task 10.5), not the same headline again — an answer that fails is refused, not repaired.
+ * Two screens call it: task 11's "Suggest a short headline" (the user reviews, then applies) and 10.5's "Shorten it
+ * with AI" (applied at once, marked "AI draft").
  */
 import { createCampaigns } from './campaigns.js';
+import { RISK } from './campaignQa.js';
 
-export const VISUAL_LIMITS = { headWords: 8, headChars: 64, subWords: 18, subChars: 130, source: 2400 };
+export const VISUAL_LIMITS = { headWords: 8, headChars: 64, subWords: 18, subChars: 130, source: 2400, enough: 48 };
 const AR = /[\u0600-\u06FF]/;
 const one = (s, n) => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, n);
 const words = (s) => s.split(/\s+/).filter(Boolean).length;
@@ -46,27 +51,38 @@ export function buildVisualCopyPrompt(asset) {
   };
 }
 
-/** Pure: the model's answer → { headline, sub }, or null when it breaks a rule. */
-export function readVisualCopy(text, source, lang) {
+/**
+ * Pure: the model's answer checked against the post's wording. → { ok: { headline, sub } } or { reason } with
+ * reason one of missing | empty | too_long | placeholder | language | new_number | new_claim | unchanged.
+ */
+export function checkVisualCopy(text, source, lang, current = '') {
   const m = String(text ?? '').match(/\{[\s\S]*\}/);
-  if (!m) return null;
+  if (!m) return { reason: 'missing' };
   let o;
   try {
     o = JSON.parse(m[0]);
   } catch {
-    return null;
+    return { reason: 'missing' };
   }
-  if (o === null || typeof o !== 'object' || typeof o.headline !== 'string') return null;
+  if (o === null || typeof o !== 'object' || typeof o.headline !== 'string') return { reason: 'missing' };
   const headline = one(o.headline, 400).replace(/[.。]+$/, '');
   const sub = typeof o.sub === 'string' ? one(o.sub, 600) : '';
-  if (!headline || headline.length > VISUAL_LIMITS.headChars || words(headline) > VISUAL_LIMITS.headWords) return null;
-  if (sub.length > VISUAL_LIMITS.subChars || words(sub) > VISUAL_LIMITS.subWords) return null;
+  if (!headline) return { reason: 'empty' };
+  if (headline.length > VISUAL_LIMITS.headChars || words(headline) > VISUAL_LIMITS.headWords) return { reason: 'too_long' };
+  if (sub.length > VISUAL_LIMITS.subChars || words(sub) > VISUAL_LIMITS.subWords) return { reason: 'too_long' };
   const all = `${headline} ${sub}`;
-  if (/⟦|⟧|\{\{|\}\}|[<>]|#\S/.test(all)) return null;
-  if (lang === 'ar' ? !AR.test(headline) || (sub && !AR.test(sub)) : AR.test(all)) return null;
+  if (/⟦|⟧|\{\{|\}\}|[<>]|#\S/.test(all)) return { reason: 'placeholder' };
+  if (lang === 'ar' ? !AR.test(headline) || (sub && !AR.test(sub)) : AR.test(all)) return { reason: 'language' };
   const have = new Set(numbers(source));
-  if (numbers(all).some((n) => !have.has(n))) return null;
-  return { headline, sub };
+  if (numbers(all).some((n) => !have.has(n))) return { reason: 'new_number' };
+  if (RISK.test(all) && !RISK.test(source)) return { reason: 'new_claim' };
+  if (current && headline.toLowerCase() === one(current, 400).replace(/[.。]+$/, '').toLowerCase()) return { reason: 'unchanged' };
+  return { ok: { headline, sub } };
+}
+
+/** Pure: the model's answer → { headline, sub }, or null when it breaks a rule. */
+export function readVisualCopy(text, source, lang, current = '') {
+  return checkVisualCopy(text, source, lang, current).ok ?? null;
 }
 
 /** Route handler factory. `ai` from createAi; `limiter` from createLimiter. */
@@ -79,15 +95,20 @@ export function visualCopyRoute(db, ai, limiter) {
     if (asset.type !== 'post') return res.status(409).json({ error: 'not_a_post' });
     const source = visualSource(asset);
     if (!/^headline: /.test(source)) return res.status(409).json({ error: 'no_headline' });
+    // 10.5: the approved offer stays word for word; a headline that is already short is not sent to the model
+    const head = one(asset.fields.headline?.v, 400);
+    const offer = one(asset.lang === 'ar' ? camp.brief?.offerAr : camp.brief?.offerEn, 400);
+    if (offer && head.toLowerCase() === offer.toLowerCase()) return res.status(409).json({ error: 'offer_headline' });
+    if (head.length <= VISUAL_LIMITS.enough && words(head) <= VISUAL_LIMITS.headWords) return res.status(409).json({ error: 'short_already' });
     if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
     const wait = limiter.retryAfter(req.user.id);
     if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
     limiter.hit(req.user.id);
     try {
       const r = await ai.complete({ ...buildVisualCopyPrompt(asset), maxTokens: 400 });
-      const got = readVisualCopy(r.text, source, asset.lang);
-      if (!got) return res.status(422).json({ error: 'visual_copy_unusable' });
-      res.json({ ...got, model: r.model });
+      const got = checkVisualCopy(r.text, source, asset.lang, asset.fields.headline?.v);
+      if (!got.ok) return res.status(422).json({ error: 'visual_copy_unusable', reason: got.reason });
+      res.json({ ...got.ok, model: r.model });
     } catch (e) {
       if (e?.name !== 'AiError') throw e;
       console.error(`visual copy: ${e.code}`, e.cause?.message ?? '');
