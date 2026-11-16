@@ -1,6 +1,10 @@
-# On branch `redesign/new-product-identity` — redesign pass 3 (recomposing screens), owner review
+# START HERE — BrandPilot redesign pass 4 (branch `redesign/new-product-identity`)
 
-**Task list with specs, checks and status per screen: `design-system/brandpilot/PASS3_TASKS.md` — start there.** Read `design-system/brandpilot/STRATEGY.md`, `MASTER.md` and the "REDESIGN — pass 3" line at the top of IMPLEMENTATION_STATUS.md. The owner wants **one commit and a push to `origin/redesign/new-product-identity` per screen**; never merge into `dev` until the owner approves. Done in pass 3: Knowledge Hub review desk. Next single screen: Analytics "Compare channels" — a channel scoreboard first (headline numbers per channel with data sufficiency and the "Best eligible" / "Highest observed" explanation inline), the findings as a compact ruled list instead of six identical cards; keep every number, label and action from `public/compare.js` / `cxView`. Then Sources intake, Studio review, QA. After each: `npm test`, check EN + AR in the browser (a copy of the DB on another port is safest), update both handoff files, commit, push.
+The owner rejected passes 1–3 as a "visual reskin". **Read `design-system/brandpilot/PASS4_BRIEF.md` first**: it has the owner's brief, the chosen direction (goal workspace: dark sidebar with the 6 customer goals, Plus Jakarta Sans + Noto Sans Arabic, cobalt `#2F55E4` on slate neutrals — from ui-ux-pro-max) and two ready-to-build tasks with exact code pointers and checks:
+- **4.1** new identity + goal shell (`public/index.html`: fonts link, `:root` override at the end of `<style>`, `render0()` shell → `.side` + `.wtop`)
+- **4.2** Knowledge Hub rebuilt as a "Company profile" (summary band, "Needs you first" lane for conflicts / questions / missing essentials, chapters with inline review, bulk bar that never confirms claims, evidence drawer showing the quote inside the source text)
+
+Nothing of pass 4 is implemented yet. Rules: change UI only (same `data-a` actions, same server), EN + AR equal, no text smaller than now. **Commit and `git push` after each task** (owner's rule); never merge into `dev`. Run `npm test` (545 pass) and check in the browser on a copy of the DB. After each task update IMPLEMENTATION_STATUS.md (the "REDESIGN" lines at the top) and this file.
 
 ---
 

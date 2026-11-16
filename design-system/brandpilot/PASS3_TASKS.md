@@ -1,3 +1,5 @@
+> **Superseded by `PASS4_BRIEF.md`** (owner rejected passes 1–3 as a reskin). Sections 2–5 below still describe useful content changes for later screens.
+
 # Redesign pass 3 — task list for the next developer
 
 Branch `redesign/new-product-identity` (owner review only — **never merge into `dev`** until the owner approves).
