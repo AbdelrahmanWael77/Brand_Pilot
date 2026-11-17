@@ -31,7 +31,8 @@ export function sniffImage(buf) {
 
 export function createImageAi({
   accountId = process.env.CLOUDFLARE_ACCOUNT_ID,
-  token = process.env.CLOUDFLARE_AI_TOKEN,
+  // CLOUDFLARE_API_TOKEN is accepted too (the name the owner used, 2026-11-17).
+  token = process.env.CLOUDFLARE_AI_TOKEN || process.env.CLOUDFLARE_API_TOKEN,
   model = process.env.AI_IMAGE_MODEL,
   fetch: f = globalThis.fetch,
   timeoutMs = IMAGE_LIMITS.timeoutMs,

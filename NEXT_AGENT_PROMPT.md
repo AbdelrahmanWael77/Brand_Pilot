@@ -1,4 +1,4 @@
-> 2026-11-17: free image backup is wired into the Canva panel but needs the owner to add CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_AI_TOKEN to .env (free Cloudflare account, Workers AI token) and restart; then run one real backup picture.
+> 2026-11-17: free image backup (Cloudflare FLUX) is configured and verified for real. Canva still blocked by the owner's Canva AI credits until 2026-12-01.
 
 > 2026-11-17: Canva generation is blocked by the owner's Canva AI credit quota (resets 2026-12-01); BrandPilot now says so (canva_credits). 16d (real Canva check of the two strategies) waits for credits.
 
