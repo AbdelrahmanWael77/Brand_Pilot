@@ -1,4 +1,21 @@
 {
   "version": 1,
-  "bugs": []
+  "bugs": [
+    {
+      "id": "canva-failed-without-iserror",
+      "timestamp": "2026-11-17",
+      "error_message": "Canva answered, but without a picture or a design BrandPilot could read. Check your Canva account before trying again. (canva_unreadable)",
+      "file": "server/canvaStudio.js",
+      "root_cause": "Canva's MCP generate-image answered isError:false with structuredContent { status: \"failed\", failure: { code: \"quota_exceeded\" } } and _meta[\"com.canva/aiCreditQuotaError\"] (\"You have exceeded your credit quota.\"). callTool only treated isError:true as a failure, so the answer went on as a success with no design or picture and was labelled unreadable.",
+      "fix": "failureOf(result) detects status \"failed\" / failure / the credit-quota meta even without isError; callTool throws canva_credits (402) with Canva's words and the reset date (quota_usage.resets_at). Generate-all already stops on credits.",
+      "tags": [
+        "canva",
+        "mcp",
+        "quota",
+        "error-handling"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-11-17"
+    }
+  ]
 }

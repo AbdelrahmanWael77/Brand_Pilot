@@ -169,6 +169,25 @@ export function toolErrorCode(text) {
   return ['canva_tool_error', 502];
 }
 
+/**
+ * Pure: a tool answer that reports a failure WITHOUT `isError` (seen with the owner's account on 2026-11-17:
+ * generate-image answered isError:false, structuredContent { status: 'failed', failure: { code: 'quota_exceeded' } } and
+ * _meta['com.canva/aiCreditQuotaError'] — "You have exceeded your credit quota."). → { said, quota } or null.
+ */
+export function failureOf(result) {
+  if (!isObj(result)) return null;
+  const sc = isObj(result.structuredContent) ? result.structuredContent : {};
+  const meta = isObj(result._meta) ? result._meta : {};
+  const quota = isObj(meta['com.canva/aiCreditQuotaError']) ? meta['com.canva/aiCreditQuotaError'] : null;
+  const failed = sc.status === 'failed' || isObj(sc.failure);
+  if (!failed && !quota) return null;
+  const f = isObj(sc.failure) ? sc.failure : {};
+  let said = one(f.message || readResult(result).text || f.code || 'Canva reported a failure.', 240);
+  const at = quota && isObj(quota.quota_usage) ? Number(quota.quota_usage.resets_at) : NaN;
+  if (Number.isFinite(at) && at > 0) said += ` Your Canva AI credits reset on ${new Date(at * 1000).toISOString().slice(0, 10)}.`;
+  return { said, quota: !!quota || /quota|credit/i.test(String(f.code || '')) };
+}
+
 /* ---------- the brief sent to Canva ---------- */
 
 const CHANNEL_NAME = { facebook: 'Facebook', instagram: 'Instagram', linkedin: 'LinkedIn', email: 'email', web: 'web', internal: 'internal' };
@@ -320,6 +339,13 @@ function createMcp(fetchImpl, now) {
           const [code, status] = toolErrorCode(said);
           const e = new CanvaError(code, status, `${name}: ${said}`);
           e.said = said;
+          throw e;
+        }
+        const failure = failureOf(result);
+        if (failure) {
+          const [code, status] = failure.quota ? ['canva_credits', 402] : toolErrorCode(failure.said);
+          const e = new CanvaError(code, status, `${name}: ${failure.said}`);
+          e.said = failure.said;
           throw e;
         }
         return result;

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';
 import { openDb } from '../server/db.js';
 import { canvaConfig, CANVA_SCOPES, CANVA_MCP_URL } from '../server/canva.js';
-import { fitArgs, readResult, toolErrorCode, canvaBrief, TOOLS } from '../server/canvaStudio.js';
+import { fitArgs, readResult, toolErrorCode, canvaBrief, failureOf, TOOLS } from '../server/canvaStudio.js';
 
 // Generate with Canva (task 10.4c). Nothing here touches the real network: Canva's token endpoint, its MCP
 // server and its asset upload are a stubbed fetch. The tool schemas and answers below are MADE UP in a
@@ -332,6 +332,24 @@ test('a tool Canva does not offer this user → 501 without a call; the offered 
     s2.close();
     db2.close();
   }
+});
+
+// Seen with the owner's account on 2026-11-17: Canva answered a generation with isError:false but status "failed".
+const QUOTA = () => ({
+  content: [{ type: 'text', text: 'You have exceeded your credit quota.' }], isError: false,
+  structuredContent: { status: 'failed', failure: { code: 'quota_exceeded', message: 'You have exceeded your credit quota.' } },
+  _meta: { 'com.canva/aiCreditQuotaError': { code: 'credit_quota_exceeded', quota_usage: { resets_at: 1796083200, used_percentage: 100 } } },
+});
+
+test('a "failed" answer without isError is a failure: out of credits, with the reset date', async () => {
+  assert.deepEqual(failureOf(QUOTA()), { said: 'You have exceeded your credit quota. Your Canva AI credits reset on 2026-12-01.', quota: true });
+  assert.equal(failureOf({ content: [{ type: 'text', text: 'ok' }], structuredContent: { status: 'done' } }), null);
+  resetMcp();
+  M.call[TOOLS.image] = QUOTA;
+  const r = await gen({ campaignId: 'k1', assetId: 'a1', kind: 'image' });
+  assert.equal(r.status, 402);
+  assert.deepEqual([r.body.error, r.body.asset.status, r.body.asset.error], ['canva_credits', 'failed', 'canva_credits']);
+  assert.match(r.body.said, /reset on 2026-12-01/);
 });
 
 test('an ended MCP session is opened again once; Canva 401 → 409 and the connection says "connect again"; 429 → 429', async () => {
