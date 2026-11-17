@@ -1,3 +1,5 @@
+> 2026-11-17: free image backup is wired into the Canva panel but needs the owner to add CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_AI_TOKEN to .env (free Cloudflare account, Workers AI token) and restart; then run one real backup picture.
+
 > 2026-11-17: Canva generation is blocked by the owner's Canva AI credit quota (resets 2026-12-01); BrandPilot now says so (canva_credits). 16d (real Canva check of the two strategies) waits for credits.
 
 > Newest (2026-11-17): 16, 16b and 16c are DONE (first three entries of IMPLEMENTATION_STATUS.md). Exact next task (16d): with the owner signed in and Canva connected, run "Generate with Canva" for one hiring post and one Build Smarter carousel slide, check the two prompt strategies against real Canva results (logo never redrawn, text accurate and editable), and fix what the real answers show. Then: a PDF of a carousel for LinkedIn (slides download as separate images today).
