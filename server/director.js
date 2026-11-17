@@ -87,11 +87,35 @@ export function buildContext(db, companyId, { range = '28' } = {}) {
 // Grounded question (task 4.3). The prompt is built from `buildContext` and nothing else.
 // ---------------------------------------------------------------------------------------------
 
-export const ASK = { question: 1000, answer: 8000, support: 30 };
+export const ASK = { question: 1000, answer: 8000, support: 30, turns: 6, turnQ: 500, turnA: 1200, next: 3, nextLen: 140 };
 const LANG_NAMES = { en: 'English', ar: 'Arabic' };
 
-/** Pure: the system prompt and the single user message for one question. */
-export function buildPrompt(context, question, lang) {
+/** Pure: the earlier turns of one conversation as the browser sends them, cleaned — the last ASK.turns, each
+ *  { q, a } capped. They only tell the model what a follow-up question refers to; they are never a source. */
+export function cleanHistory(history) {
+  const one = (v, n) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, n) : '');
+  return (Array.isArray(history) ? history : [])
+    .map((t) => ({ q: one(t?.q, ASK.turnQ), a: one(t?.a, ASK.turnA) }))
+    .filter((t) => t.q)
+    .slice(-ASK.turns);
+}
+
+/** Pure: the follow-up questions the model proposes — strings, short, distinct, not the question just asked. */
+export function cleanNext(next, question = '') {
+  const seen = new Set([String(question).toLowerCase().trim()]);
+  const out = [];
+  for (const x of Array.isArray(next) ? next : []) {
+    const t = typeof x === 'string' ? x.replace(/\s+/g, ' ').trim().slice(0, ASK.nextLen) : '';
+    if (!t || seen.has(t.toLowerCase())) continue;
+    seen.add(t.toLowerCase());
+    out.push(t);
+    if (out.length === ASK.next) break;
+  }
+  return out;
+}
+
+/** Pure: the system prompt and the single user message for one question (with the conversation so far, if any). */
+export function buildPrompt(context, question, lang, history = []) {
   const system = [
     `You are the AI Marketing Director for one company. Answer the owner's marketing question in ${LANG_NAMES[lang] ?? 'English'}.`,
     'The JSON inside <context> is the ONLY source you may use: approved facts ("facts"), measured KPIs ("metrics.kpis"), audit items ("audit.items") and, when present, the per-channel comparison ("channels"). Do not use outside knowledge about this company, its market or its competitors, and do not invent numbers, facts or sources.',
@@ -100,12 +124,13 @@ export function buildPrompt(context, question, lang) {
     'Every claim must be backed by ids from the context, listed in "support": a fact by its "id", a metric by its KPI name, an audit item by its "id", a channel number as type "channel" with id "<channel>.<metric>" (for example "facebook.leads"). Never cite an id that is not in the context.',
     'A KPI whose value is null was not measured: say so, never treat it as zero. An audit item with basis "insufficient" is not a conclusion: it says which input is missing. When an item is marked "synthetic", say that the advice rests on demo data.',
     'If the context cannot answer the question, set "insufficient" to true and say in "answer" what is missing; do not guess.',
+    '<history> holds the earlier questions and answers of this conversation, oldest first. Use it ONLY to understand what the new question refers to (for example "and on LinkedIn?" or "why?"). Earlier answers are not a source: every claim still needs ids from <context>.',
     ...(lang === 'ar' ? ['Write the Arabic answer in plain Modern Standard Arabic and address the reader in the singular (أنت), never the plural (أنتم). Quote approved wording such as offers and calls to action as it is written in the context.'] : []),
-    'Reply with one JSON object and nothing else, no code fence: {"answer": string, "support": [{"type": "fact" | "metric" | "audit" | "channel", "id": string}], "insufficient": boolean}. "answer" is plain text for the owner: short, concrete, no ids in it.',
+    'Reply with one JSON object and nothing else, no code fence: {"answer": string, "support": [{"type": "fact" | "metric" | "audit" | "channel", "id": string}], "insufficient": boolean, "next": [up to 3 short follow-up questions the owner could ask next, in the same language, that <context> can answer]}. "answer" is plain text for the owner: short, concrete, no ids in it.',
   ].join('\n');
   // "<" is escaped so that company text cannot close the tag it is quoted in.
   const esc = (s) => s.replace(/</g, '\\u003c');
-  const user = `<context>\n${esc(JSON.stringify(context))}\n</context>\n\n<question>\n${esc(JSON.stringify(question))}\n</question>`;
+  const user = `<context>\n${esc(JSON.stringify(context))}\n</context>\n\n${history.length ? `<history>\n${esc(JSON.stringify(history))}\n</history>\n\n` : ''}<question>\n${esc(JSON.stringify(question))}\n</question>`;
   return { system, messages: [{ role: 'user', content: user }] };
 }
 
@@ -173,6 +198,23 @@ export function checkSupport(context, support) {
   return out;
 }
 
+/** Pure: removes "(id)" / "(id1, id2)" / "(id evidence)" left in the answer text when every token is an id of
+ *  this context (some models cite ids inline although the prompt asks them not to). Other brackets stay. */
+export function stripIds(answer, context) {
+  const ids = new Set([
+    ...context.facts.map((f) => f.id),
+    ...context.audit.items.map((i) => i.id),
+    ...Object.keys(context.metrics.kpis),
+    ...Object.entries(context.channels?.channels ?? {}).flatMap(([ch, row]) => Object.keys(row).map((k) => `${ch}.${k}`)),
+  ].map((x) => String(x).toLowerCase()));
+  return answer
+    .replace(/[ \t]*\(([^()\n]{1,200})\)/g, (all, inner) => {
+      const parts = inner.split(/[,;]\s*/).map((p) => p.trim().replace(/\s+evidence$/i, '').toLowerCase()).filter(Boolean);
+      return parts.length && parts.every((p) => ids.has(p)) ? '' : all;
+    })
+    .replace(/[ \t]+([.,;:])/g, '$1');
+}
+
 /** True when the context holds nothing an answer could rest on. */
 export function isEmptyContext(context) {
   return (
@@ -185,9 +227,10 @@ export function isEmptyContext(context) {
 /**
  * One grounded answer for one company. Returns null for an unknown company.
  * Throws `AiError` (not configured, provider failure, unusable reply).
- * → `{ answer, support: [{ type, id, text, synthetic }], insufficient, unsupported, synthetic, model, needs? }`
+ * `history` = earlier turns of the same conversation (cleanHistory): only for what a follow-up refers to.
+ * → `{ answer, support: [{ type, id, text, synthetic }], insufficient, unsupported, synthetic, model, next, needs? }`
  */
-export async function ask(db, ai, companyId, { question, lang = 'en', range = '28' }) {
+export async function ask(db, ai, companyId, { question, lang = 'en', range = '28', history = [] }) {
   const context = buildContext(db, companyId, { range });
   if (!context) return null;
   if (isEmptyContext(context)) {
@@ -197,7 +240,7 @@ export async function ask(db, ai, companyId, { question, lang = 'en', range = '2
     const needItems = context.audit.items.filter((i) => i.needs).map((i) => ({ id: i.id, text: i.needs }));
     return { answer: null, support: [], insufficient: true, unsupported: false, synthetic: context.synthetic, model: null, needs, needItems };
   }
-  const r = await ai.complete(buildPrompt(context, question, lang));
+  const r = await ai.complete(buildPrompt(context, question, lang, history));
   const text = r.text.trim();
   let reply = parseReply(text);
   if (!reply) {
@@ -205,7 +248,7 @@ export async function ask(db, ai, companyId, { question, lang = 'en', range = '2
     if (!text || r.truncated || /[{}]/.test(text)) throw new AiError('ai_failed');
     reply = { answer: text, support: [], insufficient: false };
   }
-  const answer = typeof reply.answer === 'string' ? reply.answer.trim().slice(0, ASK.answer) : '';
+  const answer = typeof reply.answer === 'string' ? stripIds(reply.answer.trim(), context).slice(0, ASK.answer) : '';
   if (!answer) throw new AiError('ai_failed');
   const insufficient = reply.insufficient === true;
   const support = checkSupport(context, reply.support);
@@ -217,5 +260,6 @@ export async function ask(db, ai, companyId, { question, lang = 'en', range = '2
     unsupported: !insufficient && support.length === 0,
     synthetic: context.synthetic,
     model: r.model,
+    next: cleanNext(reply.next, question),
   };
 }

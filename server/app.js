@@ -9,6 +9,7 @@ import { createMeta } from './meta.js';
 import { createGoogle } from './google.js';
 import { createCanva } from './canva.js';
 import { createImageAi } from './imageAi.js';
+import { seriesRoutes } from './series.js';
 import { campaignImageRoute } from './campaignImage.js';
 import { visualCopyRoute } from './visualCopy.js';
 import { createLimiter } from './auth.js';
@@ -46,8 +47,10 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   // 1 MB JSON everywhere except the company state blob, which may hold sources and imported data.
   const jsonDefault = express.json({ limit: '1mb' });
   const jsonState = express.json({ limit: '5mb' });
+  // Reference pictures for the series style read (series.js): up to 6 shrunk images.
+  const jsonImages = express.json({ limit: '4mb' });
   app.use((req, res, next) =>
-    (/^\/api\/companies\/[^/]+\/state\/?$/.test(req.path) ? jsonState : jsonDefault)(req, res, next),
+    (/^\/api\/companies\/[^/]+\/state\/?$/.test(req.path) ? jsonState : /^\/api\/companies\/[^/]+\/series\/style-read\/?$/.test(req.path) ? jsonImages : jsonDefault)(req, res, next),
   );
 
   const auth = createAuth(db, { limits: authLimits });
@@ -64,6 +67,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   const meta = createMeta(db, metaOptions);
   const google = createGoogle(db, googleOptions);
   const canva = createCanva(db, canvaOptions);
+  const imageLimiter = createLimiter(imageLimit); // one image allowance per user, shared by campaign and series pictures
   const canvaStudio = createCanvaStudio(db, canva, { ...(fetchUrl ? { fetchUrl } : {}), ...((canvaOptions && canvaOptions.studio) || {}) });
   const signedInOrBack = (name) => (req, res, next) => {
     const user = auth.currentUser(req);
@@ -80,7 +84,11 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   app.use('/api/companies/:id/integrations/canva', auth.requireAuth, companies.requireCompany, canva.company);
   app.use('/api/companies/:id/canva', auth.requireAuth, companies.requireCompany, canvaStudio.router);
   // A picture for one campaign post (campaignImage.js, image model in imageAi.js). Own allowance: images cost more than text.
-  app.post('/api/companies/:id/campaigns/:cid/assets/:aid/image', auth.requireAuth, companies.requireCompany, campaignImageRoute(db, imageAi, createLimiter(imageLimit)));
+  app.post('/api/companies/:id/campaigns/:cid/assets/:aid/image', auth.requireAuth, companies.requireCompany, campaignImageRoute(db, imageAi, imageLimiter));
+  // AI Content Series (series.js): style read from reference posts (vision model) and series illustrations (image model).
+  const seriesRouter = express.Router();
+  seriesRoutes(seriesRouter, { db, requireCompany: companies.requireCompany, ai, imageAi, askLimiter: createLimiter(visualLimit), imageLimiter });
+  app.use('/api/companies', auth.requireAuth, seriesRouter);
   // A short headline and supporting line for one post's artwork (visualCopy.js): a suggestion from the post's own wording.
   app.post('/api/companies/:id/campaigns/:cid/assets/:aid/visual-copy', auth.requireAuth, companies.requireCompany, visualCopyRoute(db, ai, createLimiter(visualLimit)));
   app.use('/api/companies', auth.requireAuth, companies.router);

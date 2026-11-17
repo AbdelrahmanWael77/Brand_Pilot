@@ -16,6 +16,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-11-17"
+    },
+    {
+      "id": "carousel-slide-select-caption",
+      "timestamp": "2026-11-17",
+      "error_message": "Uncaught TypeError in assetPreview: Cannot read properties of undefined (reading 'v') — clicking Slide 2/5 in Campaign Studio did nothing",
+      "file": "public/index.html",
+      "root_cause": "Carousel slides 2..n have no caption field (inAssets only adds a field when its text is non-empty; the caption is only on slide 1). assetPreview and assetFile read a.fields.caption.v unconditionally, so rendering a later slide threw and the old screen stayed — the click did set S.ui.aid but the view never re-drew.",
+      "fix": "Guard a.fields.caption in assetPreview (shows \"The post caption is on slide 1\") and in assetFile (caption.txt only when a caption exists).",
+      "tags": [
+        "studio",
+        "carousel",
+        "render",
+        "caption",
+        "silent-click"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-11-17"
     }
   ]
 }

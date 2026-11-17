@@ -198,10 +198,12 @@ export function createAi({
     return runners.get(o.id);
   };
 
-  /** One request, one answer. `messages` is an array of `{ role, content }`; `system` a string. */
-  async function complete({ system, messages, maxTokens = 16000, effort } = {}) {
-    if (!cur) throw new AiError('ai_not_configured');
-    return runner(cur)({ system, messages, maxTokens, effort });
+  /** One request, one answer. `messages` is an array of `{ role, content }`; `system` a string. `use` (an option id)
+   *  runs this one request on another configured option without changing the selection (series style read, task 17). */
+  async function complete({ system, messages, maxTokens = 16000, effort, use } = {}) {
+    const o = use ? opts.find((x) => x.id === use) : cur;
+    if (!o) throw new AiError('ai_not_configured');
+    return runner(o)({ system, messages, maxTokens, effort });
   }
 
   return {

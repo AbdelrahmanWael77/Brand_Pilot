@@ -8,7 +8,7 @@ import { createReports } from './reports.js';
 import { campaignQa } from './campaignQa.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
-import { buildContext, ask, ASK } from './director.js';
+import { buildContext, ask, ASK, cleanHistory } from './director.js';
 import { suggestThemes, cleanPosts } from './themes.js';
 import { draftBrief, cleanDraftRequest, polishPost, cleanPolishRequest } from './recs.js';
 import { extractFacts, cleanRequest } from './extract.js';
@@ -254,7 +254,7 @@ export function createCompanies(
     try {
       // The Analytics period the owner is looking at, for the channel comparison in the context (default 28 days).
       const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
-      res.json(await ask(db, ai, req.company.id, { question, lang, range }));
+      res.json(await ask(db, ai, req.company.id, { question, lang, range, history: cleanHistory(req.body.history) }));
     } catch (e) {
       if (!(e instanceof AiError)) throw e;
       // The provider's own message stays in the server log.

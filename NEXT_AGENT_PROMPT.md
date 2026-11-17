@@ -1,3 +1,13 @@
+> 2026-11-17: 18 DONE — AI Director as saved conversations with real follow-up memory (see first entry of IMPLEMENTATION_STATUS.md). NOT committed. Open owner questions: web/market research for series topics (OpenAI web search) — not started.
+
+> 2026-11-17: 17c — "What to post next" moved from Performance into AI Content Series home; "What works in your posts" box in each series. NOT committed. Pending owner decision: web/market research for topic ideas.
+
+> 2026-11-17: fixed Studio carousel slide selection (caption missing on slides 2..n crashed assetPreview/assetFile). NOT committed.
+
+> Newest (2026-11-17): 17a done (owner review): series panel removed from Performance; "Topic ideas" panel inside each series (recommended topic + topic list + AI ideas via POST /series/topics). NOT committed. Next task is still 17b (Open in Canva for a saved series post) — see IMPLEMENTATION_STATUS.md first entries.
+
+> Newest (2026-11-17): task 17 AI Content Series workspace — first vertical slice DONE and verified with real AI (vision style read, AI draft, FLUX creatives) on a DB copy; NOT committed. Read the first entry of IMPLEMENTATION_STATUS.md (files, data model, what is verified, what is not). Exact next task 17b: "Open in Canva" for a saved series post (upload illustration + official logo as Canva assets, editable text design via the Canva MCP tools listed by tools/list; honest message when not connected). Restart the app on :4000 first — it still runs the old server code.
+
 > 2026-11-17: free image backup (Cloudflare FLUX) is configured and verified for real. Canva still blocked by the owner's Canva AI credits until 2026-12-01.
 
 > 2026-11-17: Canva generation is blocked by the owner's Canva AI credit quota (resets 2026-12-01); BrandPilot now says so (canva_credits). 16d (real Canva check of the two strategies) waits for credits.
