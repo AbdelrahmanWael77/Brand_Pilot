@@ -117,3 +117,29 @@ test('POST /recs/draft without an AI key → 503', async () => {
   const r = await fetch(at + `/api/companies/${id}/recs/draft`, { method: 'POST', headers: { 'content-type': 'application/json', cookie: ck }, body: JSON.stringify(BODY) });
   assert.equal(r.status, 503);
 });
+
+test('16b: questions, support line, interaction CTA; company statements not copied from a fact are flagged', () => {
+  const r = checkDraft({ ...GOOD, support: 'Clarity before code.', cta: 'Share your answer', claims: ['MD-Labs offers mobile development.', 'MD-Labs is the best app studio in the region.'] }, BODY, [{ text: 'MD-Labs offers mobile development.' }]);
+  assert.equal(r.draft.support, 'Clarity before code.');
+  assert.equal(r.draft.cta, 'Share your answer');
+  assert.deepEqual(r.warnings, [{ code: 'company_claims', claims: ['MD-Labs is the best app studio in the region.'] }]);
+});
+
+test('16b: earlier captions go to the prompt as style examples only; carousel shape; unknown format → single', () => {
+  const req = cleanDraftRequest({ ...BODY, format: 'carousel', examples: ['Our last tip post. We won 5 awards.', 7, '  '] });
+  assert.equal(req.format, 'carousel');
+  assert.deepEqual(req.examples, ['Our last tip post. We won 5 awards.']);
+  const p = buildDraftPrompt({ company: 'MD Labs', ...req }, [{ cat: 'products', text: 'x' }]);
+  assert.match(p.system, /carousel/);
+  assert.match(p.system, /They are not facts/);
+  assert.ok(p.messages[0].content.includes('<examples>'));
+  assert.equal(cleanDraftRequest({ ...BODY, format: 'video' }).format, 'single');
+});
+
+test('16b: brand colours and the signature direction reach the prompt; bad colours are dropped', () => {
+  const req = cleanDraftRequest({ ...BODY, style: { colors: ['#084298', 'navy', '#38BDF8'], note: 'Deep navy, friendly 3D illustration.' } });
+  assert.deepEqual(req.style.colors, ['#084298', '#38BDF8']);
+  const p = buildDraftPrompt({ company: 'MD Labs', ...req }, [{ cat: 'products', text: 'x' }]);
+  assert.ok(p.messages[0].content.includes('#084298'));
+  assert.ok(p.messages[0].content.includes('friendly 3D illustration'));
+});

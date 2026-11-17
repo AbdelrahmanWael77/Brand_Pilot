@@ -1,3 +1,5 @@
+> Newest (2026-11-17): 16b Content library + New post from insight is DONE (first entry of IMPLEMENTATION_STATUS.md). Next: 16c — Creative Studio adapts to the content type (structured business posts vs. signature series posts), see the owner brief in that entry once written.
+
 > Newest (2026-11-17): task 16 "What to post next" is DONE on this branch (see the first entry of IMPLEMENTATION_STATUS.md). Files: public/recs.js, server/recs.js, server/companies.js (route recs/draft), public/index.html (nx* functions above V.analytics, mkBriefHTML, mkBuild camp.idea, CSS .nx-*), test/recs.test.js, test/recs-draft.test.js. Next for this feature (only if the owner asks): use the Analytics period for the comparison; show "content made from this series" results 7 days after publishing on the recommendation card; unit-test the series form logic. Otherwise continue the redesign pass below.
 
 # START HERE — BrandPilot redesign pass 4 (branch `redesign/new-product-identity`)

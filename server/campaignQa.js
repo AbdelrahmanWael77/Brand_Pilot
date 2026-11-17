@@ -37,10 +37,12 @@ export function computeCampaignQa(campaign, facts, auditItems) {
     'cta-used',
     'campaign',
     ids(copy.filter((a) => {
+      // A carousel's inner slide (field `slide`, task 16b) has neither a button nor a caption: the CTA is on the cover's caption and the closing slide.
+      if (a.fields.slide && !a.fields.cta && !a.fields.caption) return false;
       const k = a.lang === 'ar' ? b.ctaAr : b.ctaEn;
       return !k || !txt(a).includes(k);
     })),
-    'Every asset except the messaging guide contains the brief CTA of its language, word for word.',
+    'Every asset except the messaging guide (and an inner carousel slide) contains the brief CTA of its language, word for word.',
   );
 
   const ctas = approved('ctas');
@@ -75,7 +77,9 @@ export function computeCampaignQa(campaign, facts, auditItems) {
     'Arabic assets are in Arabic; English assets contain no Arabic.',
   );
 
-  chk('links', 'campaign', /^https?:\/\/[^\s/]+\.[^\s]+/.test(b.url) ? [] : ['brief'], 'The landing URL in the brief is a valid http(s) address.');
+  // An empty URL is a post with no link (an educational post from a recommendation, task 16b): nothing to check.
+  // A template that needs the link shows ⟦link⟧ instead and fails `placeholders`.
+  chk('links', 'campaign', !b.url || /^https?:\/\/[^\s/]+\.[^\s]+/.test(b.url) ? [] : ['brief'], 'The link in the brief is a valid http(s) address, or the content has no link.');
   chk('review', 'campaign', ids(as.filter((a) => a.flagged)), 'No asset is waiting for review after a campaign change.');
 
   // Is the recommendation this campaign came from one the server can stand behind right now?

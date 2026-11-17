@@ -209,13 +209,15 @@ export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpo
     if (asset) {
       for (const [k, f] of Object.entries(asset.fields)) {
         const v = /⟦[^⟧]*⟧/.test(f.v) ? '' : one(f.v, STUDIO_LIMITS.field);
-        if (v && k !== 'caption' && k !== 'body' && words.length < 4) words.push(`- ${k}: ${v}`);
+        if (v && k !== 'caption' && k !== 'body' && k !== 'slide' && words.length < 4) words.push(`- ${k}: ${v}`);
       }
     }
     if (!words.length) {
       for (const [k, v] of [['message', pick(b.messageEn, b.messageAr)], ['offer', pick(b.offerEn, b.offerAr)], ['call to action', pick(b.ctaEn, b.ctaAr)]]) if (v) words.push(`- ${k}: ${v}`);
     }
     if (words.length) lines.push('Use this wording as given; shorten it if needed, but add no other text:', ...words);
+    const slide = asset && asset.fields.slide ? one(asset.fields.slide.v, 10) : '';
+    if (/^\d+\/\d+$/.test(slide)) lines.push(`This is slide ${slide.replace('/', ' of ')} of one carousel: keep the same layout, colours and illustration style on every slide.`);
     else lines.push(`Headline: ${one(campaign.name, 200)}. Add no other text.`);
     if (colors.length) lines.push(`Brand colours: ${colors.join(', ')}.`);
     // Seen with the owner's account on 2026-11-16: with the logo attached as an asset, every proposal still carried a redrawn, wrong logo. So Canva is asked

@@ -223,3 +223,14 @@ test("claims: the brief's own offer wording is not a claim, the same wording els
   assert.deepEqual(by(run(mk(`${offer}. Save 35% more. ${EN.cta}`), facts)).claims.affected, ['en1']);
   assert.deepEqual(by(run(mk(`${offer}, guaranteed. ${EN.cta}`), facts)).claims.affected, ['en1']);
 });
+
+test('16b: a carousel slide with no button, caption or body is not asked for the CTA; an empty link passes, a bad one fails', () => {
+  const slide = asset('s2', 'en', { fields: { headline: f('Who is it for?'), kicker: f('Question 1 / 3'), slide: f('2/5') } });
+  const r = by(run(campaign({ assets: [asset('en1', 'en'), asset('ar1', 'ar'), slide] })));
+  assert.equal(r['cta-used'].pass, true);
+  // Without the slide marker, the same headline-only asset still fails.
+  const plain = asset('p2', 'en', { fields: { headline: f('Who is it for?') } });
+  assert.deepEqual(by(run(campaign({ assets: [asset('en1', 'en'), asset('ar1', 'ar'), plain] })))['cta-used'].affected, ['p2']);
+  assert.equal(by(run(campaign({ brief: { url: '' } }))).links.pass, true);
+  assert.equal(by(run(campaign({ brief: { url: 'not a link' } }))).links.pass, false);
+});
