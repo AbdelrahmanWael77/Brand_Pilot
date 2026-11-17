@@ -10,6 +10,7 @@ import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
 import { buildContext, ask, ASK } from './director.js';
 import { suggestThemes, cleanPosts } from './themes.js';
+import { draftBrief, cleanDraftRequest } from './recs.js';
 import { extractFacts, cleanRequest } from './extract.js';
 import { websitePages } from './website.js';
 import { websiteBrand } from './brand.js';
@@ -278,6 +279,24 @@ export function createCompanies(
     } catch (e) {
       if (!(e instanceof AiError)) throw e;
       console.error(`suggest-themes: ${e.code}`, e.cause?.message ?? '');
+      res.status(e.status).json({ error: e.code });
+    }
+  });
+
+  // AI draft of a creative brief for one recommended post (recs.js, task 16): headline, points, caption, visual
+  // direction from approved facts only. Nothing is stored: the user edits the draft in the brief. Shares the AI allowance.
+  router.post('/:id/recs/draft', requireCompany, async (req, res) => {
+    const request = cleanDraftRequest(req.body);
+    if (request.error) return res.status(400).json({ error: request.error });
+    const wait = askLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    askLimiter.hit(req.user.id);
+    if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
+    try {
+      res.json(await draftBrief(db, ai, req.company.id, req.company.name, request));
+    } catch (e) {
+      if (!(e instanceof AiError)) throw e;
+      console.error(`recs/draft: ${e.code}`, e.cause?.message ?? '');
       res.status(e.status).json({ error: e.code });
     }
   });
