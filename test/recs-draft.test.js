@@ -143,3 +143,32 @@ test('16b: brand colours and the signature direction reach the prompt; bad colou
   assert.ok(p.messages[0].content.includes('#084298'));
   assert.ok(p.messages[0].content.includes('friendly 3D illustration'));
 });
+
+test('16c polish: fixed facts stay out of the rewrite; invented numbers and dropped facts are flagged', async () => {
+  const { cleanPolishRequest, checkPolish, buildPolishPrompt } = await import('../server/recs.js');
+  assert.deepEqual(cleanPolishRequest({ kind: 'nope', fields: { a: 'b' } }), { error: 'invalid_kind' });
+  assert.deepEqual(cleanPolishRequest({ kind: 'hiring', fields: {} }), { error: 'invalid_fields' });
+  const req = cleanPolishRequest({ kind: 'hiring', fields: { role: 'Senior Flutter Developer', loc: 'Cairo', about: 'build apps', req: '3 years Flutter\nDart' }, edit: ['about', 'req', 'role-not-a-key'] });
+  assert.deepEqual(req.edit, ['about', 'req']);
+  const p = buildPolishPrompt({ company: 'MD Labs', ...req });
+  assert.match(p.system, /never change/);
+  assert.ok(p.messages[0].content.includes('"fixed":{"role":"Senior Flutter Developer","loc":"Cairo"}'));
+  const ok = checkPolish({ editable: { about: 'Build polished mobile apps.', req: '3+ years of Flutter\nStrong Dart', role: 'CEO' }, caption: 'MD Labs is hiring a Senior Flutter Developer in Cairo. Salary 5000.' }, req);
+  assert.deepEqual(Object.keys(ok.fields), ['about', 'req'], 'a fixed field is never taken from the reply');
+  assert.deepEqual(ok.warnings, [{ code: 'unsupported_numbers', numbers: ['5000'] }]);
+  const miss = checkPolish({ editable: {}, caption: 'We are hiring a developer.' }, req);
+  assert.deepEqual(miss.warnings, [{ code: 'fixed_missing', fields: ['role', 'loc'] }]);
+  assert.equal(checkPolish({ editable: {} }, req), null);
+});
+
+test('16c POST /content/polish: grounded rewrite, isolation, validation', async () => {
+  next = () => reply({ editable: { about: 'Build polished apps.' }, caption: 'MD Labs is hiring a Senior Flutter Developer in Cairo.' });
+  const body = { kind: 'hiring', lang: 'en', fields: { role: 'Senior Flutter Developer', loc: 'Cairo', about: 'build apps' }, edit: ['about'] };
+  const r = await call('POST', `/api/companies/${md}/content/polish`, alice, body);
+  assert.equal(r.status, 200);
+  const b = await r.json();
+  assert.equal(b.fields.about, 'Build polished apps.');
+  assert.deepEqual(b.warnings, []);
+  assert.equal((await call('POST', `/api/companies/${bobCo}/content/polish`, alice, body)).status, 404);
+  assert.equal((await call('POST', `/api/companies/${md}/content/polish`, alice, { kind: 'x' })).status, 400);
+});

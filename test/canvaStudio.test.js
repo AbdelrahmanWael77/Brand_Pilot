@@ -390,3 +390,24 @@ test("readResult: Canva's real answers of 2026-11-15 — design_summary gives th
   assert.deepEqual(prop.candidates, [{ id: 'C1', thumb: 'https://design.canva.ai/thumb1.png' }, { id: 'C2', thumb: null }]);
   assert.deepEqual(prop.images, []);
 });
+
+test('16c: a business post gets a structured, editable brief; a series post an editorial, illustrated one in its signature style', () => {
+  const camp = { name: 'Senior Flutter Developer', brief: { objective: 'Hiring post', channels: ['linkedin'] } };
+  const asset = { channel: 'linkedin', lang: 'en', fields: { headline: { v: 'Senior Flutter Developer' }, kicker: { v: "We're hiring" }, sub: { v: 'Build apps people love' }, details: { v: 'Cairo · Full-time' }, cta: { v: 'Apply now' } } };
+  const hire = canvaBrief({ company: 'MD Labs', campaign: camp, asset, kind: 'design', lang: 'en', colors: ['#084298'], purpose: 'hiring' });
+  assert.match(hire, /recruitment post design/);
+  assert.match(hire, /structured, editable layout/);
+  assert.match(hire, /- details: Cairo · Full-time/);
+  assert.match(hire, /- cta: Apply now/, 'all five pieces of wording are kept for a business post');
+  assert.ok(!/illustration that explains the topic/.test(hire));
+  const idea = { series: 'Build Smarter', topic: '3 questions to ask before building your mobile app', visual: 'Deep #084298 background, friendly 3D smartphone illustration.', fmt: 'carousel' };
+  const slide = { channel: 'linkedin', lang: 'en', fields: { headline: { v: 'Who will use the app?' }, kicker: { v: 'Question 1 / 3' }, slide: { v: '2/5' } } };
+  const ser = canvaBrief({ company: 'MD Labs', campaign: camp, asset: slide, kind: 'design', lang: 'en', colors: ['#084298'], purpose: 'tip', idea });
+  assert.match(ser, /editorial LinkedIn post design for the content series "Build Smarter"/);
+  assert.match(ser, /friendly 3D smartphone illustration/);
+  assert.match(ser, /slide 2 of 5 of one carousel/);
+  assert.ok(!ser.includes('- slide:'), 'the slide marker is not design wording');
+  assert.match(ser, /Do not draw, write, invent or imitate any logo/);
+  const pic = canvaBrief({ company: 'MD Labs', campaign: camp, asset: slide, kind: 'image', lang: 'en', colors: [], idea });
+  assert.match(pic, /Visual direction \(approved by the company\): Deep #084298/);
+});

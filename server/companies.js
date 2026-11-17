@@ -10,7 +10,7 @@ import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
 import { buildContext, ask, ASK } from './director.js';
 import { suggestThemes, cleanPosts } from './themes.js';
-import { draftBrief, cleanDraftRequest } from './recs.js';
+import { draftBrief, cleanDraftRequest, polishPost, cleanPolishRequest } from './recs.js';
 import { extractFacts, cleanRequest } from './extract.js';
 import { websitePages } from './website.js';
 import { websiteBrand } from './brand.js';
@@ -297,6 +297,24 @@ export function createCompanies(
     } catch (e) {
       if (!(e instanceof AiError)) throw e;
       console.error(`recs/draft: ${e.code}`, e.cause?.message ?? '');
+      res.status(e.status).json({ error: e.code });
+    }
+  });
+
+  // AI rewording of a business post (recs.js polishPost, task 16c): only the fields the browser marks editable are
+  // reworded; the user's facts stay as typed. Nothing is stored. Shares the AI allowance.
+  router.post('/:id/content/polish', requireCompany, async (req, res) => {
+    const request = cleanPolishRequest(req.body);
+    if (request.error) return res.status(400).json({ error: request.error });
+    const wait = askLimiter.retryAfter(req.user.id);
+    if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
+    askLimiter.hit(req.user.id);
+    if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
+    try {
+      res.json(await polishPost(ai, req.company.name, request));
+    } catch (e) {
+      if (!(e instanceof AiError)) throw e;
+      console.error(`content/polish: ${e.code}`, e.cause?.message ?? '');
       res.status(e.status).json({ error: e.code });
     }
   });

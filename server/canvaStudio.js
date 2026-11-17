@@ -179,7 +179,7 @@ const hexes = (list) => (Array.isArray(list) ? list : []).map((x) => (typeof x =
  * wording (both from the validated campaign mirror), approved colours, the user's extra direction.
  * An image is asked without any text or logo; a design is asked to use the wording as given and to add no claim.
  */
-export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpose, note }) {
+export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpose, note, idea = null }) {
   const ar = lang === 'ar';
   const b = campaign.brief || {};
   const pick = (en, arv) => one((ar ? arv : en) || en || arv, STUDIO_LIMITS.field);
@@ -195,11 +195,25 @@ export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpo
     add('Subject', b.concept || pick(b.messageEn, b.messageAr) || campaign.name);
     add('Audience', pick(b.audienceEn, b.audienceAr));
     add('Mood', b.tone);
+    // 16c: a series post's picture follows its approved signature style and visual concept.
+    if (idea && idea.visual) add('Visual direction (approved by the company)', idea.visual);
     if (colors.length) lines.push(`Colour palette to lean on: ${colors.join(', ')}.`);
     lines.push('Style: clean and professional, with calm empty space where a headline can be placed later.');
     lines.push('The picture must contain no text, letters, numbers, prices, logos, brand marks or watermarks of any kind.');
   } else {
-    lines.push(`A ${where ? where + ' ' : ''}social media post design for the company "${one(company, 200)}".`);
+    // 16c: one strategy per kind of content. A series post is editorial: an expressive illustration in the company's
+    // approved signature style with little, controlled text. A business post (hiring, offer, event…) is structured:
+    // every fact its own editable text element, in a clear hierarchy, nothing competing with the words.
+    if (idea) {
+      lines.push(`An editorial ${where ? where + ' ' : ''}post design for the content series "${one(idea.series, 80)}" of the company "${one(company, 200)}".`);
+      add('Topic', idea.topic);
+      if (idea.visual) add('Visual direction (the company\'s approved signature style)', idea.visual);
+      lines.push('Make it expressive and recognisable: one strong central illustration that explains the topic (for example a polished, friendly 3D scene), with controlled typography — a short, large headline and at most three short points. Generous spacing. Keep every word below exactly as written and editable.');
+    } else {
+      lines.push(`A ${where ? where + ' ' : ''}${PURPOSE_NAME[purpose] || 'social media'} post design for the company "${one(company, 200)}".`);
+      lines.push('Make it a structured, editable layout: each piece of wording below as its own text element, aligned on a clear grid in this hierarchy — kicker, headline, details, call to action. Use simple brand shapes or colour blocks; no illustration or photo that competes with the words. Every fact must appear exactly as written.');
+      if (purpose === 'hiring') lines.push('This is a recruitment post: the job title is the headline, location and employment type are clearly readable, and the call to action says how to apply.');
+    }
     lines.push(`Language of all text: ${ar ? 'Arabic (right to left)' : 'English'}.`);
     add('Purpose', purpose || b.objective);
     add('Audience', pick(b.audienceEn, b.audienceAr));
@@ -209,7 +223,7 @@ export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpo
     if (asset) {
       for (const [k, f] of Object.entries(asset.fields)) {
         const v = /⟦[^⟧]*⟧/.test(f.v) ? '' : one(f.v, STUDIO_LIMITS.field);
-        if (v && k !== 'caption' && k !== 'body' && k !== 'slide' && words.length < 4) words.push(`- ${k}: ${v}`);
+        if (v && k !== 'caption' && k !== 'body' && k !== 'slide' && words.length < (idea ? 4 : 6)) words.push(`- ${k}: ${v}`);
       }
     }
     if (!words.length) {
@@ -229,6 +243,8 @@ export function canvaBrief({ company, campaign, asset, kind, lang, colors, purpo
   if (extra) lines.push(`Extra direction from the user (style only): ${extra}`);
   return lines.join('\n');
 }
+
+const PURPOSE_NAME = { hiring: 'recruitment', announce: 'company announcement', launch: 'product launch', promo: 'promotional offer', event: 'event', intro: 'company introduction', tip: 'educational' };
 
 /* ---------- MCP client (Streamable HTTP) ---------- */
 
@@ -437,7 +453,9 @@ CREATE TABLE IF NOT EXISTS canva_logos (
     const m = media && typeof media.data === 'string' ? media.data.match(/^data:(image\/(?:png|jpeg));base64,([A-Za-z0-9+/=]+)$/) : null;
     const bytes = m ? Buffer.from(m[2], 'base64') : null;
     const camps = Array.isArray(st && st.campaigns) ? st.campaigns : [];
-    return { colors: hexes(brand.colors), logo: bytes && bytes.length <= STUDIO_LIMITS.logoBytes ? { bytes, type: m[1] } : null, kindOf: (id) => one((camps.find((c) => isObj(c) && c.id === id) || {}).kind, 40).replace(/[^\w -]/g, '') };
+    return { colors: hexes(brand.colors), logo: bytes && bytes.length <= STUDIO_LIMITS.logoBytes ? { bytes, type: m[1] } : null, kindOf: (id) => one((camps.find((c) => isObj(c) && c.id === id) || {}).kind, 40).replace(/[^\w -]/g, ''),
+      // 16c: the series idea of a campaign made from a recommendation or a series (Create → New post from insight).
+      ideaOf: (id) => { const k = camps.find((c) => isObj(c) && c.id === id); const i = k && isObj(k.idea) ? k.idea : null; return i && typeof i.series === 'string' ? { series: one(i.series, 80), topic: one(i.topic, 200), visual: one(i.visual, STUDIO_LIMITS.note), fmt: i.fmt === 'carousel' ? 'carousel' : 'single' } : null; } };
   }
   /** The company's approved logo as an asset in this user's Canva (REST asset upload, once per logo). Null when it cannot be done. */
   async function logoAsset(req, logo, tok) {
@@ -536,7 +554,7 @@ CREATE TABLE IF NOT EXISTS canva_logos (
           }
         }
       }
-      const brief = canvaBrief({ company: req.company.name, campaign, asset, kind: b.kind, lang, colors: brand.colors, purpose: brand.kindOf(campaign.id), note });
+      const brief = canvaBrief({ company: req.company.name, campaign, asset, kind: b.kind, lang, colors: brand.colors, purpose: brand.kindOf(campaign.id), note, idea: brand.ideaOf(campaign.id) });
       const id = crypto.randomUUID();
       q.add.run(id, req.company.id, req.user.id, campaign.id, asset ? asset.id : null, b.kind, lang, 'working', note, brief, logo, now(), now());
       row = q.get.get(id, req.company.id, req.user.id);
