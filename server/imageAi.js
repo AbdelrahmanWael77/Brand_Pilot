@@ -67,7 +67,9 @@ export function createImageAi({
     const msg = errs.map((x) => `${x.code ?? ''} ${x.message ?? ''}`).join('; ') || data?.raw || '';
     const cause = new Error(`Cloudflare HTTP ${res.status}: ${msg}`.slice(0, 300));
     if (res.status === 401 || res.status === 403) throw new AiError('ai_auth_failed', cause);
-    if (res.status === 429 || /neuron|quota|daily (free )?(allocation|limit)/i.test(msg)) throw new AiError('ai_rate_limited', cause);
+    // The free plan's DAILY allowance (Cloudflare 4006 / 'daily free allocation of 10,000 neurons') is not a short rate limit: say so.
+    if (/neuron|daily (free )?(allocation|limit)|4006/i.test(msg)) throw new AiError('images_daily', cause);
+    if (res.status === 429 || /quota/i.test(msg)) throw new AiError('ai_rate_limited', cause);
     if (/nsfw|unsafe|safety|content (policy|filter)|flagged/i.test(msg)) throw new AiError('ai_refused', cause);
     if (!res.ok || data?.success === false) throw new AiError('ai_failed', cause);
     const b64 = data?.result?.image ?? data?.image;

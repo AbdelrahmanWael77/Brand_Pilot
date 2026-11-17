@@ -169,3 +169,86 @@ test('route topics: members only; ideas from the model; unusable reply is an hon
   aiReply = { topics: [] };
   assert.equal((await call('POST', `/api/companies/${co}/series/topics`, alice, body)).status, 502);
 });
+
+test('series subject: facts that name the series lead, the kind is passed, and the prompts say the series is ABOUT it', async () => {
+  const { subjectFacts, seriesFacts, SERIES_KINDS, buildDraftPrompt, cleanDraftRequest } = await import('../server/recs.js');
+  const { buildTopicsPrompt, cleanTopics, checkUnderstand, buildUnderstandPrompt } = await import('../server/series.js');
+  const facts = [
+    { id: 'p1', cat: 'products', text: 'MD-Labs offers IoT software platforms.' },
+    { id: 'g1', cat: 'overview', text: 'MD-Labs offers an internship program called MD-Geeks.' },
+    { id: 'g2', cat: 'ctas', text: 'Find More about MD-Geeks Program' },
+    { id: 'b1', cat: 'brandid', text: 'MD Geeks logo colours' },
+  ];
+  assert.deepEqual(subjectFacts(facts, 'MD Geeks').map((f) => f.id), ['g1', 'g2']); // spaces / hyphens / case ignored; brand ids never
+  assert.deepEqual(subjectFacts(facts, 'MD'), []); // too short to mean anything
+  const sf = seriesFacts(facts, { name: 'MD Geeks', sources: ['other-source'] });
+  assert.deepEqual(sf.facts.slice(0, 2).map((f) => f.id), ['g1', 'g2']); // subject first, even outside the chosen sources
+  const t = cleanTopics({ series: { name: 'MD Geeks', purpose: 'for our MD geeks', kind: 'program' } });
+  assert.equal(t.series.kind, 'program');
+  assert.equal(cleanTopics({ series: { name: 'X', kind: 'bogus' } }).series.kind, '');
+  const p = buildTopicsPrompt({ company: 'MD Labs', ...t }, sf.facts, sf.subject);
+  assert.match(p.system, /IS ABOUT/);
+  assert.match(p.system, /never general industry advice/);
+  const brief = JSON.parse(p.messages[0].content.match(/<brief>\n([\s\S]*?)\n<\/brief>/)[1]);
+  assert.deepEqual(brief.about_the_series, [facts[1].text, facts[2].text]);
+  assert.equal(brief.series_kind, SERIES_KINDS.program);
+  const dr = cleanDraftRequest({ series: { name: 'MD Geeks', kind: 'program' }, topic: 'What MD-Geeks interns do' });
+  const dp = buildDraftPrompt({ company: 'MD Labs', ...dr }, sf.facts, sf.subject);
+  assert.match(dp.messages[0].content, /about_the_series/);
+  assert.match(dp.system, /IS ABOUT/);
+  // understand: a known kind, offered fact ids only
+  assert.match(buildUnderstandPrompt({ company: 'MD Labs', ...t }, sf.facts, sf.subject).system, /"program" = /);
+  assert.deepEqual(checkUnderstand({ kind: 'program', about: 'MD-Geeks, the internship program', purpose: 'Attract interns', audience: 'Students', facts: ['g1', 'zz', 'g1'], missing: '' }, sf.facts).facts, ['g1']);
+  assert.equal(checkUnderstand({ kind: 'nope', about: 'a', purpose: 'b' }, sf.facts), null);
+  assert.equal(checkUnderstand({ kind: 'edu', about: '', purpose: 'b' }, sf.facts), null);
+});
+
+test('route understand: members only; proposal from the model with the facts that name the series', async () => {
+  const st = { sources: [{ id: 's1', title: 'site', kind: 'document', text: 'x', date: '2026-11-17', demo: false }], findings: [{ id: 'g1', cat: 'overview', text: 'MD-Labs offers an internship program called MD-Geeks.', type: 'fact', status: 'approved', src: 's1', ev: 'Quote: internship program called MD-Geeks', needs: false, date: '2026-11-17' }], data: {}, imports: [] };
+  assert.equal((await call('PUT', `/api/companies/${co}/state`, alice, { state: st })).status, 200);
+  const body = { series: { name: 'MD Geeks', purpose: 'for our MD geeks' } };
+  assert.equal((await call('POST', `/api/companies/${co}/series/understand`, bob, body)).status, 404);
+  aiReply = { kind: 'program', about: 'MD-Geeks, the company internship program', purpose: 'Show students what MD-Geeks offers', audience: 'Students and fresh graduates', facts: ['g1'], missing: 'Add the program page for details.' };
+  const r = await call('POST', `/api/companies/${co}/series/understand`, alice, body);
+  assert.equal(r.status, 200);
+  const j = await r.json();
+  assert.equal(j.proposal.kind, 'program');
+  assert.deepEqual(j.subject.map((f) => f.id), ['g1']);
+  assert.match(aiCalls.at(-1).messages[0].content, /<subject>[\s\S]*MD-Geeks/);
+  aiReply = { kind: 'weird' };
+  assert.equal((await call('POST', `/api/companies/${co}/series/understand`, alice, body)).status, 502);
+});
+
+test('text check: honest "not seen", vision fallback, and a picture with writing is made once more', async () => {
+  const { findText, buildTextCheckPrompt } = await import('../server/series.js');
+  const { AiError } = await import('../server/ai.js');
+  const im = { url: PIC, type: 'image/jpeg', data: PIC.split(',')[1] };
+  assert.equal(buildTextCheckPrompt('openai', im).messages[0].content[1].image_url.url, PIC);
+  assert.deepEqual(buildTextCheckPrompt('anthropic', im).messages[0].content[1].source, { type: 'base64', media_type: 'image/jpeg', data: im.data });
+  const mk = (replies) => { const calls = []; return { calls, configured: true, provider: 'openrouter', selected: 'openrouter:free', options: () => [{ id: 'openrouter:free', provider: 'openrouter' }, { id: 'openai:vision', provider: 'openai' }],
+    complete: async (req) => { calls.push(req.use); const x = replies[req.use]; if (x instanceof Error) throw x; return { text: JSON.stringify(x), model: req.use, truncated: false }; } }; };
+  // the text-only model refuses images → the vision model answers
+  const a1 = mk({ 'openrouter:free': new AiError('ai_failed'), 'openai:vision': { seen: true, text: true } });
+  assert.deepEqual(await findText(a1, PIC), { checked: true, text: true, model: 'openai:vision' });
+  // a model that says it could not see is never trusted
+  const a2 = mk({ 'openrouter:free': { seen: false }, 'openai:vision': { seen: false } });
+  assert.equal((await findText(a2, PIC)).checked, false);
+  assert.equal((await findText(a2, 'https://x/y.png')).checked, false);
+
+  // route: first picture has writing → a second one is made; the clean one is returned
+  const db2 = openDb(':memory:'); let n = 0; const prompts = [];
+  const img2 = { configured: true, model: 'flux', generate: async ({ prompt }) => { prompts.push(prompt); n++; return { data: PIC, model: 'flux' }; } };
+  let seq = [{ seen: true, text: true }, { seen: true, text: false }];
+  const ai2 = { configured: true, provider: 'openai', selected: 'openai:vision', options: () => [{ id: 'openai:vision', provider: 'openai' }], complete: async () => ({ text: JSON.stringify(seq.shift() || { seen: true, text: false }), model: 'v', truncated: false }) };
+  const s2 = createApp({ db: db2, ai: ai2, imageAi: img2 }).listen(0); await new Promise((r) => s2.once('listening', r));
+  const b2 = `http://127.0.0.1:${s2.address().port}`;
+  const ck = (await fetch(b2 + '/api/auth/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'tc@example.com', password: 'correct horse' }) })).headers.getSetCookie()[0].split(';')[0];
+  const cid = (await (await fetch(b2 + '/api/companies', { method: 'POST', headers: { 'content-type': 'application/json', cookie: ck }, body: JSON.stringify({ name: 'T' }) })).json()).company.id;
+  const r = await fetch(`${b2}/api/companies/${cid}/series/illustration`, { method: 'POST', headers: { 'content-type': 'application/json', cookie: ck }, body: JSON.stringify({ concept: 'A team at work', style: { bg: ['#0B1D45'] } }) });
+  const j = await r.json();
+  assert.equal(n, 2);
+  assert.deepEqual(j.textCheck, { checked: true, text: false, retried: 1 });
+  assert.equal(j.prompt, prompts[1]);
+  assert.notEqual(prompts[0], prompts[1]); // another variation
+  s2.close(); db2.close();
+});

@@ -31,7 +31,7 @@ export function parseTrustProxy(v) {
  * production uses the defaults (`ai` is built from ANTHROPIC_API_KEY / AI_MODEL). `meta` and `google` take
  * { config, fetch, syncLimit, now } for createMeta / createGoogle (tests pass a stubbed network).
  */
-export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), imageAi = createImageAi(), imageLimit = { max: 10, windowMs: 10 * 60_000 }, visualLimit = { max: 30, windowMs: 10 * 60_000 }, askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, canva: canvaOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
+export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), imageAi = createImageAi(), imageLimit = { max: 20, windowMs: 10 * 60_000 }, visualLimit = { max: 30, windowMs: 10 * 60_000 }, askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, canva: canvaOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
   const app = express();
   app.disable('x-powered-by');
   // Behind a reverse proxy the client's address is in X-Forwarded-For; trusted only when the owner says so
@@ -87,7 +87,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   app.post('/api/companies/:id/campaigns/:cid/assets/:aid/image', auth.requireAuth, companies.requireCompany, campaignImageRoute(db, imageAi, imageLimiter));
   // AI Content Series (series.js): style read from reference posts (vision model) and series illustrations (image model).
   const seriesRouter = express.Router();
-  seriesRoutes(seriesRouter, { db, requireCompany: companies.requireCompany, ai, imageAi, askLimiter: createLimiter(visualLimit), imageLimiter });
+  seriesRoutes(seriesRouter, { db, requireCompany: companies.requireCompany, ai, imageAi, askLimiter: createLimiter(visualLimit), imageLimiter, textCheck: process.env.BRANDPILOT_IMAGE_TEXT_CHECK !== 'off' });
   app.use('/api/companies', auth.requireAuth, seriesRouter);
   // A short headline and supporting line for one post's artwork (visualCopy.js): a suggestion from the post's own wording.
   app.post('/api/companies/:id/campaigns/:cid/assets/:aid/visual-copy', auth.requireAuth, companies.requireCompany, visualCopyRoute(db, ai, createLimiter(visualLimit)));

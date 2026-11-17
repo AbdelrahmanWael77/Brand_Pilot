@@ -56,7 +56,7 @@ test('generate: errors map to AiError codes and never carry the token', async ()
   const cases = [
     [() => reply(401, { success: false, errors: [{ code: 10000, message: 'Authentication error' }] }), 'ai_auth_failed'],
     [() => reply(429, { success: false, errors: [{ code: 3036, message: 'too many requests' }] }), 'ai_rate_limited'],
-    [() => reply(400, { success: false, errors: [{ code: 3040, message: 'You have used up your daily free allocation of 10,000 neurons' }] }), 'ai_rate_limited'],
+    [() => reply(400, { success: false, errors: [{ code: 3040, message: 'You have used up your daily free allocation of 10,000 neurons' }] }), 'images_daily'],
     [() => reply(400, { success: false, errors: [{ code: 3030, message: 'NSFW content detected' }] }), 'ai_refused'],
     [() => reply(500, 'upstream exploded'), 'ai_failed'],
     [() => reply(200, { result: {}, success: true }), 'ai_failed'], // no image

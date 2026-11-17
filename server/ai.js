@@ -43,6 +43,7 @@ export const AI_ERRORS = {
   ai_not_configured: 503,
   ai_auth_failed: 502,
   ai_rate_limited: 429,
+  images_daily: 429,
   ai_timeout: 504,
   ai_refused: 422,
   ai_failed: 502,

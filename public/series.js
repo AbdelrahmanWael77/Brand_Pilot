@@ -40,7 +40,7 @@
   const refsOf = (c, sid) => libOf(c).filter((x) => x.sid === sid && x.img && c.media.some((m) => m.id === x.img));
   const curSeries = (c) => serOf(c).find((s) => s.id === S.ui.sx) || null;
   const media = (c, id) => c.media.find((m) => m.id === id);
-  const errMsg = (e, what) => e && e.status === 429 ? L('Too many requests — try again in a few minutes.', 'طلبات كثيرة — حاول بعد دقائق.')
+  const errMsg = (e, what) => e && e.code === 'images_daily' ? L('The free daily picture allowance of the image service (Cloudflare) is used up. It resets every day at 00:00 UTC.', 'نفدت حصة الصور المجانية اليومية لخدمة الصور (Cloudflare). تتجدد يومياً عند 00:00 بتوقيت UTC.') : e && e.status === 429 ? L('Too many requests — try again in a few minutes.', 'طلبات كثيرة — حاول بعد دقائق.')
     : e && e.status === 503 ? (what === 'img' ? L('The image model is not set up on this server (CLOUDFLARE_ACCOUNT_ID / token). You can upload your own illustration instead.', 'نموذج الصور غير مُعدّ على هذا الخادم. يمكنك رفع رسمك الخاص بدلاً منه.') : L('The AI is not set up on this server.', 'الذكاء الاصطناعي غير مُعدّ على هذا الخادم.'))
     : e && e.status === 422 ? L('The selected AI model could not see the pictures. Choose a vision-capable model in Settings, or use the pixel measurement.', 'لم يستطع نموذج الذكاء الاصطناعي المختار رؤية الصور. اختر نموذجاً يرى الصور من الإعدادات أو استخدم قياس البكسلات.')
     : what === 'img' ? L('The illustration could not be made. Try again.', 'تعذّر إنشاء الرسم. حاول مجدداً.') : L('That did not work. Try again.', 'لم ينجح ذلك. حاول مجدداً.');
@@ -278,56 +278,83 @@
     const cards = ss.map((s) => {
       const st = fixStyle(styleOf(c, s)), mine = all.filter((k) => k.sid === s.id), refs = refsOf(c, s.id), rec = R_.recs.find((r) => r.sid === s.id), d = draftsOf(c)[s.id];
       const pics = mine.slice(-3).reverse().map((k) => cvHTML('h-' + k.id, specOf(c, s, k, { ill: k.ill, layout: k.layout, made: k.made }, 0, k.st), 0.3, k.copy.l1)).concat(refs.slice(-3).map((x) => `<img src="${media(c, x.img).data}" alt="${esc(L('Reference post', 'منشور مرجعي'))}" loading="lazy">`)).slice(0, 3);
-      const topic = (rec && rec.topic) || String(s.ideas || '').split(/\r?\n/).map((x) => x.trim()).filter(Boolean)[0] || '';
       return `<article class="sx-card" style="--sx-a:${st.bg[0]};--sx-b:${st.bg[1]};--sx-c:${st.accent}">
         <button class="sx-card-art" data-a="sxOpen" data-v="${esc(s.id)}" aria-label="${esc(L('Open series', 'افتح السلسلة') + ' ' + s.name)}">${pics.length ? `<span class="sx-fan n${pics.length}">${pics.join('')}</span>` : `<span class="sx-card-empty">${ic('upload', 22)}<span>${L('Add previous posts to show this series’ look', 'أضف منشورات سابقة لإظهار شكل هذه السلسلة')}</span></span>`}</button>
+        <button class="sx-card-del" data-a="sxDel" data-v="${esc(s.id)}" aria-label="${esc(L('Delete series', 'احذف السلسلة') + ' ' + s.name)}" title="${esc(L('Delete series', 'احذف السلسلة'))}">${ic('x', 15)}</button>
         <div class="sx-card-b"><div class="sx-card-t"><h3 dir="auto">${esc(s.name)}</h3>${swatches(st)}</div>
         ${s.purpose ? `<p class="sx-pur" dir="auto">${esc(s.purpose)}</p>` : ''}
         <p class="sx-meta">${styleState(s)}${chip((CHN[s.channel] || 'LinkedIn'))}${chip(mine.length + ' ' + L('posts made', 'منشور'))}${d && d.vars.length ? chip(L('Post in progress', 'منشور قيد الإعداد'), 'warn') : ''}</p>
-        ${rec && rec.kind !== 'start' ? `<p class="sx-rec small">${nxBadge(rec.level)} ${nxText(c, rec).t}</p>` : ''}
-        <form class="sx-quick" data-s="sxQuick" data-v="${esc(s.id)}"><input name="t" dir="auto" maxlength="200" value="${esc(topic)}" aria-label="${esc(L('Topic for the next post', 'موضوع المنشور التالي'))}" placeholder="${esc(L('Topic for the next post…', 'موضوع المنشور التالي…'))}"><button class="btn pri sm">${L('Create', 'أنشئ')}</button></form></div></article>`;
+        ${rec ? recBlock(c, rec) : ''}
+        <div class="sx-cta"><button class="btn pri" data-a="${rec ? 'sxRec' : 'sxOpen'}" data-v="${esc(rec ? rec.id : s.id)}" title="${esc(rec ? L('Opens the series with this suggestion ready', 'يفتح السلسلة مع هذا الاقتراح جاهزاً') : L('Opens the series: type a topic or pick a topic idea', 'يفتح السلسلة: اكتب موضوعاً أو اختر فكرة'))}">${ic('plus', 15)}<span>${L('Create a post', 'أنشئ منشوراً')}</span></button></div></div></article>`;
     }).join('');
-    const next = ss.length ? nextHTML(c, R_) : '';
-    const recent = all.slice(-8).reverse();
+    const hidden = R_.hidden ? `<p class="muted small sx-hid">${L(`${R_.hidden} suggestion(s) set aside.`, `${R_.hidden} اقتراح مؤجل.`)} <button class="linklike small" data-a="nxUnskip">${L('Show them again', 'اعرضها مجدداً')}</button></p>` : '';
+    const miss = typeof nxMissHTML === 'function' ? nxMissHTML(c, R_) : '';
+    const posts = ss.length && typeof nxPostsHTML === 'function' ? nxPostsHTML(c, R_) : '';
+    const more = posts || miss ? `<div class="sx-fold">${posts ? `<details class="sx-fd" id="sx-posts" ${S.ui.sxPostsOpen ? 'open' : ''}><summary>${L('Which published posts count for each series', 'المنشورات المنشورة التي تُحسب لكل سلسلة')}</summary>${posts}</details>` : ''}${miss ? `<details class="sx-fd"><summary>${L('What would make the suggestions stronger', 'ما الذي يجعل الاقتراحات أقوى')}</summary>${miss}</details>` : ''}</div>` : '';
+    const recent = all.slice(-6).reverse();
     const gal = recent.length ? `<section class="sx-sec"><h2>${L('Latest posts', 'أحدث المنشورات')}</h2><div class="sx-gal">${recent.map((k) => { const s = ss.find((x) => x.id === k.sid); return s ? `<button class="sx-gi" data-a="sxZoomK" data-v="${esc(k.id)}">${cvHTML('g-' + k.id, specOf(c, s, k, { ill: k.ill, layout: k.layout, made: k.made }, 0, k.st), 0.3, k.copy.l1)}<span>${k.status === 'approved' ? chip('✓ ' + L('Approved', 'معتمد'), 'ok') : chip(L('Saved draft', 'مسودة محفوظة'))}</span></button>` : ''; }).join('')}</div></section>` : '';
-    return head + setup + next + (ss.length ? `<div class="sx-lib">${cards}</div>` : '') + gal + zoomHTML(c);
+    return head + setup + (ss.length ? `<div class="sx-lib">${cards}</div>${hidden}` : '') + gal + more + zoomHTML(c);
   }
 
-  /** "What to post next" — the recommendations from the company's own post results, one card at a time (moved from Performance). */
-  function nextHTML(c, R_) {
-    if (typeof nxTop !== 'function') return '';
-    const top = nxTop(R_), pick = top.find((r) => r.id === S.ui.nxPick) || top[0], rest = top.filter((r) => r !== pick).slice(0, 3);
-    const main = pick ? nxCard(c, pick, true) : `<section class="card nx-card"><p class="nx-b">${R_.hidden ? L('You set aside every suggestion for now.', 'أجّلت كل الاقتراحات حالياً.') : L('No suggestion yet — see below what BrandPilot needs.', 'لا اقتراح بعد — انظر أدناه ما يحتاجه BrandPilot.')}</p>${R_.hidden ? `<button class="btn" data-a="nxUnskip">${L('Show them again', 'اعرضها مجدداً')}</button>` : ''}</section>`;
-    const more = rest.length || R_.hidden ? `<section class="card"><h3 style="margin-top:0">${L('Other ideas', 'أفكار أخرى')}</h3>${rest.map((r) => nxCard(c, r, false)).join('')}${R_.hidden && pick ? `<button class="btn sm" data-a="nxUnskip" style="margin-top:8px">${L(`Show ${R_.hidden} set-aside idea(s)`, `اعرض ${R_.hidden} فكرة مؤجلة`)}</button>` : ''}</section>` : '';
-    return `<section class="sx-sec sx-next2" id="sx-next"><h2>${L('What to post next', 'ماذا تنشر بعد ذلك')}</h2><p class="muted">${L('From your own imported post results. A finding needs enough comparable posts; otherwise it is labelled as an experiment.', 'من نتائج منشوراتك المستوردة. النتيجة تحتاج منشورات كافية قابلة للمقارنة؛ وإلا تُوسم كتجربة.')}</p><div class="sx-next2-g"><div class="stack">${main}</div><div class="stack">${more}${nxMissHTML(c, R_)}</div></div></section>`;
+  /** One series' recommendation, inside its card (owner 2026-11-17: no separate "What to post next" block). */
+  function recBlock(c, r) {
+    let T; try { T = nxText(c, r); } catch (e) { return ''; }
+    const open = S.ui.sxWhy === r.id;
+    return `<div class="sx-rc" id="rc-${esc(r.id)}"><p class="sx-rc-t">${nxBadge(r.level)}<b dir="auto">${T.t}</b></p>
+      <details class="sx-rc-why" ${open ? 'open' : ''}><summary>${L('Why?', 'لماذا؟')}</summary><dl><dt>${L('What we noticed', 'ما لاحظناه')}</dt><dd dir="auto">${T.b}</dd><dt>${L('Why it matters', 'لماذا يهم')}</dt><dd dir="auto">${T.why}</dd><dt>${L('Evidence', 'الأدلة')}</dt><dd dir="auto">${typeof nxScope === 'function' ? nxScope(c, r) : ''}</dd>${T.lim ? `<dt>${L('Keep in mind', 'ضع في اعتبارك')}</dt><dd dir="auto">${T.lim}</dd>` : ''}</dl></details>
+      <p class="sx-rc-a"><button class="linklike small" data-a="nxSkip" data-v="${esc(r.id)}">${L('Not now', 'ليس الآن')}</button></p></div>`;
   }
 
   const PURPOSES = () => [[L('Practical education', 'تعليم عملي'), L('Practical, educational posts that help our audience make better decisions.', 'منشورات عملية تعليمية تساعد جمهورنا على اتخاذ قرارات أفضل.')], [L('Technology news', 'أخبار التقنية'), L('Short explanations of relevant technology news and what it means for our audience.', 'شرح قصير لأخبار التقنية المهمة وما تعنيه لجمهورنا.')], [L('Tips', 'نصائح'), L('One useful, practical tip per post.', 'نصيحة عملية مفيدة في كل منشور.')], [L('Industry insights', 'رؤى القطاع'), L('Insights about our industry, trends and common mistakes.', 'رؤى عن قطاعنا والاتجاهات والأخطاء الشائعة.')], [L('Thought leadership', 'قيادة فكرية'), L('Our point of view on where our field is going.', 'وجهة نظرنا في اتجاه مجالنا.')]];
+  /* The "New content series" form (owner 2026-11-17: the plain form was flat): numbered steps, choices as tiles and
+     pills, and a live preview card in the brand colours that updates as the owner types (A.sxF, no re-render). */
+  const KIND_IC = { '': 'spark', edu: 'book', insight: 'bulb', program: 'flag', product: 'layers', culture: 'user', news: 'inbox' };
+  const KIND_HINT = () => ({ '': L('BrandPilot reads your knowledge and suggests the kind', 'يقرأ BrandPilot معرفتك ويقترح النوع'), edu: L('Tips, how-tos, questions to ask', 'نصائح وطرق وأسئلة'), insight: L('Trends, common mistakes, opinions', 'اتجاهات وأخطاء شائعة وآراء'), program: L('An internship, academy, community or event', 'تدريب أو أكاديمية أو مجتمع أو فعالية'), product: L('One product or service in focus', 'منتج أو خدمة واحدة في الواجهة'), culture: L('Team, values, behind the scenes', 'الفريق والقيم وما وراء الكواليس'), news: L('Announcements and milestones', 'إعلانات وإنجازات') });
   function setupHTML(c, first) {
-    const f = SX.form || (SX.form = { name: '', purpose: '', channel: 'linkedin', objective: 'engagement', sources: [] });
+    const f = SX.form || (SX.form = { name: '', purpose: '', channel: 'linkedin', objective: 'engagement', kind: '', audience: '', sources: [] });
     const ideas = typeof nxIdeas === 'function' ? nxIdeas(c).slice(0, 5) : [];
     const srcs = (c.sources || []).filter((x) => c.findings.some((ff) => ff.src === x.id && ff.status === 'approved'));
-    return `<section class="card sx-setup">${first ? `<div class="sx-how"><div><b>1</b><span>${L('Name a recurring series', 'سمِّ سلسلة متكررة')}</span></div><div><b>2</b><span>${L('Upload a few previous posts', 'ارفع بعض المنشورات السابقة')}</span></div><div><b>3</b><span>${L('Approve the signature style', 'اعتمد الأسلوب المميز')}</span></div><div><b>4</b><span>${L('Give a topic — get a finished post', 'أعطِ موضوعاً — واحصل على منشور جاهز')}</span></div></div>` : ''}
-      <form data-s="sxCreate" class="sx-form"><h2>${L('New content series', 'سلسلة محتوى جديدة')}</h2>
-      <label class="f">${L('Series name', 'اسم السلسلة')}<input name="name" required maxlength="60" dir="auto" value="${esc(f.name)}" placeholder="${esc(L('e.g. Build Smarter', 'مثال: Build Smarter'))}"></label>
-      ${ideas.length ? `<p class="small sx-sug"><span class="muted">${L('From your approved themes', 'من موضوعاتك المعتمدة')}:</span> ${ideas.map((t) => `<button type="button" class="btn sm ghost" data-a="sxSug" data-k="name" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</p>` : ''}
-      <label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="2" maxlength="400" dir="auto" placeholder="${esc(L('One sentence — or pick one below', 'جملة واحدة — أو اختر من الأسفل'))}">${esc(f.purpose)}</textarea></label>
-      <p class="small sx-sug">${PURPOSES().map(([t, p]) => `<button type="button" class="btn sm ghost" data-a="sxSug" data-k="purpose" data-v="${esc(p)}">${esc(t)}</button>`).join('')}</p>
-      <div class="sx-row"><label class="f">${L('Main channel', 'القناة الرئيسية')}<select name="channel">${['linkedin', 'instagram', 'facebook'].map((k) => `<option value="${k}" ${f.channel === k ? 'selected' : ''}>${CHN[k]}</option>`).join('')}</select></label>
-      <label class="f">${L('Goal', 'الهدف')}<select name="objective">${Object.keys(NXO).map((k) => `<option value="${k}" ${f.objective === k ? 'selected' : ''}>${nxL(NXO[k])}</option>`).join('')}</select></label></div>
-      ${srcs.length ? `<fieldset class="sx-src"><legend class="small"><b>${L('Knowledge it may use', 'المعرفة التي يمكنها استخدامها')}</b> <span class="muted">${L('(approved facts only; none ticked = all approved knowledge)', '(الحقائق المعتمدة فقط؛ بلا تحديد = كل المعرفة المعتمدة)')}</span></legend>${srcs.map((x) => `<label class="small"><input type="checkbox" name="src" value="${esc(x.id)}"> ${esc(x.title || x.id)}</label>`).join('')}</fieldset>` : ''}
-      <p class="muted small">${L('Your brand kit (colours, official logo) is applied automatically. You can change everything later.', 'تُطبَّق هوية علامتك (الألوان والشعار الرسمي) تلقائياً. يمكنك تغيير كل شيء لاحقاً.')}</p>
-      <div class="row"><button class="btn pri">${L('Create series', 'أنشئ السلسلة')}</button>${first ? '' : `<button type="button" class="btn ghost" data-a="sxNewT">${L('Cancel', 'إلغاء')}</button>`}</div></form></section>`;
+    const st = fixStyle(kitStyle(c)), lg = pickLogo(c, st.bg[0]);
+    const step = (n, t, sub, body) => `<section class="sx-step"><div class="sx-step-h"><b>${n}</b><div><h3>${t}</h3>${sub ? `<p class="muted small">${sub}</p>` : ''}</div></div>${body}</section>`;
+    const pill = (name, v, t, on, icn) => `<label class="sx-pill"><input type="radio" name="${name}" value="${v}" ${on ? 'checked' : ''} data-c="sxF">${icn ? ic(icn, 15) : ''}<span>${t}</span></label>`;
+    const kinds = [['', L('Let BrandPilot work it out', 'دع BrandPilot يحدده')]].concat(KINDS().map(([k, t]) => [k, t.replace(/\s*\(.*\)$/, '')]));
+    const H = KIND_HINT();
+    return `<section class="card sx-new" style="--sx-a:${st.bg[0]};--sx-b:${st.bg[1]};--sx-c:${st.accent}">
+      <header class="sx-new-h"><div><p class="sx-eyebrow">${L('AI Content Series', 'سلاسل المحتوى الذكية')}</p><h2>${L('New content series', 'سلسلة محتوى جديدة')}</h2><p>${L('A recurring kind of post with one purpose — BrandPilot keeps its look, suggests its topics and writes its posts.', 'نوع متكرر من المنشورات بغرض واحد — يحافظ BrandPilot على شكلها ويقترح مواضيعها ويكتب منشوراتها.')}</p>
+        ${first ? `<ol class="sx-new-how"><li>${L('Name it', 'سمِّها')}</li><li>${L('Add a few previous posts', 'أضف منشورات سابقة')}</li><li>${L('Approve the style', 'اعتمد الأسلوب')}</li><li>${L('Give a topic, get a post', 'أعطِ موضوعاً واحصل على منشور')}</li></ol>` : ''}</div>
+        ${first ? '' : `<button type="button" class="sx-new-x" data-a="sxNewT" aria-label="${esc(L('Close', 'إغلاق'))}">${ic('x', 18)}</button>`}</header>
+      <form data-s="sxCreate" class="sx-new-g">
+      <div class="sx-new-f">
+        ${step(1, L('Name the series', 'سمِّ السلسلة'), L('Short and recognisable — it appears on every post.', 'قصير ومميز — يظهر على كل منشور.'), `<input class="sx-big" name="name" required maxlength="60" dir="auto" value="${esc(f.name)}" data-i="sxF" placeholder="${esc(L('e.g. Build Smarter', 'مثال: Build Smarter'))}" aria-label="${esc(L('Series name', 'اسم السلسلة'))}">
+          ${ideas.length ? `<div class="sx-chips"><span class="muted small">${L('From your approved themes', 'من موضوعاتك المعتمدة')}</span>${ideas.map((t) => `<button type="button" class="sx-chipb" data-a="sxSug" data-k="name" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>` : ''}`)}
+        ${step(2, L('What is it about?', 'عن ماذا هي؟'), L('The kind decides how BrandPilot writes: a program is written about very differently from tips.', 'النوع يحدد طريقة الكتابة: البرنامج يُكتب عنه بشكل مختلف تماماً عن النصائح.'), `<div class="sx-tiles" role="radiogroup" aria-label="${esc(L('Kind of series', 'نوع السلسلة'))}">${kinds.map(([k, t]) => `<label class="sx-tile"><input type="radio" name="kind" value="${k}" ${(f.kind || '') === k ? 'checked' : ''} data-c="sxF"><span class="sx-tile-i">${ic(KIND_IC[k], 18)}</span><b>${t}</b><small>${H[k]}</small></label>`).join('')}</div>
+          <label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="2" maxlength="400" dir="auto" data-i="sxF" placeholder="${esc(L('One sentence — or pick one below', 'جملة واحدة — أو اختر من الأسفل'))}">${esc(f.purpose)}</textarea></label>
+          <div class="sx-chips">${PURPOSES().map(([t, p]) => `<button type="button" class="sx-chipb" data-a="sxSug" data-k="purpose" data-v="${esc(p)}">${esc(t)}</button>`).join('')}</div>
+          <label class="f">${L('Who is it for?', 'لمن هي؟')}<input name="audience" maxlength="160" dir="auto" data-i="sxF" value="${esc(f.audience || '')}" placeholder="${esc(L('e.g. students and fresh graduates', 'مثال: الطلاب والخريجون الجدد'))}"></label>`)}
+        ${step(3, L('Where and why', 'أين ولماذا'), '', `<div class="sx-pickrow"><span class="small"><b>${L('Main channel', 'القناة الرئيسية')}</b></span><div class="sx-pills" role="radiogroup">${['linkedin', 'instagram', 'facebook'].map((k) => pill('channel', k, CHN[k], f.channel === k)).join('')}</div></div>
+          <div class="sx-pickrow"><span class="small"><b>${L('Goal', 'الهدف')}</b></span><div class="sx-pills" role="radiogroup">${Object.keys(NXO).map((k) => pill('objective', k, nxL(NXO[k]), f.objective === k)).join('')}</div></div>`)}
+        ${srcs.length ? step(4, L('Knowledge it may use', 'المعرفة التي يمكنها استخدامها'), L('Approved facts only. Tick none to use all approved knowledge.', 'الحقائق المعتمدة فقط. لا تحدد شيئاً لاستخدام كل المعرفة المعتمدة.'), `<div class="sx-pills">${srcs.map((x) => `<label class="sx-pill"><input type="checkbox" name="src" value="${esc(x.id)}" ${(f.sources || []).includes(x.id) ? 'checked' : ''} data-c="sxF">${ic('file', 15)}<span dir="auto">${esc(x.title || x.id)}</span></label>`).join('')}</div>`) : ''}
+      </div>
+      <aside class="sx-new-pv" aria-label="${esc(L('Preview', 'معاينة'))}"><p class="small muted">${L('Preview', 'معاينة')}</p>
+        <div class="sx-pvc"><div class="sx-pvc-art">${lg ? `<img src="${media(c, lg.id).data}" alt="" class="sx-pvc-lg">` : ''}<i></i><strong data-pv="name" dir="auto">${esc(f.name || L('Your series name', 'اسم سلسلتك'))}</strong><span>${L('Same look, new topic.', 'نفس الشكل، موضوع جديد.')}</span></div>
+          <div class="sx-pvc-b"><p data-pv="purpose" dir="auto">${esc(f.purpose || L('What the series is for appears here.', 'يظهر هنا الغرض من السلسلة.'))}</p>
+          <p class="sx-meta"><span class="sx-chip" data-pv="kind">${esc((kinds.find((x) => x[0] === (f.kind || '')) || kinds[0])[1])}</span><span class="sx-chip" data-pv="channel">${CHN[f.channel] || 'LinkedIn'}</span></p>
+          <p class="small muted" data-pv="audience" dir="auto">${esc(f.audience ? L('For: ', 'لمن: ') + f.audience : L('Audience not set yet', 'لم يُحدَّد الجمهور بعد'))}</p></div></div>
+        <p class="muted small">${L('Your brand kit (colours, official logo) is applied automatically. Next you can add previous posts so BrandPilot learns the exact look.', 'تُطبَّق هوية علامتك (الألوان والشعار الرسمي) تلقائياً. بعدها يمكنك إضافة منشورات سابقة ليتعلم BrandPilot الشكل بدقة.')}</p></aside>
+      <footer class="sx-new-ft"><span class="muted small">${L('You can change everything later.', 'يمكنك تغيير كل شيء لاحقاً.')}</span><div class="row">${first ? '' : `<button type="button" class="btn ghost" data-a="sxNewT">${L('Cancel', 'إلغاء')}</button>`}<button class="btn pri">${ic('plus', 16)}<span>${L('Create series', 'أنشئ السلسلة')}</span></button></div></footer>
+      </form></section>`;
   }
 
   function seriesView(c, s) {
     const st = fixStyle(styleOf(c, s)), d = draftOf(c, s), refs = refsOf(c, s.id), mine = creativesOf(c).filter((k) => k.sid === s.id).reverse();
     const lg = pickLogo(c, st.bg[0]);
-    const head = `<div class="sx-top"><button class="linklike" data-a="sxHome">${S.lang === 'ar' ? '→' : '←'} ${L('All series', 'كل السلاسل')}</button></div>
+    const head = `<div class="sx-top"><button class="linklike" data-a="sxHome">${S.lang === 'ar' ? '→' : '←'} ${L('All series', 'كل السلاسل')}</button><button class="btn sm ghost sx-del" data-a="sxDel" data-v="${esc(s.id)}">${ic('x', 14)}<span>${L('Delete series', 'احذف السلسلة')}</span></button></div>
       <header class="sx-hero" style="--sx-a:${st.bg[0]};--sx-b:${st.bg[1]};--sx-c:${st.accent}"><div><p class="sx-eyebrow">${L('AI Content Series', 'سلاسل المحتوى الذكية')}</p><h1 dir="auto">${esc(s.name)}</h1>${s.purpose ? `<p dir="auto">${esc(s.purpose)}</p>` : ''}<p class="sx-meta">${styleState(s)}${chip(CHN[s.channel] || 'LinkedIn')}${chip(nxL(NXO[s.objective] || NXO.engagement))}${chip(mine.length + ' ' + L('posts', 'منشور'))}</p></div>${swatches(st)}</header>`;
     const warnLogo = !lg ? `<p class="note w">${L('No official logo in the brand kit — the post is made without one. BrandPilot never draws a logo. Add it under Your company → Brand.', 'لا شعار رسمي في هوية العلامة — يُصنع المنشور بدونه. لا يرسم BrandPilot شعاراً أبداً. أضفه من شركتك ← الهوية.')}</p>` : !lg.ok ? `<p class="note w">${L('Your logo versions are all meant for light backgrounds; it may be hard to read on this background. Add a light version in the brand kit.', 'نسخ شعارك مخصصة للخلفيات الفاتحة؛ قد يصعب رؤيته على هذه الخلفية. أضف نسخة فاتحة في الهوية.')}</p>` : '';
+    const au = SX.autoU || (SX.autoU = {});
+    if (!au[s.id] && !s.kind && !s.undProp && String(s.purpose || '').trim().length < 40 && subjectOf(c, s).length) { au[s.id] = 1; setTimeout(() => aiUnderstand(c, s, true), 0); }
     if (!d.drafted && !d.copy.l1 && !d.vars.length && !s.topicAI && !SX.autoT[s.id] && !topicIdeas(c, s, null).length) { SX.autoT[s.id] = 1; setTimeout(() => aiTopics(c, s, true), 0); }
-    return head + `<div class="sx-ws"><div class="sx-main">${composerHTML(c, s, d, st)}${warnLogo}${resultsHTML(c, s, d)}${postsHTML(c, s, mine)}</div><aside class="sx-side">${styleHTML(c, s, st)}${refsHTML(c, s, refs)}${learnHTML(c, s)}${workHTML(c, s)}</aside></div>` + zoomHTML(c);
+    return head + `<div class="sx-ws"><div class="sx-main">${composerHTML(c, s, d, st)}${warnLogo}${resultsHTML(c, s, d)}${postsHTML(c, s, mine)}</div><aside class="sx-side">${aboutHTML(c, s)}${styleHTML(c, s, st)}${refsHTML(c, s, refs)}${learnHTML(c, s)}${workHTML(c, s)}</aside></div>` + zoomHTML(c);
   }
 
   function composerHTML(c, s, d, st) {
@@ -356,7 +383,8 @@
     return `<div class="sx-tops"><div class="sx-tops-h"><div><h3>${L('Topic ideas for', 'أفكار مواضيع لـ')} <span dir="auto">${esc(s.name)}</span></h3><p class="muted small">${L('Pick one — BrandPilot writes the words in the series style. Or type your own topic above.', 'اختر واحداً — يكتب BrandPilot الكلمات بأسلوب السلسلة. أو اكتب موضوعك أعلاه.')}</p></div>
       <button class="btn sm" data-a="sxTopics" data-v="${esc(s.id)}" ${busy ? 'disabled' : ''}>${busy ? L('Thinking of topics…', 'جارٍ التفكير في مواضيع…') : ai ? L('More ideas', 'أفكار أخرى') : L('Suggest topics with AI', 'اقترح مواضيع بالذكاء الاصطناعي')}</button></div>
       ${ideas.length ? `<div class="sx-tl">${ideas.map((i) => `<button class="sx-ti" data-a="sxIdea" data-v="${esc(s.id)}" data-k="${esc(i.t)}" data-f="${esc(i.fmt)}"><span class="sx-tt" dir="auto">${esc(i.t)}</span>${i.why ? `<span class="sx-tw" dir="auto">${esc(i.why)}</span>` : ''}<span class="sx-tm">${tag(i)}${i.fmt === 'carousel' ? chip(L('Carousel', 'منشور دوّار')) : ''}</span></button>`).join('')}</div>`
-        : busy ? `<p class="muted small">${L('BrandPilot is thinking of topics for this series…', 'يفكر BrandPilot في مواضيع لهذه السلسلة…')}</p>` : `<p class="muted small">${L('No topic ideas yet. Ask the AI, or type your own topic above.', 'لا أفكار مواضيع بعد. اطلبها من الذكاء الاصطناعي، أو اكتب موضوعك أعلاه.')}</p>`}
+        : busy ? `<p class="muted small">${L('BrandPilot is thinking of topics for this series…', 'يفكر BrandPilot في مواضيع لهذه السلسلة…')}</p>` : SX.tErr && SX.tErr[s.id] ? `<p class="note w small">${L('The AI could not suggest topics this time', 'تعذّر على الذكاء الاصطناعي اقتراح مواضيع هذه المرة')} (${esc(SX.tErr[s.id])}). ${L('Use “Suggest topics with AI” to try again, or type your own topic above.', 'استخدم «اقترح مواضيع بالذكاء الاصطناعي» للمحاولة مجدداً، أو اكتب موضوعك أعلاه.')}</p>` : `<p class="muted small">${L('No topic ideas yet. Ask the AI, or type your own topic above.', 'لا أفكار مواضيع بعد. اطلبها من الذكاء الاصطناعي، أو اكتب موضوعك أعلاه.')}</p>`}
+      ${ai && ai.subject ? `<p class="muted small">${L(`These ideas are about ${esc(s.name)} itself — ${ai.subject} approved fact(s) name it.`, `هذه الأفكار عن ${esc(s.name)} نفسها — ${ai.subject} حقيقة معتمدة تذكرها.`)}</p>` : ''}
       ${ai && !ai.facts ? `<p class="muted small">${L('These AI ideas come from the series purpose only — approve facts in Your company for ideas closer to what you do.', 'أفكار الذكاء الاصطناعي هذه من غرض السلسلة فقط — اعتمد حقائق في شركتك لأفكار أقرب لعملك.')}</p>` : ''}</div>`;
   }
   async function aiTopics(c, s, quiet) {
@@ -367,10 +395,11 @@
     SX.busy[key] = 1; R();
     try {
       await synced(c);
-      const r = await api('POST', '/api/companies/' + c.id + '/series/topics', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', sources: s.sources || [] }, channel: s.channel || 'linkedin', lang: d.lang === 'ar' ? 'ar' : 'en', have });
+      const r = await api('POST', '/api/companies/' + c.id + '/series/topics', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [] }, channel: s.channel || 'linkedin', lang: d.lang === 'ar' ? 'ar' : 'en', have });
       const prev = (s.topicAI && s.topicAI.items) || [];
-      s.topicAI = { items: r.topics.map((x) => ({ t: x.topic, why: x.why, fmt: x.format })).concat(prev).slice(0, 16), facts: r.facts, model: r.model, at: Date.now() };
-    } catch (e) { if (!quiet) toast(errMsg(e), 'err'); }
+      s.topicAI = { items: r.topics.map((x) => ({ t: x.topic, why: x.why, fmt: x.format })).concat(prev).slice(0, 16), facts: r.facts, subject: r.subject || 0, model: r.model, at: Date.now() };
+      if (SX.tErr) delete SX.tErr[s.id];
+    } catch (e) { (SX.tErr || (SX.tErr = {}))[s.id] = errMsg(e); if (!quiet) toast(errMsg(e), 'err'); }
     delete SX.busy[key]; save(); if (C() === c) R();
   }
 
@@ -405,7 +434,7 @@
       return `<article class="sx-var ${on ? 'on' : ''}">${body}<div class="sx-var-f">
         <label class="sx-pick"><input type="radio" name="sxpick" data-c="sxPick" value="${esc(v.id)}" ${on ? 'checked' : ''} ${st !== 'ready' ? 'disabled' : ''}> ${L('Option', 'خيار')} ${String.fromCharCode(65 + i)}</label>
         ${st === 'ready' ? `<span class="sx-lay" role="group" aria-label="${esc(L('Layout', 'التخطيط'))}">${[['stack', L('Text top', 'النص أعلى')], ['split', L('Side by side', 'جنباً إلى جنب')], ['hero', L('Full picture', 'صورة كاملة')]].map(([k, t]) => `<button class="sx-seg sm ${v.layout === k ? 'on' : ''}" aria-pressed="${v.layout === k}" data-a="sxLay" data-v="${esc(v.id)}" data-k="${k}">${t}</button>`).join('')}</span>
-        ${v.layout !== (v.made || 'stack') && v.model !== 'upload' ? `<p class="small sx-hint">${L('This picture was painted for another layout.', 'رُسمت هذه الصورة لتخطيط آخر.')} <button class="btn sm" data-a="sxRe" data-v="${esc(v.id)}">${L('Repaint for this layout', 'أعد الرسم لهذا التخطيط')}</button></p>` : ''}<details class="sx-ref"><summary class="btn sm ghost">${L('Refine illustration', 'حسّن الرسم')}</summary><form data-s="sxRefine" data-v="${esc(v.id)}"><input name="note" maxlength="200" dir="auto" value="${esc(v.note || '')}" placeholder="${esc(L('e.g. a woman founder at a desk, warmer light, fewer objects', 'مثال: مؤسِّسة على مكتب، إضاءة أدفأ، عناصر أقل'))}"><button class="btn sm">${L('New illustration', 'رسم جديد')}</button></form></details>` : ''}
+        ${v.txt && v.status === 'ready' ? `<p class="small sx-hint">⚠ ${L('The picture check found writing in this picture even after a second try. Make another one.', 'وجد الفحص كتابة في هذه الصورة حتى بعد محاولة ثانية. أنشئ صورة أخرى.')}</p>` : ''}${v.layout !== (v.made || 'stack') && v.model !== 'upload' ? `<p class="small sx-hint">${L('This picture was painted for another layout.', 'رُسمت هذه الصورة لتخطيط آخر.')} <button class="btn sm" data-a="sxRe" data-v="${esc(v.id)}">${L('Repaint for this layout', 'أعد الرسم لهذا التخطيط')}</button></p>` : ''}<details class="sx-ref"><summary class="btn sm ghost">${L('Refine illustration', 'حسّن الرسم')}</summary><form data-s="sxRefine" data-v="${esc(v.id)}"><input name="note" maxlength="200" dir="auto" value="${esc(v.note || '')}" placeholder="${esc(L('e.g. a woman founder at a desk, warmer light, fewer objects', 'مثال: مؤسِّسة على مكتب، إضاءة أدفأ، عناصر أقل'))}"><button class="btn sm">${L('New illustration', 'رسم جديد')}</button></form></details>` : ''}
       </div></article>`;
     };
     const pick = d.vars.find((v) => v.id === d.pick && v.status === 'ready');
@@ -468,6 +497,39 @@
       ${posts.length < 5 ? `<p class="muted small">${L('Fewer than 5 posts — a hint, not a pattern.', 'أقل من 5 منشورات — تلميح لا نمط.')}</p>` : ''}</section>`;
   }
 
+  /* 17d — what the series is about. A series named after something in the approved knowledge (a program, a product…)
+     is ABOUT that thing; the kind tells the AI how to write. The user approves BrandPilot's reading or corrects it. */
+  const KINDS = () => [['edu', L('Practical education (tips, how-tos)', 'تعليم عملي (نصائح وطرق)')], ['insight', L('Industry insights', 'رؤى القطاع')], ['program', L('Company program or initiative (e.g. internship)', 'برنامج أو مبادرة للشركة (مثل التدريب)')], ['product', L('Product or service spotlight', 'تسليط الضوء على منتج أو خدمة')], ['culture', L('Culture and people', 'الثقافة والفريق')], ['news', L('News and announcements', 'الأخبار والإعلانات')]];
+  const kindName = (k) => (KINDS().find((x) => x[0] === k) || [0, ''])[1];
+  const cmp = (t) => String(t || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+  /** Approved facts that name the series — the same rule as the server (recs.js subjectFacts). */
+  const subjectOf = (c, s) => { const k = cmp(s.name); return k.length < 3 ? [] : (c.findings || []).filter((f) => f.status === 'approved' && f.cat !== 'brandid' && cmp(f.text).includes(k)); };
+  function aboutHTML(c, s) {
+    const sub = subjectOf(c, s), p = s.undProp, busy = SX.busy['und-' + s.id], ed = S.ui.sxAbout === s.id;
+    const facts = sub.length ? `<details class="sx-about-f"><summary class="small">${L(`${sub.length} approved fact(s) name ${esc(s.name)}`, `${sub.length} حقيقة معتمدة تذكر ${esc(s.name)}`)}</summary><ul>${sub.slice(0, 6).map((f) => `<li class="small" dir="auto">${esc(f.text)}</li>`).join('')}</ul></details>` : '';
+    const prop = p ? `<div class="sx-prop"><p class="small"><b>${L('BrandPilot understands this series as:', 'يفهم BrandPilot هذه السلسلة كالتالي:')}</b></p><dl class="sx-dl"><dt>${L('Kind', 'النوع')}</dt><dd>${esc(kindName(p.kind))}</dd><dt>${L('About', 'عن')}</dt><dd dir="auto">${esc(p.about)}</dd><dt>${L('Purpose', 'الغرض')}</dt><dd dir="auto">${esc(p.purpose)}</dd>${p.audience ? `<dt>${L('For', 'لمن')}</dt><dd dir="auto">${esc(p.audience)}</dd>` : ''}</dl>${p.missing ? `<p class="note w small" dir="auto">${esc(p.missing)}</p>` : ''}<p class="muted small">${L(`From ${p.facts.length} approved fact(s). Check it — then BrandPilot suggests topics and writes posts with it.`, `من ${p.facts.length} حقيقة معتمدة. راجعه — ثم يقترح BrandPilot المواضيع ويكتب المنشورات بناءً عليه.`)}</p><div class="row"><button class="btn sm pri" data-a="sxUndOk" data-v="${esc(s.id)}">${L('Use this', 'استخدم هذا')}</button><button class="btn sm" data-a="sxAboutEd" data-v="${esc(s.id)}">${L('Edit', 'عدّل')}</button><button class="btn sm ghost" data-a="sxUndX" data-v="${esc(s.id)}">${L('Dismiss', 'تجاهل')}</button></div></div>` : '';
+    const form = ed ? `<form class="sx-about-ed stack" data-s="sxAbout" data-v="${esc(s.id)}"><label class="f">${L('Series name', 'اسم السلسلة')}<input name="name" required maxlength="60" dir="auto" value="${esc(s.name)}"></label><div class="sx-2"><label class="f">${L('Main channel', 'القناة الرئيسية')}<select name="channel">${['linkedin', 'instagram', 'facebook'].map((k) => `<option value="${k}" ${(s.channel || 'linkedin') === k ? 'selected' : ''}>${CHN[k]}</option>`).join('')}</select></label><label class="f">${L('Goal', 'الهدف')}<select name="objective">${Object.keys(NXO).map((k) => `<option value="${k}" ${(s.objective || 'engagement') === k ? 'selected' : ''}>${nxL(NXO[k])}</option>`).join('')}</select></label></div><label class="f">${L('Kind', 'النوع')}<select name="kind"><option value="">${L('Let BrandPilot work it out', 'دع BrandPilot يحدده')}</option>${KINDS().map(([k, t]) => `<option value="${k}" ${(p ? p.kind : s.kind) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="3" maxlength="400" dir="auto">${esc(p ? p.purpose : s.purpose || '')}</textarea></label><label class="f">${L('Who is it for?', 'لمن هي؟')}<input name="audience" maxlength="160" dir="auto" value="${esc(p ? p.audience : s.audience || '')}"></label><label class="f">${L('Topic list (one per line)', 'قائمة المواضيع (موضوع في كل سطر)')}<textarea name="ideas" rows="4" maxlength="2000" dir="auto" placeholder="${esc(L('Topics you already plan — BrandPilot suggests them first', 'مواضيع تخططها مسبقاً — يقترحها BrandPilot أولاً'))}">${esc(s.ideas || '')}</textarea></label><div class="row"><button class="btn sm pri">${L('Save', 'احفظ')}</button><button type="button" class="btn sm ghost" data-a="sxAboutEd" data-v="">${L('Cancel', 'إلغاء')}</button></div></form>` : '';
+    const weak = !s.kind && !p && String(s.purpose || '').trim().length < 40;
+    return `<section class="card sx-about"><div class="sx-about-h"><h2>${L('About this series', 'عن هذه السلسلة')}</h2>${ed ? '' : `<button class="btn sm ghost" data-a="sxAboutEd" data-v="${esc(s.id)}">${L('Edit', 'عدّل')}</button>`}</div>
+      ${ed ? form : `${s.kind ? `<p class="small"><span class="sx-chip ok">${esc(kindName(s.kind))}</span></p>` : ''}${s.about ? `<p class="small" dir="auto">${esc(s.about)}</p>` : ''}<p class="small" dir="auto"><b>${L('Purpose', 'الغرض')}:</b> ${esc(s.purpose || L('not set', 'غير محدد'))}</p><p class="small" dir="auto"><b>${L('For', 'لمن')}:</b> ${esc(s.audience || L('not set', 'غير محدد'))}</p>${facts}
+      ${weak ? `<p class="note w small">${L('BrandPilot does not know enough about what this series is. Check it with AI or edit it — otherwise topic ideas may miss the point.', 'لا يعرف BrandPilot ما يكفي عن هذه السلسلة. تحقق منها بالذكاء الاصطناعي أو عدّلها — وإلا قد لا تصيب أفكار المواضيع الهدف.')}</p>` : ''}
+      ${prop || `<button class="btn sm" data-a="sxUnd" data-v="${esc(s.id)}" ${busy ? 'disabled' : ''}>${busy ? L('Reading your knowledge…', 'جارٍ قراءة معرفتك…') : L('Check with AI', 'تحقق بالذكاء الاصطناعي')}</button>`}`}</section>`;
+  }
+  async function aiUnderstand(c, s, quiet) {
+    const key = 'und-' + s.id;
+    if (SX.busy[key]) return;
+    if (!(await aiOn())) { if (!quiet) toast(L('The AI is not set up on this server — edit the series yourself.', 'الذكاء الاصطناعي غير مُعدّ — عدّل السلسلة بنفسك.'), 'err'); return; }
+    SX.busy[key] = 1; R();
+    try {
+      await synced(c);
+      const r = await api('POST', '/api/companies/' + c.id + '/series/understand', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [] }, lang: S.lang === 'ar' ? 'ar' : 'en' });
+      s.undProp = Object.assign({}, r.proposal, { at: Date.now(), model: r.model });
+    } catch (e) { if (!quiet) toast(errMsg(e), 'err'); }
+    delete SX.busy[key]; save(); if (C() === c) R();
+  }
+  /** The series changed meaning: earlier AI topic ideas are dropped and asked again. */
+  const reThink = (s) => { s.topicAI = null; SX.autoT[s.id] = 0; };
+
   function learnHTML(c, s) {
     const R_ = typeof nxRun === 'function' ? nxRun(c) : { recs: [] }, rec = R_.recs.find((r) => r.sid === s.id);
     if (!rec) return '';
@@ -513,7 +575,7 @@
     SX.busy[key] = 1; R();
     try {
       await synced(c);
-      const r = await api('POST', '/api/companies/' + c.id + '/recs/draft', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', sources: s.sources || [] }, topic: d.topic, channel: s.channel || 'linkedin', lang: d.lang, format: d.fmt === 'carousel' ? 'carousel' : 'single', examples: ex, style: { colors: [st.bg[0], st.accent, st.ink].filter(isHex), note: [st.headline && 'Headline: ' + st.headline, st.tone && 'Tone: ' + st.tone, st.illustration && 'Illustration: ' + st.illustration].filter(Boolean).join(' ').slice(0, 600) } });
+      const r = await api('POST', '/api/companies/' + c.id + '/recs/draft', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [] }, topic: d.topic, channel: s.channel || 'linkedin', lang: d.lang, format: d.fmt === 'carousel' ? 'carousel' : 'single', examples: ex, style: { colors: [st.bg[0], st.accent, st.ink].filter(isHex), note: [st.headline && 'Headline: ' + st.headline, st.tone && 'Tone: ' + st.tone, st.illustration && 'Illustration: ' + st.illustration].filter(Boolean).join(' ').slice(0, 600) } });
       if (!r.draft) toast(L('No approved knowledge yet — approve facts in Your company first, or write the words yourself.', 'لا معرفة معتمدة بعد — اعتمد الحقائق أولاً أو اكتب الكلمات بنفسك.'), 'err');
       else {
         const x = r.draft, [a, b] = splitHead(x.headline, st);
@@ -532,7 +594,7 @@
       const r = await api('POST', '/api/companies/' + c.id + '/series/illustration', { style: { bg: st.bg, palette: (st.palette.filter((h) => !skinLike(h)).length ? st.palette.filter((h) => !skinLike(h)) : [st.accent]), illustration: st.illustration || '' }, concept: (d.concept || d.topic).slice(0, 600), layout: v.layout, note: v.note || '', variant: v.variant });
       const mid = uid('m'), old = v.ill;
       c.media.push({ id: mid, name: 'Series illustration — ' + d.topic.slice(0, 60), data: r.image, series: s.id });
-      v.ill = mid; v.status = 'ready'; v.model = r.model; v.prompt = r.prompt; v.made = v.layout; dropMedia(c, old);
+      v.ill = mid; v.status = 'ready'; v.model = r.model; v.prompt = r.prompt; v.made = v.layout; v.txt = !!(r.textCheck && r.textCheck.text); dropMedia(c, old);
       if (!d.pick) d.pick = v.id;
     } catch (e) { v.status = 'failed'; v.err = errMsg(e, 'img'); }
     delete SX.busy[v.id]; save(); if (C() === c) R();
@@ -554,21 +616,68 @@
 
   const actions = {
     sxHome() { S.ui.sx = null; S.ui.sxZ = null; R(); scrollTo(0, 0); },
-    sxOpen(sid) { go(sid); },
+    sxOpen(sid) { S.ui.sxWhy = null; go(sid); },
     sxNewT() { S.ui.sxNew = !S.ui.sxNew; R(); },
-    sxSug(v, el) { const f = el.closest('form'), k = el.dataset.k; if (f && f.elements[k]) { f.elements[k].value = v; f.elements[k].focus(); } },
+    sxSug(v, el) { const f = el.closest('form'), k = el.dataset.k; if (f && f.elements[k]) { f.elements[k].value = v; f.elements[k].focus(); A.sxF(v, f.elements[k]); } },
+    /* the new-series form: remember what is typed (a re-render keeps it) and update the preview card in place */
+    sxF(v, el) {
+      const f = SX.form || (SX.form = {}), n = el.name;
+      if (n === 'src') f.sources = [...el.form.querySelectorAll('input[name=src]:checked')].map((x) => x.value); else f[n] = v;
+      const pv = (k, t) => { const e = document.querySelector('.sx-new [data-pv="' + k + '"]'); if (e) e.textContent = t; };
+      const t = String(v || '').trim();
+      if (n === 'name') pv('name', t || L('Your series name', 'اسم سلسلتك'));
+      if (n === 'purpose') pv('purpose', t || L('What the series is for appears here.', 'يظهر هنا الغرض من السلسلة.'));
+      if (n === 'audience') pv('audience', t ? L('For: ', 'لمن: ') + t : L('Audience not set yet', 'لم يُحدَّد الجمهور بعد'));
+      if (n === 'kind') { const b = el.closest('.sx-tile') && el.closest('.sx-tile').querySelector('b'); pv('kind', b ? b.textContent : ''); }
+      if (n === 'channel') pv('channel', CHN[v] || v);
+    },
+    async sxDel(sid) {
+      const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return;
+      const posts = creativesOf(c).filter((k) => k.sid === sid), refs = libOf(c).filter((x) => x.sid === sid);
+      if (!(await askBox(L(`Delete the series “${s.name}”? Its ${posts.length} saved post(s), its post in progress and its ${refs.length} reference picture(s) are removed too. Campaigns already created and your imported post results stay.`, `حذف السلسلة «${s.name}»؟ تُحذف معها منشوراتها المحفوظة (${posts.length}) ومنشورها قيد الإعداد وصورها المرجعية (${refs.length}). تبقى الحملات المنشأة ونتائج منشوراتك المستوردة.`)))) return;
+      const d = draftsOf(c)[sid], drop = posts.map((k) => k.ill).concat(d ? d.vars.map((v) => v.ill) : []);
+      c.series = serOf(c).filter((x) => x !== s);
+      c.creatives = creativesOf(c).filter((k) => k.sid !== sid);
+      delete draftsOf(c)[sid];
+      c.library = libOf(c).filter((x) => x.sid !== sid);
+      drop.forEach((id) => dropMedia(c, id));
+      refs.forEach((x) => { if (x.img && !libOf(c).some((y) => y.img === x.img)) c.media = c.media.filter((m) => m.id !== x.img); });
+      if (S.ui.sx === sid) S.ui.sx = null;
+      S.ui.sxZ = null;
+      log(c, 'campaign', `Content series “${s.name}” deleted`, `تم حذف سلسلة المحتوى «${s.name}»`);
+      toast(L(`“${s.name}” deleted.`, `حُذفت «${s.name}».`), 'ok');
+      save(); R(); scrollTo(0, 0);
+    },
     sxCreate(fd) {
       const c = C(), name = String(fd.get('name') || '').trim().slice(0, 60);
       if (!name) return toast(L('Name the series.', 'سمِّ السلسلة.'), 'err');
       if (serOf(c).some((s) => norm(s.name) === norm(name))) return toast(L('A series with this name exists.', 'توجد سلسلة بهذا الاسم.'), 'err');
-      const s = { id: uid('sr'), at: Date.now(), name, purpose: String(fd.get('purpose') || '').trim().slice(0, 400), objective: Object.keys(NXO).includes(fd.get('objective')) ? fd.get('objective') : 'engagement', channel: ['linkedin', 'instagram', 'facebook'].includes(fd.get('channel')) ? fd.get('channel') : 'linkedin', audience: '', ideas: '', sources: fd.getAll('src').map(String).slice(0, 20), themes: [], look: '' };
+      const s = { id: uid('sr'), at: Date.now(), name, purpose: String(fd.get('purpose') || '').trim().slice(0, 400), objective: Object.keys(NXO).includes(fd.get('objective')) ? fd.get('objective') : 'engagement', channel: ['linkedin', 'instagram', 'facebook'].includes(fd.get('channel')) ? fd.get('channel') : 'linkedin', audience: String(fd.get('audience') || '').trim().slice(0, 160), kind: KINDS().some(([k]) => k === fd.get('kind')) ? fd.get('kind') : '', ideas: '', sources: fd.getAll('src').map(String).slice(0, 20), themes: [], look: '' };
       serOf(c).push(s); SX.form = null; S.ui.sxNew = false;
       log(c, 'campaign', `Content series “${name}” created`, `تم إنشاء سلسلة المحتوى «${name}»`);
       toast(L('Series created. Next: add a few previous posts so BrandPilot learns its look.', 'أُنشئت السلسلة. التالي: أضف منشورات سابقة ليتعلم BrandPilot شكلها.'), 'ok');
-      save(); go(s.id);
+      save(); go(s.id); aiUnderstand(c, s, true);
     },
-    sxQuick(fd, f) { const c = C(), s = serOf(c).find((x) => x.id === f.dataset.v); if (!s) return; const t = String(fd.get('t') || '').trim(); if (!t) return toast(L('Type a topic.', 'اكتب موضوعاً.'), 'err'); startDraft(c, s, t, null); save(); go(s.id); aiDraft(c, s); },
     sxIdea(sid, el) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftOf(c, s); d.topic = el.dataset.k; if (!d.rec && (el.dataset.f === 'carousel' || el.dataset.f === 'single')) d.fmt = el.dataset.f; save(); aiDraft(c, s); },
+    sxUnd(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (s) aiUnderstand(c, s, false); },
+    sxUndOk(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s || !s.undProp) return; const p = s.undProp; Object.assign(s, { kind: p.kind, about: p.about, purpose: p.purpose, audience: p.audience || s.audience || '' }); s.undProp = null; reThink(s); log(c, 'campaign', `Series “${s.name}” defined: ${p.kind}`, `تم تعريف السلسلة «${s.name}»`); toast(L('Saved. New topic ideas follow what the series is about.', 'حُفظ. أفكار المواضيع الجديدة تتبع موضوع السلسلة.'), 'ok'); save(); R(); },
+    sxUndX(sid) { const s = serOf(C()).find((x) => x.id === sid); if (s) { s.undProp = null; save(); R(); } },
+    sxAboutEd(sid) { S.ui.sxAbout = sid || null; R(); },
+    sxAbout(fd, f) {
+      const c = C(), s = serOf(c).find((x) => x.id === f.dataset.v); if (!s) return;
+      const name = String(fd.get('name') || '').trim().replace(/\s+/g, ' ').slice(0, 60);
+      if (!name) return toast(L('Give the series a name.', 'أعطِ السلسلة اسماً.'), 'err');
+      if (serOf(c).some((x) => x !== s && norm(x.name) === norm(name))) return toast(L('A series with this name already exists.', 'توجد سلسلة بهذا الاسم.'), 'err');
+      const kind = String(fd.get('kind') || ''), was = [s.name, s.kind, s.purpose, s.audience, s.objective].join('|');
+      s.name = name; s.kind = KINDS().some(([k]) => k === kind) ? kind : '';
+      s.purpose = String(fd.get('purpose') || '').trim().slice(0, 400); s.audience = String(fd.get('audience') || '').trim().slice(0, 160);
+      if (['linkedin', 'instagram', 'facebook'].includes(fd.get('channel'))) s.channel = fd.get('channel');
+      if (Object.keys(NXO).includes(fd.get('objective'))) s.objective = fd.get('objective');
+      s.ideas = String(fd.get('ideas') || '').split(/\r?\n/).map((x) => x.trim()).filter(Boolean).join('\n').slice(0, 2000);
+      if (s.undProp) { s.about = s.undProp.about; s.undProp = null; }
+      if (was !== [s.name, s.kind, s.purpose, s.audience, s.objective].join('|')) reThink(s);
+      S.ui.sxAbout = null; save(); R();
+    },
     sxTopics(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (s) aiTopics(c, s, false); },
     sxPrep(fd, f) { const c = C(), s = serOf(c).find((x) => x.id === f.dataset.v); if (!s) return; const d = draftOf(c, s), t = String(fd.get('t') || '').trim().slice(0, 200); if (t !== d.topic && d.vars.length) startDraft(c, s, t, d.rec); else d.topic = t; aiDraft(c, s); },
     sxReset(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftsOf(c)[sid]; if (d) { delete draftsOf(c)[sid]; d.vars.forEach((v) => dropMedia(c, v.ill)); } save(); R(); },
@@ -673,7 +782,7 @@
     },
     sxStX(sid) { const s = serOf(C()).find((x) => x.id === sid); if (s) { s.styleProp = null; save(); R(); } },
     sxRec(id) { const c = C(), R_ = nxRun(c), r = R_.recs.find((x) => x.id === id), s = r && serOf(c).find((x) => x.id === r.sid); if (s) root.nxPrep(c, r, s, r.topic || ''); },
-    sxPerf(id) { S.ui.sx = null; S.ui.sxZ = null; S.ui.nxPick = id; S.ui.nxEv = 1; if (S.ui.view !== 'series') A.go('series'); else R(); const el = document.getElementById('sx-next'); if (el) el.scrollIntoView({ block: 'start' }); },
+    sxPerf(id) { S.ui.sx = null; S.ui.sxZ = null; S.ui.sxWhy = id; if (S.ui.view !== 'series') A.go('series'); else R(); const el = document.getElementById('rc-' + id); if (el) el.scrollIntoView({ block: 'center' }); },
   };
 
   /** A series recommendation (or a series topic from anywhere) opens the series workspace — never Campaign Studio. */

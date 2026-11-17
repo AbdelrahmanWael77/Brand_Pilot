@@ -1,3 +1,33 @@
+> 2026-11-17: tasks 17d–22b COMMITTED on redesign/new-product-identity and, on the owner's instruction, dev fast-forwarded to it and pushed (origin/dev = origin/redesign/new-product-identity).
+
+> 2026-11-17: 22b DONE (not committed) — one Create button per series card. 17d–22b NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 22 DONE (not committed) — AI Content Series home: series first, recommendation inside each card, details folded. 17d–22 NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 21 DONE (not committed) — Improvement center (was Automation): weekly review in 3 blocks, honest Update now, Plan with AI Director per task. 17d–21 NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 20d DONE (not committed) — Content library left Create content; series editing + per-post series list now in AI Content Series. 17d–20d NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 20c DONE (not committed) — single-post view, vision text check + one retry for AI pictures, honest daily-allowance error. Cloudflare free image allowance used up today (resets 00:00 UTC). 17d–20c NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 20b DONE (not committed) — Studio step 2: thumbnail post list, EN/AR switch, Extras. 17d–20b NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 20 DONE (not committed) — Campaign Studio cleanup step 1 (one navigation, brief summary, one template picker, pictures in the Picture tab, sticky Approve/Next bar, Delete in ⋯). Next = step 2: thumbnail post list + EN/AR switch + Extras. 17d–20 NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 19e DONE (not committed) — Campaign Studio Create content = business posts only; series via AI Content Series. 17d–19e NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 19d DONE (not committed) — AI scene options (3 per post), scenes kept out of template looks, AI scenes for all posts. 17d, 17e, 19, 19b, 19c, 19d NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 19c DONE (not committed) — Studio side panel scrolls independently; live preview pinned in Colours. 17d, 17e, 19, 19b, 19c NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 19b DONE (not committed) — Look tab colours: brand kit + any colour, cards, live contrast. 17d, 17e, 19, 19b NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 19 DONE (not committed) — Campaign Studio "AI scene" look (AI picture made for the layout fills the post; real text/logo on top). 17d, 17e and 19 are NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 17e DONE (not committed) — redesigned New series form with live preview; Delete series. 17d + 17e are NOT pushed (dev = 56a473f).
+
+> 2026-11-17: 17d DONE (not committed) — series understand their subject (kind, about, audience; facts that name the series lead every topic and draft prompt). Last push to dev was 56a473f; 17d is NOT pushed.
+
 > 2026-11-17: 18 DONE — AI Director as saved conversations. COMMITTED a1a76be on redesign/new-product-identity and, on the owner's instruction, dev fast-forwarded to it and pushed (origin/dev = origin/redesign/new-product-identity). Open owner question: web/market research for series topics — not started.
 
 > 2026-11-17: 17c — "What to post next" moved from Performance into AI Content Series home; "What works in your posts" box in each series. NOT committed. Pending owner decision: web/market research for topic ideas.
