@@ -1,4 +1,4 @@
-> 2026-11-17: 18 DONE — AI Director as saved conversations with real follow-up memory (see first entry of IMPLEMENTATION_STATUS.md). NOT committed. Open owner questions: web/market research for series topics (OpenAI web search) — not started.
+> 2026-11-17: 18 DONE — AI Director as saved conversations. COMMITTED a1a76be on redesign/new-product-identity and, on the owner's instruction, dev fast-forwarded to it and pushed (origin/dev = origin/redesign/new-product-identity). Open owner question: web/market research for series topics — not started.
 
 > 2026-11-17: 17c — "What to post next" moved from Performance into AI Content Series home; "What works in your posts" box in each series. NOT committed. Pending owner decision: web/market research for topic ideas.
 
