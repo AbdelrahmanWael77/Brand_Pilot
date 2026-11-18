@@ -28,7 +28,7 @@ const MAX_NAME = 120;
  */
 export function createCompanies(
   db,
-  { fetchUrl = createFetchUrl(), fetchLimit = { max: 20, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 }, reportLimit = { max: 30, windowMs: 10 * 60_000 }, extractLimit = { max: 10, windowMs: 10 * 60_000 } } = {},
+  { fetchUrl = createFetchUrl(), fetchLimit = { max: 60, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 }, reportLimit = { max: 30, windowMs: 10 * 60_000 }, extractLimit = { max: 60, windowMs: 10 * 60_000 } } = {},
 ) {
   const knowledge = createKnowledge(db);
   const data = createData(db);

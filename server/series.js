@@ -30,7 +30,7 @@ import { AiError } from './ai.js';
 import { parseReply } from './director.js';
 import { colorName, visualOnly } from './campaignImage.js';
 import { approvedFacts } from './knowledge.js';
-import { seriesFacts, SERIES_KINDS, SUBJECT_RULE } from './recs.js';
+import { seriesFacts, SERIES_KINDS, SUBJECT_RULE, KNOWLEDGE, GENERAL_RULE, COMPANY_KINDS } from './recs.js';
 
 export const SERIES_LIMITS = { images: 8, imageChars: 1_400_000, name: 80, concept: 600, note: 200, field: 300, list: 8 };
 export const LAYOUTS = ['stack', 'split', 'hero'];
@@ -245,7 +245,7 @@ export function cleanTopics(body) {
   const have = (Array.isArray(b.have) ? b.have : []).map((x) => line(x, 200)).filter(Boolean).slice(0, TOPICS.have);
   const sources = Array.isArray(s.sources) ? s.sources.filter((x) => typeof x === 'string' && x.length <= 200).slice(0, 20) : [];
   return {
-    series: { name, purpose: line(s.purpose, TOPICS.text), audience: line(s.audience, TOPICS.text), objective: OBJ[s.objective] ? s.objective : 'engagement', kind: SERIES_KINDS[s.kind] ? s.kind : '', sources },
+    series: { name, purpose: line(s.purpose, TOPICS.text), audience: line(s.audience, TOPICS.text), objective: OBJ[s.objective] ? s.objective : 'engagement', kind: SERIES_KINDS[s.kind] ? s.kind : '', sources, knowledge: KNOWLEDGE.includes(s.knowledge) && !(s.knowledge === 'none' && COMPANY_KINDS.includes(s.kind)) ? s.knowledge : 'auto' },
     channel: CHN[b.channel] ? b.channel : 'linkedin', lang, have,
   };
 }
@@ -254,7 +254,7 @@ export function cleanTopics(body) {
 export function buildTopicsPrompt({ company, series, channel, lang, have }, facts, subject = []) {
   const system = [
     `You suggest ${TOPICS.n} topics for the next ${CHN[channel]} posts of one recurring content series of the company in <brief>. Write them in ${lang === 'ar' ? 'Arabic' : 'English'}.`,
-    'First work out what the series is about from its name, purpose, audience and kind. ' + SUBJECT_RULE,
+    series.knowledge === 'none' ? 'First work out what the series is about from its name, purpose, audience and kind. ' + GENERAL_RULE + ' Topics are practical, general advice for that audience.' : 'First work out what the series is about from its name, purpose, audience and kind. ' + SUBJECT_RULE,
     'Every topic must fit what the series is about, its goal and its audience: concrete, specific, one post each. Only when the series is general education or industry insight are topics practical, general advice (for example "3 questions to ask before building your mobile app"); mix questions to ask, mistakes to avoid, short how-tos, myths and checklists there.',
     'Use <facts> to understand the company and who it serves. A topic is never a claim about the company, a client name, a result, a price, an offer or a statistic. Numbers only as list sizes ("3 questions").',
     'Do not repeat or rephrase any topic in <have>.',

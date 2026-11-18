@@ -172,3 +172,30 @@ test('16c POST /content/polish: grounded rewrite, isolation, validation', async 
   assert.equal((await call('POST', `/api/companies/${bobCo}/content/polish`, alice, body)).status, 404);
   assert.equal((await call('POST', `/api/companies/${md}/content/polish`, alice, { kind: 'x' })).status, 400);
 });
+
+test('general series (knowledge none, owner 2026-11-18): no company facts sent, the prompt forbids company claims, drafts without approved facts', async () => {
+  const req = cleanDraftRequest({ ...BODY, series: { ...BODY.series, knowledge: 'none' } });
+  assert.equal(req.series.knowledge, 'none');
+  assert.equal(cleanDraftRequest({ ...BODY, series: { ...BODY.series, knowledge: 'weird' } }).series.knowledge, 'auto');
+  const p = buildDraftPrompt({ company: 'MD Labs', ...req }, []);
+  assert.match(p.system, /general educational series/i);
+  assert.match(p.system, /never state anything about the company/i);
+  assert.doesNotMatch(p.system, /about_the_series/);
+  // md has approved facts, but none reach the model; the empty company still gets a draft
+  next = () => reply(GOOD);
+  const n = calls.length;
+  for (const co of [md, empty]) {
+    const r = await call('POST', `/api/companies/${co}/recs/draft`, alice, { ...BODY, series: { ...BODY.series, knowledge: 'none' } });
+    assert.equal(r.status, 200);
+    const j = await r.json();
+    assert.ok(j.draft && j.draft.headline);
+    assert.deepEqual(j.facts, []);
+  }
+  assert.equal(calls.length, n + 2);
+  assert.ok(!JSON.stringify(calls.slice(-2)).includes('MD-Labs offers mobile development'), 'no company fact in the prompt');
+});
+
+test('a series about the company (program, product, culture, news) never drafts as "general, not about us"', () => {
+  for (const kind of ['program', 'product', 'culture', 'news']) assert.equal(cleanDraftRequest({ ...BODY, series: { ...BODY.series, kind, knowledge: 'none' } }).series.knowledge, 'auto');
+  for (const kind of ['edu', 'insight', '']) assert.equal(cleanDraftRequest({ ...BODY, series: { ...BODY.series, kind, knowledge: 'none' } }).series.knowledge, 'none');
+});

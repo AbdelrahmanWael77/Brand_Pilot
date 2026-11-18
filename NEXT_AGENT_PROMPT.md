@@ -1,3 +1,41 @@
+> 2026-11-18: 57 DONE — new-series flow: "What do you want to post?" type cards first (set kind + knowledge), then name/purpose/audience, then channel/goal. Tasks 41–57 committed and pushed; dev fast-forwarded to redesign/new-product-identity (owner asked).
+
+> 2026-11-18: 55 + 56 DONE (not committed) — Export & delivery redesign; series "Start from" starting points (Teach a topic = general explainer series in one click). 41–56 uncommitted.
+
+> 2026-11-18: 54 DONE (not committed) — new series: the kind is inferred from name / purpose / approved facts and shown on one line (Change opens the tiles); step 4 follows it. 41–54 uncommitted.
+
+> 2026-11-18: 53 DONE (not committed) — Growth & leads: band, honest funnel/empty states; evidence on all recommendation cards = 2 clean lines + Show all. 41–53 uncommitted.
+
+> 2026-11-18: 52 DONE (not committed) — Your data screen: status band, one drop zone, colour-coded source cards with "Unlocks"; duplicate tiles and the internal "Why these integrations" card removed. 41–52 uncommitted.
+
+> 2026-11-18: 51 DONE (not committed) — Settings has a Company card to rename the company. 41–51 uncommitted.
+
+> 2026-11-18: 50c DONE (not committed) — series setup step 4 ("What it writes from") now follows the kind in step 2; no contradictory combinations; server guard too. Restart :3000. 41–50c uncommitted.
+
+> 2026-11-18: 50b DONE (not committed) — series can be "General knowledge — not about us": no company facts sent, prompt forbids company claims, drafts without approved facts. Restart :3000. 41–50b uncommitted.
+
+> 2026-11-18: 50 DONE (not committed) — series setup step 4: Automatic (recommended) vs Only from topics I choose; clean grouped topics with fact counts instead of URL pills. 41–50 uncommitted.
+
+> 2026-11-18: 49 DONE (not committed) — Brand identity is one card (colours with roles, font, logos, each with Details); the separate "Brand identity in use" card and duplicate rows are gone. 41–49 uncommitted.
+
+> 2026-11-18: 48b DONE (not committed) — clicks inside an open panel/dialog no longer replay its slide/pop animation (looked like a refresh). 41–48b uncommitted.
+
+> 2026-11-18: 48 DONE (not committed) — website pages read 4 at a time, AI analysis 3 at a time, per-user allowances 60/10 min (was 20 fetch / 10 AI); Brand panel keeps its scroll on ↑/✕. Restart :3000 for the server part. 41–48 uncommitted.
+
+> 2026-11-18: 47 DONE (not committed) — website brand colours ignore framework palettes (Bootstrap etc.) and read the site's own CSS first; md-labs.net now gives #4CABE3 / #152B44. Owner: re-read the brand to replace the old pending list. 41–47 uncommitted.
+
+> 2026-11-18: 46 DONE (not committed) — Compare channels: question cards (answer sentence + ranked bars) replace the side-by-side table, which is folded under See all numbers. 41–46 uncommitted.
+
+> 2026-11-18: 45 DONE (not committed) — Compare channels lower half: cleaner table (no Search-only group, (i) notes, folded rules), gap alert cards, other lead sources as bars. 41–45 uncommitted.
+
+> 2026-11-18: 44 DONE (not committed) — Performance channel tabs (Facebook, Instagram, LinkedIn, Website, Google search) get the Summary look: colour band, sparkline cards, top posts, bar lists. 41–44 uncommitted.
+
+> 2026-11-18: 43 DONE (not committed) — Compare channels: headline band, channel cards, finding cards; removed How-it-works box, Sources and freshness, and the 'no earlier period' text. 41–43 uncommitted.
+
+> 2026-11-18: 42 DONE (not committed) — Performance Summary upgrade: headline band, coloured step cards with 12-week sparklines, bars in What changed, insight icons. Owner to look (not seen in a screenshot). 41 + 42 uncommitted.
+
+> 2026-11-18: 41 DONE (not committed) — AI suggestions card: full-width "Get AI suggestions" button; fixed CSS that task 34 had inserted inside a media rule (card had no border; .studio>.ed-side lost its prefix).
+
 > 2026-11-18 MERGE: two sessions both used task numbers 34–39 (see the numbering note at the top of IMPLEMENTATION_STATUS.md). Both sets are below — Set B (AI suggestions card … series parts 40b, .env.example removed) first, then Set A (Read-all warning … colour boxes). New work starts at 41.
 
 > 2026-11-18: .env.example removed from the repo on the owner's instruction (git rm staged, `!.env.example` dropped from .gitignore). Only the git-ignored .env holds settings. Tasks 34–40b still uncommitted.

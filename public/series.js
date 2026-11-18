@@ -335,6 +335,90 @@
     if (!used) { c.media = c.media.filter((m) => m.id !== id); delete SX.img[id]; }
   }
 
+  /* Step 4 "Knowledge it may use" (owner 2026-11-18: a wall of page URLs). Automatic is the default and what most
+     series need — facts that name the series come first (server/recs.js seriesFacts), then the most relevant approved
+     facts. "Only from topics I choose" is for a series about one service or program; it lists clean topic names,
+     grouped, with their count of approved facts — sources without approved facts are not offered (they add nothing). */
+  const STOP = new Set(['as', 'a', 'an', 'of', 'and', 'the', 'to', 'for', 'in', 'on', 'at', 'by', 'or', 'with']);
+  const srcUrl = (x) => (String(x.title || '').match(/https?:\/\/\S+/) || [x.url || ''])[0];
+  function srcName(x) {
+    let t = String(x.title || x.id).replace(/\s*[—–-]\s*https?:\/\/\S+\s*$/, '').replace(/https?:\/\/\S+/g, '').trim() || String(x.title || x.id);
+    try { t = decodeURIComponent(t); } catch (e) { /* keep */ }
+    const letters = t.replace(/[^A-Za-z]/g, ''), up = letters.replace(/[^A-Z]/g, '').length;
+    if (letters.length > 4 && up / letters.length > 0.6) {
+      t = t.split(/\s+/).map((w, i) => { const lw = w.toLowerCase(); return w.length <= 3 && !STOP.has(lw) ? w : i === 0 ? lw.charAt(0).toUpperCase() + lw.slice(1) : lw; }).join(' ');
+    }
+    return t;
+  }
+  function srcGroup(x) {
+    const u = srcUrl(x);
+    if (!u) return 'docs';
+    let seg = '';
+    try { seg = (new URL(u).pathname.split('/').filter(Boolean)[0] || '').toLowerCase(); } catch (e) { return 'more'; }
+    if (!seg || /^(about|about-us|team|careers|jobs|contact|contact-us|company|who-we-are)$/.test(seg)) return 'co';
+    if (/^(service|services|solutions?|products?|offers?|pricing|plans)$/.test(seg)) return 'offer';
+    return 'more';
+  }
+  /* Owner 2026-11-18: step 2 (what the series is about) and step 4 contradicted each other ("Company program" +
+     "General — not about us"). Step 4 now follows the kind: a series about the company always uses approved facts;
+     education / insight series default to general know-how, with "Add our perspective" to tie tips to what you do. */
+  const KCO = ['program', 'product', 'culture', 'news'], KGEN = ['edu', 'insight'];
+  const knowModes = (kind, srcs) => (KGEN.includes(kind) ? ['none', 'auto'] : ['auto']).concat(srcs.length ? ['pick'] : []);
+  const knowDefault = (kind) => (KGEN.includes(kind) ? 'none' : 'auto');
+  function knowHTML(c, f, srcs) {
+    const cnt = (x) => c.findings.filter((ff) => ff.src === x.id && ff.status === 'approved').length;
+    const kind = kindOf(c, f), modes = knowModes(kind, srcs), sel = f.sources || [], total = c.findings.filter((ff) => ff.status === 'approved').length;
+    const mode = modes.includes(f.srcMode) ? f.srcMode : sel.length && modes.includes('pick') ? 'pick' : knowDefault(kind), pick = mode === 'pick', rec = knowDefault(kind);
+    const T = {
+      auto: KGEN.includes(kind) ? [L('Add our perspective', 'أضف منظورنا'), L(`Tips tied to what you do, from your approved facts — ${total} available.`, `نصائح مرتبطة بما تقدّمه، من حقائقك المعتمدة — ${total} متاحة.`)] : [L('Your approved knowledge', 'معرفتك المعتمدة'), L(`Facts that mention this series first, then the most relevant ones — ${total} available.`, `الحقائق التي تذكر هذه السلسلة أولاً، ثم الأنسب — ${total} متاحة.`)],
+      pick: [L('Only topics I choose', 'مواضيع أختارها فقط'), L('For one service or program, so other topics stay out.', 'لخدمة أو برنامج واحد، كي تبقى المواضيع الأخرى خارجها.')],
+      none: [L('General know-how', 'معرفة عامة'), L('Tips for your audience. Nothing is said about your company — it is only the publisher.', 'نصائح لجمهورك. لا يُقال شيء عن شركتك — هي الناشر فقط.')],
+    };
+    const why = KCO.includes(kind) ? L(`A ${kindName(kind).split(' (')[0].toLowerCase()} series is about your company, so it always writes from your approved facts.`, `سلسلة ${kindName(kind).split(' (')[0]} عن شركتك، لذلك تكتب دائماً من حقائقك المعتمدة.`)
+      : KGEN.includes(kind) ? L('Education and insight posts can stand on general know-how, or add your perspective.', 'منشورات التعليم والرؤى يمكن أن تعتمد على المعرفة العامة، أو تضيف منظورك.')
+      : L('BrandPilot reads your approved knowledge to work out what the series is about, so it writes from it.', 'يقرأ BrandPilot معرفتك المعتمدة ليفهم موضوع السلسلة، لذلك يكتب منها.');
+    const opt = (v) => `<label class="sx-km-o ${mode === v ? 'on' : ''}"><input type="radio" name="srcMode" value="${v}" data-c="sxF" ${mode === v ? 'checked' : ''}><span><b>${T[v][0]}${v === rec ? ` <i class="sx-rec">${L('recommended', 'موصى به')}</i>` : ''}</b><span>${T[v][1]}</span></span></label>`;
+    const G = [['co', L('Company', 'الشركة')], ['offer', L('What you offer', 'ما تقدّمه')], ['more', L('More pages', 'صفحات أخرى')], ['docs', L('Documents & notes', 'مستندات وملاحظات')]];
+    const groups = G.map(([k, t]) => [t, srcs.filter((x) => srcGroup(x) === k)]).filter((g) => g[1].length);
+    const nSel = srcs.filter((x) => sel.includes(x.id)).reduce((t, x) => t + cnt(x), 0);
+    const empty = !total && mode !== 'none' ? `<p class="sx-kn w">${L('You have no approved facts yet — approve some in Your company, or this series will have little to write from.', 'لا حقائق معتمدة لديك بعد — اعتمد بعضها في «شركتك»، وإلا فلن تجد السلسلة ما تكتب منه.')}</p>` : '';
+    return `<p class="sx-kw">${ic('info', 14)}<span>${why}</span></p><div class="sx-km n${modes.length}" role="radiogroup" aria-label="${esc(L('Knowledge it may use', 'المعرفة التي يمكنها استخدامها'))}">${modes.map(opt).join('')}</div>${empty}
+      ${pick ? `<div class="sx-kgs">${groups.map(([t, xs]) => `<div class="sx-kg"><span class="sx-kg-h">${t}</span><div class="sx-pills">${xs.map((x) => `<label class="sx-pill sx-kp" title="${esc(srcUrl(x) || x.title || '')}"><input type="checkbox" name="src" value="${esc(x.id)}" ${sel.includes(x.id) ? 'checked' : ''} data-c="sxF"><span dir="auto">${esc(srcName(x))}</span><em>${cnt(x)}</em></label>`).join('')}</div></div>`).join('')}
+        <p class="sx-kn ${sel.length ? '' : 'w'}">${sel.length ? L(`${nSel} approved facts from ${sel.length} topic${sel.length > 1 ? 's' : ''} — plus any fact that names the series.`, `${nSel} حقيقة معتمدة من ${sel.length} موضوع — إضافة إلى أي حقيقة تذكر السلسلة.`) : L('Tick at least one topic — or choose another option.', 'اختر موضوعاً واحداً على الأقل — أو اختر خياراً آخر.')}</p></div>` : ''}`;
+  }
+
+  /* Owner 2026-11-18: choosing the kind is not a required step. BrandPilot reads it from the name, the purpose and the
+     approved facts that name the series (e.g. "MD Geeks" + "an internship program called MD-Geeks" → program), shows it
+     on one line, and the seven tiles open only on "Change". With nothing to go on the kind stays empty and
+     BrandPilot works it out from the knowledge after the series is created (aiUnderstand). */
+  const KIND_WORDS = {
+    program: /\b(?:intern(?:ship)?s?|academy|bootcamp|program(?:me)?s?|community|hackathons?|graduates?|trainees?|mentorship|scholarships?|events?|webinars?|meetups?)\b|تدريب|أكاديمية|برنامج|مجتمع|فعالية/i,
+    news: /\b(?:news|announce\w*|launch\w*|milestones?|awards?|releases?)\b|أخبار|إعلان|إطلاق/i,
+    culture: /\b(?:team|culture|people|behind the scenes|values|life at|hiring|careers?|employees?)\b|فريق|ثقافة|موظفين/i,
+    edu: /\b(?:tips?|how[- ]to|guides?|questions?|learn\w*|explain\w*|checklists?|steps?|basics|101|smarter|best practices?|testing|what is|what's|intro(?:duction)?|beginners?|fundamentals|explainers?)\b|نصائح|كيف|دليل|أسئلة|تعلم|ما هو|ما هي|أساسيات|شرح/i,
+    insight: /\b(?:trends?|insights?|mistakes?|myths?|future|industry|market|opinions?|lessons?)\b|اتجاهات|رؤى|أخطاء/i,
+    product: /\b(?:products?|services?|solutions?|features?|platforms?|offerings?|spotlight|case stud(?:y|ies))\b|منتج|خدمة|حلول/i,
+  };
+  function inferKind(c, f) {
+    const name = String(f.name || ''), purpose = String(f.purpose || ''), facts = name.trim().length >= 3 ? subjectOf(c, { name }).map((x) => x.text).join(' ') : '';
+    let best = null;
+    for (const k of Object.keys(KIND_WORDS)) {
+      const re = KIND_WORDS[k], hit = (t) => { const m = re.exec(t); return m ? m[0] : null; };
+      const w = hit(name), p = hit(purpose), x = hit(facts), score = (w ? 2 : 0) + (p ? 1 : 0) + (x ? 1 : 0);
+      if (score && (!best || score > best.score)) best = { kind: k, score, word: w || p || x, fromFacts: !w && !p };
+    }
+    return best;
+  }
+  const kindOf = (c, f) => f.kind || (f.kindOff ? '' : (inferKind(c, f) || {}).kind || '');
+  function kindLine(c, f, kinds, H) {
+    const auto = inferKind(c, f), k = kindOf(c, f), open = f.kindOpen, nm = (x) => (kinds.find((y) => y[0] === x) || [0, ''])[1];
+    const line = f.kind ? L(`Chosen by you: <b>${esc(nm(k))}</b>`, `اخترته أنت: <b>${esc(nm(k))}</b>`)
+      : k ? L(`BrandPilot reads this as <b>${esc(nm(k))}</b>`, `يقرأ BrandPilot هذا كـ <b>${esc(nm(k))}</b>`) + `<span class="sx-kd">${auto.fromFacts ? L('— from your approved facts', '— من حقائقك المعتمدة') : L(`— from “${esc(auto.word)}”`, `— من «${esc(auto.word)}»`)}</span>`
+      : L('BrandPilot will work out what kind of series this is from your knowledge after you create it.', 'سيستنتج BrandPilot نوع هذه السلسلة من معرفتك بعد إنشائها.');
+    return `<div class="sx-kl"><span class="sx-kl-i">${ic(KIND_IC[k] || KIND_IC[''], 16)}</span><span class="sx-kl-t">${line}</span><button type="button" class="btn sm ghost" data-a="sxKindOpen">${open ? L('Done', 'تم') : f.kind || k ? L('Change', 'غيّر') : L('Choose yourself', 'اختر بنفسك')}</button></div>
+      ${open ? `<div class="sx-tiles" role="radiogroup" aria-label="${esc(L('Kind of series', 'نوع السلسلة'))}">${kinds.map(([x, t]) => `<label class="sx-tile"><input type="radio" name="kindPick" value="${x}" ${(f.kind || (f.kindOff ? '' : null)) === x || (!f.kind && !f.kindOff && x === k && k) ? 'checked' : ''} data-c="sxF"><span class="sx-tile-i">${ic(KIND_IC[x], 18)}</span><b>${t}</b><small>${H[x]}</small></label>`).join('')}</div>` : ''}<input type="hidden" name="kind" value="${esc(k)}">`;
+  }
+
   /* ---------- views ---------- */
   const chip = (t, cls) => `<span class="sx-chip ${cls || ''}">${t}</span>`;
   const swatches = (st) => `<span class="sx-sw" aria-hidden="true">${[st.bg[0], st.bg[1], st.accent, st.ink].filter(isHex).map((h) => `<i style="background:${h}"></i>`).join('')}</span>`;
@@ -374,11 +458,48 @@
       <p class="sx-rc-a"><button class="linklike small" data-a="nxSkip" data-v="${esc(r.id)}">${L('Not now', 'ليس الآن')}</button></p></div>`;
   }
 
-  const PURPOSES = () => [[L('Practical education', 'تعليم عملي'), L('Practical, educational posts that help our audience make better decisions.', 'منشورات عملية تعليمية تساعد جمهورنا على اتخاذ قرارات أفضل.')], [L('Technology news', 'أخبار التقنية'), L('Short explanations of relevant technology news and what it means for our audience.', 'شرح قصير لأخبار التقنية المهمة وما تعنيه لجمهورنا.')], [L('Tips', 'نصائح'), L('One useful, practical tip per post.', 'نصيحة عملية مفيدة في كل منشور.')], [L('Industry insights', 'رؤى القطاع'), L('Insights about our industry, trends and common mistakes.', 'رؤى عن قطاعنا والاتجاهات والأخطاء الشائعة.')], [L('Thought leadership', 'قيادة فكرية'), L('Our point of view on where our field is going.', 'وجهة نظرنا في اتجاه مجالنا.')]];
+  /* Owner 2026-11-18 ("how do I make a series like 'What is testing?'"): the purpose chips are starting points that set
+     the purpose, the kind and what it writes from in one click. {topic} becomes the series name. */
+  const PURPOSES = () => [
+    [L('Teach a topic', 'علّم موضوعاً'), L('Explain the basics of {topic} in simple words — one clear idea per post.', 'اشرح أساسيات {topic} بكلمات بسيطة — فكرة واضحة واحدة في كل منشور.'), 'edu', 'none', 'book'],
+    [L('Practical tips', 'نصائح عملية'), L('One practical tip about {topic} per post that our audience can use right away.', 'نصيحة عملية واحدة عن {topic} في كل منشور يستطيع جمهورنا تطبيقها فوراً.'), 'edu', 'none', 'check'],
+    [L('Mistakes & myths', 'أخطاء وخرافات'), L('Common mistakes and myths about {topic}, and what to do instead.', 'الأخطاء والخرافات الشائعة عن {topic} وما الصواب بدلاً منها.'), 'insight', 'none', 'alert'],
+    [L('Trends', 'اتجاهات'), L('What is changing in {topic} and what it means for our audience.', 'ما الذي يتغيّر في {topic} وماذا يعني لجمهورنا.'), 'insight', 'none', 'growth'],
+    [L('Our point of view', 'وجهة نظرنا'), L('Our point of view on {topic}, backed by what we do.', 'وجهة نظرنا في {topic}، مدعومة بما نقوم به.'), 'insight', 'auto', 'quote'],
+    [L('Showcase a service', 'اعرض خدمة'), L('What our {topic} service solves, how it works and who it is for.', 'ما المشكلة التي تحلّها خدمة {topic} وكيف تعمل ولمن هي.'), 'product', 'auto', 'layers'],
+    [L('Promote a program', 'روّج لبرنامج'), L('What {topic} is, who it is for and how to join.', 'ما هو {topic} ولمن هو وكيف تنضم إليه.'), 'program', 'auto', 'flag'],
+  ];
   /* The "New content series" form (owner 2026-11-17: the plain form was flat): numbered steps, choices as tiles and
      pills, and a live preview card in the brand colours that updates as the owner types (A.sxF, no re-render). */
   const KIND_IC = { '': 'spark', edu: 'book', insight: 'bulb', program: 'flag', product: 'layers', culture: 'user', news: 'inbox' };
-  const KIND_HINT = () => ({ '': L('BrandPilot reads your knowledge and suggests the kind', 'يقرأ BrandPilot معرفتك ويقترح النوع'), edu: L('Tips, how-tos, questions to ask', 'نصائح وطرق وأسئلة'), insight: L('Trends, common mistakes, opinions', 'اتجاهات وأخطاء شائعة وآراء'), program: L('An internship, academy, community or event', 'تدريب أو أكاديمية أو مجتمع أو فعالية'), product: L('One product or service in focus', 'منتج أو خدمة واحدة في الواجهة'), culture: L('Team, values, behind the scenes', 'الفريق والقيم وما وراء الكواليس'), news: L('Announcements and milestones', 'إعلانات وإنجازات') });
+  const KIND_HINT = () => ({ '': L('BrandPilot reads your knowledge and suggests the kind', 'يقرأ BrandPilot معرفتك ويقترح النوع'), edu: L('Tips, how-tos, explainers — e.g. “What is testing?”', 'نصائح وشروحات وطرق — مثل «ما هو الاختبار؟»'), insight: L('Trends, common mistakes, opinions', 'اتجاهات وأخطاء شائعة وآراء'), program: L('An internship, academy, community or event', 'تدريب أو أكاديمية أو مجتمع أو فعالية'), product: L('One product or service in focus', 'منتج أو خدمة واحدة في الواجهة'), culture: L('Team, values, behind the scenes', 'الفريق والقيم وما وراء الكواليس'), news: L('Announcements and milestones', 'إعلانات وإنجازات') });
+  /* Owner 2026-11-18 ("as a user I can't understand that flow"): one decision first — what do you want to post? —
+     then the details. A type sets the kind and what the posts are written from; one line says what that means, with
+     Change for the knowledge options. Kind tiles, the kind line and the separate step 4 are gone. */
+  const TYPES = () => [
+    ['teach', L('Teach a topic', 'علّم موضوعاً'), L('e.g. “What is testing?”', 'مثل «ما هو الاختبار؟»'), 'edu', 'none', 'book', L('Explain the basics of {topic} in simple words — one clear idea per post.', 'اشرح أساسيات {topic} بكلمات بسيطة — فكرة واضحة واحدة في كل منشور.'), L('e.g. Testing 101', 'مثال: الاختبار 101')],
+    ['tips', L('Practical tips', 'نصائح عملية'), L('e.g. “5 QA habits for startups”', 'مثل «5 عادات جودة للشركات الناشئة»'), 'edu', 'none', 'check', L('One practical tip about {topic} per post that our audience can use right away.', 'نصيحة عملية واحدة عن {topic} في كل منشور يستطيع جمهورنا تطبيقها فوراً.'), L('e.g. QA Tips', 'مثال: نصائح الجودة')],
+    ['insight', L('Industry insights', 'رؤى القطاع'), L('Trends, mistakes and myths', 'اتجاهات وأخطاء وخرافات'), 'insight', 'none', 'bulb', L('What is changing in {topic}, the common mistakes, and what it means for our audience.', 'ما الذي يتغيّر في {topic} والأخطاء الشائعة وماذا يعني ذلك لجمهورنا.'), L('e.g. Software Trends', 'مثال: اتجاهات البرمجيات')],
+    ['view', L('Our point of view', 'وجهة نظرنا'), L('How you see your field', 'كيف ترى مجالك'), 'insight', 'auto', 'quote', L('Our point of view on {topic}, backed by what we do.', 'وجهة نظرنا في {topic}، مدعومة بما نقوم به.'), L('e.g. Build Smarter', 'مثال: ابنِ بذكاء')],
+    ['service', L('Showcase a service', 'اعرض خدمة'), L('One product or service in focus', 'منتج أو خدمة واحدة'), 'product', 'auto', 'layers', L('What {topic} solves, how it works and who it is for.', 'ما المشكلة التي يحلّها {topic} وكيف يعمل ولمن هو.'), L('e.g. CTO as a Service', 'مثال: CTO كخدمة')],
+    ['program', L('Promote a program or event', 'روّج لبرنامج أو فعالية'), L('An internship, academy or event', 'تدريب أو أكاديمية أو فعالية'), 'program', 'auto', 'flag', L('What {topic} is, who it is for and how to join.', 'ما هو {topic} ولمن هو وكيف تنضم إليه.'), L('e.g. MD Geeks', 'مثال: MD Geeks')],
+    ['culture', L('Team & culture', 'الفريق والثقافة'), L('People, values, behind the scenes', 'الناس والقيم وما وراء الكواليس'), 'culture', 'auto', 'user', L('The people, values and everyday life behind our work.', 'الناس والقيم والحياة اليومية وراء عملنا.'), L('e.g. Life at our company', 'مثال: الحياة في شركتنا')],
+    ['news', L('News & milestones', 'أخبار وإنجازات'), L('Announcements and wins', 'إعلانات ونجاحات'), 'news', 'auto', 'inbox', L('Our news and milestones, in short posts.', 'أخبارنا وإنجازاتنا في منشورات قصيرة.'), L('e.g. Company news', 'مثال: أخبار الشركة')],
+    ['other', L('Something else', 'شيء آخر'), L('Describe it — BrandPilot works out the rest', 'صِفه — ويستنتج BrandPilot الباقي'), '', 'auto', 'spark', '', L('e.g. Build Smarter', 'مثال: ابنِ بذكاء')],
+  ];
+  const typeOf = (f) => TYPES().find((t) => t[0] === f.type) || null;
+  /* The knowledge mode in effect (also what a hidden field sends when the options are folded). */
+  function knowMode(c, f, srcs) {
+    const kind = kindOf(c, f), modes = knowModes(kind, srcs), sel = f.sources || [];
+    return modes.includes(f.srcMode) ? f.srcMode : sel.length && modes.includes('pick') ? 'pick' : knowDefault(kind);
+  }
+  function typeHTML(c, f, srcs) {
+    const T = typeOf(f), mode = knowMode(c, f, srcs), total = c.findings.filter((x) => x.status === 'approved').length;
+    const what = { none: L('Posts explain from general know-how — nothing is said about your company.', 'المنشورات تشرح من المعرفة العامة — لا يُقال شيء عن شركتك.'), auto: L(`Posts are written from your approved facts (${total} available) — facts that mention the series first.`, `المنشورات تُكتب من حقائقك المعتمدة (${total} متاحة) — الحقائق التي تذكر السلسلة أولاً.`), pick: L(`Posts use only the topics you chose (${(f.sources || []).length}).`, `المنشورات تستخدم المواضيع التي اخترتها فقط (${(f.sources || []).length}).`) }[mode];
+    return `<div class="sx-types" role="radiogroup" aria-label="${esc(L('What do you want to post?', 'ماذا تريد أن تنشر؟'))}">${TYPES().map(([k, t, ex, , , icn]) => `<label class="sx-type ${f.type === k ? 'on' : ''}"><input type="radio" name="stype" value="${k}" ${f.type === k ? 'checked' : ''} data-c="sxF"><span class="sx-type-i">${ic(icn, 18)}</span><b>${t}</b><small>${ex}</small></label>`).join('')}</div>
+      ${T ? `<div class="sx-kl"><span class="sx-kl-i">${ic(mode === 'none' ? 'book' : 'db', 16)}</span><span class="sx-kl-t">${what}</span><button type="button" class="btn sm ghost" data-a="sxKnowOpen">${f.knowOpen ? L('Done', 'تم') : L('Change', 'غيّر')}</button></div>${f.knowOpen ? `<div class="sx-kopen">${knowHTML(c, f, srcs)}</div>` : `<input type="hidden" name="srcMode" value="${mode}">`}` : `<p class="muted small sx-tnote">${L('Not sure? Pick “Something else” or just skip this — BrandPilot works it out from the name and what it is for.', 'لست متأكداً؟ اختر «شيء آخر» أو تخطَّ هذا — يستنتج BrandPilot النوع من الاسم والغرض.')}</p><input type="hidden" name="srcMode" value="${mode}">`}
+      <input type="hidden" name="kind" value="${esc(kindOf(c, f))}">`;
+  }
   function setupHTML(c, first) {
     const f = SX.form || (SX.form = { name: '', purpose: '', channel: 'linkedin', objective: 'engagement', kind: '', audience: '', sources: [] });
     const ideas = typeof nxIdeas === 'function' ? nxIdeas(c).slice(0, 5) : [];
@@ -394,20 +515,18 @@
         ${first ? '' : `<button type="button" class="sx-new-x" data-a="sxNewT" aria-label="${esc(L('Close', 'إغلاق'))}">${ic('x', 18)}</button>`}</header>
       <form data-s="sxCreate" class="sx-new-g">
       <div class="sx-new-f">
-        ${step(1, L('Name the series', 'سمِّ السلسلة'), L('Short and recognisable — it appears on every post.', 'قصير ومميز — يظهر على كل منشور.'), `<input class="sx-big" name="name" required maxlength="60" dir="auto" value="${esc(f.name)}" data-i="sxF" placeholder="${esc(L('e.g. Build Smarter', 'مثال: Build Smarter'))}" aria-label="${esc(L('Series name', 'اسم السلسلة'))}">
-          ${ideas.length ? `<div class="sx-chips"><span class="muted small">${L('From your approved themes', 'من موضوعاتك المعتمدة')}</span>${ideas.map((t) => `<button type="button" class="sx-chipb" data-a="sxSug" data-k="name" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>` : ''}`)}
-        ${step(2, L('What is it about?', 'عن ماذا هي؟'), L('The kind decides how BrandPilot writes: a program is written about very differently from tips.', 'النوع يحدد طريقة الكتابة: البرنامج يُكتب عنه بشكل مختلف تماماً عن النصائح.'), `<div class="sx-tiles" role="radiogroup" aria-label="${esc(L('Kind of series', 'نوع السلسلة'))}">${kinds.map(([k, t]) => `<label class="sx-tile"><input type="radio" name="kind" value="${k}" ${(f.kind || '') === k ? 'checked' : ''} data-c="sxF"><span class="sx-tile-i">${ic(KIND_IC[k], 18)}</span><b>${t}</b><small>${H[k]}</small></label>`).join('')}</div>
-          <label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="2" maxlength="400" dir="auto" data-i="sxF" placeholder="${esc(L('One sentence — or pick one below', 'جملة واحدة — أو اختر من الأسفل'))}">${esc(f.purpose)}</textarea></label>
-          <div class="sx-chips">${PURPOSES().map(([t, p]) => `<button type="button" class="sx-chipb" data-a="sxSug" data-k="purpose" data-v="${esc(p)}">${esc(t)}</button>`).join('')}</div>
-          <label class="f">${L('Who is it for?', 'لمن هي؟')}<input name="audience" maxlength="160" dir="auto" data-i="sxF" value="${esc(f.audience || '')}" placeholder="${esc(L('e.g. students and fresh graduates', 'مثال: الطلاب والخريجون الجدد'))}"></label>`)}
+        ${step(1, L('What do you want to post?', 'ماذا تريد أن تنشر؟'), L('Pick the closest one — it decides how BrandPilot writes.', 'اختر الأقرب — فهو يحدد طريقة كتابة BrandPilot.'), typeHTML(c, f, srcs))}
+        ${step(2, L('Name it', 'سمِّها'), L('Short and recognisable — it appears on every post.', 'قصير ومميز — يظهر على كل منشور.'), `<input class="sx-big" name="name" required maxlength="60" dir="auto" value="${esc(f.name)}" data-i="sxF" placeholder="${esc((typeOf(f) || [])[7] || L('e.g. Build Smarter', 'مثال: Build Smarter'))}" aria-label="${esc(L('Series name', 'اسم السلسلة'))}">
+          ${ideas.length ? `<div class="sx-chips"><span class="muted small">${L('From your approved themes', 'من موضوعاتك المعتمدة')}</span>${ideas.map((t) => `<button type="button" class="sx-chipb" data-a="sxSug" data-k="name" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>` : ''}
+          <label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="2" maxlength="400" dir="auto" data-i="sxF" placeholder="${esc(L('One sentence, e.g. Explain the basics of testing to founders.', 'جملة واحدة، مثل: اشرح أساسيات الاختبار للمؤسسين.'))}">${esc(f.purpose)}</textarea></label>
+          <label class="f">${L('Who is it for?', 'لمن هي؟')}<input name="audience" maxlength="160" dir="auto" data-i="sxF" value="${esc(f.audience || '')}" placeholder="${esc(L('e.g. startup founders', 'مثال: مؤسسو الشركات الناشئة'))}"></label>`)}
         ${step(3, L('Where and why', 'أين ولماذا'), '', `<div class="sx-pickrow"><span class="small"><b>${L('Main channel', 'القناة الرئيسية')}</b></span><div class="sx-pills" role="radiogroup">${['linkedin', 'instagram', 'facebook'].map((k) => pill('channel', k, CHN[k], f.channel === k)).join('')}</div></div>
           <div class="sx-pickrow"><span class="small"><b>${L('Goal', 'الهدف')}</b></span><div class="sx-pills" role="radiogroup">${Object.keys(NXO).map((k) => pill('objective', k, nxL(NXO[k]), f.objective === k)).join('')}</div></div>`)}
-        ${srcs.length ? step(4, L('Knowledge it may use', 'المعرفة التي يمكنها استخدامها'), L('Approved facts only. Tick none to use all approved knowledge.', 'الحقائق المعتمدة فقط. لا تحدد شيئاً لاستخدام كل المعرفة المعتمدة.'), `<div class="sx-pills">${srcs.map((x) => `<label class="sx-pill"><input type="checkbox" name="src" value="${esc(x.id)}" ${(f.sources || []).includes(x.id) ? 'checked' : ''} data-c="sxF">${ic('file', 15)}<span dir="auto">${esc(x.title || x.id)}</span></label>`).join('')}</div>`) : ''}
       </div>
       <aside class="sx-new-pv" aria-label="${esc(L('Preview', 'معاينة'))}"><p class="small muted">${L('Preview', 'معاينة')}</p>
         <div class="sx-pvc"><div class="sx-pvc-art">${lg ? `<img src="${media(c, lg.id).data}" alt="" class="sx-pvc-lg">` : ''}<i></i><strong data-pv="name" dir="auto">${esc(f.name || L('Your series name', 'اسم سلسلتك'))}</strong><span>${L('Same look, new topic.', 'نفس الشكل، موضوع جديد.')}</span></div>
           <div class="sx-pvc-b"><p data-pv="purpose" dir="auto">${esc(f.purpose || L('What the series is for appears here.', 'يظهر هنا الغرض من السلسلة.'))}</p>
-          <p class="sx-meta"><span class="sx-chip" data-pv="kind">${esc((kinds.find((x) => x[0] === (f.kind || '')) || kinds[0])[1])}</span><span class="sx-chip" data-pv="channel">${CHN[f.channel] || 'LinkedIn'}</span></p>
+          <p class="sx-meta"><span class="sx-chip" data-pv="kind">${esc((typeOf(f) || [0, L('Series', 'سلسلة')])[1])}</span><span class="sx-chip" data-pv="channel">${CHN[f.channel] || 'LinkedIn'}</span></p>
           <p class="small muted" data-pv="audience" dir="auto">${esc(f.audience ? L('For: ', 'لمن: ') + f.audience : L('Audience not set yet', 'لم يُحدَّد الجمهور بعد'))}</p></div></div>
         <p class="muted small">${L('Your brand kit (colours, official logo) is applied automatically. Next you can add previous posts so BrandPilot learns the exact look.', 'تُطبَّق هوية علامتك (الألوان والشعار الرسمي) تلقائياً. بعدها يمكنك إضافة منشورات سابقة ليتعلم BrandPilot الشكل بدقة.')}</p></aside>
       <footer class="sx-new-ft"><span class="muted small">${L('You can change everything later.', 'يمكنك تغيير كل شيء لاحقاً.')}</span><div class="row">${first ? '' : `<button type="button" class="btn ghost" data-a="sxNewT">${L('Cancel', 'إلغاء')}</button>`}<button class="btn pri">${ic('plus', 16)}<span>${L('Create series', 'أنشئ السلسلة')}</span></button></div></footer>
@@ -454,7 +573,7 @@
       ${ideas.length ? `<div class="sx-tl">${ideas.map((i) => `<button class="sx-ti" data-a="sxIdea" data-v="${esc(s.id)}" data-k="${esc(i.t)}" data-f="${esc(i.fmt)}"><span class="sx-tt" dir="auto">${esc(i.t)}</span>${i.why ? `<span class="sx-tw" dir="auto">${esc(i.why)}</span>` : ''}<span class="sx-tm">${tag(i)}${i.fmt === 'carousel' ? chip(L('Carousel', 'منشور دوّار')) : ''}</span></button>`).join('')}</div>`
         : busy ? `<p class="muted small">${L('BrandPilot is thinking of topics for this series…', 'يفكر BrandPilot في مواضيع لهذه السلسلة…')}</p>` : SX.tErr && SX.tErr[s.id] ? `<p class="note w small">${L('The AI could not suggest topics this time', 'تعذّر على الذكاء الاصطناعي اقتراح مواضيع هذه المرة')} (${esc(SX.tErr[s.id])}). ${L('Use “Suggest topics with AI” to try again, or type your own topic above.', 'استخدم «اقترح مواضيع بالذكاء الاصطناعي» للمحاولة مجدداً، أو اكتب موضوعك أعلاه.')}</p>` : `<p class="muted small">${L('No topic ideas yet. Ask the AI, or type your own topic above.', 'لا أفكار مواضيع بعد. اطلبها من الذكاء الاصطناعي، أو اكتب موضوعك أعلاه.')}</p>`}
       ${ai && ai.subject ? `<p class="muted small">${L(`These ideas are about ${esc(s.name)} itself — ${ai.subject} approved fact(s) name it.`, `هذه الأفكار عن ${esc(s.name)} نفسها — ${ai.subject} حقيقة معتمدة تذكرها.`)}</p>` : ''}
-      ${ai && !ai.facts ? `<p class="muted small">${L('These AI ideas come from the series purpose only — approve facts in Your company for ideas closer to what you do.', 'أفكار الذكاء الاصطناعي هذه من غرض السلسلة فقط — اعتمد حقائق في شركتك لأفكار أقرب لعملك.')}</p>` : ''}</div>`;
+      ${ai && !ai.facts && s.knowledge !== 'none' ? `<p class="muted small">${L('These AI ideas come from the series purpose only — approve facts in Your company for ideas closer to what you do.', 'أفكار الذكاء الاصطناعي هذه من غرض السلسلة فقط — اعتمد حقائق في شركتك لأفكار أقرب لعملك.')}</p>` : ''}</div>`;
   }
   async function aiTopics(c, s, quiet) {
     const key = 'topics-' + s.id;
@@ -464,7 +583,7 @@
     SX.busy[key] = 1; R();
     try {
       await synced(c);
-      const r = await api('POST', '/api/companies/' + c.id + '/series/topics', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [] }, channel: s.channel || 'linkedin', lang: d.lang === 'ar' ? 'ar' : 'en', have });
+      const r = await api('POST', '/api/companies/' + c.id + '/series/topics', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [], knowledge: s.knowledge || 'auto' }, channel: s.channel || 'linkedin', lang: d.lang === 'ar' ? 'ar' : 'en', have });
       const prev = (s.topicAI && s.topicAI.items) || [];
       s.topicAI = { items: r.topics.map((x) => ({ t: x.topic, why: x.why, fmt: x.format })).concat(prev).slice(0, 16), facts: r.facts, subject: r.subject || 0, model: r.model, at: Date.now() };
       if (SX.tErr) delete SX.tErr[s.id];
@@ -605,10 +724,10 @@
     const sub = subjectOf(c, s), p = s.undProp, busy = SX.busy['und-' + s.id], ed = S.ui.sxAbout === s.id;
     const facts = sub.length ? `<details class="sx-about-f"><summary class="small">${L(`${sub.length} approved fact(s) name ${esc(s.name)}`, `${sub.length} حقيقة معتمدة تذكر ${esc(s.name)}`)}</summary><ul>${sub.slice(0, 6).map((f) => `<li class="small" dir="auto">${esc(f.text)}</li>`).join('')}</ul></details>` : '';
     const prop = p ? `<div class="sx-prop"><p class="small"><b>${L('BrandPilot understands this series as:', 'يفهم BrandPilot هذه السلسلة كالتالي:')}</b></p><dl class="sx-dl"><dt>${L('Kind', 'النوع')}</dt><dd>${esc(kindName(p.kind))}</dd><dt>${L('About', 'عن')}</dt><dd dir="auto">${esc(p.about)}</dd><dt>${L('Purpose', 'الغرض')}</dt><dd dir="auto">${esc(p.purpose)}</dd>${p.audience ? `<dt>${L('For', 'لمن')}</dt><dd dir="auto">${esc(p.audience)}</dd>` : ''}</dl>${p.missing ? `<p class="note w small" dir="auto">${esc(p.missing)}</p>` : ''}<p class="muted small">${L(`From ${p.facts.length} approved fact(s). Check it — then BrandPilot suggests topics and writes posts with it.`, `من ${p.facts.length} حقيقة معتمدة. راجعه — ثم يقترح BrandPilot المواضيع ويكتب المنشورات بناءً عليه.`)}</p><div class="row"><button class="btn sm pri" data-a="sxUndOk" data-v="${esc(s.id)}">${L('Use this', 'استخدم هذا')}</button><button class="btn sm" data-a="sxAboutEd" data-v="${esc(s.id)}">${L('Edit', 'عدّل')}</button><button class="btn sm ghost" data-a="sxUndX" data-v="${esc(s.id)}">${L('Dismiss', 'تجاهل')}</button></div></div>` : '';
-    const form = ed ? `<form class="sx-about-ed stack" data-s="sxAbout" data-v="${esc(s.id)}"><label class="f">${L('Series name', 'اسم السلسلة')}<input name="name" required maxlength="60" dir="auto" value="${esc(s.name)}"></label><div class="sx-2"><label class="f">${L('Main channel', 'القناة الرئيسية')}<select name="channel">${['linkedin', 'instagram', 'facebook'].map((k) => `<option value="${k}" ${(s.channel || 'linkedin') === k ? 'selected' : ''}>${CHN[k]}</option>`).join('')}</select></label><label class="f">${L('Goal', 'الهدف')}<select name="objective">${Object.keys(NXO).map((k) => `<option value="${k}" ${(s.objective || 'engagement') === k ? 'selected' : ''}>${nxL(NXO[k])}</option>`).join('')}</select></label></div><label class="f">${L('Kind', 'النوع')}<select name="kind"><option value="">${L('Let BrandPilot work it out', 'دع BrandPilot يحدده')}</option>${KINDS().map(([k, t]) => `<option value="${k}" ${(p ? p.kind : s.kind) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="3" maxlength="400" dir="auto">${esc(p ? p.purpose : s.purpose || '')}</textarea></label><label class="f">${L('Who is it for?', 'لمن هي؟')}<input name="audience" maxlength="160" dir="auto" value="${esc(p ? p.audience : s.audience || '')}"></label><label class="sx-chk"><input type="checkbox" name="parts" ${partsOn(s) ? 'checked' : ''}> ${L('Number posts as parts (Part 1, Part 2…)', 'رقّم المنشورات كأجزاء (الجزء 1، الجزء 2…)')}</label><label class="f">${L('Series hashtag', 'وسم السلسلة')}<input name="tag" maxlength="60" dir="auto" value="${esc(s.tag || '')}" placeholder="${esc(tagOf(c, { ...s, tag: '' }))}"></label><label class="f">${L('Topic list (one per line)', 'قائمة المواضيع (موضوع في كل سطر)')}<textarea name="ideas" rows="4" maxlength="2000" dir="auto" placeholder="${esc(L('Topics you already plan — BrandPilot suggests them first', 'مواضيع تخططها مسبقاً — يقترحها BrandPilot أولاً'))}">${esc(s.ideas || '')}</textarea></label><div class="row"><button class="btn sm pri">${L('Save', 'احفظ')}</button><button type="button" class="btn sm ghost" data-a="sxAboutEd" data-v="">${L('Cancel', 'إلغاء')}</button></div></form>` : '';
+    const form = ed ? `<form class="sx-about-ed stack" data-s="sxAbout" data-v="${esc(s.id)}"><label class="f">${L('Series name', 'اسم السلسلة')}<input name="name" required maxlength="60" dir="auto" value="${esc(s.name)}"></label><div class="sx-2"><label class="f">${L('Main channel', 'القناة الرئيسية')}<select name="channel">${['linkedin', 'instagram', 'facebook'].map((k) => `<option value="${k}" ${(s.channel || 'linkedin') === k ? 'selected' : ''}>${CHN[k]}</option>`).join('')}</select></label><label class="f">${L('Goal', 'الهدف')}<select name="objective">${Object.keys(NXO).map((k) => `<option value="${k}" ${(s.objective || 'engagement') === k ? 'selected' : ''}>${nxL(NXO[k])}</option>`).join('')}</select></label></div><label class="f">${L('Kind', 'النوع')}<select name="kind"><option value="">${L('Let BrandPilot work it out', 'دع BrandPilot يحدده')}</option>${KINDS().map(([k, t]) => `<option value="${k}" ${(p ? p.kind : s.kind) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="3" maxlength="400" dir="auto">${esc(p ? p.purpose : s.purpose || '')}</textarea></label><label class="f">${L('Who is it for?', 'لمن هي؟')}<input name="audience" maxlength="160" dir="auto" value="${esc(p ? p.audience : s.audience || '')}"></label><label class="f">${L('Knowledge it may use', 'المعرفة التي يمكنها استخدامها')}<select name="knowledge"><option value="auto" ${s.knowledge !== 'none' ? 'selected' : ''}>${(s.sources || []).length ? L(`Your approved facts (${(s.sources || []).length} chosen topics)`, `حقائقك المعتمدة (${(s.sources || []).length} مواضيع مختارة)`) : L('Automatic — your approved facts', 'تلقائي — حقائقك المعتمدة')}</option>${KCO.includes(s.kind) ? '' : `<option value="none" ${s.knowledge === 'none' ? 'selected' : ''}>${L('General know-how — not about the company', 'معرفة عامة — ليست عن الشركة')}</option>`}</select></label><label class="sx-chk"><input type="checkbox" name="parts" ${partsOn(s) ? 'checked' : ''}> ${L('Number posts as parts (Part 1, Part 2…)', 'رقّم المنشورات كأجزاء (الجزء 1، الجزء 2…)')}</label><label class="f">${L('Series hashtag', 'وسم السلسلة')}<input name="tag" maxlength="60" dir="auto" value="${esc(s.tag || '')}" placeholder="${esc(tagOf(c, { ...s, tag: '' }))}"></label><label class="f">${L('Topic list (one per line)', 'قائمة المواضيع (موضوع في كل سطر)')}<textarea name="ideas" rows="4" maxlength="2000" dir="auto" placeholder="${esc(L('Topics you already plan — BrandPilot suggests them first', 'مواضيع تخططها مسبقاً — يقترحها BrandPilot أولاً'))}">${esc(s.ideas || '')}</textarea></label><div class="row"><button class="btn sm pri">${L('Save', 'احفظ')}</button><button type="button" class="btn sm ghost" data-a="sxAboutEd" data-v="">${L('Cancel', 'إلغاء')}</button></div></form>` : '';
     const weak = !s.kind && !p && String(s.purpose || '').trim().length < 40;
     return `<section class="card sx-about"><div class="sx-about-h"><h2>${L('About this series', 'عن هذه السلسلة')}</h2>${ed ? '' : `<button class="btn sm ghost" data-a="sxAboutEd" data-v="${esc(s.id)}">${L('Edit', 'عدّل')}</button>`}</div>
-      ${ed ? form : `${s.kind ? `<p class="small"><span class="sx-chip ok">${esc(kindName(s.kind))}</span></p>` : ''}${s.about ? `<p class="small" dir="auto">${esc(s.about)}</p>` : ''}<p class="small" dir="auto"><b>${L('Purpose', 'الغرض')}:</b> ${esc(s.purpose || L('not set', 'غير محدد'))}</p><p class="small" dir="auto"><b>${L('For', 'لمن')}:</b> ${esc(s.audience || L('not set', 'غير محدد'))}</p>${partsOn(s) ? `<p class="small sx-part-a">${L('Posted as parts', 'تُنشر كأجزاء')} · ${L('next', 'التالي')}: <b>${L('Part', 'الجزء')} ${partFor(c, s, null)}</b> · <b dir="auto">${esc(tagOf(c, s))}</b></p>` : ''}${facts}
+      ${ed ? form : `${s.kind ? `<p class="small"><span class="sx-chip ok">${esc(kindName(s.kind))}</span></p>` : ''}${s.about ? `<p class="small" dir="auto">${esc(s.about)}</p>` : ''}<p class="small" dir="auto"><b>${L('Purpose', 'الغرض')}:</b> ${esc(s.purpose || L('not set', 'غير محدد'))}</p><p class="small" dir="auto"><b>${L('For', 'لمن')}:</b> ${esc(s.audience || L('not set', 'غير محدد'))}</p><p class="small"><b>${L('Knowledge', 'المعرفة')}:</b> ${s.knowledge === 'none' ? L('General — not about the company', 'عامة — ليست عن الشركة') : (s.sources || []).length ? L(`only ${(s.sources || []).length} chosen topic(s)`, `${(s.sources || []).length} موضوع مختار فقط`) : L('automatic', 'تلقائية')}</p>${partsOn(s) ? `<p class="small sx-part-a">${L('Posted as parts', 'تُنشر كأجزاء')} · ${L('next', 'التالي')}: <b>${L('Part', 'الجزء')} ${partFor(c, s, null)}</b> · <b dir="auto">${esc(tagOf(c, s))}</b></p>` : ''}${facts}
       ${weak ? `<p class="note w small">${L('BrandPilot does not know enough about what this series is. Check it with AI or edit it — otherwise topic ideas may miss the point.', 'لا يعرف BrandPilot ما يكفي عن هذه السلسلة. تحقق منها بالذكاء الاصطناعي أو عدّلها — وإلا قد لا تصيب أفكار المواضيع الهدف.')}</p>` : ''}
       ${prop || `<button class="btn sm" data-a="sxUnd" data-v="${esc(s.id)}" ${busy ? 'disabled' : ''}>${busy ? L('Reading your knowledge…', 'جارٍ قراءة معرفتك…') : L('Check with AI', 'تحقق بالذكاء الاصطناعي')}</button>`}`}</section>`;
   }
@@ -619,7 +738,7 @@
     SX.busy[key] = 1; R();
     try {
       await synced(c);
-      const r = await api('POST', '/api/companies/' + c.id + '/series/understand', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [] }, lang: S.lang === 'ar' ? 'ar' : 'en' });
+      const r = await api('POST', '/api/companies/' + c.id + '/series/understand', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [], knowledge: s.knowledge || 'auto' }, lang: S.lang === 'ar' ? 'ar' : 'en' });
       s.undProp = Object.assign({}, r.proposal, { at: Date.now(), model: r.model });
     } catch (e) { if (!quiet) toast(errMsg(e), 'err'); }
     delete SX.busy[key]; save(); if (C() === c) R();
@@ -755,7 +874,7 @@
     SX.busy[key] = 1; R();
     try {
       await synced(c);
-      const r = await api('POST', '/api/companies/' + c.id + '/recs/draft', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [] }, topic: d.topic, channel: s.channel || 'linkedin', lang: d.lang, format: d.fmt === 'carousel' ? 'carousel' : 'single', examples: ex, style: { colors: [st.bg[0], st.accent, st.ink].filter(isHex), note: [st.headline && 'Headline: ' + st.headline, st.tone && 'Tone: ' + st.tone, st.illustration && 'Illustration: ' + st.illustration].filter(Boolean).join(' ').slice(0, 600) } });
+      const r = await api('POST', '/api/companies/' + c.id + '/recs/draft', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [], knowledge: s.knowledge || 'auto' }, topic: d.topic, channel: s.channel || 'linkedin', lang: d.lang, format: d.fmt === 'carousel' ? 'carousel' : 'single', examples: ex, style: { colors: [st.bg[0], st.accent, st.ink].filter(isHex), note: [st.headline && 'Headline: ' + st.headline, st.tone && 'Tone: ' + st.tone, st.illustration && 'Illustration: ' + st.illustration].filter(Boolean).join(' ').slice(0, 600) } });
       if (!r.draft) toast(L('No approved knowledge yet — approve facts in Your company first, or write the words yourself.', 'لا معرفة معتمدة بعد — اعتمد الحقائق أولاً أو اكتب الكلمات بنفسك.'), 'err');
       else {
         const x = r.draft, [a, b] = splitHead(x.headline, st);
@@ -798,18 +917,37 @@
   const actions = {
     sxHome() { S.ui.sx = null; S.ui.sxZ = null; R(); scrollTo(0, 0); },
     sxOpen(sid) { S.ui.sxWhy = null; go(sid); },
+    sxKnowOpen() { const f = SX.form || (SX.form = {}); f.knowOpen = !f.knowOpen; R(); },
+    sxKindOpen() { const f = SX.form || (SX.form = {}); f.kindOpen = !f.kindOpen; R(); },
     sxNewT() { S.ui.sxNew = !S.ui.sxNew; R(); },
-    sxSug(v, el) { const f = el.closest('form'), k = el.dataset.k; if (f && f.elements[k]) { f.elements[k].value = v; f.elements[k].focus(); A.sxF(v, f.elements[k]); } },
+    sxSug(v, el) {
+      const f = el.closest('form'), k = el.dataset.k;
+      if (!f || !f.elements[k]) return;
+      if (el.dataset.t) {
+        const nm = String((f.elements.name && f.elements.name.value) || '').trim(), F = SX.form || (SX.form = {});
+        v = el.dataset.t.replace('{topic}', nm || L('the topic', 'الموضوع'));
+        F.purpose = v; F.kind = el.dataset.kind || ''; F.kindOff = false; F.srcMode = el.dataset.kn || undefined; F.sources = [];
+        R(); const t = document.querySelector('.sx-new textarea[name=purpose]'); if (t) t.focus(); return;
+      }
+      f.elements[k].value = v; f.elements[k].focus(); A.sxF(v, f.elements[k]);
+    },
     /* the new-series form: remember what is typed (a re-render keeps it) and update the preview card in place */
     sxF(v, el) {
       const f = SX.form || (SX.form = {}), n = el.name;
-      if (n === 'src') f.sources = [...el.form.querySelectorAll('input[name=src]:checked')].map((x) => x.value); else f[n] = v;
+      if (n === 'srcMode') { f.srcMode = v; if (v !== 'pick') f.sources = []; R(); return; }
+      if (n === 'src') { f.sources = [...el.form.querySelectorAll('input[name=src]:checked')].map((x) => x.value); R(); return; } else f[n] = v;
       const pv = (k, t) => { const e = document.querySelector('.sx-new [data-pv="' + k + '"]'); if (e) e.textContent = t; };
       const t = String(v || '').trim();
       if (n === 'name') pv('name', t || L('Your series name', 'اسم سلسلتك'));
       if (n === 'purpose') pv('purpose', t || L('What the series is for appears here.', 'يظهر هنا الغرض من السلسلة.'));
       if (n === 'audience') pv('audience', t ? L('For: ', 'لمن: ') + t : L('Audience not set yet', 'لم يُحدَّد الجمهور بعد'));
-      if (n === 'kind') { const b = el.closest('.sx-tile') && el.closest('.sx-tile').querySelector('b'); pv('kind', b ? b.textContent : ''); }
+      if (n === 'stype') { const T = TYPES().find((t) => t[0] === v); f.type = v; f.kind = T ? T[3] : ''; f.kindOff = false; f.srcMode = T ? T[4] : undefined; f.sources = []; f.knowOpen = false;
+        if (T && T[6] && (!String(f.purpose || '').trim() || f.purposeAuto)) { f.purpose = T[6].replace('{topic}', String(f.name || '').trim() || L('this topic', 'هذا الموضوع')); f.purposeAuto = true; }
+        R(); return; }
+      if (n === 'purpose') f.purposeAuto = false;
+      if (n === 'name' && f.purposeAuto) { const T = typeOf(f); if (T && T[6]) { f.purpose = T[6].replace('{topic}', String(v || '').trim() || L('this topic', 'هذا الموضوع')); const ta = document.querySelector('.sx-new textarea[name=purpose]'); if (ta) ta.value = f.purpose; pv('purpose', f.purpose); } }
+      if (n === 'kindPick') { f.kind = v || ''; f.kindOff = !v; f.srcMode = undefined; f.sources = []; R(); return; }
+      if ((n === 'name' || n === 'purpose') && !f.kind) { const k = kindOf(C(), f); if (k !== f.kindSeen) { f.kindSeen = k; f.srcMode = undefined; f.sources = []; R(); return; } const au = inferKind(C(), f), kd = document.querySelector('.sx-kd'); if (kd && au) kd.textContent = au.fromFacts ? L('— from your approved facts', '— من حقائقك المعتمدة') : L(`— from “${au.word}”`, `— من «${au.word}»`); }
       if (n === 'channel') pv('channel', CHN[v] || v);
     },
     async sxDel(sid) {
@@ -833,7 +971,7 @@
       const c = C(), name = String(fd.get('name') || '').trim().slice(0, 60);
       if (!name) return toast(L('Name the series.', 'سمِّ السلسلة.'), 'err');
       if (serOf(c).some((s) => norm(s.name) === norm(name))) return toast(L('A series with this name exists.', 'توجد سلسلة بهذا الاسم.'), 'err');
-      const s = { id: uid('sr'), at: Date.now(), name, purpose: String(fd.get('purpose') || '').trim().slice(0, 400), objective: Object.keys(NXO).includes(fd.get('objective')) ? fd.get('objective') : 'engagement', channel: ['linkedin', 'instagram', 'facebook'].includes(fd.get('channel')) ? fd.get('channel') : 'linkedin', audience: String(fd.get('audience') || '').trim().slice(0, 160), kind: KINDS().some(([k]) => k === fd.get('kind')) ? fd.get('kind') : '', ideas: '', sources: fd.getAll('src').map(String).slice(0, 20), themes: [], look: '' };
+      const s = { id: uid('sr'), at: Date.now(), name, purpose: String(fd.get('purpose') || '').trim().slice(0, 400), objective: Object.keys(NXO).includes(fd.get('objective')) ? fd.get('objective') : 'engagement', channel: ['linkedin', 'instagram', 'facebook'].includes(fd.get('channel')) ? fd.get('channel') : 'linkedin', audience: String(fd.get('audience') || '').trim().slice(0, 160), kind: KINDS().some(([k]) => k === fd.get('kind')) ? fd.get('kind') : '', ideas: '', sources: fd.get('srcMode') === 'pick' ? fd.getAll('src').map(String).slice(0, 20) : [], knowledge: fd.get('srcMode') === 'none' && KGEN.includes(String(fd.get('kind') || '')) ? 'none' : fd.get('srcMode') === 'pick' && fd.getAll('src').length ? 'pick' : 'auto', themes: [], look: '' };
       serOf(c).push(s); SX.form = null; S.ui.sxNew = false;
       log(c, 'campaign', `Content series “${name}” created`, `تم إنشاء سلسلة المحتوى «${name}»`);
       toast(L('Series created. Next: add a few previous posts so BrandPilot learns its look.', 'أُنشئت السلسلة. التالي: أضف منشورات سابقة ليتعلم BrandPilot شكلها.'), 'ok');
@@ -856,6 +994,7 @@
       if (['linkedin', 'instagram', 'facebook'].includes(fd.get('channel'))) s.channel = fd.get('channel');
       if (Object.keys(NXO).includes(fd.get('objective'))) s.objective = fd.get('objective');
       s.parts = fd.get('parts') === 'on';
+      if (fd.get('knowledge') === 'none' && !KCO.includes(s.kind)) s.knowledge = 'none'; else s.knowledge = (s.sources || []).length ? 'pick' : 'auto';
       { const t = String(fd.get('tag') || '').trim().replace(/^#+/, '').replace(/[^\p{L}\p{N}_]+/gu, ''); if (t) s.tag = '#' + t.slice(0, 60); else delete s.tag; }
       s.ideas = String(fd.get('ideas') || '').split(/\r?\n/).map((x) => x.trim()).filter(Boolean).join('\n').slice(0, 2000);
       if (s.undProp) { s.about = s.undProp.about; s.undProp = null; }

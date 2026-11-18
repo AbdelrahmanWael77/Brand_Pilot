@@ -10,7 +10,7 @@
 // into a page as markup. An SVG over the size limit is refused like any other image.
 import { FetchUrlError } from './fetchUrl.js';
 
-export const BRAND = { colors: 8, neutrals: 4, fonts: 4, sheets: 5, sheetBytes: 1024 * 1024, logoBytes: 500_000, logoTries: 8, logos: 4, notes: 20, url: 2000 };
+export const BRAND = { colors: 8, neutrals: 4, fonts: 4, sheets: 5, vendorSheets: 3, sheetBytes: 1024 * 1024, logoBytes: 500_000, logoTries: 8, logos: 4, notes: 20, url: 2000 };
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'image/gif'];
 const BRAND_NAME = /primary|brand|accent|secondary|main|theme|highlight|cta|link|action/i;
 const GENERIC = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded', 'emoji', 'math', 'fangsong', '-apple-system', 'blinkmacsystemfont', 'inherit', 'initial', 'unset', 'revert']);
@@ -84,6 +84,24 @@ export function colorRole(hex) {
   return 'brand';
 }
 const COLOR_RE = /#[0-9a-f]{3,8}\b|\b(?:rgb|hsl)a?\([^()]*\)/gi;
+// Framework style sheets (owner 2026-11-18: "these colours are not used on the website"): Bootstrap, Tailwind, icon
+// fonts, sliders, WordPress block styles … define whole palettes the site may never show. Their colours do not count
+// as the site's colours; only a framework's own primary / brand setting does, and only when the site changed it.
+const VENDOR = /^all(?:\.min)?\.css$|bootstrap|tailwind|bulma|foundation|materialize|uikit|semantic\.|font-?awesome|line-awesome|fontello|(?:^|[-_.])icons?(?:[-_.]|$)|animate(?:\.min)?\.css|swiper|slick|owl\.|(?:^|[-_.])aos(?:[-_.]|$)|normalize|(?:^|[-_.])reset(?:[-_.]|$)|jquery|select2|fancybox|magnific|lightbox|flickity|splide|toastr|sweetalert|datatables|flatpickr|block-library|wp-block|woocommerce|dashicons|(?:^|[-_.])mdb(?:[-_.]|$)/i;
+const CDN = /(?:^|\.)(?:cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com|unpkg\.com|stackpath\.bootstrapcdn\.com|maxcdn\.bootstrapcdn\.com|cdn\.tailwindcss\.com|use\.fontawesome\.com|code\.jquery\.com|fonts\.googleapis\.com)$/i;
+export const isVendorSheet = (sheet) => {
+  if (VENDOR.test(String(sheet?.name ?? ''))) return true;
+  try {
+    return CDN.test(new URL(sheet.url).hostname);
+  } catch {
+    return false;
+  }
+};
+// In a framework sheet only these settings can name the brand — and not while they hold the framework's default.
+const VENDOR_KEEP = /^--(?:bs-)?(?:primary|secondary|brand(?:-[a-z]+)?)$/;
+const FRAMEWORK_DEFAULT = new Set(['#0D6EFD', '#6C757D', '#007BFF', '#6610F2', '#198754', '#DC3545', '#FFC107', '#0DCAF0', '#28A745', '#17A2B8', '#343A40']);
+// Bootstrap colour classes in the page's markup → that colour is visibly on the website.
+const BS_CLASS = /^(?:btn(?:-outline)?|bg|text|border|alert|badge|link|text-bg)-(primary|secondary|success|danger|warning|info)$/;
 
 /** Pure: CSS text without comments, as `[{ selector, body }]` for the innermost rule blocks (rules inside @media included). */
 function rules(css) {
@@ -118,9 +136,35 @@ export function readStyles(html, sheets) {
   };
 
   const uses = new Map();
-  for (const s of clean) for (const m of s.css.match(COLOR_RE) ?? []) {
-    const hex = parseColor(m);
-    if (hex) uses.set(hex, (uses.get(hex) ?? 0) + 1);
+  const how = new Map(); // colours counted from something other than the site's own styles
+  const add = (hex) => uses.set(hex, (uses.get(hex) ?? 0) + 1);
+  const vendor = sheets.map(isVendorSheet);
+  clean.forEach((s, i) => {
+    if (vendor[i]) return; // a framework's palette is not the site's
+    for (const m of s.css.match(COLOR_RE) ?? []) {
+      const hex = parseColor(m);
+      if (hex) add(hex);
+    }
+  });
+  // inline style="" attributes are the site's own
+  for (const m of html.matchAll(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)) {
+    for (const c of (m[1] ?? m[2] ?? '').match(COLOR_RE) ?? []) {
+      const hex = parseColor(c);
+      if (hex) add(hex);
+    }
+  }
+  // Bootstrap colour classes in the markup (btn-success, text-danger …) put that framework colour on the page
+  if (vendor.some(Boolean)) {
+    for (const m of html.matchAll(/\sclass\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)) {
+      for (const cls of (m[1] ?? m[2] ?? '').split(/\s+/)) {
+        const b = BS_CLASS.exec(cls);
+        const hex = b && parseColor(follow(vars.get(`--bs-${b[1]}`) ?? vars.get(`--${b[1]}`) ?? ''));
+        if (hex) {
+          add(hex);
+          how.set(hex, 'Bootstrap classes on the page');
+        }
+      }
+    }
   }
   const named = [];
   for (const tag of tags(html, 'meta')) {
@@ -128,17 +172,24 @@ export function readStyles(html, sheets) {
     const hex = parseColor(attr(tag, 'content'));
     if (hex) named.push({ hex, from: 'meta theme-color' });
   }
-  for (const s of parsed) for (const r of s.rules) for (const [k, v] of r.decls) {
-    if (!k.startsWith('--') || !BRAND_NAME.test(k)) continue;
-    const hex = parseColor(follow(v));
-    if (hex) named.push({ hex, from: `${k} in ${s.name}` });
-  }
+  parsed.forEach((s, i) => {
+    for (const r of s.rules) for (const [k, v] of r.decls) {
+      if (!k.startsWith('--') || !BRAND_NAME.test(k)) continue;
+      if (vendor[i] && !VENDOR_KEEP.test(k)) continue;
+      const hex = parseColor(follow(v));
+      if (!hex || (vendor[i] && FRAMEWORK_DEFAULT.has(hex))) continue; // the framework's own default, not a brand choice
+      named.push({ hex, from: `${k} in ${s.name}` });
+    }
+  });
   const ranked = [...uses.entries()].sort((a, b) => b[1] - a[1]);
   const colors = [];
   const neutrals = [];
   const seen = new Set();
+  // near-identical shades (#152B44 / #152B45) are one colour: the first one offered stands for both
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const twin = (h) => [...seen].some((x) => rgb(x).every((v, i) => Math.abs(v - rgb(h)[i]) <= 3));
   const offer = (hex, from) => {
-    if (seen.has(hex)) return;
+    if (seen.has(hex) || twin(hex)) return;
     seen.add(hex);
     const role = colorRole(hex);
     const item = { hex, uses: uses.get(hex) ?? 0, from };
@@ -147,7 +198,7 @@ export function readStyles(html, sheets) {
     } else if (neutrals.filter((n) => n.role === role).length < BRAND.neutrals / 2) neutrals.push({ ...item, role });
   };
   for (const n of named) offer(n.hex, n.from);
-  for (const [hex, n] of ranked) offer(hex, `used ${n} time${n === 1 ? '' : 's'} in the styles`);
+  for (const [hex, n] of ranked) offer(hex, `used ${n} time${n === 1 ? '' : 's'}${how.has(hex) ? ' — ' + how.get(hex) : ' in the styles'}`);
 
   // Fonts: the first named family of body text and of headings.
   const fonts = [];
@@ -342,10 +393,15 @@ export async function websiteBrand(fetchUrl, rawUrl) {
   const notes = [];
   const note = (n) => notes.length < BRAND.notes && notes.push(n);
 
+  // The site's own style sheets first (owner 2026-11-18: md-labs.net links 9 framework sheets before its own
+  // main.css, so the old first-5 rule read only Bootstrap and Font Awesome), then a few framework sheets, which
+  // are only used to look up a Bootstrap class colour or a customised primary.
   const hrefs = stylesheetLinks(html, page.url);
-  if (hrefs.length > BRAND.sheets) note({ code: 'stylesheets_skipped', count: hrefs.length - BRAND.sheets });
+  const isV = (u) => isVendorSheet({ name: fileName(u), url: u });
+  const pick = [...hrefs.filter((u) => !isV(u)).slice(0, BRAND.sheets), ...hrefs.filter(isV).slice(0, BRAND.vendorSheets)];
+  if (hrefs.length > pick.length) note({ code: 'stylesheets_skipped', count: hrefs.length - pick.length });
   const read = await Promise.all(
-    hrefs.slice(0, BRAND.sheets).map((u) =>
+    pick.map((u) =>
       fetchUrl(u, { types: ['text/css'], maxBytes: BRAND.sheetBytes, accept: 'text/css,*/*;q=0.1' }).then(
         (r) => ({ name: fileName(r.url), css: r.text, url: r.url }),
         (e) => ({ failed: { code: 'stylesheet_failed', url: u, error: code(e) } }),

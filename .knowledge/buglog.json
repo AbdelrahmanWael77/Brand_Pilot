@@ -64,6 +64,50 @@
         "caption",
         "edit"
       ]
+    },
+    {
+      "id": "css-insert-inside-media-rule",
+      "timestamp": "2026-11-18",
+      "error_message": "AI suggestions card showed no border/background; its rule appeared as .studio>.aih inside @media(min-width:1101px)",
+      "file": "public/index.html",
+      "root_cause": "A patch inserted new CSS right before the text '.ed-side{position:sticky…' — that text was the middle of '@media(min-width:1101px){.studio>.ed-side{…}', so the new rules were swallowed by the media query and the selector prefix moved onto the new first rule",
+      "fix": "Moved the .aih rules out and restored '@media(min-width:1101px){.studio>.ed-side{…}'. When inserting CSS by anchor, anchor on the START of a line or a whole rule, never mid-selector",
+      "tags": [
+        "css",
+        "patch",
+        "studio",
+        "media-query"
+      ]
+    },
+    {
+      "id": "brand-colours-from-frameworks",
+      "timestamp": "2026-11-18",
+      "error_message": "Brand colours from the website listed #0D6EFD, #DC3545, #198754, #FFC107, #0DCAF0 … (--bs-primary in bootstrap-5.min.css, 'used 29 times in the styles') — colours the site does not use",
+      "file": "server/brand.js",
+      "root_cause": "readStyles counted every colour in every linked style sheet, so Bootstrap's palette definitions looked like heavy use and --bs-primary passed the brand-name filter; and websiteBrand read only the FIRST 5 linked sheets — md-labs.net links 9 framework sheets (Font Awesome all.min.css, two Bootstraps, Google Fonts, toastr, owl, select2) before its own main.css, so the site's real colours were never read",
+      "fix": "Framework sheets (name pattern or public CDN host) no longer count; a framework's --bs-primary/--primary only counts when changed from the framework default; Bootstrap colour classes in the markup and inline style attributes count; the site's own sheets are read first (5) plus 3 framework sheets; near-identical shades merge",
+      "tags": [
+        "brand",
+        "colours",
+        "bootstrap",
+        "website",
+        "css"
+      ]
+    },
+    {
+      "id": "overlay-animation-replays-on-render",
+      "timestamp": "2026-11-18",
+      "error_message": "Clicking ↑ / ✕ in the Brand identity panel looks like the screen refreshes",
+      "file": "public/index.html",
+      "root_cause": "Every action calls render(), which rebuilds the whole app's HTML; the panel (.kev, animation kevin from opacity 0) and its scrim (fade) are new elements each time, so their entrance animations replay on every click. Keeping the scroll (data-ks) alone did not stop the flash",
+      "fix": "render() remembers which overlays (.kev, .kev-scrim, .ov, .modal, .ck-ov, .ck, .gp) were open before render0() and sets style.animation='none' on them afterwards; a newly opened overlay still animates",
+      "tags": [
+        "render",
+        "animation",
+        "drawer",
+        "modal",
+        "flicker"
+      ]
     }
   ]
 }

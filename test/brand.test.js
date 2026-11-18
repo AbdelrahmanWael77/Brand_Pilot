@@ -118,6 +118,28 @@ test('readStyles: theme-color, brand-named variables, then the most used; greys 
   ]);
 });
 
+test('readStyles: framework style sheets do not count; Bootstrap defaults dropped; a customised primary and Bootstrap classes on the page count', () => {
+  // the owner's case (2026-11-18): bootstrap.min.css alone put #0D6EFD, #DC3545, #198754, #FFC107 … on the brand list
+  const BS = ':root{--bs-primary:#0d6efd;--bs-secondary:#6c757d;--bs-success:#198754;--bs-danger:#dc3545;--bs-warning:#ffc107;--bs-link-color:#0d6efd;--bs-primary-text-emphasis:#052c65}'
+    + '.btn-primary{background:#0d6efd}.text-danger{color:#dc3545}.alert-success{color:#0f5132;background:#d1e7dd}.text-warning{color:#ffc107}'.repeat(10);
+  const own = '.hero{background:#7C3AED}.cta{color:#7c3aed}';
+  let r = readStyles('<p>x</p>', [{ name: 'bootstrap.min.css', css: BS }, { name: 'site.css', css: own }]);
+  assert.deepEqual(r.colors.map((c) => c.hex), ['#7C3AED']);
+  // Bootstrap's success colour IS on the website when the page uses its classes
+  r = readStyles('<a class="btn btn-success">Go</a><span class="text-success x"></span>', [{ name: 'bootstrap.min.css', css: BS }, { name: 'site.css', css: own }]);
+  assert.deepEqual(r.colors.map((c) => [c.hex, c.uses]), [['#7C3AED', 2], ['#198754', 2]]);
+  assert.match(r.colors[1].from, /Bootstrap classes on the page/);
+  // a customised Bootstrap primary is the brand colour
+  r = readStyles('', [{ name: 'bootstrap.min.css', css: ':root{--bs-primary:#E11D48;--bs-danger:#dc3545}' }]);
+  assert.deepEqual(r.colors, [{ hex: '#E11D48', uses: 0, from: '--bs-primary in bootstrap.min.css' }]);
+  // a copy on a public CDN counts as a framework sheet, whatever its name
+  assert.deepEqual(readStyles('', [{ name: 'theme.css', url: 'https://cdn.jsdelivr.net/npm/x/theme.css', css: '.a{color:#F97316}' }]).colors, []);
+  // inline style attributes are the site's own
+  assert.deepEqual(readStyles('<div style="background:#0EA5E9"></div>', []).colors.map((c) => c.hex), ['#0EA5E9']);
+  // near-identical shades are one colour
+  assert.deepEqual(readStyles('', [{ name: 'a.css', css: '.a{color:#152B44}.b{color:#152b44}.c{color:#152B45}' }]).colors.map((c) => c.hex), ['#152B44']);
+});
+
 test('readStyles: at most 8 colours; nothing found is an empty answer', () => {
   const many = Array.from({ length: 30 }, (_, i) => `.c${i}{color:hsl(${i * 12}, 80%, 45%)}`).join('');
   assert.equal(readStyles('', [{ name: 'a.css', css: many }]).colors.length, BRAND.colors);
