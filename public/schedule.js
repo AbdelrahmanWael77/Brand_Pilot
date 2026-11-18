@@ -79,7 +79,10 @@
       const d = free((w) => t.days.d.includes(w), 14) || free((w) => t.wd.includes(w), 14) || free(() => true, 366);
       used.add(d);
       const src = t.days.src === 'data' || t.hours.src === 'data' ? 'data' : 'peak', h = t.hours.h;
-      g.items.slice().sort((a, b) => (a.lang === 'en' ? 0 : 1) - (b.lang === 'en' ? 0 : 1)).forEach((it, k) => {
+      // The window follows the language (English first), so all slides of one carousel language go out together.
+      const langs = [...new Set(g.items.map((it) => it.lang))].sort((a, b) => (a === 'en' ? 0 : 1) - (b === 'en' ? 0 : 1));
+      g.items.slice().sort((a, b) => langs.indexOf(a.lang) - langs.indexOf(b.lang)).forEach((it) => {
+        const k = langs.indexOf(it.lang);
         const hour = h.length === 1 && k > 0 ? Math.min(h[0][0] + 2 * k, 23) : h[k % h.length][0];
         rows.push({ key: it.key, date: d, time: hh(hour), src });
       });
@@ -87,5 +90,16 @@
     return rows.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
   }
 
-  root.BPSchedule = { workDays, region, PEAK, hourIn, bestTimes, localToday, place };
+  /* A publish hour from an import cell: an integer 0–23, "19", "19:00" or "7 PM". Anything else → undefined (the post
+     is kept without an hour; a blank cell must never become 00:00 and pose as the company's own data). */
+  function cleanHour(v) {
+    if (typeof v === 'number') return Number.isInteger(v) && v >= 0 && v <= 23 ? v : undefined;
+    const m = /^\s*(\d{1,2})(?::(\d{2}))?(?::\d{2})?\s*(am|pm)?\s*$/i.exec(String(v ?? ''));
+    if (!m || (m[2] !== undefined && +m[2] > 59)) return undefined;
+    let h = +m[1];
+    if (m[3]) { if (h < 1 || h > 12) return undefined; h = h % 12 + (/pm/i.test(m[3]) ? 12 : 0); }
+    return h <= 23 ? h : undefined;
+  }
+
+  root.BPSchedule = { workDays, region, PEAK, hourIn, bestTimes, localToday, place, cleanHour };
 })(typeof window !== 'undefined' ? window : globalThis);

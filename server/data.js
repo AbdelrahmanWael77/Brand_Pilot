@@ -17,7 +17,7 @@ export const SCHEMAS = {
     req: ['date', 'platform', 'reach', 'engagements'],
     // hour (0–23) + htz (its IANA zone): when the post went out, from exports with a publish time or the live sync.
     opt: ['post_id', 'theme', 'language', 'impressions', 'link_clicks', 'spend', 'campaign', 'text', 'hour', 'htz'],
-    num: ['reach', 'impressions', 'engagements', 'link_clicks', 'spend', 'hour'],
+    num: ['reach', 'impressions', 'engagements', 'link_clicks', 'spend'], // hour is checked on its own in cleanRow
   },
   ga4: {
     req: ['date', 'channel', 'sessions'],

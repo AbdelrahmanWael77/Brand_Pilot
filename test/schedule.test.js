@@ -136,3 +136,28 @@ test('place: one window only → the second language two hours later', () => {
   const rows = J(S.place([item(1, 'en', 'email'), item(1, 'ar', 'email')], one, null, 'Africa/Cairo', NOW));
   assert.deepEqual(rows.map((r) => r.time), ['10:00', '12:00']);
 });
+
+// ---- Final review fixes ----
+test('place: carousel slides share one day; every slide of a language gets that language window', () => {
+  const slide = (j, lang) => ({ key: `s${j}-${lang}`, ch: 'facebook', lang, pair: 'post|facebook|carousel' });
+  const items = [1, 2, 3].map((j) => slide(j, 'en')).concat([1, 2, 3].map((j) => slide(j, 'ar')));
+  const rows = J(S.place(items, cairoPeak, null, 'Africa/Cairo', NOW));
+  assert.equal(new Set(rows.map((r) => r.date)).size, 1);
+  assert.ok(rows.filter((r) => r.key.endsWith('-en')).every((r) => r.time === '16:00'));
+  assert.ok(rows.filter((r) => r.key.endsWith('-ar')).every((r) => r.time === '20:00'));
+  assert.deepEqual(rows.filter((r) => r.key.endsWith('-en')).map((r) => r.key), ['s1-en', 's2-en', 's3-en']);
+});
+
+test('cleanHour: an integer 0–23 or HH:MM / 7 PM text; anything else is no hour', () => {
+  assert.equal(S.cleanHour(19), 19);
+  assert.equal(S.cleanHour('19'), 19);
+  assert.equal(S.cleanHour('19:00'), 19);
+  assert.equal(S.cleanHour('7 PM'), 19);
+  assert.equal(S.cleanHour('12 am'), 0);
+  assert.equal(S.cleanHour(0), 0);
+  for (const v of ['', null, undefined, 24, 7.5, -1, 'soon', '25:00']) assert.equal(S.cleanHour(v), undefined, JSON.stringify(v));
+});
+
+test('hourIn: late October (Cairo back on winter time, Los Angeles still on summer time) → 18', () => {
+  assert.equal(S.hourIn('2026-10-30', 9, 'America/Los_Angeles', 'Africa/Cairo'), 18);
+});
