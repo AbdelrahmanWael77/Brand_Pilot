@@ -1,3 +1,7 @@
+> 2026-11-18: 38 DONE (not committed) — colour boxes in Review the signature style aligned (public/series.css).
+
+> 2026-11-18: 38 DONE (committed + pushed) — Performance page redesign: opens on Summary (journey steps → What changed → What it may mean → trend), one-line period, cleaner tabs, comparison rules/sources folded. 348/348 tests; EN/AR/mobile screenshots checked (data/check-perf-steps.mjs). Owner to review. The colour-box fix in public/series.css is still uncommitted.
+
 > 2026-11-18: 37 DONE — AI "Suggest everything from the name" on the campaign brief (server/campaignBrief.js, route campaigns/suggest-brief, 5 tests). Owner asked about a colour-box UI bug with a screenshot that is NOT from BrandPilot — clarify.
 
 > 2026-11-18: 36 DONE — full campaign card first in Campaign Studio. Still offered to the owner: prefill every purpose from facts, or AI campaign copy (9.10/9.11).
