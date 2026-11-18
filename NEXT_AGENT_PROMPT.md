@@ -1,3 +1,5 @@
+> 2026-11-18: 25 PLANNED (not started, plan not committed) — Posting schedule v2: docs/superpowers/plans/2026-11-18-posting-schedule.md (move When-to-post logic to public/schedule.js with tests, sourced MENA/global peak windows, EN/AR same day, start date, 14-day cap, Meta sync keeps the hour). Start with its Task 1. Sonnet 5.5 [Opus 5.5] · medium · ~1 day.
+
 > 2026-11-18: tasks 23–24c COMMITTED on redesign/new-product-identity and, on the owner's instruction, dev fast-forwarded to it and pushed.
 
 > 2026-11-18: 24c DONE (not committed) — When to post (own results + labelled peak guidance, audience time zone), Tracking links card removed, 8 creative references. dev = b2ec073.
