@@ -108,6 +108,21 @@
         "modal",
         "flicker"
       ]
+    },
+    {
+      "id": "ai-scene-tile-click-does-nothing",
+      "timestamp": "2026-11-18",
+      "error_message": "(no error) Clicking the AI scene tile in Studio → Look showed no loading and created no image",
+      "file": "public/index.html (sceneTile, aiScene, scenePick)",
+      "root_cause": "The Look-tab tile only generates when the post has no scene picture yet (data-a=aiScene). With a picture it runs scenePick, which re-applies that same picture — when it was already applied nothing changes, so it looks broken. New options are made only in the Picture tab, and generation progress was shown only there.",
+      "fix": "Tile action: no picture → aiScene; picture not applied → scenePick; already applied → sceneMore (opens the Picture tab at the scene options and focuses \"3 more options\"). The tile shows a spinner overlay \"Creating n / 3…\" whenever SRV.imgBusy is this post, and a hint line (3 options · ~30 s / Tap to use / In use · tap for new options).",
+      "tags": [
+        "campaign studio",
+        "ai scene",
+        "image generation",
+        "loading",
+        "ux"
+      ]
     }
   ]
 }

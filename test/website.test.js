@@ -238,3 +238,9 @@ test('route: a page without links asks no model; members only; input, reader err
   assert.ok(Number(limited.headers.get('retry-after')) >= 1);
   assert.equal((await off.call('POST', `/api/companies/${off.id}/fetch-url`, off.alice, { url: 'https://site.test/about' })).status, 429);
 });
+
+test('collectLinks: character codes in labels are decoded, also when the page encodes them twice', () => {
+  const html = '<a href="/a">Let&amp;#039;s talk</a><a href="/b">Our team&rsquo;s work</a><a href="/c">Q&amp;A</a>';
+  const labels = collectLinks(html, 'https://example.com/').map((l) => l.label);
+  assert.deepEqual(labels, ["Let's talk", 'Our team’s work', 'Q&A']);
+});

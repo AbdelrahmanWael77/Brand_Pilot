@@ -1,3 +1,31 @@
+> 2026-11-18: 68 DONE (not committed) — AI scene tile: shows progress on the tile while creating; when the scene is already in use the click opens the Picture tab options (it used to do nothing). 58–68 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
+
+> 2026-11-18: 67 DONE (not committed) — Studio header: breadcrumb "Campaign Studio / <name> ▾" with a styled content switcher (replaces the native select), pipeline back under the header, gallery "Continue editing" card; details menus close on outside click / Escape. 58–67 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
+
+> 2026-11-18: 66 DONE (not committed) — Studio editor header is one compact row with "← Campaign Studio" back to the Studio home; the gallery button reads "← Back to <campaign>". 58–66 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
+
+> 2026-11-18: 65 DONE (not committed) — Director chat: navy question bubbles, centred 780px reading column, AI answers formatted into paragraphs and numbered steps with bold roles (display only), grounding line moved to the conversation header. 58–65 uncommitted. Next: owner reviews; phone-width check; commit.
+
+> 2026-11-18: 64 DONE (not committed) — Lead quality tables → ranked bars with a "best with enough leads" line and faded small samples; Your data: quiet Remove data, compact import history with dataset tags and folded reading notes. 58–64 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
+
+> 2026-11-18: 63 DONE (not committed) — Home: Performance-style hero band (company, goal, verdict, Needs/Priorities/Health pills, period) and colour-coded KPI cards with trend chips and 12-week sparklines that open Performance. 58–63 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
+
+> 2026-11-18: 61c DONE (not committed) — fact sheet: Brand identity full width; HTML character codes (&#039; &rsquo; &quot;) decoded when pages are read (client + server) and cleaned from saved companies on load. 58–62 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
+
+> 2026-11-18: 61b DONE (not committed) — Company knowledge reads as a fact sheet: two columns of topic cards, one line per statement with a short source label, Details on hover, and statements cut off mid-sentence flagged "Looks cut off — fix". 58–62 uncommitted. Next: owner reviews; phone-width check; commit. npm test 619/619.
+
+> 2026-11-18: 62 DONE (not committed) — Company sources: list first with "+ Add a source" opening the add box, quiet AI line, clean rows (name / address / one meta line / facts), Analyse again + Remove in a ⋯ menu, creative assets collapsed. 58–62 uncommitted. Next: owner reviews; phone-width check; commit. npm test 619/619.
+
+> 2026-11-18: 61 DONE (not committed) — Company knowledge: summary leads with missing essentials (chips jump to the section), lede says what confirmed knowledge is used for, contents list has counts + dot legend, confirmed rows lighter with clean source labels. 58–61 uncommitted. Next: owner reviews; phone-width check; commit.
+
+> 2026-11-18: 60b DONE (not committed) — full-campaign brief: picker dropdown font fixed, pipeline under the header without the repeated name, brief form in 3 numbered groups with English | Arabic side by side and missing fields marked inline. 58–60b uncommitted. Next: owner reviews; phone-width check; commit. npm test 619/619.
+
+> 2026-11-18: 60 DONE (not committed) — Campaign Studio: Create content page tabbed (Create · Your content · Templates · Pictures · Brand kit), quiet delete/remove, template actions in ⋯; editor header = campaign picker as title + honesty line, no post column for one-post campaigns, one primary action in the bottom bar. 58–60 uncommitted. Next: owner reviews; phone-width check of 58–60; commit. npm test 619/619.
+
+> 2026-11-18: 59 DONE (not committed) — Home redesigned: goal editable in place, duplicate ask box removed, compact priorities with "Ask the Director", Marketing health as a rail scorecard (weakest first), activity 4 + Show more. 58 (AI Director) also uncommitted. Next: owner reviews Home + Director; check both at phone width; then commit. npm test 619/619.
+
+> 2026-11-18: 58 DONE (not committed) — AI Director redesigned: composer first, questions suggested from the company audit, popular questions in topic tabs, right rail folded into one grounding line + "Can’t measure yet" chips, Rename/Delete in the conversation header. Next: owner reviews it; check phone width (≤860px: list under the chat) in a resizable browser; then commit. npm test 619/619.
+
 > 2026-11-18: 57 DONE — new-series flow: "What do you want to post?" type cards first (set kind + knowledge), then name/purpose/audience, then channel/goal. Tasks 41–57 committed and pushed; dev fast-forwarded to redesign/new-product-identity (owner asked).
 
 > 2026-11-18: 55 + 56 DONE (not committed) — Export & delivery redesign; series "Start from" starting points (Teach a topic = general explainer series in one click). 41–56 uncommitted.
@@ -56,7 +84,7 @@
 
 > 2026-11-18: 35 DONE (not committed) — ANTHROPIC_MODEL read for the Claude option; OpenAI removed from the Settings help. Owner: restart :3000, then choose Claude in Settings → AI model (saved choice is still OpenRouter nemotron).
 
-> 2026-11-18: 34 DONE (not committed) — "AI suggestions" card at the top of Campaign Studio → Words: better headline / supporting line / button / caption + campaign tips from the post, brief and approved facts (server/postHelp.js, route ai-help, test/postHelp.test.js). Restart the :3000 server to load the new route. Next: owner tries it on a real post (EN + AR), then commit.
+> 2026-11-18: 34 DONE (not committed) — "AI suggestions" card at the top of Campaign Studio → Words: better headline / supporting line / button / caption + campaign tips from the post, brief and approved facts (server/postHelp.js, route ai-help, test/postHelp.test.js). Restart the :3000 server to load the new route. Next: owner tries it on a real post (EN + AR), then commit. npm test 620/620.
 
 > Latest local run check, 2026-11-18. User requested run again. Existing app serves http://localhost:3000. Fresh Invoke-WebRequest checks for /api/health and / returned HTTP 200 with expected content. Working tree was clean before this check. Only the two handoff files were updated, uncommitted. Next single task is browser verification of task 33 in EN and AR: generic AI explanation wording and model selection in Settings. Read AGENTS.md, status and Git state before continuing.
 

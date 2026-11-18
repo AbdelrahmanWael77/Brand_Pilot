@@ -12,13 +12,15 @@ export const WEBSITE = { links: 80, pages: 8 /* keyword rule only */, label: 120
 
 /** Links that are files, not pages. */
 const FILE = /\.(?:pdf|docx?|xlsx?|pptx?|csv|zip|rar|7z|gz|tar|exe|dmg|apk|png|jpe?g|gif|webp|svg|ico|bmp|avif|mp[34]|m4[av]|mov|avi|webm|wav|ogg|css|js|mjs|json|xml|rss|atom|txt|woff2?|ttf|eot|ics|vcf)$/i;
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
-const decode = (s) =>
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“', ndash: '–', mdash: '—', hellip: '…', laquo: '«', raquo: '»' };
+const decode1 = (s) =>
   s.replace(/&(?:#(\d{1,7})|#x([0-9a-f]{1,6})|([a-z]{2,6}));/gi, (m, dec, hex, name) => {
     if (name) return ENTITIES[name.toLowerCase()] ?? m;
     const n = dec ? Number(dec) : parseInt(hex, 16);
     return n > 31 && n <= 0x10ffff ? String.fromCodePoint(n) : ' ';
   });
+// pages that encode twice (&amp;#039;) need a second pass
+const decode = (s) => { const once = decode1(s); return once === s ? once : decode1(once); };
 const flat = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
 const attr = (tag, name) => {
   const m = new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, 'i').exec(tag);
