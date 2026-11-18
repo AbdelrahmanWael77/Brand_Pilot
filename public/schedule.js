@@ -6,8 +6,22 @@
   'use strict';
   /* Sun–Thu work week where it applies (UAE moved to Mon–Fri in 2022). 0 = Sunday. */
   const workDays = (z) => /^(Africa\/Cairo|Asia\/(Riyadh|Kuwait|Qatar|Bahrain|Muscat|Baghdad|Amman)|Asia\/Aden)$/.test(z) ? [0, 1, 2, 3, 4] : [1, 2, 3, 4, 5];
-  /* General guidance: commonly reported peak windows (local time). Days: middle of the work week for LinkedIn and e-mail. */
-  const PEAK = { linkedin: { h: [[8, 10], [12, 13]], mid: true }, facebook: { h: [[9, 11], [19, 21]] }, instagram: { h: [[12, 13], [19, 21]] }, email: { h: [[10, 11]], mid: true } };
+  /* Middle East zones get the regional windows; every other zone the global ones. */
+  const region = (z) => /^(Africa\/Cairo|Asia\/(Riyadh|Dubai|Kuwait|Qatar|Bahrain|Muscat|Baghdad|Amman|Aden|Beirut))$/.test(z) ? 'mena' : 'global';
+  /* General guidance (local time, end hour exclusive): used only until the company's own posts say otherwise, and always
+     labelled "general guidance from published studies" on screen. mid = the middle three days of the work week, else all
+     work days. Sources (2026-11-18), generic and mostly vendor data — hence the label:
+     - Sprout Social 2026 (~2B engagements, ~307k profiles): overall Tue–Wed 11–18, Facebook Tue–Wed 12–20, Sunday weakest.
+       https://sproutsocial.com/insights/best-times-to-post-on-social-media/
+     - Instagram mid-week late morning–early afternoon; LinkedIn Tue–Thu office hours + late afternoon (third-party
+       roundups, they disagree): https://postfa.st/blog/best-time-to-post-on-social-media
+     - Middle East: 9-country Facebook study (300k posts, Ramadan): Egypt 16:00, UAE 19:00, KSA 22:00; Saudi Instagram
+       11–12 and ~22: https://thinkmarketingmagazine.com/?p=26033 ,
+       https://timetopost.co/best-time-to-post/instagram/gulf-weekend-split/ */
+  const PEAK = {
+    global: { facebook: { h: [[12, 14], [18, 20]], mid: true }, instagram: { h: [[11, 13], [17, 19]], mid: true }, linkedin: { h: [[10, 12], [15, 17]], mid: true }, email: { h: [[10, 11]], mid: true } },
+    mena: { facebook: { h: [[16, 18], [20, 22]] }, instagram: { h: [[12, 14], [20, 22]] }, linkedin: { h: [[10, 12], [13, 15]], mid: true }, email: { h: [[10, 11]], mid: true } },
+  };
   /* Hour h on day dISO in zone `from`, as an hour in zone `to`. A bad zone leaves the hour as it is. */
   function hourIn(dISO, h, from, to) {
     try {
@@ -22,7 +36,7 @@
   }
   /* Best days and hours for one channel. rows = the company's social post rows (c.data.meta); z = audience zone. */
   function bestTimes(rows, ch, z) {
-    const wd = workDays(z), pk = PEAK[ch] || PEAK.linkedin, out = { tz: z, wd, ch };
+    const wd = workDays(z), P = PEAK[region(z)], pk = P[ch] || P.linkedin, out = { tz: z, wd, ch };
     const own = (rows || []).filter((r) => r.platform === ch && !(+r.spend > 0) && +r.reach > 0 && r.engagements != null && r.engagements !== '');
     const rate = (xs) => { const R = xs.reduce((s, r) => s + (+r.reach || 0), 0); return R ? xs.reduce((s, r) => s + (+r.engagements || 0), 0) / R : 0; };
     const avg = rate(own);
@@ -42,5 +56,5 @@
     return out;
   }
 
-  root.BPSchedule = { workDays, PEAK, hourIn, bestTimes };
+  root.BPSchedule = { workDays, region, PEAK, hourIn, bestTimes };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -55,3 +55,26 @@ test('bestTimes: own hours from posts that carry a publish hour', () => {
   assert.equal(t.hours.src, 'data');
   assert.deepEqual(J(t.hours.h), [[18, 21]]);
 });
+
+// ---- Task 2: sourced peak windows per region ----
+test('region: Middle East zones vs the rest', () => {
+  assert.equal(S.region('Asia/Dubai'), 'mena');
+  assert.equal(S.region('Africa/Cairo'), 'mena');
+  assert.equal(S.region('Europe/Berlin'), 'global');
+});
+
+test('bestTimes fallback: Cairo Facebook = evening windows on every work day', () => {
+  const t = S.bestTimes([], 'facebook', 'Africa/Cairo');
+  assert.deepEqual(J(t.hours.h), [[16, 18], [20, 22]]);
+  assert.deepEqual(J(t.days.d), [0, 1, 2, 3, 4]);
+});
+
+test('bestTimes fallback: London Facebook = midday and early evening, mid-week', () => {
+  const t = S.bestTimes([], 'facebook', 'Europe/London');
+  assert.deepEqual(J(t.hours.h), [[12, 14], [18, 20]]);
+  assert.deepEqual(J(t.days.d), [2, 3, 4]);
+});
+
+test('bestTimes fallback: Cairo LinkedIn = mid-week of a Sun–Thu week', () => {
+  assert.deepEqual(J(S.bestTimes([], 'linkedin', 'Africa/Cairo').days.d), [1, 2, 3]);
+});
