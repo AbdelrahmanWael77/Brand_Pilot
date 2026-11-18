@@ -1,3 +1,5 @@
+> 2026-11-18: 32 DONE — user-facing "Meta" labels for the posts dataset renamed to Social posts (Facebook, Instagram, LinkedIn); Meta only means the Facebook+Instagram connection.
+
 > 2026-11-18: 31 DONE — progress bar in the Knowledge Hub analysing bar. 27–30 pushed (561d938).
 
 > 2026-11-18: 30 DONE — Read all button in the page popup; Home keeps its loader until the AI analysis ends. 28 + 29 are committed in 35fc667.
