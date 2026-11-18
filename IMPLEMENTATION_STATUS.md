@@ -1,5 +1,7 @@
 # BrandPilot — Live Implementation Status
 
+**33 — Model name removed from "How answers are made" (2026-11-18, owner).** AI Director card now says "Answered by AI from this company’s approved facts…" (EN+AR) and no longer has the "Change the model in Settings" line. The model stays visible only in Settings (model picker). npm test 343/343.
+
 **32 — LinkedIn is not Meta (2026-11-18, owner: "facebook and instagram are meta, linkedin is separate").** The posts dataset (internal key data.meta) holds Facebook, Instagram AND LinkedIn rows, but several labels called it "Meta". Renamed to "Social posts (Facebook, Instagram, LinkedIn)" (EN+AR): Data & integrations "unlocks" list + import hint, unrecognised-columns error, audit gap/spend texts and the 7 audit finding tags (plat), Analytics engagement note, empty-state hints. Meta stays only for the Facebook + Instagram connection / Meta Business Suite exports. Internal key meta unchanged. npm test 343/343.
 
 **31 — Progress bar in the Knowledge Hub analysing bar (2026-11-18, owner).** kWork: .meter under the sentence, brand colour; fills by finished sources (AI, (i-1)/n), pages (website read) or discovery steps; a moving stripe (.meter.ind, still under reduced motion) when progress is unknown (opening the site, waiting for page choice, AI starting). npm test 343/343; not clicked through in a browser.

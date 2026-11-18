@@ -1,3 +1,5 @@
+> 2026-11-18: 33 DONE — model name removed from the AI Director "How answers are made" card. 32 committed c8ccf59 (not pushed).
+
 > 2026-11-18: 32 DONE — user-facing "Meta" labels for the posts dataset renamed to Social posts (Facebook, Instagram, LinkedIn); Meta only means the Facebook+Instagram connection.
 
 > 2026-11-18: 31 DONE — progress bar in the Knowledge Hub analysing bar. 27–30 pushed (561d938).
