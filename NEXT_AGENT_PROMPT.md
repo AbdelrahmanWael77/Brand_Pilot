@@ -1,4 +1,4 @@
-> 2026-11-18: 38 DONE (not committed) — colour boxes in Review the signature style aligned (public/series.css).
+> 2026-11-18: 39 DONE — colour boxes in Review the signature style aligned (public/series.css).
 
 > 2026-11-18: 38 DONE (committed + pushed) — Performance page redesign: opens on Summary (journey steps → What changed → What it may mean → trend), one-line period, cleaner tabs, comparison rules/sources folded. 348/348 tests; EN/AR/mobile screenshots checked (data/check-perf-steps.mjs). Owner to review. The colour-box fix in public/series.css is still uncommitted.
 
