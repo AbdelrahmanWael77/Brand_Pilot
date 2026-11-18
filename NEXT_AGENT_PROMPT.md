@@ -1,3 +1,5 @@
+> 2026-11-18: 35 DONE — larger compass in the logo. Owner was offered: full campaign first in the Studio, prefill every purpose from facts, or start AI campaign copy (9.10/9.11) — waiting for a choice.
+
 > 2026-11-18: 34 DONE — token/time warning under Read all in the page popup. 32–33 pushed (6367951).
 
 > 2026-11-18: 33 DONE — model name removed from the AI Director "How answers are made" card. 32 committed c8ccf59 (not pushed).

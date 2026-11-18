@@ -1,5 +1,7 @@
 # BrandPilot — Live Implementation Status
 
+**35 — Bigger compass in the logo (2026-11-18, owner).** ic('logo') drawn at 20 px (sidebar, was 16) and 21 px (second use, was 17) inside the unchanged logo tile. Also answered the owner: the full campaign generator (template text for posts, landing page, email, guide) still exists under "Need a full campaign instead?" at the bottom of Create content; AI-written copy (9.10/9.11/10.2) was never built. npm test 343/343.
+
 **34 — Warning under "Read all" (2026-11-18, owner).** sitePick: amber note under the buttons (shown only with the Read all button): reading all pages can use many AI tokens and take much longer (EN+AR). npm test 343/343.
 
 **33 — Model name removed from "How answers are made" (2026-11-18, owner).** AI Director card now says "Answered by AI from this company’s approved facts…" (EN+AR) and no longer has the "Change the model in Settings" line. The model stays visible only in Settings (model picker). npm test 343/343.
