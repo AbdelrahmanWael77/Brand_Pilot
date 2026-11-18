@@ -78,3 +78,61 @@ test('bestTimes fallback: London Facebook = midday and early evening, mid-week',
 test('bestTimes fallback: Cairo LinkedIn = mid-week of a Sun–Thu week', () => {
   assert.deepEqual(J(S.bestTimes([], 'linkedin', 'Africa/Cairo').days.d), [1, 2, 3]);
 });
+
+// ---- Task 3: placement ----
+const NOW = new Date('2026-11-18T22:30:00Z'); // 00:30 on 19 November in Cairo
+const cairoPeak = () => ({ tz: 'Africa/Cairo', wd: [0, 1, 2, 3, 4], days: { src: 'peak', d: [0, 1, 2, 3, 4] }, hours: { src: 'peak', h: [[16, 18], [20, 22]] } });
+const item = (n, lang, ch = 'facebook') => ({ key: `${ch}-${n}-${lang}`, ch, lang, pair: `post|${ch}|${n}|` });
+const SIX = [1, 2, 3].map((n) => item(n, 'en')).concat([1, 2, 3].map((n) => item(n, 'ar')));
+const addD = (d, n) => new Date(Date.parse(d + 'T00:00:00Z') + n * 864e5).toISOString().slice(0, 10);
+
+test('localToday: the date in the audience zone, not UTC', () => {
+  assert.equal(S.localToday('Africa/Cairo', NOW), '2026-11-19');
+  assert.equal(S.localToday('UTC', NOW), '2026-11-18');
+});
+
+test('place: English and Arabic of a post share a day, English first window, Arabic second', () => {
+  const rows = J(S.place(SIX, cairoPeak, null, 'Africa/Cairo', NOW));
+  assert.equal(rows.length, 6);
+  assert.equal(new Set(rows.map((r) => r.date)).size, 3);
+  for (const n of [1, 2, 3]) {
+    const en = rows.find((r) => r.key === `facebook-${n}-en`), ar = rows.find((r) => r.key === `facebook-${n}-ar`);
+    assert.equal(en.date, ar.date);
+    assert.equal(en.time, '16:00');
+    assert.equal(ar.time, '20:00');
+  }
+  assert.equal(rows[0].date, '2026-11-22'); // Fri 20 and Sat 21 are not work days in Cairo
+});
+
+test('place: single language posts get the first window', () => {
+  const rows = J(S.place([1, 2, 3].map((n) => item(n, 'en')), cairoPeak, null, 'Africa/Cairo', NOW));
+  assert.equal(rows.length, 3);
+  assert.ok(rows.every((r) => r.time === '16:00'));
+});
+
+test('place: a campaign stays within 14 days of its start even with one best weekday', () => {
+  const wedOnly = () => ({ ...cairoPeak(), days: { src: 'data', d: [3] } });
+  const rows = J(S.place([1, 2, 3].map((n) => item(n, 'en')), wedOnly, null, 'Africa/Cairo', NOW));
+  const start = '2026-11-20';
+  assert.ok(rows.every((r) => r.date <= addD(start, 13)), JSON.stringify(rows));
+  assert.equal(rows.find((r) => r.key === 'facebook-1-en').date, '2026-11-25');
+  assert.ok(rows.every((r) => r.src === 'data'));
+});
+
+test('place: a past or garbled start falls back to tomorrow in the audience zone', () => {
+  const first = (s) => J(S.place(SIX, cairoPeak, s, 'Africa/Cairo', NOW))[0].date;
+  assert.equal(first('2020-01-01'), first(null));
+  assert.equal(first('nonsense'), first(null));
+  assert.equal(first('2027-02-31'), first(null));
+});
+
+test('place: the user start date is respected', () => {
+  const rows = J(S.place(SIX, cairoPeak, '2026-12-06', 'Africa/Cairo', NOW));
+  assert.ok(rows[0].date >= '2026-12-06');
+});
+
+test('place: one window only → the second language two hours later', () => {
+  const one = () => ({ ...cairoPeak(), hours: { src: 'peak', h: [[10, 11]] } });
+  const rows = J(S.place([item(1, 'en', 'email'), item(1, 'ar', 'email')], one, null, 'Africa/Cairo', NOW));
+  assert.deepEqual(rows.map((r) => r.time), ['10:00', '12:00']);
+});

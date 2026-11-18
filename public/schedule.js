@@ -56,5 +56,36 @@
     return out;
   }
 
-  root.BPSchedule = { workDays, region, PEAK, hourIn, bestTimes };
+  const addDays = (d, n) => new Date(Date.parse(d + 'T00:00:00Z') + n * 864e5).toISOString().slice(0, 10);
+  const weekday = (d) => new Date(d + 'T00:00:00Z').getUTCDay();
+  const hh = (h) => String(h).padStart(2, '0') + ':00';
+  /* Today's date (YYYY-MM-DD) where the audience lives; UTC when the zone is unknown. */
+  function localToday(z, now) {
+    try { return new Intl.DateTimeFormat('en-CA', { timeZone: z, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now); } catch (e) { return now.toISOString().slice(0, 10); }
+  }
+  /* Calendar placement (owner 2026-11-18). items: {key, ch, lang, pair} in asset order; pair = the twin key, so the
+     English and Arabic versions of one post share a day (English in the first window, Arabic in the second).
+     A group takes the first free best day within 14 days of the start, else the first free work day there, else the
+     first free day. start: the user's date, or tomorrow in the audience zone when missing, garbled or earlier. */
+  function place(items, timesFor, start, z, now) {
+    const earliest = addDays(localToday(z, now), 1);
+    const s = typeof start === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(start) && !Number.isNaN(Date.parse(start)) && addDays(start, 0) === start && start >= earliest ? start : earliest;
+    const groups = [];
+    for (const it of items) { const g = groups.find((x) => x.pair === it.pair); if (g) g.items.push(it); else groups.push({ pair: it.pair, ch: it.ch, items: [it] }); }
+    const used = new Set(), rows = [];
+    for (const g of groups) {
+      const t = timesFor(g.ch);
+      const free = (ok, max) => { for (let k = 0; k < max; k++) { const d = addDays(s, k); if (!used.has(d) && ok(weekday(d))) return d; } return null; };
+      const d = free((w) => t.days.d.includes(w), 14) || free((w) => t.wd.includes(w), 14) || free(() => true, 366);
+      used.add(d);
+      const src = t.days.src === 'data' || t.hours.src === 'data' ? 'data' : 'peak', h = t.hours.h;
+      g.items.slice().sort((a, b) => (a.lang === 'en' ? 0 : 1) - (b.lang === 'en' ? 0 : 1)).forEach((it, k) => {
+        const hour = h.length === 1 && k > 0 ? Math.min(h[0][0] + 2 * k, 23) : h[k % h.length][0];
+        rows.push({ key: it.key, date: d, time: hh(hour), src });
+      });
+    }
+    return rows.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+  }
+
+  root.BPSchedule = { workDays, region, PEAK, hourIn, bestTimes, localToday, place };
 })(typeof window !== 'undefined' ? window : globalThis);

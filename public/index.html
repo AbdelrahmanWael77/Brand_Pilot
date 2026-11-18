@@ -2278,11 +2278,10 @@ function whenHTML(c,camp){const chs=[...new Set(camp.assets.filter(a=>a.type==='
    <p>${ic('cal',14)} ${t.days.d.map(d=>D[d]).join(L(', ','، '))} <span class="wt-s ${t.days.src}">${t.days.src==='data'?L(`your results: ${t.days.lift}% more engagement per reach than your average, from ${t.days.n} posts`,`نتائجك: تفاعل أعلى بـ ${t.days.lift}% لكل وصول من متوسطك، من ${t.days.n} منشور`):L('typical peak days — not enough of your own posts yet','أيام الذروة المعتادة — منشوراتك لا تكفي بعد')}</span></p>
    <p>${ic('clock',14)} ${t.hours.h.map(([a,b])=>hh(a)+'–'+hh(b)).join(L(' or ',' أو '))} ${tzName(z)} <span class="wt-s ${t.hours.src}">${t.hours.src==='data'?L(`your posts, from ${t.hours.n} with a publish time`,`منشوراتك، من ${t.hours.n} بوقت نشر`):L('general guidance from published studies','إرشاد عام من دراسات منشورة')}</span></p></li>`}).join('')}</ul>
   <p class="muted small">${hasHour?L('Hours come from posts whose export carried the publish time.','الساعات من منشورات يحمل تصديرها وقت النشر.'):L('Your imported posts carry dates only. Facebook and Instagram exports include the publish time — import them again and BrandPilot learns your own best hours.','منشوراتك المستوردة تحمل التواريخ فقط. تصديرات فيسبوك وإنستجرام تتضمن وقت النشر — استوردها مجدداً ليتعلّم BrandPilot أفضل ساعاتك.')} ${L('Check results after two weeks: the Performance step compares days fairly.','راجع النتائج بعد أسبوعين: خطوة الأداء تقارن الأيام بإنصاف.')}</p></section>`}
-function calendar(c,camp){const z=audTz(c),items=camp.assets.filter(a=>a.type==='post').concat(camp.assets.filter(a=>a.type==='email')),rows=[],used=new Set();
- const now=new Date(),tomorrow=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+1)).toISOString().slice(0,10),T={};
- items.forEach((a,i)=>{const ch=a.type==='email'?'email':a.channel,t=T[ch]||(T[ch]=bestTimes(c,ch));let d=tomorrow;for(let k=0;k<60;k++){const wd=new Date(d+'T00:00:00Z').getUTCDay();if(t.days.d.includes(wd)&&!used.has(d))break;d=addDays(d,1)}used.add(d);
-  const w=t.hours.h[i%t.hours.h.length];rows.push({date:d,time:hh(w[0]),a,why:t.days.src==='data'||t.hours.src==='data'?'data':'peak',tz:z})});
- return rows.sort((x,y)=>x.date.localeCompare(y.date)||x.time.localeCompare(y.time))}
+/* Placement lives in public/schedule.js (BPSchedule.place): EN/AR of a post on the same day, within 14 days of the start (camp.start or tomorrow in the audience zone). */
+function calendar(c,camp){const z=audTz(c),list=camp.assets.filter(a=>a.type==='post').concat(camp.assets.filter(a=>a.type==='email')),by={};
+ const items=list.map(a=>{const ch=a.type==='email'?'email':a.channel;by[a.id]=a;return{key:a.id,ch,lang:a.lang,pair:[a.type,a.channel,a.n||0,a.slide||0].join('|')}});
+ return BPSchedule.place(items,ch=>bestTimes(c,ch),camp.start||null,z,new Date()).map(r=>({date:r.date,time:r.time,a:by[r.key],why:r.src,tz:z}))}
 
 /* Exports */
 const crcT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
