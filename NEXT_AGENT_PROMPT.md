@@ -1,3 +1,5 @@
+> 2026-11-18: 34 DONE — token/time warning under Read all in the page popup. 32–33 pushed (6367951).
+
 > 2026-11-18: 33 DONE — model name removed from the AI Director "How answers are made" card. 32 committed c8ccf59 (not pushed).
 
 > 2026-11-18: 32 DONE — user-facing "Meta" labels for the posts dataset renamed to Social posts (Facebook, Instagram, LinkedIn); Meta only means the Facebook+Instagram connection.

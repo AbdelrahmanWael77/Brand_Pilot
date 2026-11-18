@@ -1,5 +1,7 @@
 # BrandPilot — Live Implementation Status
 
+**34 — Warning under "Read all" (2026-11-18, owner).** sitePick: amber note under the buttons (shown only with the Read all button): reading all pages can use many AI tokens and take much longer (EN+AR). npm test 343/343.
+
 **33 — Model name removed from "How answers are made" (2026-11-18, owner).** AI Director card now says "Answered by AI from this company’s approved facts…" (EN+AR) and no longer has the "Change the model in Settings" line. The model stays visible only in Settings (model picker). npm test 343/343.
 
 **32 — LinkedIn is not Meta (2026-11-18, owner: "facebook and instagram are meta, linkedin is separate").** The posts dataset (internal key data.meta) holds Facebook, Instagram AND LinkedIn rows, but several labels called it "Meta". Renamed to "Social posts (Facebook, Instagram, LinkedIn)" (EN+AR): Data & integrations "unlocks" list + import hint, unrecognised-columns error, audit gap/spend texts and the 7 audit finding tags (plat), Analytics engagement note, empty-state hints. Meta stays only for the Facebook + Instagram connection / Meta Business Suite exports. Internal key meta unchanged. npm test 343/343.
