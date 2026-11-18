@@ -1,4 +1,6 @@
-> 2026-11-18: 27 DONE (not committed) — website reading waits for the page choice (popup picker, facts + brand scan only after pages are read or skipped). Owner to try it on Home with a real site.
+> 2026-11-18: 28 + 29 DONE (not committed) — no AI page cap on website reading (rate limits now wait and continue), and a Knowledge Hub status bar for running/finished analysis. Owner to try both on a real site; then commit.
+
+> 2026-11-18: 27 DONE (9d6ca62) — website reading waits for the page choice (popup picker, facts + brand scan only after pages are read or skipped). Owner to try it on Home with a real site.
 
 > 2026-11-18: 25b DONE (296122b, not pushed) — schedule minors fixed, Instagram export = Pacific, logo dot removed. WAITING ON OWNER: (1) pick a logo from https://claude.ai/artifact/8ifu3St6VWBnFLhuBo8ByE, then replace IC.logo + public/favicon.svg; (2) is the Facebook export column publish_time_pacific really Cairo time? (evidence in IMPLEMENTATION_STATUS 25b) — if yes, set htz to the audience zone for Facebook files.
 

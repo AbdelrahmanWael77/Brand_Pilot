@@ -99,14 +99,14 @@ test('chooseByRules: company pages by keyword, English and Arabic, no sign-in or
   assert.deepEqual(chooseByRules([{ url: 'https://site.test/x', label: 'Nothing known' }]), []);
 });
 
-test('checkChosen: only listed addresses, once, at most 8', () => {
+test('checkChosen: only listed addresses, once, as many as the AI chose (no page cap)', () => {
   const r = checkChosen(LINKS, {
     pages: ['https://site.test/pricing', 'https://site.test/invented', 'https://other.test/about', 'http://169.254.169.254/latest', 'https://site.test/about/', 'https://site.test/pricing', 5, null],
   });
   assert.deepEqual(r, { chosen: ['https://site.test/pricing', 'https://site.test/about'], dropped: 6 });
   assert.deepEqual(checkChosen(LINKS, { pages: 'https://site.test/about' }), { chosen: [], dropped: 0 });
   const many = Array.from({ length: 20 }, (_, i) => ({ url: `https://site.test/p${i}`, label: '' }));
-  assert.equal(checkChosen(many, { pages: many.map((l) => l.url) }).chosen.length, WEBSITE.pages);
+  assert.equal(checkChosen(many, { pages: many.map((l) => l.url) }).chosen.length, 20);
 });
 
 test('buildPagesPrompt: labels are quoted data and cannot close their tag', () => {
