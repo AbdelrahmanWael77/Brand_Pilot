@@ -1549,6 +1549,7 @@ section.ledger{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 <div id="app"></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <script src="compare.js"></script>
+<script src="schedule.js"></script>
 <script src="recs.js"></script>
 <script src="series.js"></script>
 <script>
@@ -2266,20 +2267,9 @@ const TZS=[['Africa/Cairo','Cairo'],['Asia/Riyadh','Riyadh'],['Asia/Dubai','Duba
 const MKTZ=[[/egypt|cairo|مصر|القاهرة/i,'Africa/Cairo'],[/saudi|ksa|riyadh|jeddah|السعودية|الرياض/i,'Asia/Riyadh'],[/uae|emirates|dubai|abu dhabi|الإمارات|دبي/i,'Asia/Dubai'],[/kuwait|الكويت/i,'Asia/Kuwait'],[/qatar|doha|قطر/i,'Asia/Qatar'],[/jordan|amman|الأردن/i,'Asia/Amman'],[/united kingdom|uk|london/i,'Europe/London']];
 const audTz=c=>c.tz||(()=>{const t=c.findings.filter(f=>f.status==='approved'&&/markets|audiences|overview/.test(f.cat)).map(f=>f.text).join(' ');let best=null;MKTZ.forEach(([re,z])=>{const m=re.exec(t);if(m&&(!best||m.index<best.i))best={i:m.index,z}});if(best)return best.z;try{const z=Intl.DateTimeFormat().resolvedOptions().timeZone;return z&&!/^Etc\//.test(z)?z:'Africa/Cairo'}catch(e){return'Africa/Cairo'}})();
 const tzName=z=>(TZS.find(x=>x[0]===z)||[0,z.split('/').pop().replace(/_/g,' ')])[1];
-/* Sun–Thu work week where it applies (UAE moved to Mon–Fri in 2022). 0 = Sunday. */
-const workDays=z=>/^(Africa\/Cairo|Asia\/(Riyadh|Kuwait|Qatar|Bahrain|Muscat|Baghdad|Amman)|Asia\/Aden)$/.test(z)?[0,1,2,3,4]:[1,2,3,4,5];
+/* The pure logic lives in public/schedule.js (BPSchedule, tested in test/schedule.test.js). */
+const workDays=BPSchedule.workDays,hourIn=BPSchedule.hourIn,bestTimes=(c,ch)=>BPSchedule.bestTimes((c.data&&c.data.meta)||[],ch,audTz(c));
 const DAYN=()=>[L('Sun','الأحد'),L('Mon','الاثنين'),L('Tue','الثلاثاء'),L('Wed','الأربعاء'),L('Thu','الخميس'),L('Fri','الجمعة'),L('Sat','السبت')];
-/* General guidance: commonly reported peak windows (local time). Days: middle of the work week for LinkedIn and e-mail. */
-const PEAK={linkedin:{h:[[8,10],[12,13]],mid:true},facebook:{h:[[9,11],[19,21]]},instagram:{h:[[12,13],[19,21]]},email:{h:[[10,11]],mid:true}};
-const hourIn=(dISO,h,from,to)=>{try{const t=Date.UTC(+dISO.slice(0,4),+dISO.slice(5,7)-1,+dISO.slice(8,10),h),off=z=>{const p=new Intl.DateTimeFormat('en-US',{timeZone:z,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit'}).formatToParts(new Date(t)),g=k=>+p.find(x=>x.type===k).value;return(Date.UTC(g('year'),g('month')-1,g('day'),g('hour'))-t)/36e5};return((h-off(from)+off(to))%24+24)%24}catch(e){return h}};
-function bestTimes(c,ch){const z=audTz(c),wd=workDays(z),pk=PEAK[ch]||PEAK.linkedin,rows=((c.data&&c.data.meta)||[]).filter(r=>r.platform===ch&&!(+r.spend>0)&&+r.reach>0&&r.engagements!=null&&r.engagements!==''),out={tz:z,wd,ch};
- const rate=xs=>{const R=xs.reduce((s,r)=>s+(+r.reach||0),0);return R?xs.reduce((s,r)=>s+(+r.engagements||0),0)/R:0},avg=rate(rows);
- if(rows.length>=8&&avg>0){const by=[0,1,2,3,4,5,6].map(d=>{const xs=rows.filter(r=>new Date(r.date+'T00:00:00Z').getUTCDay()===d);return{d,n:xs.length,r:rate(xs)}}).filter(x=>x.n>=2&&x.r>avg*1.1).sort((a,b)=>b.r-a.r).slice(0,2);
-  if(by.length)out.days={src:'data',d:by.map(x=>x.d),n:rows.length,lift:Math.round((by[0].r/avg-1)*100)}}
- if(!out.days)out.days={src:'peak',d:pk.mid?wd.slice(1,4):wd.slice(0,5)};
- const hr=rows.filter(r=>r.hour!=null&&r.hour!=='');
- if(hr.length>=8&&avg>0){const blk=[0,3,6,9,12,15,18,21].map(b=>{const xs=hr.filter(r=>{const h=hourIn(r.date,+r.hour,r.htz||z,z);return h>=b&&h<b+3});return{b,n:xs.length,r:rate(xs)}}).filter(x=>x.n>=3).sort((a,b)=>b.r-a.r)[0];if(blk)out.hours={src:'data',h:[[blk.b,blk.b+3]],n:hr.length}}
- if(!out.hours)out.hours={src:'peak',h:pk.h};return out}
 const hh=h=>String(h).padStart(2,'0')+':00';
 function whenHTML(c,camp){const chs=[...new Set(camp.assets.filter(a=>a.type==='post'||a.type==='email').map(a=>a.type==='email'?'email':a.channel))],z=audTz(c),D=DAYN(),hasHour=((c.data&&c.data.meta)||[]).some(r=>r.hour!=null&&r.hour!=='');
  return`<section class="card wtp"><header class="pl-h"><div><h2>${L('When to post','متى تنشر')}</h2><p class="muted">${L('The calendar uses these days and times.','يستخدم التقويم هذه الأيام والأوقات.')}</p></div></header>
