@@ -1,4 +1,6 @@
-> 2026-11-18: 30 DONE (not committed) — Knowledge Hub shows website logo candidates as images (light + dark tiles) in review, and "Brand identity in use" lists pending logos with Confirm/Dismiss instead of "none". Owner to check on MD Geeks; then commit 28–30.
+> 2026-11-18: 30 DONE — Read all button in the page popup; Home keeps its loader until the AI analysis ends. 28 + 29 are committed in 35fc667.
+
+> 2026-11-18: 30 DONE — Knowledge Hub shows website logo candidates as images (light + dark tiles) in review, and "Brand identity in use" lists pending logos with Confirm/Dismiss instead of "none". Owner to check on MD Geeks; then commit 28–30.
 
 > 2026-11-18: 28 + 29 DONE (not committed) — no AI page cap on website reading (rate limits now wait and continue), and a Knowledge Hub status bar for running/finished analysis. Owner to try both on a real site; then commit.
 
