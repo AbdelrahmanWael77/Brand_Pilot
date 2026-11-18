@@ -23,16 +23,28 @@
     mena: { facebook: { h: [[16, 18], [20, 22]] }, instagram: { h: [[12, 14], [20, 22]] }, linkedin: { h: [[10, 12], [13, 15]], mid: true }, email: { h: [[10, 11]], mid: true } },
   };
   /* Hour h on day dISO in zone `from`, as an hour in zone `to`. A bad zone leaves the hour as it is. */
+  /* Wall-clock parts of an instant in zone z, read from formatToParts (never from a locale's date text). */
+  function partsIn(z, ms) {
+    const p = new Intl.DateTimeFormat('en-US', { timeZone: z, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit' }).formatToParts(new Date(ms));
+    const g = (k) => +p.find((x) => x.type === k).value;
+    return { y: g('year'), m: g('month'), d: g('day'), h: g('hour') % 24 };
+  }
+  const isoOf = (p) => p.y + '-' + String(p.m).padStart(2, '0') + '-' + String(p.d).padStart(2, '0');
+  /* Day dISO at hour h in zone `from`, as {date, hour} in zone `to`. Throws on a bad zone. */
+  function shift(dISO, h, from, to) {
+    const t = Date.UTC(+dISO.slice(0, 4), +dISO.slice(5, 7) - 1, +dISO.slice(8, 10), h);
+    const f = partsIn(from, t), off = (Date.UTC(f.y, f.m - 1, f.d, f.h) - t) / 36e5;
+    const p = partsIn(to, t - off * 36e5);
+    return { date: isoOf(p), hour: p.h };
+  }
   function hourIn(dISO, h, from, to) {
-    try {
-      const t = Date.UTC(+dISO.slice(0, 4), +dISO.slice(5, 7) - 1, +dISO.slice(8, 10), h);
-      const off = (z) => {
-        const p = new Intl.DateTimeFormat('en-US', { timeZone: z, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit' }).formatToParts(new Date(t));
-        const g = (k) => +p.find((x) => x.type === k).value;
-        return (Date.UTC(g('year'), g('month') - 1, g('day'), g('hour')) - t) / 36e5;
-      };
-      return ((h - off(from) + off(to)) % 24 + 24) % 24;
-    } catch (e) { return h; }
+    try { return shift(dISO, h, from, to).hour; } catch (e) { return h; }
+  }
+  /* The weekday a post went out where the audience lives: from its publish hour + zone when known, else its date. */
+  function localWeekday(r, z) {
+    let d = r.date;
+    if (r.hour != null && r.hour !== '') { try { d = shift(r.date, +r.hour, r.htz || z, z).date; } catch (e) { d = r.date; } }
+    return new Date(d + 'T00:00:00Z').getUTCDay();
   }
   /* Best days and hours for one channel. rows = the company's social post rows (c.data.meta); z = audience zone. */
   function bestTimes(rows, ch, z) {
@@ -41,7 +53,7 @@
     const rate = (xs) => { const R = xs.reduce((s, r) => s + (+r.reach || 0), 0); return R ? xs.reduce((s, r) => s + (+r.engagements || 0), 0) / R : 0; };
     const avg = rate(own);
     if (own.length >= 8 && avg > 0) {
-      const by = [0, 1, 2, 3, 4, 5, 6].map((d) => { const xs = own.filter((r) => new Date(r.date + 'T00:00:00Z').getUTCDay() === d); return { d, n: xs.length, r: rate(xs) }; })
+      const by = [0, 1, 2, 3, 4, 5, 6].map((d) => { const xs = own.filter((r) => localWeekday(r, z) === d); return { d, n: xs.length, r: rate(xs) }; })
         .filter((x) => x.n >= 2 && x.r > avg * 1.1).sort((a, b) => b.r - a.r).slice(0, 2);
       if (by.length) out.days = { src: 'data', d: by.map((x) => x.d), n: own.length, lift: Math.round((by[0].r / avg - 1) * 100) };
     }
@@ -61,7 +73,7 @@
   const hh = (h) => String(h).padStart(2, '0') + ':00';
   /* Today's date (YYYY-MM-DD) where the audience lives; UTC when the zone is unknown. */
   function localToday(z, now) {
-    try { return new Intl.DateTimeFormat('en-CA', { timeZone: z, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now); } catch (e) { return now.toISOString().slice(0, 10); }
+    try { return isoOf(partsIn(z, now.getTime())); } catch (e) { return now.toISOString().slice(0, 10); }
   }
   /* Calendar placement (owner 2026-11-18). items: {key, ch, lang, pair} in asset order; pair = the twin key, so the
      English and Arabic versions of one post share a day (English in the first window, Arabic in the second).

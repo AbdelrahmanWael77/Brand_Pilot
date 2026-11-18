@@ -55,7 +55,7 @@ svg.i{flex:none;display:block}
 .side{background:var(--paper-2);border-inline-end:1px solid var(--rule);padding:16px 12px 12px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;gap:10px;color:var(--ink-2)}
 .logo{display:flex;align-items:center;gap:10px;color:var(--ink);font:600 21px/1 var(--f-display);letter-spacing:-.02em;padding:4px 8px 6px;font-variation-settings:"opsz" 36}
 .logo i{width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;position:relative}
-.logo i::after{content:"";position:absolute;inset-inline-end:-3px;bottom:-3px;width:9px;height:9px;border-radius:50%;background:var(--signal);border:2px solid var(--paper-2)}
+
 .dossier{display:block;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r-2);padding:8px 10px 10px;transition:border-color .14s var(--ease)}
 .dossier:focus-within,.dossier:hover{border-color:var(--rule-2)}
 .dossier .eyebrow{font-size:12.5px;margin-bottom:4px}
@@ -452,7 +452,7 @@ pre.guide{white-space:pre-wrap;font:14px/1.65 var(--f-ui);background:var(--surfa
 .auth{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:var(--paper)}
 .auth-cover{background:var(--ink);color:#EDE9E1;padding:48px 56px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;isolation:isolate}
 .auth-cover::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(700px 380px at 110% -10%,rgba(200,64,26,.42),transparent 60%),repeating-linear-gradient(0deg,transparent 0 39px,rgba(255,255,255,.035) 39px 40px)}
-.auth-cover .logo{color:#fff}.auth-cover .logo i{background:#fff;color:var(--ink)}.auth-cover .logo i::after{border-color:var(--ink)}
+.auth-cover .logo{color:#fff}.auth-cover .logo i{background:#fff;color:var(--ink)}.auth-cover 
 .auth-cover h1{font-size:50px;line-height:1.06;color:#fff;max-width:560px;margin:40px 0 18px}
 [dir=rtl] .auth-cover h1{font-size:40px;line-height:1.3}
 .auth-cover h1 em{font-style:italic;color:#F08A66;font-weight:500}
@@ -663,7 +663,7 @@ h2{font-weight:700}
 .gside{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--side);color:#C3CCDC;display:flex;flex-direction:column;gap:18px;padding:18px 12px 14px;z-index:45;scrollbar-color:#24324D transparent}
 .gs-top{display:flex;align-items:center;gap:8px}
 .gside .logo{color:#fff;font:800 19px/1 var(--f-ui);letter-spacing:-.01em;padding:4px 8px;flex:1}
-.gside .logo i{background:var(--brand);border-radius:9px}.gside .logo i::after{background:#7CE0B5;border-color:var(--side)}
+.gside .logo i{background:var(--brand);border-radius:9px}.gside 
 .gs-x{display:none!important;color:#C3CCDC!important}
 .gs-co{display:grid;gap:6px}
 .gs-l{font:600 13px/1.2 var(--f-ui);color:#8D99AE;padding:0 10px}
@@ -1801,7 +1801,7 @@ function importData(c,text,origin,fname,kind){
  const room=ROW_MAX-c.data[kind].length;if(room<=0)throw impStop(L(`This dataset already holds the maximum of ${fmt(ROW_MAX)} rows. Remove its data before importing more.`,`هذه المجموعة تحتوي بالفعل على الحد الأقصى (${fmt(ROW_MAX)} صف). أزل بياناتها قبل استيراد المزيد.`));
  /* Day/month order for the whole file: a first part above 12 means day first, a second part above 12 means month first; neither → the default (day first; 8.2 will pass a platform default) and the import says it was assumed. */
  const di=h.indexOf('date'),dp=rows.slice(1).map(rw=>dateParts(rw[di])).filter(p=>p&&!p.iso),aBig=dp.some(p=>p.a>12),bBig=dp.some(p=>p.b>12),dord=!dp.length?'':bBig&&!aBig?'mdy':aBig?'dmy':pm?pm.dflt:'dmy',dassumed=!!dp.length&&!aBig&&!bBig,p2=x=>String(x).padStart(2,'0');
- rows.slice(1).forEach(rw=>{const o={};h.forEach((k,i)=>{if(rw[i]!==null)o[k]=String(rw[i]??'').trim()});const p=dateParts(o.date),d=!p?'':p.iso||(dord==='mdy'?p.y+'-'+p2(p.a)+'-'+p2(p.b):p.y+'-'+p2(p.b)+'-'+p2(p.a));if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!realDate(d)){why.date++;return}{const hm=/[T\s,](\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)?/i.exec(String(o.date||''));if(hm){let H=+hm[1];if(hm[3]){H=H%12+(/pm/i.test(hm[3])?12:0)}if(H<24){o.hour=H;if(pm&&pm.plat==='facebook')o.htz='America/Los_Angeles'}}}o.date=d;if(sc.req.some(k=>(o[k]??'')==='')){why.required++;return}
+ rows.slice(1).forEach(rw=>{const o={};h.forEach((k,i)=>{if(rw[i]!==null)o[k]=String(rw[i]??'').trim()});const p=dateParts(o.date),d=!p?'':p.iso||(dord==='mdy'?p.y+'-'+p2(p.a)+'-'+p2(p.b):p.y+'-'+p2(p.b)+'-'+p2(p.a));if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!realDate(d)){why.date++;return}{const hm=/[T\s,](\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm)?/i.exec(String(o.date||''));if(hm){let H=+hm[1];if(hm[3]){H=H%12+(/pm/i.test(hm[3])?12:0)}if(H<24){o.hour=H;/* Meta post exports: Facebook and Instagram publish times are both Pacific (owner's crossposted posts, 2026-11-18) */if(pm&&(pm.plat==='facebook'||pm.plat==='instagram'))o.htz='America/Los_Angeles'}}}o.date=d;if(sc.req.some(k=>(o[k]??'')==='')){why.required++;return}
   let bad='';sc.num.forEach(k=>{if(k in o){o[k]=o[k]===''?0:numVal(o[k]);if(!isFinite(o[k]))bad=bad||'number';else if(o[k]<0)bad=bad||'negative'}});if(bad){why[bad]++;return}
   if(kind==='meta'){delete o.format;/* publish hour: kept only when readable (BPSchedule.cleanHour); a blank or odd cell never drops the post nor becomes 00:00 */if('hour' in o){const hv=BPSchedule.cleanHour(o.hour);if(hv===undefined){delete o.hour;delete o.htz}else o.hour=hv}}if(o.platform)o.platform=o.platform.toLowerCase();if(o.status)o.status=o.status.toLowerCase();out.push(o)});
  const skipped=why.date+why.required+why.number+why.negative;

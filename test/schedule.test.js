@@ -161,3 +161,22 @@ test('cleanHour: an integer 0–23 or HH:MM / 7 PM text; anything else is no hou
 test('hourIn: late October (Cairo back on winter time, Los Angeles still on summer time) → 18', () => {
   assert.equal(S.hourIn('2026-10-30', 9, 'America/Los_Angeles', 'Africa/Cairo'), 18);
 });
+
+// ---- Deferred minors, fixed 2026-11-18 ----
+test('bestTimes: own best day is the weekday where the audience lives (Sat 23:00 UTC = Sun 01:00 Cairo)', () => {
+  const sync = (d, h, eng) => fb(d, 1000, eng, { hour: h, htz: 'UTC' });
+  const rows = ['2026-11-07', '2026-11-14', '2026-11-21'].map((d) => sync(d, 23, 100)) // Saturdays in UTC
+    .concat(['2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-09', '2026-11-10', '2026-11-11'].map((d) => sync(d, 10, 30)));
+  const t = S.bestTimes(rows, 'facebook', 'Africa/Cairo');
+  assert.equal(t.days.src, 'data');
+  assert.equal(t.days.d[0], 0);
+  assert.ok(!t.days.d.includes(6));
+});
+
+test('localToday: does not depend on how a locale formats dates', () => {
+  const Real = Intl.DateTimeFormat;
+  const usOnly = function (_loc, opts) { return new Real('en-US', opts); }; // format() gives 11/19/2026
+  const ctx2 = { Intl: { DateTimeFormat: usOnly } };
+  vm.runInNewContext(readFileSync(new URL('../public/schedule.js', import.meta.url), 'utf8'), ctx2);
+  assert.equal(ctx2.BPSchedule.localToday('Africa/Cairo', NOW), '2026-11-19');
+});
