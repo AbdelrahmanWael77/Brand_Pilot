@@ -15,8 +15,9 @@ import crypto from 'node:crypto';
 export const SCHEMAS = {
   meta: {
     req: ['date', 'platform', 'reach', 'engagements'],
-    opt: ['post_id', 'theme', 'language', 'impressions', 'link_clicks', 'spend', 'campaign', 'text'],
-    num: ['reach', 'impressions', 'engagements', 'link_clicks', 'spend'],
+    // hour (0–23) + htz (its IANA zone): when the post went out, from exports with a publish time or the live sync.
+    opt: ['post_id', 'theme', 'language', 'impressions', 'link_clicks', 'spend', 'campaign', 'text', 'hour', 'htz'],
+    num: ['reach', 'impressions', 'engagements', 'link_clicks', 'spend', 'hour'],
   },
   ga4: {
     req: ['date', 'channel', 'sessions'],
@@ -46,6 +47,15 @@ export function cleanRow(kind, r) {
     if (col === 'date') continue;
     const required = sc.req.includes(col);
     const v = r[col];
+    // An optional publish time that is not usable is left out; the post itself is still good.
+    if (col === 'hour') {
+      if (Number.isInteger(v) && v >= 0 && v <= 23) out.hour = v;
+      continue;
+    }
+    if (col === 'htz') {
+      if (typeof v === 'string' && v.trim() && v.length <= 64) out.htz = v.trim();
+      continue;
+    }
     if (sc.num.includes(col)) {
       if (v === undefined || v === null || v === '') {
         if (required) return null;

@@ -78,7 +78,7 @@ async function startState(cookie = alice, id = co) {
 test('row mapping: only current metrics, absent ones left out, never invented', () => {
   assert.deepEqual(fbRow({ id: 'x', created_time: '2026-11-10T23:30:00+0000', message: 'Hello', shares: { count: 2 } },
     ins({ post_total_media_view_unique: 10, post_media_view: 15, post_clicks_by_type: { 'other clicks': 1 }, post_reactions_by_type_total: { like: 3, wow: 1 } }).data),
-  { date: '2026-11-10', platform: 'facebook', post_id: 'x', reach: 10, impressions: 15, engagements: 6, link_clicks: 0, language: 'en', text: 'Hello' });
+  { date: '2026-11-10', platform: 'facebook', post_id: 'x', reach: 10, impressions: 15, engagements: 6, link_clicks: 0, language: 'en', text: 'Hello', hour: 23, htz: 'UTC' });
   // No reach → no row (reach is required by the Meta schema).
   assert.equal(fbRow({ id: 'y', created_time: '2026-11-10T00:00:00+0000' }, ins({ post_media_view: 5 }).data), null);
   // Without the clicks metric the row has no link_clicks at all (not 0); without views no impressions.
@@ -89,7 +89,7 @@ test('row mapping: only current metrics, absent ones left out, never invented', 
   assert.equal('text' in r, false); // no caption → no text column value
   assert.deepEqual(igRow({ id: 'm', timestamp: '2026-11-11T10:00:00+0000', media_type: 'REELS', caption: 'عرض اليوم' },
     [{ name: 'reach', values: [{ value: 9 }] }, { name: 'total_interactions', total_value: { value: 2 } }]),
-  { date: '2026-11-11', platform: 'instagram', post_id: 'm', reach: 9, engagements: 2, language: 'ar', text: 'عرض اليوم' });
+  { date: '2026-11-11', platform: 'instagram', post_id: 'm', reach: 9, engagements: 2, language: 'ar', text: 'عرض اليوم', hour: 10, htz: 'UTC' });
   assert.equal(scriptLang('Clinics عيادات عيادات'), 'ar');
   assert.equal(scriptLang('123 !'), undefined);
 });
@@ -188,9 +188,9 @@ test('sync: posts and media in the window become Meta rows; gaps are counted, no
   assert.equal(r.status, 200);
   const s = await r.json();
   assert.deepEqual(s.rows, [
-    { date: '2026-11-10', platform: 'facebook', post_id: 'P1_a', reach: 1200, impressions: 2000, engagements: 50, link_clicks: 30, language: 'ar', text: 'توصيل مجاني لأول طلب' },
-    { date: '2026-11-01', platform: 'facebook', post_id: 'P1_b', reach: 800, impressions: 900, engagements: 0, language: 'en', text: 'Free delivery on first orders' },
-    { date: '2026-11-11', platform: 'instagram', post_id: 'M1', reach: 500, impressions: 650, engagements: 37, language: 'en', text: 'Clinics: printer paper & toner' },
+    { date: '2026-11-10', platform: 'facebook', post_id: 'P1_a', reach: 1200, impressions: 2000, engagements: 50, link_clicks: 30, language: 'ar', text: 'توصيل مجاني لأول طلب', hour: 9, htz: 'UTC' },
+    { date: '2026-11-01', platform: 'facebook', post_id: 'P1_b', reach: 800, impressions: 900, engagements: 0, language: 'en', text: 'Free delivery on first orders', hour: 9, htz: 'UTC' },
+    { date: '2026-11-11', platform: 'instagram', post_id: 'M1', reach: 500, impressions: 650, engagements: 37, language: 'en', text: 'Clinics: printer paper & toner', hour: 10, htz: 'UTC' },
   ]);
   assert.deepEqual(s.skipped, { noInsights: 1, errors: 1 }); // P1_c returned no metrics; M2's insights failed
   assert.deepEqual(s.accounts, { pages: 1, instagram: 1 });

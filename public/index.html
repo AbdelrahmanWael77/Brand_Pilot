@@ -1747,7 +1747,7 @@ function fixtureCSV(co,phase,slug){
  return{meta:csv(M),ga4:csv(G),gsc:csv(Q),leads:csv(Ld)}}
 
 /* ---------- Import pipeline (CSV / JSON) ---------- */
-const SCH={meta:{req:['date','platform','reach','engagements'],opt:['post_id','theme','language','impressions','link_clicks','spend','campaign','text'],num:['reach','impressions','engagements','link_clicks','spend'],en:'Social posts (Facebook, Instagram, LinkedIn)',ar:'منشورات السوشيال (فيسبوك وإنستجرام وLinkedIn)'},
+const SCH={meta:{req:['date','platform','reach','engagements'],opt:['post_id','theme','language','impressions','link_clicks','spend','campaign','text','hour','htz'],num:['reach','impressions','engagements','link_clicks','spend','hour'],en:'Social posts (Facebook, Instagram, LinkedIn)',ar:'منشورات السوشيال (فيسبوك وإنستجرام وLinkedIn)'},
  ga4:{req:['date','channel','sessions'],opt:['landing_page','device','engaged_sessions','enquiries','campaign'],num:['sessions','engaged_sessions','enquiries'],en:'Google Analytics 4 — website traffic',ar:'جوجل أناليتكس 4 — زيارات الموقع'},
  gsc:{req:['date','query','clicks','impressions'],opt:['page','position'],num:['clicks','impressions','position'],en:'Google Search Console — queries',ar:'جوجل سيرش كونسول — عبارات البحث'},
  leads:{req:['date','status'],opt:['source','campaign','segment'],num:[],en:'Leads / CRM export',ar:'العملاء المحتملون / تصدير CRM'}};

@@ -198,3 +198,16 @@ test('meta rows keep an optional caption and never the tagging suggestions (8.5)
   assert.equal('theme' in u, false);
   assert.equal(u.text, 'hello');
 });
+
+test('cleanRow: Meta rows keep a valid publish hour and its zone; a bad hour is dropped, the row kept', () => {
+  const base = { date: '2026-11-10', platform: 'facebook', reach: 5, engagements: 1 };
+  const ok = cleanRow('meta', { ...base, hour: 19, htz: 'Africa/Cairo' });
+  assert.equal(ok.hour, 19);
+  assert.equal(ok.htz, 'Africa/Cairo');
+  for (const hour of [24, 7.5, -1, '19']) {
+    const r = cleanRow('meta', { ...base, hour });
+    assert.ok(r, `row with hour ${JSON.stringify(hour)} is kept`);
+    assert.equal('hour' in r, false, `hour ${JSON.stringify(hour)} is dropped`);
+  }
+  assert.equal('htz' in cleanRow('meta', { ...base, htz: 'x'.repeat(65) }), false);
+});

@@ -82,6 +82,16 @@ const day = (iso) => {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
 };
+/** The publish hour in UTC (Meta times carry an offset), so the app can learn the company's own best hours. */
+const hourOf = (iso) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? undefined : d.getUTCHours();
+};
+const withHour = (row, iso) => {
+  const h = hourOf(iso);
+  if (h !== undefined) Object.assign(row, { hour: h, htz: 'UTC' });
+  return row;
+};
 /** Script of a caption: 'ar' when Arabic letters outnumber Latin ones, 'en' for the reverse, nothing when neither. */
 export function scriptLang(text) {
   const s = String(text || '');
@@ -116,7 +126,7 @@ export function fbRow(post, insights) {
   if (lang) row.language = lang;
   const text = caption(post.message);
   if (text) row.text = text;
-  return row;
+  return withHour(row, post.created_time);
 }
 
 /** The post's own words for theme suggestions (task 9.16): one line, at most 2000 characters (the Tag posts popup shows it; the theme model reads the first 500); nothing when empty. */
@@ -135,7 +145,7 @@ export function igRow(media, insights) {
   if (lang) row.language = lang;
   const text = caption(media.caption);
   if (text) row.text = text;
-  return row;
+  return withHour(row, media.timestamp);
 }
 
 /** Runs `fn` over `items` with at most `n` at a time. */
