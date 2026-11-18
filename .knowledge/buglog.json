@@ -33,6 +33,23 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-11-17"
+    },
+    {
+      "id": "website-read-frozen-ui",
+      "timestamp": "2026-11-18",
+      "error_message": "Adding a website showed no change for ~25 s, then a page-chooser dialog popped over an already-switched results screen; 631 facts from 4 pages",
+      "file": "public/index.html",
+      "root_cause": "A.scan only set SRV.scanning (a disabled button label) and a 3 s toast while the server read the page and asked the AI to choose links; the chooser was a MODAL opened at the end while discovery had already re-rendered Home. Rule extraction turned every line under a heading of a website page into a fact (menus, buttons, price tables).",
+      "fix": "readTrack step tracker with a live seconds ticker replaces the add box; page chooser inline on Home/Sources; website-only filters in extract (okWeb: nav labels, short/numeric lines, per-category caps).",
+      "tags": [
+        "onboarding",
+        "website",
+        "loading",
+        "ux",
+        "extract"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-11-18"
     }
   ]
 }

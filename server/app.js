@@ -48,7 +48,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   const jsonDefault = express.json({ limit: '1mb' });
   const jsonState = express.json({ limit: '5mb' });
   // Reference pictures for the series style read (series.js): up to 6 shrunk images.
-  const jsonImages = express.json({ limit: '4mb' });
+  const jsonImages = express.json({ limit: '12mb' }); // up to 8 reference pictures (series style read)
   app.use((req, res, next) =>
     (/^\/api\/companies\/[^/]+\/state\/?$/.test(req.path) ? jsonState : /^\/api\/companies\/[^/]+\/series\/style-read\/?$/.test(req.path) ? jsonImages : jsonDefault)(req, res, next),
   );

@@ -478,7 +478,7 @@
     return `<section class="card sx-refs"><h2>${L('Creative references', 'المراجع الإبداعية')}</h2><p class="muted small">${L('Previous posts that show how this series looks. Used for style only — never as company facts.', 'منشورات سابقة تُظهر شكل هذه السلسلة. تُستخدم للأسلوب فقط — وليس كحقائق عن الشركة.')}</p>
       <label class="sx-drop">${ic('upload', 18)}<span>${L('Add previous posts (images, several at once)', 'أضف منشورات سابقة (صور، عدة مرات واحدة)')}</span><input type="file" multiple accept="image/png,image/jpeg,image/webp" data-c="sxRefUp" data-v="${esc(s.id)}" class="sr-only"></label>
       ${refs.length ? `<div class="sx-rg">${refs.map((x) => `<div class="sx-rt ${x.ref ? 'on' : ''}"><img src="${media(c, x.img).data}" alt="${esc(x.cap || L('Reference post', 'منشور مرجعي'))}" loading="lazy"><label><input type="checkbox" data-c="sxRefSel" value="${esc(x.id)}" ${x.ref ? 'checked' : ''}> ${L('Style', 'أسلوب')}</label><button class="sx-rx" data-a="sxRefDel" data-v="${esc(x.id)}" aria-label="${esc(L('Remove reference', 'احذف المرجع'))}">${ic('x', 14)}</button></div>`).join('')}</div>
-      <div class="row"><button class="btn sm pri" data-a="sxRead" data-v="${esc(s.id)}" ${!sel.length || busy ? 'disabled' : ''}>${busy ? L('Reading the pictures…', 'جارٍ قراءة الصور…') : L(`Read the style from ${Math.min(6, sel.length)} selected`, `اقرأ الأسلوب من ${Math.min(6, sel.length)} محددة`)}</button><button class="btn sm ghost" data-a="sxMeasure" data-v="${esc(s.id)}" ${!sel.length ? 'disabled' : ''} title="${esc(L('Without AI: measures colours only', 'بدون ذكاء اصطناعي: يقيس الألوان فقط'))}">${L('Measure colours only', 'قِس الألوان فقط')}</button></div>` : ''}</section>`;
+      <div class="row"><button class="btn sm pri" data-a="sxRead" data-v="${esc(s.id)}" ${!sel.length || busy ? 'disabled' : ''}>${busy ? L('Reading the pictures…', 'جارٍ قراءة الصور…') : (sel.length > 8 ? L(`Read the style from the 8 newest of ${sel.length} selected`, `اقرأ الأسلوب من أحدث 8 من ${sel.length} محددة`) : L(`Read the style from ${sel.length} selected`, `اقرأ الأسلوب من ${sel.length} محددة`))}</button><button class="btn sm ghost" data-a="sxMeasure" data-v="${esc(s.id)}" ${!sel.length ? 'disabled' : ''} title="${esc(L('Without AI: measures colours only', 'بدون ذكاء اصطناعي: يقيس الألوان فقط'))}">${L('Measure colours only', 'قِس الألوان فقط')}</button></div>` : ''}</section>`;
   }
 
   /** The company's own best organic posts on the series' channel — writing guidance from results, never market data. */
@@ -606,6 +606,7 @@
     return out;
   }
   function download(c, s, k, v) {
+    if (!c.downloaded) { c.downloaded = 1; save(); }
     const n = slidesOf(k), base = (s.name + '-' + (k.topic || 'post')).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '').slice(0, 60) || 'post';
     for (let i = 0; i < n; i++) {
       const cv = document.createElement('canvas');
@@ -744,7 +745,7 @@
     sxRefDel(id) { const c = C(), it = libOf(c).find((x) => x.id === id); if (!it) return; c.library = libOf(c).filter((x) => x !== it); if (!libOf(c).some((x) => x.img === it.img)) c.media = c.media.filter((m) => m.id !== it.img); save(); R(); },
     async sxRead(sid) {
       const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return;
-      const ids = refsOf(c, sid).filter((x) => x.ref).slice(-6).map((x) => x.img), key = 'read-' + sid;
+      const ids = refsOf(c, sid).filter((x) => x.ref).slice(-8).map((x) => x.img), key = 'read-' + sid;
       if (!ids.length || SX.busy[key]) return;
       if (!(await aiOn())) return toast(L('The AI is not set up on this server. Use “Measure colours only”.', 'الذكاء الاصطناعي غير مُعدّ. استخدم «قِس الألوان فقط».'), 'err');
       SX.busy[key] = 1; R();

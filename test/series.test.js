@@ -24,7 +24,7 @@ const MDL = {
 
 test('style read: request checks, provider-specific image parts, honest "not seen"', () => {
   assert.equal(cleanStyleRead({}).error, 'no_images');
-  assert.equal(cleanStyleRead({ images: Array(7).fill(PIC) }).error, 'too_many_images');
+  assert.equal(cleanStyleRead({ images: Array(9).fill(PIC) }).error, 'too_many_images');
   assert.equal(cleanStyleRead({ images: ['https://example.com/a.png'] }).error, 'invalid_image');
   assert.equal(cleanStyleRead({ images: ['data:image/svg+xml;base64,PHN2Zy8+'] }).error, 'invalid_image');
   const r = cleanStyleRead({ images: [PIC, PIC], series: 'Build Smarter' });

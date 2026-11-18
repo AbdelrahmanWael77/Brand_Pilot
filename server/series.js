@@ -32,7 +32,7 @@ import { colorName, visualOnly } from './campaignImage.js';
 import { approvedFacts } from './knowledge.js';
 import { seriesFacts, SERIES_KINDS, SUBJECT_RULE } from './recs.js';
 
-export const SERIES_LIMITS = { images: 6, imageChars: 1_400_000, name: 80, concept: 600, note: 200, field: 300, list: 8 };
+export const SERIES_LIMITS = { images: 8, imageChars: 1_400_000, name: 80, concept: 600, note: 200, field: 300, list: 8 };
 export const LAYOUTS = ['stack', 'split', 'hero'];
 export const LOGO_POS = ['tr', 'tl', 'br', 'bl'];
 export const ASPECTS = ['1:1', '4:5', '1.91:1', '9:16'];

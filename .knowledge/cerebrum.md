@@ -5,6 +5,7 @@ code. Maintained by hand by the team. Never read this file whole. Search it.
 
 ## Conventions
 ## Key Learnings
+- 2026-11-18: npm test (node --test) also collects data/git-canva-publish/test (an old project copy, ~265 tests); its extract tests can fail with "bad port" while a server is running. Run node --test test/*.test.js for the project alone (320).
 - 2026-11-17: Cloudflare Workers AI free plan = 10,000 neurons per DAY (error 4006 "daily free allocation"); a day of FLUX testing used it up. It is not a rate limit — report images_daily, not "try in a few minutes". A vision check asked for "any letters or scribbles" flags almost every FLUX scene; ask for writing a viewer would notice.
 - 2026-11-17: FLUX schnell copies any SENTENCE in the prompt onto screens/signs as garbled text. Send a visual description or a few keywords told as a scene (campaign sceneConcept), never the post headline.
 - 2026-11-17: the free OpenRouter model (nemotron) sometimes returns an unusable reply (ai_failed with no provider cause) and takes 40-50 s per topic request; ask once more before failing (series.js askChecked) and give reasoning models maxTokens ≥4000.
@@ -20,6 +21,7 @@ code. Maintained by hand by the team. Never read this file whole. Search it.
 - 2026-11-15: when several reads run in parallel, collect their failures from the results in input order, not at the moment each one fails — otherwise the order of the notes changes from run to run (a test in brand.test.js caught this).
 
 ## Decision Log
+- 2026-11-18 (23, owner): the app is one guided path — FLOW(c) (9 steps, 4 groups) drives the menu, the guide under every screen and Home. Add a new screen to a FLOW step (views) or it shows only "Your path · Continue".
 - 2026-11-17 (20, owner): Campaign Studio has ONE navigation (the step boxes) and each control in ONE place: templates in the Look tab, pictures (AI scene, own, Canva) in the Picture tab, approve/next in the sticky bottom bar. An approved brief is shown as a summary; edits go through Change impact ("Edit brief").
 - 2026-11-17 (19d, owner): an AI scene picture belongs only to the AI scene look of its post group (post + language twins / one carousel deck); template looks never show it. Generation gives 3 options; applying to the whole campaign is an explicit button.
 - 2026-11-17 (17d, owner): a series named after something in the approved knowledge (a program like MD-Geeks, a product, an event) is ABOUT that thing — facts naming it lead the topic and draft prompts; generic advice only for education/insight series. The owner confirms what BrandPilot understood (About this series card).

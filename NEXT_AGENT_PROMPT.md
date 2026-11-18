@@ -1,3 +1,19 @@
+> 2026-11-18: tasks 23–24c COMMITTED on redesign/new-product-identity and, on the owner's instruction, dev fast-forwarded to it and pushed.
+
+> 2026-11-18: 24c DONE (not committed) — When to post (own results + labelled peak guidance, audience time zone), Tracking links card removed, 8 creative references. dev = b2ec073.
+
+> 2026-11-18: 24b DONE (not committed) — Check & export → Export, browser Back works, compact colour cards, template cards open, no dashed line on ⋯. dev = b2ec073.
+
+> 2026-11-18: 24 DONE (not committed) — one add-your-business box on Home + Sources, step tracker while a website is read (inline page chooser), website fact filters (631 → 64 on stripe.com). dev = b2ec073.
+
+> 2026-11-18: 23d DONE (not committed) — Guide button bottom-right + panel. dev = b2ec073.
+
+> 2026-11-18: 23c DONE (not committed) — guide is a bottom-left card (pill when small); menu plain. dev = b2ec073.
+
+> 2026-11-18: 23b DONE (not committed) — guidance completed for a new company (do-next buttons, honest checks, step order warnings). dev = b2ec073.
+
+> 2026-11-18: 23 DONE (not committed) — guided flow: 9-step path in the menu, a step guide on every screen, Home overview. dev = b2ec073.
+
 > 2026-11-17: tasks 17d–22b COMMITTED on redesign/new-product-identity and, on the owner's instruction, dev fast-forwarded to it and pushed (origin/dev = origin/redesign/new-product-identity).
 
 > 2026-11-17: 22b DONE (not committed) — one Create button per series card. 17d–22b NOT pushed (dev = 56a473f).
