@@ -1,3 +1,5 @@
+> 2026-11-18: 58–68 committed (0b76490) and pushed on redesign/new-product-identity (owner: "make push"). Next: owner reviews; phone-width check of the redesigned screens.
+
 > 2026-11-18: 68 DONE (not committed) — AI scene tile: shows progress on the tile while creating; when the scene is already in use the click opens the Picture tab options (it used to do nothing). 58–68 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
 
 > 2026-11-18: 67 DONE (not committed) — Studio header: breadcrumb "Campaign Studio / <name> ▾" with a styled content switcher (replaces the native select), pipeline back under the header, gallery "Continue editing" card; details menus close on outside click / Escape. 58–67 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
