@@ -1,3 +1,5 @@
+> 2026-11-18: 25b DONE (296122b, not pushed) — schedule minors fixed, Instagram export = Pacific, logo dot removed. WAITING ON OWNER: (1) pick a logo from https://claude.ai/artifact/8ifu3St6VWBnFLhuBo8ByE, then replace IC.logo + public/favicon.svg; (2) is the Facebook export column publish_time_pacific really Cairo time? (evidence in IMPLEMENTATION_STATUS 25b) — if yes, set htz to the audience zone for Facebook files.
+
 > 2026-11-18: 25 DONE — posting schedule v2 committed (b89ad34..ad4dfd4, not pushed): EN/AR same day, carousel on one day, start date, 14-day cap, sourced MENA/global peak windows, synced posts keep the hour. Logic in public/schedule.js (tests test/schedule.test.js). Next single task: owner to choose — optional deferred minor: compute own-data weekdays in the audience zone (BPSchedule.bestTimes uses r.date; with r.hour+r.htz the local date can be derived) — Sonnet 5.5 · medium · 1h.
 
 > 2026-11-18: tasks 23–24c COMMITTED on redesign/new-product-identity and, on the owner's instruction, dev fast-forwarded to it and pushed.
