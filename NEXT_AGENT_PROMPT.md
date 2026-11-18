@@ -1,4 +1,4 @@
-> 2026-11-18: 25 PLANNED (not started, plan not committed) — Posting schedule v2: docs/superpowers/plans/2026-11-18-posting-schedule.md (move When-to-post logic to public/schedule.js with tests, sourced MENA/global peak windows, EN/AR same day, start date, 14-day cap, Meta sync keeps the hour). Start with its Task 1. Sonnet 5.5 [Opus 5.5] · medium · ~1 day.
+> 2026-11-18: 25 DONE — posting schedule v2 committed (b89ad34..ad4dfd4, not pushed): EN/AR same day, carousel on one day, start date, 14-day cap, sourced MENA/global peak windows, synced posts keep the hour. Logic in public/schedule.js (tests test/schedule.test.js). Next single task: owner to choose — optional deferred minor: compute own-data weekdays in the audience zone (BPSchedule.bestTimes uses r.date; with r.hour+r.htz the local date can be derived) — Sonnet 5.5 · medium · 1h.
 
 > 2026-11-18: tasks 23–24c COMMITTED on redesign/new-product-identity and, on the owner's instruction, dev fast-forwarded to it and pushed.
 
