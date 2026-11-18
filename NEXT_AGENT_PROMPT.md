@@ -1,3 +1,7 @@
+> 2026-11-18: 37 DONE — AI "Suggest everything from the name" on the campaign brief (server/campaignBrief.js, route campaigns/suggest-brief, 5 tests). Owner asked about a colour-box UI bug with a screenshot that is NOT from BrandPilot — clarify.
+
+> 2026-11-18: 36 DONE — full campaign card first in Campaign Studio. Still offered to the owner: prefill every purpose from facts, or AI campaign copy (9.10/9.11).
+
 > 2026-11-18: 35 DONE — larger compass in the logo. Owner was offered: full campaign first in the Studio, prefill every purpose from facts, or start AI campaign copy (9.10/9.11) — waiting for a choice.
 
 > 2026-11-18: 34 DONE — token/time warning under Read all in the page popup. 32–33 pushed (6367951).
