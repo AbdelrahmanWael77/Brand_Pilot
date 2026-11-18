@@ -132,7 +132,7 @@
 .sx-style.rev{border-color:var(--warn-c);box-shadow:0 0 0 3px var(--warn-bg)}
 .sx-style.rev .f{margin-top:10px}
 .sx-cols{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
-.sx-col{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-3);text-align:center}.sx-col input{width:40px;height:32px;padding:1px;border-radius:8px;cursor:pointer}
+/* every box on one line: labels that wrap to two lines no longer push their box down (owner 2026-11-18) */.sx-col{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;line-height:1.3;color:var(--ink-3);text-align:center;min-width:0}.sx-col input{width:40px;height:32px;padding:1px;border-radius:8px;cursor:pointer;margin-top:auto;flex:none}
 .sx-checks{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .sx-drop{display:flex;align-items:center;gap:10px;border:1.5px dashed var(--rule-2);border-radius:12px;padding:14px;cursor:pointer;font-size:13.5px;font-weight:550;color:var(--ink-2);margin:10px 0}
 .sx-drop:hover,.sx-drop:focus-within{border-color:var(--ink);color:var(--ink)}

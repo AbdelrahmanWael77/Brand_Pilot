@@ -1,3 +1,5 @@
+> 2026-11-18 MERGE: two sessions both used task numbers 34–39 (see the numbering note at the top of IMPLEMENTATION_STATUS.md). Both sets are below — Set B (AI suggestions card … series parts 40b, .env.example removed) first, then Set A (Read-all warning … colour boxes). New work starts at 41.
+
 > 2026-11-18: .env.example removed from the repo on the owner's instruction (git rm staged, `!.env.example` dropped from .gitignore). Only the git-ignored .env holds settings. Tasks 34–40b still uncommitted.
 
 > 2026-11-18: 40b DONE (not committed) — editing a series post keeps its part number; wrong part lines in a caption are detected and fixed; part bar under the caption. Tasks 34–40b uncommitted.
@@ -19,6 +21,18 @@
 > 2026-11-18: 34 DONE (not committed) — "AI suggestions" card at the top of Campaign Studio → Words: better headline / supporting line / button / caption + campaign tips from the post, brief and approved facts (server/postHelp.js, route ai-help, test/postHelp.test.js). Restart the :3000 server to load the new route. Next: owner tries it on a real post (EN + AR), then commit.
 
 > Latest local run check, 2026-11-18. User requested run again. Existing app serves http://localhost:3000. Fresh Invoke-WebRequest checks for /api/health and / returned HTTP 200 with expected content. Working tree was clean before this check. Only the two handoff files were updated, uncommitted. Next single task is browser verification of task 33 in EN and AR: generic AI explanation wording and model selection in Settings. Read AGENTS.md, status and Git state before continuing.
+
+> 2026-11-18: 39 DONE — colour boxes in Review the signature style aligned (public/series.css).
+
+> 2026-11-18: 38 DONE (committed + pushed) — Performance page redesign: opens on Summary (journey steps → What changed → What it may mean → trend), one-line period, cleaner tabs, comparison rules/sources folded. 348/348 tests; EN/AR/mobile screenshots checked (data/check-perf-steps.mjs). Owner to review. The colour-box fix in public/series.css is still uncommitted.
+
+> 2026-11-18: 37 DONE — AI "Suggest everything from the name" on the campaign brief (server/campaignBrief.js, route campaigns/suggest-brief, 5 tests). Owner asked about a colour-box UI bug with a screenshot that is NOT from BrandPilot — clarify.
+
+> 2026-11-18: 36 DONE — full campaign card first in Campaign Studio. Still offered to the owner: prefill every purpose from facts, or AI campaign copy (9.10/9.11).
+
+> 2026-11-18: 35 DONE — larger compass in the logo. Owner was offered: full campaign first in the Studio, prefill every purpose from facts, or start AI campaign copy (9.10/9.11) — waiting for a choice.
+
+> 2026-11-18: 34 DONE — token/time warning under Read all in the page popup. 32–33 pushed (6367951).
 
 > 2026-11-18: 33 DONE — model name removed from the AI Director "How answers are made" card. 32 committed c8ccf59 (not pushed).
 
