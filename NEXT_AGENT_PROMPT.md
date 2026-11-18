@@ -1,3 +1,25 @@
+> 2026-11-18: .env.example removed from the repo on the owner's instruction (git rm staged, `!.env.example` dropped from .gitignore). Only the git-ignored .env holds settings. Tasks 34–40b still uncommitted.
+
+> 2026-11-18: 40b DONE (not committed) — editing a series post keeps its part number; wrong part lines in a caption are detected and fixed; part bar under the caption. Tasks 34–40b uncommitted.
+
+> 2026-11-18: 40 DONE (not committed) — series posts numbered as parts (badge on the design, "<Series> — Part N" + previous part + series hashtag in the caption, settings in About this series). Owner to look at the badge (not seen in a screenshot). Possible next pieces the owner did NOT pick yet: AI plan of parts, per-part tracking card, follow CTA. Tasks 34–40 uncommitted.
+
+> 2026-11-18: 39 DONE (not committed) — post preview action buttons moved to the fixed top bar. Tasks 34–39 uncommitted.
+
+> 2026-11-18: 38 DONE (not committed) — "What works in your posts" removed from the series side panel; preview avatar shows the full logo on white. Tasks 34–38 uncommitted.
+
+> 2026-11-18: 37 DONE (not committed) — "View post" preview in AI Content Series: feed mock-up (LinkedIn/Facebook/Instagram) + full post details. Owner to try; check a carousel post and Arabic. Tasks 34–37 uncommitted.
+
+> 2026-11-18: server on :3000 restarted with the owner's new .env (Anthropic key + ANTHROPIC_MODEL=claude-sonnet-5-5, no OpenAI key). Saved AI choice switched to anthropic:claude-sonnet-5-5 (was OpenRouter nemotron); a test call to Claude answered. Tasks 34–36 still uncommitted.
+
+> 2026-11-18: 36 DONE (not committed) — AI Content Series Words step redesigned: two zones (On the creative + live preview / Under the post), counters, gradient generate bar. Owner to review; check Arabic and phone width.
+
+> 2026-11-18: 35 DONE (not committed) — ANTHROPIC_MODEL read for the Claude option; OpenAI removed from the Settings help. Owner: restart :3000, then choose Claude in Settings → AI model (saved choice is still OpenRouter nemotron).
+
+> 2026-11-18: 34 DONE (not committed) — "AI suggestions" card at the top of Campaign Studio → Words: better headline / supporting line / button / caption + campaign tips from the post, brief and approved facts (server/postHelp.js, route ai-help, test/postHelp.test.js). Restart the :3000 server to load the new route. Next: owner tries it on a real post (EN + AR), then commit.
+
+> Latest local run check, 2026-11-18. User requested run again. Existing app serves http://localhost:3000. Fresh Invoke-WebRequest checks for /api/health and / returned HTTP 200 with expected content. Working tree was clean before this check. Only the two handoff files were updated, uncommitted. Next single task is browser verification of task 33 in EN and AR: generic AI explanation wording and model selection in Settings. Read AGENTS.md, status and Git state before continuing.
+
 > 2026-11-18: 33 DONE — model name removed from the AI Director "How answers are made" card. 32 committed c8ccf59 (not pushed).
 
 > 2026-11-18: 32 DONE — user-facing "Meta" labels for the posts dataset renamed to Social posts (Facebook, Instagram, LinkedIn); Meta only means the Facebook+Instagram connection.

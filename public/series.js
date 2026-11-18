@@ -36,6 +36,62 @@
   const rgba = (h, a) => { const [r, g, b] = rgbOf(isHex(h) ? h : '#000000'); return `rgba(${r},${g},${b},${a})`; };
   const lang = () => (S.lang === 'ar' ? 'ar' : 'en');
   const creativesOf = (c) => (Array.isArray(c.creatives) ? c.creatives : (c.creatives = []));
+  /* Series as numbered parts (owner 2026-11-18, LinkedIn): every post is "Part N" of its series, the caption opens with
+     "<Series> — Part N", points back to the previous part and carries ONE series hashtag so readers can follow the
+     series and imported posts name it. s.parts === false turns it off; s.tag overrides the automatic hashtag. */
+  const pascal = (t) => String(t || '').split(/[^\p{L}\p{N}]+/u).filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join('');
+  const partsOn = (s) => s.parts !== false;
+  function tagOf(c, s) {
+    if (s.tag) return s.tag;
+    const co = pascal(c.name), sn = pascal(s.name);
+    return '#' + (!co || sn.toLowerCase().includes(co.toLowerCase()) ? sn : co + sn);
+  }
+  /** Saved posts of a series in order, each with its part number (older posts without one count by position). */
+  const partsDone = (c, s) => creativesOf(c).filter((k) => k.sid === s.id).sort((a, b) => (a.at || 0) - (b.at || 0)).map((k, i) => ({ k, n: k.part || i + 1 }));
+  /** The part number of a saved post or of the draft (the next part); 0 when parts are off. */
+  function partFor(c, s, x) {
+    if (!s || !partsOn(s)) return 0;
+    if (x && x.part) return x.part;
+    const done = partsDone(c, s), mine = done.find((o) => o.k === x || (x && x.editOf && o.k.id === x.editOf))
+      // a draft made by "Edit as a new post" before editOf existed: it reuses that post's illustration
+      || (x && Array.isArray(x.vars) ? done.find((o) => o.k.ill && x.vars.some((v) => v.ill === o.k.ill)) : null);
+    return mine ? mine.n : done.reduce((m, o) => Math.max(m, o.n), 0) + 1;
+  }
+  const partHead = (s, n, ar) => (ar ? `${s.name} — الجزء ${n}` : `${s.name} — Part ${n}`);
+  /** What the caption still lacks: { head, prev, tag } (each '' when present or not needed). */
+  const reEsc = (x) => String(x).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  /** "<Series> — Part N" / "<Series> — الجزء N" lines and "Missed Part N?" / "فاتك الجزء N؟" lines, whatever N is. */
+  const headRe = (s) => new RegExp('^' + reEsc(s.name) + ' — (?:Part|الجزء) \\d+[ \\t]*$', 'mu');
+  const prevRe = /^(?:Missed Part \d+\?|فاتك الجزء \d+؟).*$/mu;
+  function partNeeds(c, s, d, cap) {
+    const n = partFor(c, s, d);
+    if (!n) return null;
+    const ar = d.lang === 'ar', t = String(cap || ''), tag = tagOf(c, s), pv = partsDone(c, s).filter((o) => o.n === n - 1 && o.k.id !== d.editOf).pop();
+    const want = pv && pv.k.topic ? (ar ? `فاتك الجزء ${n - 1}؟ «${pv.k.topic}»` : `Missed Part ${n - 1}? “${pv.k.topic}”`) : '';
+    const hm = t.match(headRe(s)), pm = t.match(prevRe);
+    return {
+      n,
+      head: hm && hm[0].trim() === partHead(s, n, ar) ? '' : partHead(s, n, ar),
+      wrongHead: hm && hm[0].trim() !== partHead(s, n, ar) ? hm[0].trim() : '',
+      prev: (pm ? pm[0].trim() : '') === want ? '' : want,
+      dropPrev: pm && pm[0].trim() !== want ? pm[0].trim() : '',
+      tag: t.toLowerCase().includes(tag.toLowerCase()) ? '' : tag,
+    };
+  }
+  /** The caption with the series line on top, the previous part and the series hashtag at the end (idempotent). */
+  function partCap(c, s, d, cap) {
+    const w = partNeeds(c, s, d, cap);
+    let t = String(cap || '').trim();
+    if (!w) return t;
+    const lines = t.split('\n'), last = lines[lines.length - 1].trim(), tagLine = /^(#[\p{L}\p{N}_]+\s*)+$/u.test(last);
+    let body = tagLine ? lines.slice(0, -1).join('\n').trim() : t, tags = tagLine ? last : '';
+    if (w.wrongHead) body = body.replace(headRe(s), '').trim();
+    if (w.dropPrev) body = body.replace(prevRe, '').replace(/\n{3,}/g, '\n\n').trim();
+    if (w.head) body = w.head + (body ? '\n\n' + body : '');
+    if (w.prev) body += '\n\n' + w.prev;
+    if (w.tag) tags = tags ? w.tag + ' ' + tags : w.tag;
+    return body + (tags ? '\n\n' + tags : '');
+  }
   const draftsOf = (c) => (c.sxd && typeof c.sxd === 'object' && !Array.isArray(c.sxd) ? c.sxd : (c.sxd = {}));
   const refsOf = (c, sid) => libOf(c).filter((x) => x.sid === sid && x.img && c.media.some((m) => m.id === x.img));
   const curSeries = (c) => serOf(c).find((s) => s.id === S.ui.sx) || null;
@@ -170,6 +226,15 @@
     const up = (s) => (st.upper && !ar ? String(s || '').toUpperCase() : String(s || ''));
     const textW = cover && lay === 'split' ? W * 0.48 - m : W - 2 * m;
     const tx = ar ? (cover && lay === 'split' ? W * 0.52 : W - m) : m;
+    // the part badge (owner 2026-11-18): in the logo row, on the side the logo does not use; pushes the text down when there is no top logo
+    let pb = null;
+    if (cover && P.part) {
+      const label = ar ? `${P.kicker || ''} · الجزء ${P.part}` : `${String(P.kicker || '').toUpperCase()} · PART ${P.part}`;
+      g.font = face(700, 26); const bw = g.measureText(label).width + 44, bh = 48;
+      const logoSide = lg && lg.y < H / 2 ? (lg.x < W / 2 ? 'l' : 'r') : null, start = ar ? 'r' : 'l', side = logoSide === start ? (start === 'l' ? 'r' : 'l') : start;
+      pb = { label, w: bw, h: bh, x: side === 'l' ? m : W - m - bw, y: lg && lg.y < H / 2 ? lg.y + (lg.h - bh) / 2 : m * 0.72 };
+      if (!lh) lh = bh;
+    }
     const ops = []; // text drawn after the picture
     let bottom = 0;
     if (cover) {
@@ -197,6 +262,10 @@
     }
     // 3. logo and text on top
     if (lg) g.drawImage(lg.li, lg.x, lg.y, lg.w, lg.h);
+    if (pb) {
+      g.save(); g.beginPath(); g.roundRect(pb.x, pb.y, pb.w, pb.h, pb.h / 2); g.fillStyle = rgba(st.accent, 0.16); g.fill(); g.lineWidth = 2; g.strokeStyle = rgba(st.accent, 0.75); g.stroke();
+      g.font = face(700, 26); g.fillStyle = st.accent; g.textAlign = 'center'; g.direction = ar ? 'rtl' : 'ltr'; g.textBaseline = 'middle'; g.fillText(pb.label, pb.x + pb.w / 2, pb.y + pb.h / 2 + 1); g.restore();
+    }
     if (cover) {
       ops.forEach(([f, col, s, x, y]) => { g.font = f; g.fillStyle = col; g.fillText(s, x, y); });
     } else if (last) {
@@ -208,7 +277,7 @@
       g.font = face(800, 150); g.fillStyle = st.accent; g.fillText(String(P.slide).padStart(2, '0'), tx, m * 0.72 + (lh ? lh + 60 : 30) + 130);
       g.font = face(800, 68); g.fillStyle = st.ink; let y = m * 0.72 + (lh ? lh + 60 : 30) + 250;
       wrap(g, up(pt), W - 2 * m).slice(0, 6).forEach((s) => { g.fillText(s, tx, y); y += 80; });
-      g.font = face(600, 28); g.fillStyle = rgba(st.sub || st.ink, 0.85); g.fillText(`${P.kicker || ''}  ·  ${P.slide}/${P.slides - 1 - (P.copy.cta ? 1 : 0)}`, tx, H - m * 0.7);
+      g.font = face(600, 28); g.fillStyle = rgba(st.sub || st.ink, 0.85); g.fillText(`${P.kicker || ''}${P.part ? (ar ? '  ·  الجزء ' : '  ·  Part ') + P.part : ''}  ·  ${P.slide}/${P.slides - 1 - (P.copy.cta ? 1 : 0)}`, tx, H - m * 0.7);
     }
   }
   /** Register a preview; the canvas is painted right after each render (and when a picture finishes loading). */
@@ -257,7 +326,7 @@
   function specOf(c, s, d, v, slide, st0) {
     return () => {
       const st = fixStyle(st0 || styleOf(c, s));
-      return { st, copy: { ...d.copy, pts: d.copy.pts.filter((x) => x.trim()) }, ill: v && v.ill ? img(c, v.ill) : null, made: (v && v.made) || 'stack', logo: pickLogo(c, st.bg[0]), fmt: d.aspect || ((st.aspects || [])[0] === '4:5' ? '4:5' : '1:1'), layout: (v && v.layout) || st.layout, lang: d.lang, slide: slide || 0, slides: slidesOf(d), kicker: s.name };
+      return { st, copy: { ...d.copy, pts: d.copy.pts.filter((x) => x.trim()) }, ill: v && v.ill ? img(c, v.ill) : null, made: (v && v.made) || 'stack', logo: pickLogo(c, st.bg[0]), fmt: d.aspect || ((st.aspects || [])[0] === '4:5' ? '4:5' : '1:1'), layout: (v && v.layout) || st.layout, lang: d.lang, slide: slide || 0, slides: slidesOf(d), kicker: s.name, part: partFor(c, s, d) };
     };
   }
   function dropMedia(c, id) {
@@ -292,8 +361,8 @@
     const posts = ss.length && typeof nxPostsHTML === 'function' ? nxPostsHTML(c, R_) : '';
     const more = posts || miss ? `<div class="sx-fold">${posts ? `<details class="sx-fd" id="sx-posts" ${S.ui.sxPostsOpen ? 'open' : ''}><summary>${L('Which published posts count for each series', 'المنشورات المنشورة التي تُحسب لكل سلسلة')}</summary>${posts}</details>` : ''}${miss ? `<details class="sx-fd"><summary>${L('What would make the suggestions stronger', 'ما الذي يجعل الاقتراحات أقوى')}</summary>${miss}</details>` : ''}</div>` : '';
     const recent = all.slice(-6).reverse();
-    const gal = recent.length ? `<section class="sx-sec"><h2>${L('Latest posts', 'أحدث المنشورات')}</h2><div class="sx-gal">${recent.map((k) => { const s = ss.find((x) => x.id === k.sid); return s ? `<button class="sx-gi" data-a="sxZoomK" data-v="${esc(k.id)}">${cvHTML('g-' + k.id, specOf(c, s, k, { ill: k.ill, layout: k.layout, made: k.made }, 0, k.st), 0.3, k.copy.l1)}<span>${k.status === 'approved' ? chip('✓ ' + L('Approved', 'معتمد'), 'ok') : chip(L('Saved draft', 'مسودة محفوظة'))}</span></button>` : ''; }).join('')}</div></section>` : '';
-    return head + setup + (ss.length ? `<div class="sx-lib">${cards}</div>${hidden}` : '') + gal + more + zoomHTML(c);
+    const gal = recent.length ? `<section class="sx-sec"><h2>${L('Latest posts', 'أحدث المنشورات')}</h2><div class="sx-gal">${recent.map((k) => { const s = ss.find((x) => x.id === k.sid); return s ? `<button class="sx-gi" data-a="sxView" data-v="${esc(k.id)}" aria-label="${esc(L('View post', 'اعرض المنشور') + ': ' + (k.topic || ''))}">${cvHTML('g-' + k.id, specOf(c, s, k, { ill: k.ill, layout: k.layout, made: k.made }, 0, k.st), 0.3, k.copy.l1)}<span>${k.status === 'approved' ? chip('✓ ' + L('Approved', 'معتمد'), 'ok') : chip(L('Saved draft', 'مسودة محفوظة'))}</span><span class="sx-view">${ic('eye', 14)}${L('View post', 'اعرض المنشور')}</span></button>` : ''; }).join('')}</div></section>` : '';
+    return head + setup + (ss.length ? `<div class="sx-lib">${cards}</div>${hidden}` : '') + gal + more + zoomHTML(c) + pvHTML(c);
   }
 
   /** One series' recommendation, inside its card (owner 2026-11-17: no separate "What to post next" block). */
@@ -354,7 +423,7 @@
     const au = SX.autoU || (SX.autoU = {});
     if (!au[s.id] && !s.kind && !s.undProp && String(s.purpose || '').trim().length < 40 && subjectOf(c, s).length) { au[s.id] = 1; setTimeout(() => aiUnderstand(c, s, true), 0); }
     if (!d.drafted && !d.copy.l1 && !d.vars.length && !s.topicAI && !SX.autoT[s.id] && !topicIdeas(c, s, null).length) { SX.autoT[s.id] = 1; setTimeout(() => aiTopics(c, s, true), 0); }
-    return head + `<div class="sx-ws"><div class="sx-main">${composerHTML(c, s, d, st)}${warnLogo}${resultsHTML(c, s, d)}${postsHTML(c, s, mine)}</div><aside class="sx-side">${aboutHTML(c, s)}${styleHTML(c, s, st)}${refsHTML(c, s, refs)}${learnHTML(c, s)}${workHTML(c, s)}</aside></div>` + zoomHTML(c);
+    return head + `<div class="sx-ws"><div class="sx-main">${composerHTML(c, s, d, st)}${warnLogo}${resultsHTML(c, s, d)}${postsHTML(c, s, mine)}</div><aside class="sx-side">${aboutHTML(c, s)}${styleHTML(c, s, st)}${refsHTML(c, s, refs)}${learnHTML(c, s)}</aside></div>` + zoomHTML(c) + pvHTML(c);
   }
 
   function composerHTML(c, s, d, st) {
@@ -403,24 +472,52 @@
     delete SX.busy[key]; save(); if (C() === c) R();
   }
 
+  /* Words step (owner 2026-11-18: "very flat and unappealing"): two zones — what is drawn ON the creative (with a live
+     preview painted from these words as you type) and what goes UNDER the post — plus a highlighted generate bar.
+     Field keys, limits and the sxIn handler are unchanged. */
   function wordsHTML(c, s, d) {
-    const fld = (k, l, v, max, ph_) => `<label class="f">${l}<input data-i="sxIn" data-k="${k}" dir="auto" maxlength="${max}" value="${esc(v)}" ${ph_ ? `placeholder="${esc(ph_)}"` : ''}></label>`;
+    const cnt = (k, v, max) => `<span class="sx-cnt" data-cnt="${k}" data-max="${max}">${String(v || '').length}/${max}</span>`;
+    const fld = (k, l, v, max, ph_, cls) => `<label class="f sx-fl ${cls || ''}"><span class="sx-lh">${l}${cnt(k, v, max)}</span><input data-i="sxIn" data-k="${k}" dir="auto" maxlength="${max}" value="${esc(v)}" ${ph_ ? `placeholder="${esc(ph_)}"` : ''}></label>`;
     const st = fixStyle(styleOf(c, s)), busy = d.vars.some((v) => v.status === 'pending');
     const warn = (d.warn && d.warn.length) || (d.claims && d.claims.length);
-    return `<div class="sx-words"><div class="sx-wl">
-      ${fld('l1', L('Headline — line 1', 'العنوان — السطر 1'), d.copy.l1, 90)}
-      ${fld('l2', L('Headline — line 2', 'العنوان — السطر 2') + (st.twoTone !== false ? ` <span class="sx-dot" style="background:${st.accent}" title="${esc(L('accent colour', 'لون التمييز'))}"></span>` : ''), d.copy.l2, 90, L('optional', 'اختياري'))}
-      ${fld('sub', L('Supporting line', 'السطر الداعم'), d.copy.sub, 160)}
-      <fieldset class="sx-pts"><legend>${d.fmt === 'carousel' ? L('Points — one slide each', 'النقاط — شريحة لكل نقطة') : L('Points — in the caption', 'النقاط — في النص المرافق')}</legend>${[0, 1, 2].map((i) => `<input data-i="sxIn" data-k="p${i}" dir="auto" maxlength="90" value="${esc(d.copy.pts[i] || '')}" aria-label="${esc(L('Point', 'نقطة') + ' ' + (i + 1))}">`).join('')}</fieldset>
-      ${d.fmt === 'carousel' ? fld('cta', L('Closing slide', 'الشريحة الختامية'), d.copy.cta, 60) : ''}
-      ${st.footnote ? fld('foot', L('Source line (small, bottom)', 'سطر المصدر (صغير، أسفل)'), d.copy.foot, 90, L('e.g. Source: Google Developers Blog, 9 Nov 2026', 'مثال: المصدر: مدونة مطوري Google')) : ''}
-      </div><div class="sx-wr">
-      <label class="f">${L('Caption', 'النص المرافق')}<textarea data-i="sxIn" data-k="caption" rows="7" dir="auto" maxlength="3000">${esc(d.copy.caption)}</textarea></label>
-      <label class="f">${L('Visual concept for the illustration', 'فكرة الرسم')}<textarea data-i="sxIn" data-k="concept" rows="3" dir="auto" maxlength="600">${esc(d.concept)}</textarea></label>
-      ${warn ? `<div class="note w small">${d.warn && d.warn.length ? `<p>${L('Numbers not found in your approved knowledge', 'أرقام غير موجودة في معرفتك المعتمدة')}: <b>${esc(d.warn.join(', '))}</b></p>` : ''}${d.claims && d.claims.length ? `<p>${L('Statements about the company to check', 'عبارات عن الشركة يجب التحقق منها')}:</p><ul>${d.claims.map((x) => `<li dir="auto">${esc(x)}</li>`).join('')}</ul>` : ''}<label><input type="checkbox" data-c="sxAck" ${d.ack ? 'checked' : ''}> ${L('I checked these', 'تحققت منها')}</label></div>` : ''}
-      ${d.facts && d.facts.length ? `<details class="small"><summary>${L('Approved knowledge used', 'المعرفة المعتمدة المستخدمة')} (${d.facts.length})</summary><ul>${d.facts.map((f) => `<li dir="auto">${esc(f.text)}</li>`).join('')}</ul></details>` : ''}
-      </div></div>
-      <div class="sx-genbar"><button class="btn pri" data-a="sxGen" data-v="${esc(s.id)}" ${busy || !d.copy.l1.trim() ? 'disabled' : ''}>${ic('spark', 16)}${d.vars.length ? L('Make 2 new creatives', 'اصنع تصميمين جديدين') : L('Generate 2 creatives', 'أنشئ تصميمين')}</button><span class="muted small">${L('Each creative: a new illustration in the series style + your official logo + this text as real type. You can edit the words after generating.', 'كل تصميم: رسم جديد بأسلوب السلسلة + شعارك الرسمي + هذا النص ككتابة حقيقية. يمكنك تعديل الكلمات بعد الإنشاء.')}</span></div>`;
+    const v = d.vars.find((x) => x.id === d.pick && x.ill) || d.vars.find((x) => x.ill) || null;
+    const zh = (n, icon, t, sub) => `<div class="sx-zh"><span class="sx-zn">${n}</span><div><h3>${ic(icon, 15)}${t}</h3><p class="muted small">${sub}</p></div></div>`;
+    const pv = cvHTML('words-' + s.id, specOf(c, s, d, v, 0), 0.32, L('Live preview of the words on the creative', 'معاينة حيّة للكلمات على التصميم'));
+    return `<div class="sx-words">
+      <div class="sx-zone sx-on">
+        <div class="sx-zf">
+          ${zh(1, 'eye', L('On the creative', 'على التصميم'), L('Short words drawn on the picture as real type.', 'كلمات قصيرة تُكتب على الصورة كنص حقيقي.'))}
+          <div class="sx-head" style="--sx-acc:${st.accent}">
+            ${fld('l1', L('Headline — line 1', 'العنوان — السطر 1'), d.copy.l1, 90, '', 'sx-h1')}
+            ${fld('l2', L('Headline — line 2', 'العنوان — السطر 2') + (st.twoTone !== false ? ` <span class="sx-dot" style="background:${st.accent}" title="${esc(L('accent colour', 'لون التمييز'))}"></span>` : ''), d.copy.l2, 90, L('optional', 'اختياري'), 'sx-h2')}
+          </div>
+          ${fld('sub', L('Supporting line', 'السطر الداعم'), d.copy.sub, 160)}
+          <fieldset class="sx-pts"><legend>${ic('list', 14)}${d.fmt === 'carousel' ? L('Points — one slide each', 'النقاط — شريحة لكل نقطة') : L('Points — in the caption', 'النقاط — في النص المرافق')}</legend>${[0, 1, 2].map((i) => `<label class="sx-pt"><span class="sx-pn" aria-hidden="true">${i + 1}</span><input data-i="sxIn" data-k="p${i}" dir="auto" maxlength="90" value="${esc(d.copy.pts[i] || '')}" aria-label="${esc(L('Point', 'نقطة') + ' ' + (i + 1))}" placeholder="${esc(L('Add a point', 'أضف نقطة'))}"></label>`).join('')}</fieldset>
+          ${d.fmt === 'carousel' ? fld('cta', L('Closing slide', 'الشريحة الختامية'), d.copy.cta, 60) : ''}
+          ${st.footnote ? fld('foot', L('Source line (small, bottom)', 'سطر المصدر (صغير، أسفل)'), d.copy.foot, 90, L('e.g. Source: Google Developers Blog, 9 Nov 2026', 'مثال: المصدر: مدونة مطوري Google')) : ''}
+        </div>
+        <figure class="sx-wpv">${pv}<figcaption>${ic('eye', 13)}${v ? L('Live preview — updates as you type', 'معاينة حيّة — تتحدّث أثناء الكتابة') : L('Live preview — the illustration is added when you generate', 'معاينة حيّة — يُضاف الرسم عند الإنشاء')}</figcaption></figure>
+      </div>
+      <div class="sx-zone">
+        ${zh(2, 'quote', L('Under the post', 'تحت المنشور'), L('The caption carries the full message; the concept guides the illustration.', 'النص المرافق يحمل الرسالة كاملة؛ والفكرة توجّه الرسم.'))}
+        <div class="sx-under">
+          <div class="sx-capw"><label class="f sx-fl sx-cap"><span class="sx-lh">${L('Caption', 'النص المرافق')}${cnt('caption', d.copy.caption, 3000)}</span><textarea data-i="sxIn" data-k="caption" rows="9" dir="auto" maxlength="3000">${esc(d.copy.caption)}</textarea></label>${partBar(c, s, d)}</div>
+          <div class="sx-wr">
+            <label class="f sx-fl sx-concept"><span class="sx-lh">${ic('bulb', 14)}${L('Visual concept for the illustration', 'فكرة الرسم')}${cnt('concept', d.concept, 600)}</span><textarea data-i="sxIn" data-k="concept" rows="6" dir="auto" maxlength="600">${esc(d.concept)}</textarea></label>
+            ${d.facts && d.facts.length ? `<details class="sx-kn"><summary>${ic('book', 14)}${L('Approved knowledge used', 'المعرفة المعتمدة المستخدمة')} <b>${d.facts.length}</b></summary><ul>${d.facts.map((f) => `<li dir="auto">${esc(f.text)}</li>`).join('')}</ul></details>` : ''}
+          </div>
+        </div>
+        ${warn ? `<div class="note w small">${d.warn && d.warn.length ? `<p>${L('Numbers not found in your approved knowledge', 'أرقام غير موجودة في معرفتك المعتمدة')}: <b>${esc(d.warn.join(', '))}</b></p>` : ''}${d.claims && d.claims.length ? `<p>${L('Statements about the company to check', 'عبارات عن الشركة يجب التحقق منها')}:</p><ul>${d.claims.map((x) => `<li dir="auto">${esc(x)}</li>`).join('')}</ul>` : ''}<label><input type="checkbox" data-c="sxAck" ${d.ack ? 'checked' : ''}> ${L('I checked these', 'تحققت منها')}</label></div>` : ''}
+      </div>
+    </div>
+    <div class="sx-genbar"><div class="sx-gt"><b>${d.vars.length ? L('Happy with the words?', 'راضٍ عن الكلمات؟') : L('Ready for the creatives', 'جاهز للتصاميم')}</b><span class="small">${L('Each creative: a new illustration in the series style + your official logo + this text as real type. You can edit the words after generating.', 'كل تصميم: رسم جديد بأسلوب السلسلة + شعارك الرسمي + هذا النص ككتابة حقيقية. يمكنك تعديل الكلمات بعد الإنشاء.')}</span></div><button class="btn pri" data-a="sxGen" data-v="${esc(s.id)}" ${busy || !d.copy.l1.trim() ? 'disabled' : ''}>${ic('spark', 16)}${d.vars.length ? L('Make 2 new creatives', 'اصنع تصميمين جديدين') : L('Generate 2 creatives', 'أنشئ تصميمين')}</button></div>`;
+  }
+
+  function partBar(c, s, d) {
+    const w = partNeeds(c, s, d, d.copy.caption);
+    if (!w) return '';
+    const miss = [w.wrongHead ? L(`the part number (it says “${w.wrongHead}”)`, `رقم الجزء (مكتوب «${w.wrongHead}»)`) : w.head && L('the part line', 'سطر الجزء'), (w.prev || w.dropPrev) && L('the previous part', 'الجزء السابق'), w.tag && L('the series hashtag', 'وسم السلسلة')].filter(Boolean);
+    return `<div class="sx-part"><span class="sx-part-n">${L('Part', 'الجزء')} ${w.n}</span>${d.editOf ? `<span class="sx-chip">${L('Editing this part', 'تعديل هذا الجزء')}</span>` : ''}<span class="sx-part-t" dir="auto">${esc(tagOf(c, s))}</span><span class="sx-part-m small">${miss.length ? L('Fix in the caption: ', 'صحّح في النص المرافق: ') + miss.join(', ') : '✓ ' + L('Caption names the series, the part and the hashtag', 'النص يذكر السلسلة والجزء والوسم')}</span>${miss.length ? `<button class="btn sm" data-a="sxPartCap" data-v="${esc(s.id)}">${L('Fix the caption', 'صحّح النص')}</button>` : ''}</div>`;
   }
 
   function resultsHTML(c, s, d) {
@@ -441,13 +538,13 @@
     const needAck = ((d.warn && d.warn.length) || (d.claims && d.claims.length)) && !d.ack;
     return `<section class="sx-res"><div class="sx-res-h"><h2>${L('Compare and choose', 'قارن واختر')}</h2><button class="btn sm" data-a="sxMore" data-v="${esc(s.id)}" ${d.vars.some((v) => v.status === 'pending') ? 'disabled' : ''}>${L('Another variation', 'تنويع آخر')}</button></div>
       <div class="sx-vars">${d.vars.map(card).join('')}</div>
-      <div class="sx-act"><button class="btn pri" data-a="sxSave" data-v="${esc(s.id)}" ${pick ? '' : 'disabled'}>${L('Save to series', 'احفظ في السلسلة')}</button><button class="btn" data-a="sxSave" data-v="${esc(s.id)}" data-k="approve" ${pick && !needAck ? '' : 'disabled'}>${ic('check', 16)}${L('Save and approve', 'احفظ واعتمد')}</button><button class="btn ghost" data-a="sxDl" data-v="${esc(pick ? pick.id : '')}" ${pick ? '' : 'disabled'}>${ic('dl', 16)}${L('Download PNG', 'نزّل PNG')}</button>
+      <div class="sx-act"><button class="btn pri" data-a="sxSave" data-v="${esc(s.id)}" ${pick ? '' : 'disabled'}>${L('Save to series', 'احفظ في السلسلة')}</button><button class="btn" data-a="sxSave" data-v="${esc(s.id)}" data-k="approve" ${pick && !needAck ? '' : 'disabled'}>${ic('check', 16)}${L('Save and approve', 'احفظ واعتمد')}</button><button class="btn" data-a="sxViewV" data-v="${esc(pick ? pick.id : '')}" ${pick ? '' : 'disabled'}>${ic('eye', 16)}${L('Preview as a post', 'عاين كمنشور')}</button><button class="btn ghost" data-a="sxDl" data-v="${esc(pick ? pick.id : '')}" ${pick ? '' : 'disabled'}>${ic('dl', 16)}${L('Download PNG', 'نزّل PNG')}</button>
       <span class="muted small">${!pick ? L('Choose an option first.', 'اختر خياراً أولاً.') : needAck ? L('Check the flagged statements before approving.', 'تحقق من العبارات المُعلَّمة قبل الاعتماد.') : L('Editable Canva copy: not available for series posts yet — download the PNG or the illustration.', 'نسخة Canva قابلة للتعديل: غير متاحة لمنشورات السلاسل بعد — نزّل PNG أو الرسم.')}</span></div></section>`;
   }
 
   function postsHTML(c, s, mine) {
     if (!mine.length) return '';
-    return `<section class="sx-sec"><h2>${L('Posts in this series', 'منشورات هذه السلسلة')}</h2><div class="sx-gal">${mine.map((k) => `<button class="sx-gi" data-a="sxZoomK" data-v="${esc(k.id)}">${cvHTML('p-' + k.id, specOf(c, s, k, { ill: k.ill, layout: k.layout, made: k.made }, 0, k.st), 0.3, k.copy.l1)}<span>${k.status === 'approved' ? chip('✓ ' + L('Approved', 'معتمد'), 'ok') : chip(L('Saved draft', 'مسودة محفوظة'))}${k.rec ? chip(L('From recommendation', 'من توصية')) : ''}</span><span class="small" dir="auto">${esc(k.topic)}</span></button>`).join('')}</div></section>`;
+    return `<section class="sx-sec"><h2>${L('Posts in this series', 'منشورات هذه السلسلة')}</h2><div class="sx-gal">${mine.map((k) => `<button class="sx-gi" data-a="sxView" data-v="${esc(k.id)}" aria-label="${esc(L('View post', 'اعرض المنشور') + ': ' + (k.topic || ''))}">${cvHTML('p-' + k.id, specOf(c, s, k, { ill: k.ill, layout: k.layout, made: k.made }, 0, k.st), 0.3, k.copy.l1)}<span>${k.status === 'approved' ? chip('✓ ' + L('Approved', 'معتمد'), 'ok') : chip(L('Saved draft', 'مسودة محفوظة'))}${k.rec ? chip(L('From recommendation', 'من توصية')) : ''}</span><span class="small" dir="auto">${esc(k.topic)}</span><span class="sx-view">${ic('eye', 14)}${L('View post', 'اعرض المنشور')}</span></button>`).join('')}</div></section>`;
   }
 
   function styleHTML(c, s, st) {
@@ -481,7 +578,7 @@
       <div class="row"><button class="btn sm pri" data-a="sxRead" data-v="${esc(s.id)}" ${!sel.length || busy ? 'disabled' : ''}>${busy ? L('Reading the pictures…', 'جارٍ قراءة الصور…') : (sel.length > 8 ? L(`Read the style from the 8 newest of ${sel.length} selected`, `اقرأ الأسلوب من أحدث 8 من ${sel.length} محددة`) : L(`Read the style from ${sel.length} selected`, `اقرأ الأسلوب من ${sel.length} محددة`))}</button><button class="btn sm ghost" data-a="sxMeasure" data-v="${esc(s.id)}" ${!sel.length ? 'disabled' : ''} title="${esc(L('Without AI: measures colours only', 'بدون ذكاء اصطناعي: يقيس الألوان فقط'))}">${L('Measure colours only', 'قِس الألوان فقط')}</button></div>` : ''}</section>`;
   }
 
-  /** The company's own best organic posts on the series' channel — writing guidance from results, never market data. */
+  /** The company's own best organic posts on the series' channel. NOT shown since 2026-11-18 (owner removed "What works in your posts"). */
   function workHTML(c, s) {
     const R = root.BPRecs, ch = s.channel || 'linkedin', posts = ((c.data && c.data.meta) || []).filter((r) => r.platform === ch && !(+r.spend > 0));
     if (!R || !posts.length) return '';
@@ -508,10 +605,10 @@
     const sub = subjectOf(c, s), p = s.undProp, busy = SX.busy['und-' + s.id], ed = S.ui.sxAbout === s.id;
     const facts = sub.length ? `<details class="sx-about-f"><summary class="small">${L(`${sub.length} approved fact(s) name ${esc(s.name)}`, `${sub.length} حقيقة معتمدة تذكر ${esc(s.name)}`)}</summary><ul>${sub.slice(0, 6).map((f) => `<li class="small" dir="auto">${esc(f.text)}</li>`).join('')}</ul></details>` : '';
     const prop = p ? `<div class="sx-prop"><p class="small"><b>${L('BrandPilot understands this series as:', 'يفهم BrandPilot هذه السلسلة كالتالي:')}</b></p><dl class="sx-dl"><dt>${L('Kind', 'النوع')}</dt><dd>${esc(kindName(p.kind))}</dd><dt>${L('About', 'عن')}</dt><dd dir="auto">${esc(p.about)}</dd><dt>${L('Purpose', 'الغرض')}</dt><dd dir="auto">${esc(p.purpose)}</dd>${p.audience ? `<dt>${L('For', 'لمن')}</dt><dd dir="auto">${esc(p.audience)}</dd>` : ''}</dl>${p.missing ? `<p class="note w small" dir="auto">${esc(p.missing)}</p>` : ''}<p class="muted small">${L(`From ${p.facts.length} approved fact(s). Check it — then BrandPilot suggests topics and writes posts with it.`, `من ${p.facts.length} حقيقة معتمدة. راجعه — ثم يقترح BrandPilot المواضيع ويكتب المنشورات بناءً عليه.`)}</p><div class="row"><button class="btn sm pri" data-a="sxUndOk" data-v="${esc(s.id)}">${L('Use this', 'استخدم هذا')}</button><button class="btn sm" data-a="sxAboutEd" data-v="${esc(s.id)}">${L('Edit', 'عدّل')}</button><button class="btn sm ghost" data-a="sxUndX" data-v="${esc(s.id)}">${L('Dismiss', 'تجاهل')}</button></div></div>` : '';
-    const form = ed ? `<form class="sx-about-ed stack" data-s="sxAbout" data-v="${esc(s.id)}"><label class="f">${L('Series name', 'اسم السلسلة')}<input name="name" required maxlength="60" dir="auto" value="${esc(s.name)}"></label><div class="sx-2"><label class="f">${L('Main channel', 'القناة الرئيسية')}<select name="channel">${['linkedin', 'instagram', 'facebook'].map((k) => `<option value="${k}" ${(s.channel || 'linkedin') === k ? 'selected' : ''}>${CHN[k]}</option>`).join('')}</select></label><label class="f">${L('Goal', 'الهدف')}<select name="objective">${Object.keys(NXO).map((k) => `<option value="${k}" ${(s.objective || 'engagement') === k ? 'selected' : ''}>${nxL(NXO[k])}</option>`).join('')}</select></label></div><label class="f">${L('Kind', 'النوع')}<select name="kind"><option value="">${L('Let BrandPilot work it out', 'دع BrandPilot يحدده')}</option>${KINDS().map(([k, t]) => `<option value="${k}" ${(p ? p.kind : s.kind) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="3" maxlength="400" dir="auto">${esc(p ? p.purpose : s.purpose || '')}</textarea></label><label class="f">${L('Who is it for?', 'لمن هي؟')}<input name="audience" maxlength="160" dir="auto" value="${esc(p ? p.audience : s.audience || '')}"></label><label class="f">${L('Topic list (one per line)', 'قائمة المواضيع (موضوع في كل سطر)')}<textarea name="ideas" rows="4" maxlength="2000" dir="auto" placeholder="${esc(L('Topics you already plan — BrandPilot suggests them first', 'مواضيع تخططها مسبقاً — يقترحها BrandPilot أولاً'))}">${esc(s.ideas || '')}</textarea></label><div class="row"><button class="btn sm pri">${L('Save', 'احفظ')}</button><button type="button" class="btn sm ghost" data-a="sxAboutEd" data-v="">${L('Cancel', 'إلغاء')}</button></div></form>` : '';
+    const form = ed ? `<form class="sx-about-ed stack" data-s="sxAbout" data-v="${esc(s.id)}"><label class="f">${L('Series name', 'اسم السلسلة')}<input name="name" required maxlength="60" dir="auto" value="${esc(s.name)}"></label><div class="sx-2"><label class="f">${L('Main channel', 'القناة الرئيسية')}<select name="channel">${['linkedin', 'instagram', 'facebook'].map((k) => `<option value="${k}" ${(s.channel || 'linkedin') === k ? 'selected' : ''}>${CHN[k]}</option>`).join('')}</select></label><label class="f">${L('Goal', 'الهدف')}<select name="objective">${Object.keys(NXO).map((k) => `<option value="${k}" ${(s.objective || 'engagement') === k ? 'selected' : ''}>${nxL(NXO[k])}</option>`).join('')}</select></label></div><label class="f">${L('Kind', 'النوع')}<select name="kind"><option value="">${L('Let BrandPilot work it out', 'دع BrandPilot يحدده')}</option>${KINDS().map(([k, t]) => `<option value="${k}" ${(p ? p.kind : s.kind) === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label class="f">${L('What is it for?', 'ما الغرض منها؟')}<textarea name="purpose" rows="3" maxlength="400" dir="auto">${esc(p ? p.purpose : s.purpose || '')}</textarea></label><label class="f">${L('Who is it for?', 'لمن هي؟')}<input name="audience" maxlength="160" dir="auto" value="${esc(p ? p.audience : s.audience || '')}"></label><label class="sx-chk"><input type="checkbox" name="parts" ${partsOn(s) ? 'checked' : ''}> ${L('Number posts as parts (Part 1, Part 2…)', 'رقّم المنشورات كأجزاء (الجزء 1، الجزء 2…)')}</label><label class="f">${L('Series hashtag', 'وسم السلسلة')}<input name="tag" maxlength="60" dir="auto" value="${esc(s.tag || '')}" placeholder="${esc(tagOf(c, { ...s, tag: '' }))}"></label><label class="f">${L('Topic list (one per line)', 'قائمة المواضيع (موضوع في كل سطر)')}<textarea name="ideas" rows="4" maxlength="2000" dir="auto" placeholder="${esc(L('Topics you already plan — BrandPilot suggests them first', 'مواضيع تخططها مسبقاً — يقترحها BrandPilot أولاً'))}">${esc(s.ideas || '')}</textarea></label><div class="row"><button class="btn sm pri">${L('Save', 'احفظ')}</button><button type="button" class="btn sm ghost" data-a="sxAboutEd" data-v="">${L('Cancel', 'إلغاء')}</button></div></form>` : '';
     const weak = !s.kind && !p && String(s.purpose || '').trim().length < 40;
     return `<section class="card sx-about"><div class="sx-about-h"><h2>${L('About this series', 'عن هذه السلسلة')}</h2>${ed ? '' : `<button class="btn sm ghost" data-a="sxAboutEd" data-v="${esc(s.id)}">${L('Edit', 'عدّل')}</button>`}</div>
-      ${ed ? form : `${s.kind ? `<p class="small"><span class="sx-chip ok">${esc(kindName(s.kind))}</span></p>` : ''}${s.about ? `<p class="small" dir="auto">${esc(s.about)}</p>` : ''}<p class="small" dir="auto"><b>${L('Purpose', 'الغرض')}:</b> ${esc(s.purpose || L('not set', 'غير محدد'))}</p><p class="small" dir="auto"><b>${L('For', 'لمن')}:</b> ${esc(s.audience || L('not set', 'غير محدد'))}</p>${facts}
+      ${ed ? form : `${s.kind ? `<p class="small"><span class="sx-chip ok">${esc(kindName(s.kind))}</span></p>` : ''}${s.about ? `<p class="small" dir="auto">${esc(s.about)}</p>` : ''}<p class="small" dir="auto"><b>${L('Purpose', 'الغرض')}:</b> ${esc(s.purpose || L('not set', 'غير محدد'))}</p><p class="small" dir="auto"><b>${L('For', 'لمن')}:</b> ${esc(s.audience || L('not set', 'غير محدد'))}</p>${partsOn(s) ? `<p class="small sx-part-a">${L('Posted as parts', 'تُنشر كأجزاء')} · ${L('next', 'التالي')}: <b>${L('Part', 'الجزء')} ${partFor(c, s, null)}</b> · <b dir="auto">${esc(tagOf(c, s))}</b></p>` : ''}${facts}
       ${weak ? `<p class="note w small">${L('BrandPilot does not know enough about what this series is. Check it with AI or edit it — otherwise topic ideas may miss the point.', 'لا يعرف BrandPilot ما يكفي عن هذه السلسلة. تحقق منها بالذكاء الاصطناعي أو عدّلها — وإلا قد لا تصيب أفكار المواضيع الهدف.')}</p>` : ''}
       ${prop || `<button class="btn sm" data-a="sxUnd" data-v="${esc(s.id)}" ${busy ? 'disabled' : ''}>${busy ? L('Reading your knowledge…', 'جارٍ قراءة معرفتك…') : L('Check with AI', 'تحقق بالذكاء الاصطناعي')}</button>`}`}</section>`;
   }
@@ -550,6 +647,89 @@
       <div class="row">${k.status !== 'approved' ? `<button class="btn pri sm" data-a="sxAppr" data-v="${esc(k.id)}">${ic('check', 14)}${L('Approve', 'اعتمد')}</button>` : `<button class="btn sm" data-a="sxUnappr" data-v="${esc(k.id)}">${L('Back to draft', 'أعده مسودة')}</button>`}<button class="btn sm" data-a="sxDlK" data-v="${esc(k.id)}">${ic('dl', 14)}${L('Download PNG', 'نزّل PNG')}</button><button class="btn sm ghost" data-a="sxDlIll" data-v="${esc(k.id)}">${L('Illustration only', 'الرسم فقط')}</button><button class="btn sm ghost" data-a="sxEdit" data-v="${esc(k.id)}">${L('Edit as a new post', 'عدّل كمنشور جديد')}</button><button class="btn sm ghost" data-a="sxDelK" data-v="${esc(k.id)}">${L('Delete', 'احذف')}</button></div></div>` : ''}</div></div>`;
   }
 
+  /* Post preview (owner 2026-11-18: "a button to view the post with full details and the image, to see how the post will
+     look"): the post inside a LinkedIn / Facebook / Instagram feed mock-up, next to every detail of the post. A preview
+     only — nothing is published. Opened by "View post" on a saved post (S.ui.sxP = { k }) or "Preview as a post" on the
+     chosen creative of the draft (S.ui.sxP = { sid, v }). */
+  const PV_FOLD = { linkedin: 210, facebook: 250, instagram: 125 };
+  const PV_SVG = {
+    like: '<path d="M7 10v11H3V10h4Zm2 11h8.3a2 2 0 0 0 2-1.6l1.4-7A2 2 0 0 0 18.7 10H14V5.5A2.5 2.5 0 0 0 11.5 3L9 10v11Z"/>',
+    heart: '<path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.5 1.1 5 3 1.5-1.9 3-3 5-3 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2Z"/>',
+    comment: '<path d="M4 5h16v11H9l-5 4V5Z"/>',
+    repost: '<path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/>',
+    send: '<path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/>',
+    share: '<path d="M14 5l7 7-7 7v-4c-6 0-9 2-11 5 1-6 4-10 11-11V5Z"/>',
+    save: '<path d="M6 3h12v18l-6-4-6 4V3Z"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/>',
+    dots: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+  };
+  const pvI = (k, sz = 18) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PV_SVG[k]}</svg>`;
+  const pvTags = (t) => [...new Set(String(t || '').match(/(^|\s)#[\p{L}\p{N}_]+/gu) || [])].map((x) => x.trim());
+  const pvText = (t) => esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<span class="pv-ln">$1</span>').replace(/(^|\s)(#[\p{L}\p{N}_]+)/gu, '$1<span class="pv-ln">$2</span>');
+
+  /** The post being previewed → { s, k (saved post or null), src (copy, topic, lang, fmt, …), v (illustration + layout), n }. */
+  function pvSrc(c) {
+    const z = S.ui.sxP;
+    if (!z) return null;
+    if (z.k) {
+      const k = creativesOf(c).find((x) => x.id === z.k), s = k && serOf(c).find((x) => x.id === k.sid);
+      return k && s ? { s, k, src: k, v: { ill: k.ill, layout: k.layout, made: k.made }, st: k.st, n: slidesOf(k), model: k.model } : null;
+    }
+    const s = serOf(c).find((x) => x.id === z.sid), d = s && draftsOf(c)[s.id], v = d && d.vars.find((x) => x.id === z.v && x.status === 'ready');
+    return v ? { s, k: null, src: { ...d, aspect: aspectOf(c, s, d) }, v, st: null, n: slidesOf(d), model: v.model } : null;
+  }
+
+  function pvHTML(c) {
+    const P = pvSrc(c);
+    if (!P) return '';
+    const z = S.ui.sxP, { s, k, src, v, n } = P, i = Math.min(z.i || 0, n - 1);
+    const ch = ['linkedin', 'facebook', 'instagram'].includes(z.ch) ? z.ch : ['linkedin', 'facebook', 'instagram'].includes(s.channel) ? s.channel : 'linkedin';
+    const cap = String(src.copy.caption || '').trim(), fold = PV_FOLD[ch], long = cap.length > fold && !z.more;
+    const capHTML = cap ? `<p class="pv-cap" dir="auto">${ch === 'instagram' ? `<b>${esc(handle(c))}</b> ` : ''}${pvText(long ? cap.slice(0, fold).replace(/\s+\S*$/, '') : cap)}${long ? `… <button class="pv-more" data-a="sxPvMore">${L('see more', 'عرض المزيد')}</button>` : ''}</p>` : `<p class="pv-cap muted">${L('No caption yet.', 'لا يوجد نص مرافق بعد.')}</p>`;
+    const lg = pickLogo(c, '#FFFFFF'), lm = lg && media(c, lg.id), dk = lg && !lg.ok; // the avatar is white, like the platforms show a page logo
+    const av = `<span class="pv-av ${ch === 'instagram' ? 'ig' : ''} ${lm ? (dk ? 'dk' : 'lt') : ''}">${lm ? `<img src="${lm.data}" alt="">` : esc(String(c.name || '?').trim().slice(0, 2).toUpperCase())}</span>`;
+    const when = { linkedin: L('Now', 'الآن'), facebook: L('Just now', 'الآن'), instagram: '' }[ch];
+    const head = `<div class="pv-hd">${av}<div class="pv-who"><b dir="auto">${ch === 'instagram' ? esc(handle(c)) : esc(c.name || '')}</b>${ch !== 'instagram' ? `<span>${when} · ${pvI('globe', 12)}</span>` : ''}</div><span class="pv-dots">${pvI('dots')}</span></div>`;
+    const media_ = `<div class="pv-media">${cvHTML('pv', specOf(c, s, src, v, i, P.st), 0.5, [src.copy.l1, src.copy.l2].filter(Boolean).join(' '))}${n > 1 ? `${i > 0 ? `<button class="pv-nav prev" data-a="sxPvI" data-v="${i - 1}" aria-label="${esc(L('Previous slide', 'الشريحة السابقة'))}">‹</button>` : ''}${i < n - 1 ? `<button class="pv-nav next" data-a="sxPvI" data-v="${i + 1}" aria-label="${esc(L('Next slide', 'الشريحة التالية'))}">›</button>` : ''}<span class="pv-cnt">${i + 1}/${n}</span>` : ''}</div>${n > 1 ? `<div class="pv-dotsr">${Array.from({ length: n }, (_, j) => `<button class="${j === i ? 'on' : ''}" data-a="sxPvI" data-v="${j}" aria-label="${esc(L('Slide', 'شريحة') + ' ' + (j + 1))}"></button>`).join('')}</div>` : ''}`;
+    const bar = ch === 'instagram'
+      ? `<div class="pv-bar ig"><span>${pvI('heart', 22)}</span><span>${pvI('comment', 22)}</span><span>${pvI('send', 22)}</span><span class="sp"></span><span>${pvI('save', 22)}</span></div>`
+      : `<div class="pv-bar">${(ch === 'linkedin' ? [['like', L('Like', 'أعجبني')], ['comment', L('Comment', 'تعليق')], ['repost', L('Repost', 'إعادة نشر')], ['send', L('Send', 'إرسال')]] : [['like', L('Like', 'أعجبني')], ['comment', L('Comment', 'تعليق')], ['share', L('Share', 'مشاركة')]]).map(([ic_, t]) => `<span>${pvI(ic_)}${t}</span>`).join('')}</div>`;
+    const feed = `<div class="pv-post ${ch}">${head}${ch === 'instagram' ? media_ + bar + capHTML : capHTML + media_ + bar}</div>`;
+    const tabs = `<div class="pv-tabs" role="tablist" aria-label="${esc(L('Show it on', 'اعرضه على'))}">${[['linkedin', 'LinkedIn'], ['facebook', 'Facebook'], ['instagram', 'Instagram']].map(([key, t]) => `<button role="tab" aria-selected="${ch === key}" class="${ch === key ? 'on' : ''}" data-a="sxPvCh" data-v="${key}">${t}${key === s.channel ? ' ★' : ''}</button>`).join('')}</div>`;
+
+    // details
+    const st = fixStyle(P.st || styleOf(c, s)), words = cap ? cap.split(/\s+/).filter(Boolean).length : 0, tags = pvTags(cap);
+    const row = (l, val) => val ? `<div class="pv-kv"><span>${l}</span><b dir="auto">${val}</b></div>` : '';
+    const status = k ? (k.status === 'approved' ? chip('✓ ' + L('Approved', 'معتمد'), 'ok') : chip(L('Saved draft', 'مسودة محفوظة'))) : chip(L('Not saved yet — option you are choosing', 'غير محفوظ بعد — الخيار الذي تختاره'), 'warn');
+    const size = (src.aspect || '1:1') === '4:5' ? '4:5 · 1080 × 1350' : '1:1 · 1080 × 1080';
+    const lay = { stack: L('Text top', 'النص أعلى'), split: L('Side by side', 'جنباً إلى جنب'), hero: L('Full picture', 'صورة كاملة') }[v.layout] || '';
+    const illFrom = !v.ill ? L('None', 'لا يوجد') : P.model === 'upload' ? L('Your own upload', 'رفعته بنفسك') : L('Made by AI in the series style', 'صنعه الذكاء الاصطناعي بأسلوب السلسلة');
+    const styleFrom = { vision: L('Read by AI from your reference posts', 'قرأه الذكاء الاصطناعي من منشوراتك المرجعية'), pixels: L('Colours measured from your reference posts', 'ألوان مقاسة من منشوراتك المرجعية'), kit: L('Your brand kit', 'هوية علامتك') }[(k && k.styleRead) || (s.style && s.style.read) || 'kit'] || '';
+    const pts = (src.copy.pts || []).filter((x) => String(x).trim());
+    const onCreative = `<div class="pv-words" style="--pv-bg:${st.bg[0] || '#0B2140'};--pv-ink:${st.ink || '#fff'};--pv-acc:${st.accent || '#55C8FF'}">${src.copy.l1 ? `<b dir="auto">${esc(src.copy.l1)}</b>` : ''}${src.copy.l2 ? `<b class="acc" dir="auto">${esc(src.copy.l2)}</b>` : ''}${src.copy.sub ? `<span dir="auto">${esc(src.copy.sub)}</span>` : ''}</div>
+      ${pts.length ? `<p class="pv-sm">${src.fmt === 'carousel' ? L('One slide each', 'شريحة لكل نقطة') : L('Points in the caption', 'نقاط في النص المرافق')}</p><ol class="pv-pts">${pts.map((x) => `<li dir="auto">${esc(x)}</li>`).join('')}</ol>` : ''}
+      ${src.copy.cta && src.fmt === 'carousel' ? row(L('Closing slide', 'الشريحة الختامية'), esc(src.copy.cta)) : ''}${src.copy.foot ? row(L('Source line', 'سطر المصدر'), esc(src.copy.foot)) : ''}`;
+    const capStats = `<div class="pv-stats"><div><b>${cap.length}</b><span>${L('characters', 'حرفاً')}</span></div><div><b>${words}</b><span>${L('words', 'كلمة')}</span></div><div><b>${tags.length}</b><span>${L('hashtags', 'وسماً')}</span></div><div><b>${Math.max(1, Math.round(words / 200 * 60))}s</b><span>${L('to read', 'للقراءة')}</span></div></div>
+      ${cap.length > fold && ch !== 'facebook' ? `<p class="pv-sm">${L(`${CHN[ch]} shows about the first ${fold} characters, then “see more” — your opening line has to carry the post.`, `يعرض ${CHN[ch]} نحو أول ${fold} حرفاً ثم «عرض المزيد» — سطرك الأول يجب أن يحمل المنشور.`)}</p>` : ''}
+      ${tags.length ? `<div class="pv-tagl">${tags.map((t) => `<span dir="auto">${esc(t)}</span>`).join('')}</div>` : ''}`;
+    const rec = src.rec ? `<section class="pv-sec"><h4>${ic('target', 15)}${L('Why this post', 'لماذا هذا المنشور')}</h4>${row(L('Goal', 'الهدف'), esc(nxL(NXO[src.rec.objective] || NXO.engagement)))}${src.rec.why ? `<p class="pv-sm" dir="auto">${esc(src.rec.why)}</p>` : ''}${src.rec.measure ? `<p class="pv-sm" dir="auto">${esc(src.rec.measure)}</p>` : ''}</section>` : '';
+    const acts = k
+      ? `${k.status !== 'approved' ? `<button class="btn pri sm" data-a="sxAppr" data-v="${esc(k.id)}">${ic('check', 14)}${L('Approve', 'اعتمد')}</button>` : `<button class="btn sm" data-a="sxUnappr" data-v="${esc(k.id)}">${L('Back to draft', 'أعده مسودة')}</button>`}${cap ? `<button class="btn sm" data-a="sxCopyCap" data-v="${esc(k.id)}">${ic('copy', 14)}${L('Copy caption', 'انسخ النص')}</button>` : ''}<button class="btn sm" data-a="sxDlK" data-v="${esc(k.id)}">${ic('dl', 14)}${L('Download PNG', 'نزّل PNG')}</button><button class="btn sm ghost" data-a="sxEdit" data-v="${esc(k.id)}">${L('Edit as a new post', 'عدّل كمنشور جديد')}</button>`
+      : `<button class="btn sm" data-a="sxDl" data-v="${esc(v.id)}">${ic('dl', 14)}${L('Download PNG', 'نزّل PNG')}</button><button class="btn sm ghost" data-a="sxPvX">${L('Back to choosing', 'عد إلى الاختيار')}</button>`;
+    const details = `<div class="pv-det">
+      <div class="pv-top">${status}<h3 dir="auto">${esc(src.topic || src.copy.l1 || '')}</h3><p class="pv-sm">${L('Series', 'السلسلة')}: <b dir="auto">${esc(s.name)}</b></p></div>
+      <div class="pv-grid">${row(L('Planned for', 'مخطط لـ'), CHN[s.channel] || CHN.linkedin)}${row(L('Format', 'الشكل'), src.fmt === 'carousel' ? L(`Carousel · ${n} slides`, `منشور دوّار · ${n} شرائح`) : L('Single image', 'صورة واحدة'))}${row(L('Size', 'المقاس'), size)}${row(L('Language', 'اللغة'), src.lang === 'ar' ? 'العربية' : 'English')}${row(L('Layout', 'التخطيط'), lay)}${k ? row(k.status === 'approved' ? L('Approved', 'اعتُمد') : L('Saved', 'حُفظ'), esc(k.status === 'approved' ? [k.approvedAt, k.approvedBy].filter(Boolean).join(' · ') : k.date || '')) : ''}</div>
+      <section class="pv-sec"><h4>${ic('eye', 15)}${L('On the creative', 'على التصميم')}</h4>${onCreative}</section>
+      <section class="pv-sec"><h4>${ic('quote', 15)}${L('Caption', 'النص المرافق')}</h4>${capStats}</section>
+      <section class="pv-sec"><h4>${ic('bulb', 15)}${L('Picture', 'الصورة')}</h4>${row(L('Illustration', 'الرسم'), illFrom)}${row(L('Style', 'الأسلوب'), styleFrom)}${src.concept ? `<p class="pv-sm" dir="auto">${esc(src.concept)}</p>` : ''}</section>
+      ${rec}</div>`;
+    return `<div class="sx-zoom pv" role="dialog" aria-modal="true" aria-label="${esc(L('Post preview', 'معاينة المنشور') + ': ' + (src.topic || ''))}"><div class="pv-in">
+      <div class="pv-h"><b>${ic('eye', 16)}${L('Post preview', 'معاينة المنشور')}</b><span class="pv-note">${L('How it will look — nothing is published', 'كيف سيبدو — لا يُنشر شيء')}</span><div class="pv-acts">${acts}</div><button class="btn sm ghost" data-a="sxPvX" aria-label="${esc(L('Close', 'أغلق'))}">${ic('x', 18)}</button></div>
+      <div class="pv-body"><div class="pv-stage">${tabs}${feed}</div>${details}</div></div></div>`;
+  }
+  /** An Instagram-style handle from the company name ("MD Labs" → "mdlabs"). */
+  function handle(c) { return String(c.name || 'company').toLowerCase().replace(/[^\p{L}\p{N}_.]+/gu, '') || 'company'; }
+
   function view(c) {
     const s = curSeries(c);
     if (S.ui.sx && !s) S.ui.sx = null;
@@ -579,7 +759,7 @@
       if (!r.draft) toast(L('No approved knowledge yet — approve facts in Your company first, or write the words yourself.', 'لا معرفة معتمدة بعد — اعتمد الحقائق أولاً أو اكتب الكلمات بنفسك.'), 'err');
       else {
         const x = r.draft, [a, b] = splitHead(x.headline, st);
-        Object.assign(d.copy, { l1: a, l2: b, sub: x.support || '', pts: [0, 1, 2].map((i) => x.points[i] || ''), caption: x.caption + (x.hashtags.length ? '\n\n' + x.hashtags.join(' ') : ''), cta: x.cta || '' });
+        Object.assign(d.copy, { l1: a, l2: b, sub: x.support || '', pts: [0, 1, 2].map((i) => x.points[i] || ''), caption: partCap(c, s, d, x.caption + (x.hashtags.length ? '\n\n' + x.hashtags.join(' ') : '')), cta: x.cta || '' });
         d.concept = x.visual || d.topic; d.facts = r.facts; d.drafted = true; d.ack = false;
         const w = r.warnings || []; d.warn = (w.find((y) => y.code === 'unsupported_numbers') || {}).numbers || null; d.claims = (w.find((y) => y.code === 'company_claims') || {}).claims || null;
         toast(L('Draft ready — edit anything, then generate.', 'المسودة جاهزة — عدّل ما تشاء ثم أنشئ.'), 'ok');
@@ -663,6 +843,7 @@
     sxUnd(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (s) aiUnderstand(c, s, false); },
     sxUndOk(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s || !s.undProp) return; const p = s.undProp; Object.assign(s, { kind: p.kind, about: p.about, purpose: p.purpose, audience: p.audience || s.audience || '' }); s.undProp = null; reThink(s); log(c, 'campaign', `Series “${s.name}” defined: ${p.kind}`, `تم تعريف السلسلة «${s.name}»`); toast(L('Saved. New topic ideas follow what the series is about.', 'حُفظ. أفكار المواضيع الجديدة تتبع موضوع السلسلة.'), 'ok'); save(); R(); },
     sxUndX(sid) { const s = serOf(C()).find((x) => x.id === sid); if (s) { s.undProp = null; save(); R(); } },
+    sxPartCap(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftOf(c, s); d.copy.caption = partCap(c, s, d, d.copy.caption); save(); R(); toast(L('Caption updated: the part line, the previous part and the series hashtag.', 'حُدّث النص: سطر الجزء والجزء السابق ووسم السلسلة.'), 'ok'); },
     sxAboutEd(sid) { S.ui.sxAbout = sid || null; R(); },
     sxAbout(fd, f) {
       const c = C(), s = serOf(c).find((x) => x.id === f.dataset.v); if (!s) return;
@@ -674,6 +855,8 @@
       s.purpose = String(fd.get('purpose') || '').trim().slice(0, 400); s.audience = String(fd.get('audience') || '').trim().slice(0, 160);
       if (['linkedin', 'instagram', 'facebook'].includes(fd.get('channel'))) s.channel = fd.get('channel');
       if (Object.keys(NXO).includes(fd.get('objective'))) s.objective = fd.get('objective');
+      s.parts = fd.get('parts') === 'on';
+      { const t = String(fd.get('tag') || '').trim().replace(/^#+/, '').replace(/[^\p{L}\p{N}_]+/gu, ''); if (t) s.tag = '#' + t.slice(0, 60); else delete s.tag; }
       s.ideas = String(fd.get('ideas') || '').split(/\r?\n/).map((x) => x.trim()).filter(Boolean).join('\n').slice(0, 2000);
       if (s.undProp) { s.about = s.undProp.about; s.undProp = null; }
       if (was !== [s.name, s.kind, s.purpose, s.audience, s.objective].join('|')) reThink(s);
@@ -685,7 +868,7 @@
     sxFmt(v) { const c = C(), s = curSeries(c); if (!s) return; draftOf(c, s).fmt = v === 'carousel' ? 'carousel' : 'single'; save(); R(); },
     sxAsp(v) { const c = C(), s = curSeries(c); if (!s) return; draftOf(c, s).aspect = v === '4:5' ? '4:5' : '1:1'; save(); R(); },
     sxLang(v) { const c = C(), s = curSeries(c); if (!s) return; const d = draftOf(c, s); if (d.lang === v) return; d.lang = v === 'ar' ? 'ar' : 'en'; save(); R(); if (d.drafted && d.topic) toast(L('Language changed — use “Re-draft with AI” to write the words in this language.', 'تغيّرت اللغة — استخدم «أعد الصياغة» لكتابة الكلمات بهذه اللغة.')); },
-    sxIn(val, el) { const c = C(), s = curSeries(c); if (!s) return; const d = draftOf(c, s), k = el.dataset.k; if (/^p\d$/.test(k)) d.copy.pts[+k[1]] = val; else if (k === 'concept') d.concept = val; else d.copy[k] = val; save(); paintAll(); const g = document.querySelector('[data-a="sxGen"]'); if (g && k === 'l1') g.disabled = !val.trim() || d.vars.some((v) => v.status === 'pending'); },
+    sxIn(val, el) { const c = C(), s = curSeries(c); if (!s) return; const d = draftOf(c, s), k = el.dataset.k; if (/^p\d$/.test(k)) d.copy.pts[+k[1]] = val; else if (k === 'concept') d.concept = val; else d.copy[k] = val; save(); paintAll(); const n = document.querySelector(`[data-cnt="${k}"]`); if (n) { const m = +n.dataset.max; n.textContent = `${val.length}/${m}`; n.classList.toggle('hi', val.length > m * 0.9); } const g = document.querySelector('[data-a="sxGen"]'); if (g && k === 'l1') g.disabled = !val.trim() || d.vars.some((v) => v.status === 'pending'); },
     sxAck(v, el) { const c = C(), s = curSeries(c); if (!s) return; draftOf(c, s).ack = !!el.checked; save(); R(); },
     sxGen(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftOf(c, s); if (!d.copy.l1.trim()) return; if (!d.drafted) d.drafted = true; newVars(c, s, d, 2).forEach((v) => genVar(c, s, d, v)); },
     sxMore(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftOf(c, s); newVars(c, s, d, 1).forEach((v) => genVar(c, s, d, v)); },
@@ -706,7 +889,7 @@
       const d = draftOf(c, s), v = d.vars.find((x) => x.id === d.pick && x.status === 'ready'); if (!v) return;
       const ok = el && el.dataset.k === 'approve';
       if (ok && ((d.warn && d.warn.length) || (d.claims && d.claims.length)) && !d.ack) return toast(L('Check the flagged statements first.', 'تحقق من العبارات المُعلَّمة أولاً.'), 'err');
-      const k = { id: uid('cr'), sid: s.id, topic: d.topic, lang: d.lang, fmt: d.fmt, aspect: aspectOf(c, s, d), layout: v.layout, made: v.made || 'stack', copy: JSON.parse(JSON.stringify(d.copy)), concept: d.concept, ill: v.ill, model: v.model || '', st: fixStyle(styleOf(c, s)), styleRead: (s.style && s.style.read) || 'kit', rec: d.rec || null, status: ok ? 'approved' : 'saved', at: Date.now(), date: today() };
+      const k = { id: uid('cr'), sid: s.id, topic: d.topic, lang: d.lang, fmt: d.fmt, aspect: aspectOf(c, s, d), layout: v.layout, made: v.made || 'stack', copy: JSON.parse(JSON.stringify(d.copy)), concept: d.concept, ill: v.ill, model: v.model || '', st: fixStyle(styleOf(c, s)), styleRead: (s.style && s.style.read) || 'kit', rec: d.rec || null, status: ok ? 'approved' : 'saved', at: Date.now(), date: today(), part: partFor(c, s, d) || undefined };
       if (ok) { k.approvedBy = (typeof USER !== 'undefined' && USER && USER.email) || ''; k.approvedAt = today(); }
       creativesOf(c).push(k);
       delete draftsOf(c)[s.id]; d.vars.forEach((x) => { if (x.ill !== k.ill) dropMedia(c, x.ill); });
@@ -721,10 +904,16 @@
     sxZoomK(id) { S.ui.sxZ = { k: id, i: 0 }; R(); },
     sxZi(i) { if (S.ui.sxZ) { S.ui.sxZ.i = +i; R(); } },
     sxZx() { S.ui.sxZ = null; R(); },
+    sxView(id) { S.ui.sxZ = null; S.ui.sxP = { k: id, i: 0 }; R(); },
+    sxViewV(id) { const c = C(), s = curSeries(c); if (!id || !s) return; S.ui.sxZ = null; S.ui.sxP = { sid: s.id, v: id, i: 0 }; R(); },
+    sxPvI(i) { if (S.ui.sxP) { S.ui.sxP.i = +i; R(); } },
+    sxPvCh(ch) { if (S.ui.sxP) { S.ui.sxP.ch = ch; S.ui.sxP.more = false; R(); } },
+    sxPvMore() { if (S.ui.sxP) { S.ui.sxP.more = true; R(); } },
+    sxPvX() { S.ui.sxP = null; R(); },
     sxAppr(id) { const c = C(), k = creativesOf(c).find((x) => x.id === id); if (!k) return; k.status = 'approved'; k.approvedBy = (typeof USER !== 'undefined' && USER && USER.email) || ''; k.approvedAt = today(); log(c, 'approve', `Series post “${k.topic}” approved`, `اعتُمد منشور السلسلة «${k.topic}»`); save(); R(); },
     sxUnappr(id) { const c = C(), k = creativesOf(c).find((x) => x.id === id); if (!k) return; k.status = 'saved'; delete k.approvedBy; delete k.approvedAt; save(); R(); },
-    sxDelK(id) { const c = C(), k = creativesOf(c).find((x) => x.id === id); if (!k) return; c.creatives = creativesOf(c).filter((x) => x !== k); dropMedia(c, k.ill); S.ui.sxZ = null; toast(L('Post deleted.', 'حُذف المنشور.'), 'ok'); save(); R(); },
-    sxEdit(id) { const c = C(), k = creativesOf(c).find((x) => x.id === id), s = k && serOf(c).find((x) => x.id === k.sid); if (!s) return; const d = startDraft(c, s, k.topic, k.rec); Object.assign(d, { lang: k.lang, fmt: k.fmt, aspect: k.aspect || '1:1', copy: JSON.parse(JSON.stringify(k.copy)), concept: k.concept || k.topic, drafted: true }); const v = { id: uid('sv'), layout: k.layout, made: k.made, variant: 0, status: 'ready', ill: k.ill, note: '', model: k.model }; d.vars.push(v); d.pick = v.id; S.ui.sxZ = null; save(); go(s.id); },
+    sxDelK(id) { const c = C(), k = creativesOf(c).find((x) => x.id === id); if (!k) return; c.creatives = creativesOf(c).filter((x) => x !== k); dropMedia(c, k.ill); S.ui.sxZ = null; S.ui.sxP = null; toast(L('Post deleted.', 'حُذف المنشور.'), 'ok'); save(); R(); },
+    sxEdit(id) { S.ui.sxP = null; const c = C(), k = creativesOf(c).find((x) => x.id === id), s = k && serOf(c).find((x) => x.id === k.sid); if (!s) return; const d = startDraft(c, s, k.topic, k.rec); Object.assign(d, { lang: k.lang, fmt: k.fmt, aspect: k.aspect || '1:1', copy: JSON.parse(JSON.stringify(k.copy)), concept: k.concept || k.topic, drafted: true, part: partFor(c, s, k) || undefined, editOf: k.id }); const v = { id: uid('sv'), layout: k.layout, made: k.made, variant: 0, status: 'ready', ill: k.ill, note: '', model: k.model }; d.vars.push(v); d.pick = v.id; S.ui.sxZ = null; save(); go(s.id); },
     sxCopyCap(id) { const k = creativesOf(C()).find((x) => x.id === id); if (k && navigator.clipboard) navigator.clipboard.writeText(k.copy.caption).then(() => toast(L('Copied', 'تم النسخ'), 'ok'), () => {}); },
     async sxRefUp(_, el) {
       const c = C(), s = serOf(c).find((x) => x.id === el.dataset.v), fs = [...(el.files || [])].slice(0, 12); el.value = '';
@@ -805,7 +994,7 @@
     root.nxPrep = fromRec;
     // Campaign Studio's "post in your content series" lane now points here.
     root.serLane = () => `<div class="card sx-pointer"><div><b>${L('Series posts have their own workspace', 'لمنشورات السلاسل مساحة عمل خاصة')}</b><p class="small">${L('AI Content Series: your signature style, a topic, a finished branded post.', 'سلاسل المحتوى الذكية: أسلوبك المميز وموضوع ومنشور جاهز بهويتك.')}</p></div><button class="btn pri" data-a="go" data-v="series">${L('Open AI Content Series', 'افتح سلاسل المحتوى الذكية')}</button></div>`;
-    addEventListener('keydown', (e) => { if (e.key === 'Escape' && S && S.ui && S.ui.sxZ && S.ui.view === 'series') { e.stopImmediatePropagation(); S.ui.sxZ = null; R(); } }, true);
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && S && S.ui && (S.ui.sxZ || S.ui.sxP) && S.ui.view === 'series') { e.stopImmediatePropagation(); if (S.ui.sxP) S.ui.sxP = null; else S.ui.sxZ = null; R(); } }, true);
     if (document.fonts && document.fonts.load) Promise.all(['800 40px "Plus Jakarta Sans"', '500 20px "Plus Jakarta Sans"', '800 40px "Noto Sans Arabic"'].map((f) => document.fonts.load(f).catch(() => null))).then(() => paintAll());
   }
 

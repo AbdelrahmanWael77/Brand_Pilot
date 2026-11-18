@@ -50,6 +50,20 @@
       ],
       "occurrences": 1,
       "last_seen": "2026-11-18"
+    },
+    {
+      "id": "series-edit-part-number",
+      "timestamp": "2026-11-18",
+      "error_message": "Edit as a new post on Part 1 showed Part 3 (series had 2 posts); caption said Part 2 but the bar showed a green check",
+      "file": "public/series.js",
+      "root_cause": "A draft made by sxEdit carried no link to the post it edits, so partFor treated it as the NEXT part; partNeeds only searched the caption for the exact expected line, so a line with another number passed",
+      "fix": "sxEdit stores d.part + d.editOf (older drafts matched by the reused illustration); headRe/prevRe find any part line and partCap replaces a wrong one",
+      "tags": [
+        "series",
+        "parts",
+        "caption",
+        "edit"
+      ]
     }
   ]
 }

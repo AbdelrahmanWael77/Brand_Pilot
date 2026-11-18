@@ -12,6 +12,7 @@ import { createImageAi } from './imageAi.js';
 import { seriesRoutes } from './series.js';
 import { campaignImageRoute } from './campaignImage.js';
 import { visualCopyRoute } from './visualCopy.js';
+import { postHelpRoute } from './postHelp.js';
 import { createLimiter } from './auth.js';
 import { createCanvaStudio } from './canvaStudio.js';
 
@@ -91,6 +92,8 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
   app.use('/api/companies', auth.requireAuth, seriesRouter);
   // A short headline and supporting line for one post's artwork (visualCopy.js): a suggestion from the post's own wording.
   app.post('/api/companies/:id/campaigns/:cid/assets/:aid/visual-copy', auth.requireAuth, companies.requireCompany, visualCopyRoute(db, ai, createLimiter(visualLimit)));
+  // AI suggestions for one post in Campaign Studio → Words (postHelp.js): better wording + campaign tips, grounded in the brief and approved facts.
+  app.post('/api/companies/:id/campaigns/:cid/assets/:aid/ai-help', auth.requireAuth, companies.requireCompany, postHelpRoute(db, ai, createLimiter(visualLimit)));
   app.use('/api/companies', auth.requireAuth, companies.router);
   // Whether an AI key is set on this server. Says nothing else: no key, no model, no provider detail.
   // AI model choice (owner's request 2026-11-16): every provider / model with a key is an option; the choice

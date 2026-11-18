@@ -157,6 +157,7 @@ function chatComplete({ apiKey, model, fetch: f = globalThis.fetch, timeoutMs, m
  * @param {object} [o]
  * @param {string} [o.apiKey]          Anthropic key; defaults to ANTHROPIC_API_KEY
  * @param {string} [o.openaiKey]       OpenAI key; defaults to OPENAI_API_KEY
+ * @param {string} [o.anthropicModel]  Claude model id; defaults to ANTHROPIC_MODEL, then AI_MODEL (when Anthropic starts), then DEFAULT_MODEL
  * @param {string} [o.openrouterKey]   OpenRouter key; defaults to BRANDPILOT_OPENROUTER_API_KEY
  * @param {string} [o.openrouterModel] one OpenRouter model id or several, comma-separated; defaults to BRANDPILOT_OPENROUTER_MODEL
  * @param {string} [o.provider]        'anthropic' | 'openai' | 'openrouter'; defaults to AI_PROVIDER, then to the first key that is set
@@ -167,6 +168,7 @@ function chatComplete({ apiKey, model, fetch: f = globalThis.fetch, timeoutMs, m
  */
 export function createAi({
   apiKey = process.env.ANTHROPIC_API_KEY,
+  anthropicModel = process.env.ANTHROPIC_MODEL,
   openaiKey = process.env.OPENAI_API_KEY,
   openrouterKey = process.env.BRANDPILOT_OPENROUTER_API_KEY,
   openrouterModel = process.env.BRANDPILOT_OPENROUTER_MODEL,
@@ -182,7 +184,7 @@ export function createAi({
   const envModel = has(model) ? model.trim() : null;
   const opts = [];
   const add = (p, m, key) => { if (!opts.some((o) => o.id === `${p}:${m}`)) opts.push({ id: `${p}:${m}`, provider: p, model: m, key }); };
-  if (has(apiKey)) add('anthropic', (which === 'anthropic' && envModel) || DEFAULT_MODEL, apiKey.trim());
+  if (has(apiKey)) add('anthropic', (has(anthropicModel) && anthropicModel.trim()) || (which === 'anthropic' && envModel) || DEFAULT_MODEL, apiKey.trim());
   if (has(openaiKey)) add('openai', (which === 'openai' && envModel) || DEFAULT_OPENAI_MODEL, openaiKey.trim());
   if (has(openrouterKey)) {
     const listed = String(openrouterModel ?? '').split(',').map((x) => x.trim()).filter(Boolean);

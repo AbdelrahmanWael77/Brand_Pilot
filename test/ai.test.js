@@ -329,6 +329,9 @@ test('options and select: every keyed provider / model is an option; select swit
   // AI_MODEL applies to the starting provider only
   const m = createAi({ apiKey: '', openaiKey: OKEY, openrouterKey: RKEY, model: 'gpt-x' });
   assert.deepEqual(m.options().map((o) => o.model), ['gpt-x', DEFAULT_OPENROUTER_MODEL]);
+  // ANTHROPIC_MODEL names the Claude model, whichever provider starts
+  assert.equal(createAi({ apiKey: KEY, anthropicModel: ' claude-x ', openaiKey: '', openrouterKey: '' }).model, 'claude-x');
+  assert.equal(createAi({ apiKey: KEY, anthropicModel: 'claude-x', openaiKey: '', openrouterKey: RKEY, provider: 'openrouter' }).options()[0].model, 'claude-x');
 });
 
 test('PUT /api/ai/model: signed in only; known ids switch and are remembered after a restart; unknown → 400', async () => {
