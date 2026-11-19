@@ -1631,6 +1631,15 @@ details.src-m>summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--
 .st3 .st-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin:0;padding-inline-start:2px}
 .st3 .st-ey{font-size:12px;font-weight:700;color:var(--brand);background:var(--signal-soft);border-radius:99px;padding:1px 9px}.st3 .st-tr{font-size:12.5px}
 .st3 + .pipe{margin:0 0 14px}
+/* 69 (2026-11-19): header alignment — the title switcher is a <details>, so drop the global details border/margin that pushed it below the breadcrumb; one height for every action button. */
+.st3 .st-sw{border:0;margin:0;padding:0}
+.st3 .st-meta{padding-inline-start:0}
+.st3 .st-act{align-items:center;gap:8px}
+.st3 .st-act .btn{height:38px;min-height:38px;margin:0;padding-block:0;box-sizing:border-box;font-size:14px}
+.st3 .st-act .kmenu>summary{width:38px;min-width:38px;padding:0}
+/* 69: a knowledge card never grows past its column — long theme names wrap instead of pushing the card wide */
+.ks{grid-template-columns:minmax(0,1fr)}
+.ks .badge{white-space:normal;text-align:start}
 .mk-back{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:12px;max-width:360px;padding:8px 16px 8px 8px;border-radius:14px;background:var(--surface);border:1px solid var(--rule);box-shadow:0 1px 2px rgba(14,23,38,.05);transition:box-shadow .15s,border-color .15s,transform .15s}
 .mk-back:hover,.mk-back:focus-visible{border-color:var(--brand);box-shadow:0 10px 24px -16px rgba(29,78,216,.55);transform:translateY(-1px)}.mk-back:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 .mk-back>i{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--signal-soft);color:var(--brand);flex:none}.mk-back>i svg{transform:scaleX(-1)}

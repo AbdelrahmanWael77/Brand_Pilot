@@ -1,3 +1,5 @@
+> 2026-11-19: 69 DONE (not committed) — Studio header: title switcher no longer inherits the global dashed details border/margin (it sat below the breadcrumb); New / Edit answers / ⋯ all 38px and centred; meta line flush with the breadcrumb. Company knowledge: topic cards cannot grow past their column (.ks single minmax(0,1fr) track; long theme badges wrap) — fixes Content themes spilling under Restrictions. Next: owner reviews; commit. npm test 355/355.
+
 > 2026-11-18: 58–68 committed (0b76490) and pushed on redesign/new-product-identity (owner: "make push"). Next: owner reviews; phone-width check of the redesigned screens.
 
 > 2026-11-18: 68 DONE (not committed) — AI scene tile: shows progress on the tile while creating; when the scene is already in use the click opens the Picture tab options (it used to do nothing). 58–68 uncommitted. Next: owner reviews; phone-width check; commit. npm test 620/620.
