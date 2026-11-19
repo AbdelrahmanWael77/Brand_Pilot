@@ -11,10 +11,15 @@
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
     "test": "node --test",
-    "seed:dev": "node scripts/seed-dev-user.js"
+    "seed:dev": "node scripts/seed-dev-user.js",
+    "test:ui": "node --test \"ui-tests/*.ui.mjs\"",
+    "baseline:flownest": "node scripts/flownest-baseline.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
     "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "playwright-core": "1.47.2"
   }
 }

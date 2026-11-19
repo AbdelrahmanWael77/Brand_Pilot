@@ -1,0 +1,1469 @@
+{
+ "about": "Recommendations BrandPilot produced for the synthetic FlowNest demo company before P1 (rules engine, no AI). recs = browser audit(c) per language; server = GET /api/companies/:id/audit. Rebuild: node scripts/flownest-baseline.mjs --write",
+ "recordedAt": "2026-11-19",
+ "commit": "40fe188",
+ "counts": {
+  "sources": 6,
+  "findings": 51,
+  "approved": 44,
+  "rows": {
+   "meta": 56,
+   "ga4": 1680,
+   "gsc": 672,
+   "leads": 151
+  }
+ },
+ "recs": {
+  "en": [
+   {
+    "id": "ch-leak",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "GA4",
+    "title": "Organic Social brings many visits but few enquiries",
+    "why": "This is where “traffic but few enquiries” comes from: attention is being won but not converted.",
+    "ev": [
+     "Organic Social: 37% of sessions, enquiry rate 0.24% vs site 1.32%",
+     "Hypothesis: posts send people to pages that do not match what the post promised."
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Send Organic Social traffic to a dedicated landing page with one CTA instead of general pages.",
+    "metric": "Enquiry rate of Organic Social sessions",
+    "conf": "med",
+    "need": "Landing-page level data after the change",
+    "v": 3,
+    "e": 3,
+    "f": 2,
+    "u": 3,
+    "make": "campaign",
+    "exp": {
+     "t": "Dedicated landing page for Organic Social",
+     "h": "A page matching the post message with a single CTA converts better than the pricing or blog page.",
+     "m": "Enquiries ÷ sessions on the landing page",
+     "d": 21
+    },
+    "score": 10
+   },
+   {
+    "id": "mobile-gap",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "GA4",
+    "title": "Mobile visitors enquire far less than desktop visitors",
+    "why": "Most visits are on phones. If the mobile path is harder, every channel pays for it.",
+    "ev": [
+     "Mobile: 62% of sessions, enquiry rate 0.80%",
+     "Desktop: enquiry rate 2.17%"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Test the enquiry path on a phone: form length, button size, load time, WhatsApp/click-to-call option.",
+    "metric": "Mobile enquiry rate",
+    "conf": "high",
+    "need": "Device-level form analytics would pinpoint the step where people leave",
+    "v": 3,
+    "e": 3,
+    "f": 2,
+    "u": 3,
+    "make": "exp",
+    "exp": {
+     "t": "Shorter mobile enquiry form",
+     "h": "Reducing the mobile form to name and phone raises the mobile enquiry rate.",
+     "m": "Mobile enquiries ÷ mobile sessions",
+     "d": 14
+    },
+    "score": 10
+   },
+   {
+    "id": "offer-conflict",
+    "kind": "risk",
+    "cls": "obs",
+    "plat": "All channels",
+    "title": "Your own materials state different offers",
+    "why": "A prospect who sees two versions of the offer cannot tell which is true; outdated material also puts campaign copy at risk.",
+    "ev": [
+     "Sources disagree on the trial length: 14 days (Website — home page (EN)) vs 7 days (Company brochure 2024 (PDF text))"
+    ],
+    "obj": "Brand trust and consistency",
+    "action": "Approve the current offer in Company knowledge, reject the outdated one, and retire or correct the old document.",
+    "metric": "No offer conflicts in Company knowledge or Brand QA",
+    "conf": "high",
+    "need": "None",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 3,
+    "make": "task",
+    "score": 9
+   },
+   {
+    "id": "page-leak",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "GA4",
+    "title": "Landing page /pricing under-converts",
+    "why": "A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.",
+    "ev": [
+     "/pricing: 4,965 sessions (35%), enquiry rate 0.40% vs site 1.32%"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Review /pricing: put the primary CTA above the fold, shorten the form, state the offer in the first screen.",
+    "metric": "Enquiry rate on /pricing",
+    "conf": "high",
+    "need": "A look at the live page (BrandPilot has not seen its layout)",
+    "v": 3,
+    "e": 3,
+    "f": 2,
+    "u": 2,
+    "make": "exp",
+    "exp": {
+     "t": "New first screen on /pricing",
+     "h": "Showing the offer and one CTA in the first screen raises the enquiry rate of this page.",
+     "m": "Enquiries ÷ sessions on the page",
+     "d": 21
+    },
+    "score": 9
+   },
+   {
+    "id": "claims",
+    "kind": "risk",
+    "cls": "obs",
+    "plat": "Documents & creatives",
+    "title": "Promotional claims without supporting evidence",
+    "why": "Rankings, guarantees and customer numbers that cannot be proven damage trust and may breach ad platform policies. BrandPilot will not reuse them.",
+    "ev": [
+     "“The #1 task management tool in Egypt” — Company brochure 2024 (PDF text) (not approved)",
+     "“Guaranteed to double your team's productivity” — Company brochure 2024 (PDF text) (not approved)"
+    ],
+    "obj": "Brand trust and consistency",
+    "action": "Reject each claim, or attach proof and approve it explicitly. Replace with approved product facts.",
+    "metric": "Zero unapproved claims in Brand QA",
+    "conf": "high",
+    "need": "Proof documents if you want to keep a claim",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 8
+   },
+   {
+    "id": "know-gaps",
+    "kind": "gap",
+    "cls": "gap",
+    "plat": "Company knowledge",
+    "title": "1 business question(s) no source could answer",
+    "why": "Recommendations in these areas would be guesses. BrandPilot leaves them blank rather than inventing answers.",
+    "ev": [
+     "Which alternatives do customers compare you with?"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Answer the open questions in Company knowledge — one line each is enough.",
+    "metric": "Open questions remaining",
+    "conf": "high",
+    "need": "Your answers",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 8
+   },
+   {
+    "id": "theme-best",
+    "kind": "strong",
+    "cls": "measured",
+    "plat": "Social posts",
+    "title": "“how-to tips” is your strongest content theme",
+    "why": "Your own history shows what the audience responds to — a better guide than generic best practice.",
+    "ev": [
+     "“how-to tips”: engagement 5.3% of reach across 20 posts; link clicks 1.06% of reach",
+     "Account average engagement: 3.8%; weakest theme “product update”: 1.6%",
+     "Engagement is an awareness signal, not proof of enquiries."
+    ],
+    "obj": "Relevant visibility",
+    "action": "Publish more “how-to tips” posts and end each with the primary CTA and a tracked link.",
+    "metric": "Link clicks and enquiries from tagged posts",
+    "conf": "high",
+    "need": "UTM-tagged links to connect posts to enquiries",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "campaign",
+    "exp": {
+     "t": "“how-to tips” vs “product update” as campaign creative",
+     "h": "The strongest organic theme also produces more tracked link clicks per reach when used with the campaign CTA.",
+     "m": "Link clicks ÷ reach",
+     "d": 14
+    },
+    "score": 8
+   },
+   {
+    "id": "src-unknown",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "Leads",
+    "title": "The source of many leads is not recorded",
+    "why": "Leads with no source cannot be credited to any channel, so good channels look weaker than they are.",
+    "ev": [
+     "30% of 151 leads have an empty source field."
+    ],
+    "obj": "Ability to measure what works",
+    "action": "Add a required “How did you hear about us?” field or capture UTM values in the form.",
+    "metric": "Share of leads with a source",
+    "conf": "high",
+    "need": "None",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 8
+   },
+   {
+    "id": "seg-best",
+    "kind": "opp",
+    "cls": "measured",
+    "seg": "Agencies",
+    "plat": "Leads",
+    "title": "“Agencies” is your strongest customer segment",
+    "why": "A campaign aimed at the segment that already qualifies best is the most evidence-backed way to raise lead quality.",
+    "ev": [
+     "Agencies: 38% qualified (32 leads)",
+     "Retail: 29% qualified (35 leads)",
+     "Logistics: 28% qualified (32 leads)",
+     "Software: 17% qualified (35 leads)"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Run a campaign addressed to Agencies, built only from approved product facts.",
+    "metric": "Qualified leads from Agencies; qualified share of campaign leads",
+    "conf": "med",
+    "need": "Segment field filled on every lead",
+    "v": 3,
+    "e": 2,
+    "f": 2,
+    "u": 2,
+    "make": "campaign",
+    "exp": {
+     "t": "Message for Agencies vs general message",
+     "h": "Naming the segment in the headline raises the qualified share of leads.",
+     "m": "Qualified leads ÷ leads from the campaign",
+     "d": 21
+    },
+    "score": 8
+   },
+   {
+    "id": "pf-depth",
+    "kind": "strong",
+    "cls": "obs",
+    "seg": "Agencies",
+    "plat": "Company CV & portfolio",
+    "title": "Repeated project experience in “Agencies”",
+    "why": "Several completed projects for the same kind of customer is evidence you can show, not a claim you have to assert.",
+    "ev": [
+     "Team workspace rollout for a Cairo creative agency (2025)",
+     "Campaign production tracking for a digital marketing agency (2026)"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Run a campaign aimed at Agencies that cites approved projects as proof.",
+    "metric": "Qualified leads from Agencies",
+    "conf": "med",
+    "need": "Client permission before naming any client publicly",
+    "v": 3,
+    "e": 2,
+    "f": 2,
+    "u": 2,
+    "make": "campaign",
+    "score": 8
+   },
+   {
+    "id": "cta-mix",
+    "kind": "weak",
+    "cls": "obs",
+    "plat": "Website & all channels",
+    "title": "Several different calls to action are in use",
+    "why": "When materials ask people to do different things, fewer people do any of them and results cannot be compared across channels.",
+    "ev": [
+     "“Start your free trial” — Website — home page (EN)",
+     "“Contact sales” — Website — home page (EN)",
+     "“Request a demo” — Company brochure 2024 (PDF text)"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Choose one primary CTA in Company knowledge and use it on every campaign asset; keep the others as secondary links only.",
+    "metric": "Brand QA: share of assets using the primary CTA; enquiry rate before and after",
+    "conf": "med",
+    "need": "Nothing to act. GA4 key events are needed to measure the effect.",
+    "v": 2,
+    "e": 2,
+    "f": 1,
+    "u": 2,
+    "make": "exp",
+    "exp": {
+     "t": "One primary CTA vs. the current mix",
+     "h": "If every page and post uses the single primary CTA, a larger share of visitors will enquire.",
+     "m": "Enquiries ÷ sessions",
+     "d": 21
+    },
+    "score": 7
+   },
+   {
+    "id": "pf-noout",
+    "kind": "weak",
+    "cls": "obs",
+    "plat": "Company CV & portfolio",
+    "title": "3 of 5 projects state no outcome",
+    "why": "A project name shows activity; an outcome shows value. BrandPilot will not invent outcomes.",
+    "ev": [
+     "Campaign production tracking for a digital marketing agency",
+     "Sprint board setup for a software studio in Alexandria",
+     "Delivery follow-up board for a logistics operator"
+    ],
+    "obj": "Brand trust and consistency",
+    "action": "Add one factual outcome line per project (what was delivered or changed).",
+    "metric": "Projects with an outcome",
+    "conf": "high",
+    "need": "Outcome per project",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 1,
+    "make": "task",
+    "score": 7
+   },
+   {
+    "id": "ch-best",
+    "kind": "strong",
+    "cls": "measured",
+    "plat": "GA4",
+    "title": "Email visitors enquire at the highest rate",
+    "why": "This channel already brings people with intent; growing it is lower-risk than fixing a weak one.",
+    "ev": [
+     "Email: 21 enquiries from 777 sessions (2.70%)",
+     "Site average: 1.32%"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Invest more effort in Email: more content, better pages, clearer follow-up.",
+    "metric": "Sessions and enquiries from this channel",
+    "conf": "high",
+    "need": "Lead quality by channel (leads import)",
+    "v": 2,
+    "e": 3,
+    "f": 2,
+    "u": 1,
+    "make": "campaign",
+    "score": 6
+   },
+   {
+    "id": "cadence",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "Social posts",
+    "title": "Posting stopped for 19 days",
+    "why": "Irregular publishing makes results hard to read and gives followers no reason to expect you.",
+    "ev": [
+     "No posts between 2026-09-06 and 2026-09-25.",
+     "56 posts across 56 posting days in the import."
+    ],
+    "obj": "Relevant visibility",
+    "action": "Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.",
+    "metric": "Longest gap between posts (days)",
+    "conf": "high",
+    "need": "None",
+    "v": 1,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 6
+   },
+   {
+    "id": "lang",
+    "kind": "opp",
+    "cls": "measured",
+    "plat": "Social posts",
+    "title": "Arabic posts earn more engagement than English posts",
+    "why": "Language is a cheap lever: the same idea can be published in the language the audience prefers.",
+    "ev": [
+     "Arabic: 4.3% of reach (25 posts)",
+     "English: 3.4% of reach (31 posts)"
+    ],
+    "obj": "Relevant visibility",
+    "action": "Lead campaigns with the stronger language and test whether it also brings more enquiries.",
+    "metric": "Link clicks and enquiries by language",
+    "conf": "med",
+    "need": "UTM content tags per language",
+    "v": 2,
+    "e": 2,
+    "f": 1,
+    "u": 1,
+    "make": "exp",
+    "exp": {
+     "t": "Arabic vs English creative",
+     "h": "The language with higher engagement also yields more enquiries per click.",
+     "m": "Enquiries ÷ link clicks, by utm_content language",
+     "d": 21
+    },
+    "score": 6
+   },
+   {
+    "id": "plat-roles",
+    "kind": "opp",
+    "cls": "measured",
+    "plat": "Social posts",
+    "title": "Facebook and Instagram do different jobs",
+    "why": "Treating both platforms the same wastes the strength of each.",
+    "ev": [
+     "Facebook: engagement 2.9% of reach, link clicks 1.14% (28 posts)",
+     "Instagram: engagement 5.0%, link clicks 0.53% (28 posts)",
+     "Metric definitions differ between platforms; compare direction, not exact values."
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Use Facebook for posts that link to the landing page; use Instagram for attention and DMs.",
+    "metric": "Link clicks ÷ reach per platform; enquiries by source",
+    "conf": "med",
+    "need": "Lead source data to confirm which platform brings qualified leads",
+    "v": 2,
+    "e": 2,
+    "f": 1,
+    "u": 1,
+    "make": "task",
+    "score": 6
+   },
+   {
+    "id": "seo-q",
+    "kind": "opp",
+    "cls": "measured",
+    "plat": "Search Console",
+    "title": "People search for what you offer but rarely reach you",
+    "why": "These queries already show your pages. Moving a few positions up usually costs less than buying the same visits.",
+    "ev": [
+     "“برنامج إدارة المهام”: 17.0k impressions, 146 clicks (0.9%), average position 11.3",
+     "“task board for teams”: 13.7k impressions, 241 clicks (1.8%), average position 8.5",
+     "“shared task board”: 9,311 impressions, 208 clicks (2.2%), average position 7.2"
+    ],
+    "obj": "Relevant visibility",
+    "action": "Create or improve one page per query: put the phrase in the title, answer the need directly, add the primary CTA.",
+    "metric": "Clicks and average position for these queries",
+    "conf": "med",
+    "need": "Enquiries by landing page to confirm search visitors convert",
+    "v": 2,
+    "e": 3,
+    "f": 2,
+    "u": 1,
+    "make": "task",
+    "score": 6
+   },
+   {
+    "id": "pf-seg",
+    "kind": "opp",
+    "cls": "obs",
+    "seg": "Logistics",
+    "plat": "Company CV & portfolio",
+    "title": "Your projects show a segment your positioning does not mention: “Logistics”",
+    "why": "Delivered work reveals who actually buys. Segments present in the portfolio but absent from the stated audience are untapped positioning.",
+    "ev": [
+     "Logistics: 1 project(s)"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Add Logistics to the approved audiences if you want more of this work, then target it.",
+    "metric": "Leads by segment",
+    "conf": "med",
+    "need": "Whether these projects were profitable and repeatable",
+    "v": 2,
+    "e": 2,
+    "f": 1,
+    "u": 1,
+    "make": "campaign",
+    "score": 6
+   },
+   {
+    "id": "brand-doc",
+    "kind": "strong",
+    "cls": "obs",
+    "plat": "Brand",
+    "title": "Tone of voice and colours are documented and approved",
+    "why": "Documented guidelines let every asset be checked automatically instead of by eye.",
+    "ev": [
+     "“Plain, friendly and practical. Avoid jargon and exaggerated promises.” — Brand guidelines",
+     "“Brand colours: #1D4ED8, #4338CA, #0F172A, #FFFFFF, #38BDF8” — Brand guidelines"
+    ],
+    "obj": "Brand trust and consistency",
+    "action": "Keep guidelines current; BrandPilot applies them in Brand QA.",
+    "metric": "Colour and CTA checks in Brand QA",
+    "conf": "high",
+    "need": "None",
+    "v": 1,
+    "e": 3,
+    "f": 1,
+    "u": 1,
+    "make": "task",
+    "score": 5
+   },
+   {
+    "id": "eng-drop",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "Social posts",
+    "title": "Engagement is below your own baseline",
+    "why": "The comparison is with your own earlier posts, not an industry benchmark.",
+    "ev": [
+     "Last 28 days: 3.1% engagement per reach (20 posts)",
+     "Earlier baseline: 4.2% (36 posts)",
+     "Cause unknown: could be theme mix, the posting gap, or platform changes."
+    ],
+    "obj": "Relevant visibility",
+    "action": "Check the theme mix of recent posts against the strongest theme before changing anything else.",
+    "metric": "Engagement ÷ reach, 28-day window",
+    "conf": "med",
+    "need": "Another month of data to confirm the trend",
+    "v": 1,
+    "e": 2,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 5
+   },
+   {
+    "id": "src-best",
+    "kind": "strong",
+    "cls": "measured",
+    "plat": "Leads",
+    "title": "Referral brings your best-quality leads",
+    "why": "Quality, not volume, is what turns into customers.",
+    "ev": [
+     "Referral: 12 of 21 leads qualified (57%)",
+     "All leads: 30% qualified"
+    ],
+    "obj": "Qualified enquiries",
+    "action": "Protect and grow Referral; study what these leads saw before enquiring.",
+    "metric": "Qualified leads from this source",
+    "conf": "med",
+    "need": "Sales outcomes per lead to confirm revenue",
+    "v": 2,
+    "e": 2,
+    "f": 2,
+    "u": 1,
+    "make": "campaign",
+    "score": 5
+   },
+   {
+    "id": "no-spend",
+    "kind": "gap",
+    "cls": "gap",
+    "plat": "Social posts",
+    "title": "No spend data — cost per lead cannot be calculated",
+    "why": "Cost per lead needs both spend and leads tied to the same campaign.",
+    "ev": [
+     "The spend column is empty in all imported social post rows."
+    ],
+    "obj": "Ability to measure what works",
+    "action": "Include the spend column when exporting paid posts.",
+    "metric": "Rows with spend",
+    "conf": "high",
+    "need": "Ad spend export",
+    "v": 1,
+    "e": 3,
+    "f": 1,
+    "u": 1,
+    "make": "task",
+    "score": 5
+   }
+  ],
+  "ar": [
+   {
+    "id": "ch-leak",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "GA4",
+    "title": "Organic Social تجلب زيارات كثيرة واستفسارات قليلة",
+    "why": "هنا مصدر «زيارات كثيرة واستفسارات قليلة»: نكسب الانتباه ولا نحوّله.",
+    "ev": [
+     "Organic Social: 37% من الجلسات، معدل الاستفسار 0.24% مقابل 1.32% للموقع",
+     "فرضية: المنشورات ترسل الناس إلى صفحات لا تطابق ما وعد به المنشور."
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "وجّه زيارات Organic Social إلى صفحة هبوط مخصصة بدعوة واحدة بدلاً من الصفحات العامة.",
+    "metric": "معدل استفسار جلسات Organic Social",
+    "conf": "med",
+    "need": "بيانات على مستوى صفحة الهبوط بعد التغيير",
+    "v": 3,
+    "e": 3,
+    "f": 2,
+    "u": 3,
+    "make": "campaign",
+    "exp": {
+     "t": "صفحة هبوط مخصصة لـ Organic Social",
+     "h": "صفحة تطابق رسالة المنشور بدعوة واحدة تحوّل أفضل من صفحة الأسعار أو المدونة.",
+     "m": "الاستفسارات ÷ الجلسات في صفحة الهبوط",
+     "d": 21
+    },
+    "score": 10
+   },
+   {
+    "id": "mobile-gap",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "GA4",
+    "title": "زوار الموبايل يستفسرون أقل بكثير من زوار الكمبيوتر",
+    "why": "معظم الزيارات من الموبايل. إذا كان المسار عليه أصعب فكل القنوات تدفع الثمن.",
+    "ev": [
+     "الموبايل: 62% من الجلسات، معدل الاستفسار 0.80%",
+     "الكمبيوتر: معدل الاستفسار 2.17%"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "اختبر مسار الاستفسار على الموبايل: طول النموذج، حجم الزر، سرعة التحميل، خيار واتساب أو الاتصال.",
+    "metric": "معدل استفسار الموبايل",
+    "conf": "high",
+    "need": "تحليلات النموذج حسب الجهاز تحدد خطوة الخروج",
+    "v": 3,
+    "e": 3,
+    "f": 2,
+    "u": 3,
+    "make": "exp",
+    "exp": {
+     "t": "نموذج استفسار أقصر على الموبايل",
+     "h": "اختصار نموذج الموبايل إلى الاسم والهاتف يرفع معدل الاستفسار.",
+     "m": "استفسارات الموبايل ÷ جلسات الموبايل",
+     "d": 14
+    },
+    "score": 10
+   },
+   {
+    "id": "offer-conflict",
+    "kind": "risk",
+    "cls": "obs",
+    "plat": "كل القنوات",
+    "title": "موادك نفسها تذكر عروضاً مختلفة",
+    "why": "العميل المحتمل الذي يرى نسختين من العرض لا يعرف أيهما الصحيح، والمواد القديمة تعرّض نصوص الحملات للخطأ.",
+    "ev": [
+     "Sources disagree on the trial length: 14 days (Website — home page (EN)) vs 7 days (Company brochure 2024 (PDF text))"
+    ],
+    "obj": "ثقة واتساق العلامة",
+    "action": "اعتمد العرض الحالي في معرفة الشركة وارفض القديم، ثم صحّح أو أوقف المستند القديم.",
+    "metric": "عدم وجود تعارض في العروض",
+    "conf": "high",
+    "need": "لا شيء",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 3,
+    "make": "task",
+    "score": 9
+   },
+   {
+    "id": "page-leak",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "GA4",
+    "title": "صفحة /pricing أقل تحويلاً من المتوسط",
+    "why": "صفحة عالية الزيارات بتحويل أقل من المتوسط هي أرخص مكان لكسب استفسارات: الزوار موجودون بالفعل.",
+    "ev": [
+     "/pricing: 4,965 جلسة (35%)، معدل الاستفسار 0.40% مقابل 1.32%"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "راجع /pricing: ضع الدعوة الأساسية أعلى الصفحة، قصّر النموذج، واذكر العرض في أول شاشة.",
+    "metric": "معدل الاستفسار في /pricing",
+    "conf": "high",
+    "need": "مراجعة الصفحة الفعلية (BrandPilot لم يرَ تصميمها)",
+    "v": 3,
+    "e": 3,
+    "f": 2,
+    "u": 2,
+    "make": "exp",
+    "exp": {
+     "t": "شاشة أولى جديدة في /pricing",
+     "h": "عرض العرض ودعوة واحدة في أول شاشة يرفع معدل الاستفسار لهذه الصفحة.",
+     "m": "الاستفسارات ÷ الجلسات في الصفحة",
+     "d": 21
+    },
+    "score": 9
+   },
+   {
+    "id": "claims",
+    "kind": "risk",
+    "cls": "obs",
+    "plat": "المستندات والتصاميم",
+    "title": "ادعاءات ترويجية بلا دليل داعم",
+    "why": "التصنيفات والضمانات وأرقام العملاء غير المثبتة تضر بالثقة وقد تخالف سياسات المنصات. لن يعيد BrandPilot استخدامها.",
+    "ev": [
+     "“The #1 task management tool in Egypt” — Company brochure 2024 (PDF text) (غير معتمدة)",
+     "“Guaranteed to double your team's productivity” — Company brochure 2024 (PDF text) (غير معتمدة)"
+    ],
+    "obj": "ثقة واتساق العلامة",
+    "action": "ارفض كل ادعاء أو أرفق دليلاً واعتمده صراحة. استبدلها بحقائق المنتج المعتمدة.",
+    "metric": "صفر ادعاءات غير معتمدة في فحص الجودة",
+    "conf": "high",
+    "need": "مستندات إثبات إن أردت الإبقاء على ادعاء",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 8
+   },
+   {
+    "id": "know-gaps",
+    "kind": "gap",
+    "cls": "gap",
+    "plat": "معرفة الشركة",
+    "title": "1 سؤال عن النشاط لم يُجب عنه أي مصدر",
+    "why": "التوصيات في هذه المناطق ستكون تخميناً. BrandPilot يتركها فارغة بدلاً من اختلاق إجابات.",
+    "ev": [
+     "ما البدائل التي يقارنك بها العملاء؟"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "أجب عن الأسئلة المفتوحة في معرفة الشركة — سطر واحد لكل سؤال يكفي.",
+    "metric": "عدد الأسئلة المفتوحة",
+    "conf": "high",
+    "need": "إجاباتك",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 8
+   },
+   {
+    "id": "theme-best",
+    "kind": "strong",
+    "cls": "measured",
+    "plat": "منشورات التواصل",
+    "title": "«how-to tips» هو أقوى موضوع محتوى لديك",
+    "why": "تاريخك نفسه يوضح ما يستجيب له الجمهور — وهو أفضل من النصائح العامة.",
+    "ev": [
+     "«how-to tips»: تفاعل 5.3% من الوصول عبر 20 منشور؛ نقرات الروابط 1.06%",
+     "متوسط تفاعل الحساب: 3.8%؛ أضعف موضوع «product update»: 1.6%",
+     "التفاعل مؤشر وعي وليس دليلاً على استفسارات."
+    ],
+    "obj": "ظهور ملائم",
+    "action": "انشر المزيد من منشورات «how-to tips» واختم كل منشور بالدعوة الأساسية ورابط متتبَّع.",
+    "metric": "نقرات الروابط والاستفسارات من المنشورات الموسومة",
+    "conf": "high",
+    "need": "روابط UTM لربط المنشورات بالاستفسارات",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "campaign",
+    "exp": {
+     "t": "«how-to tips» مقابل «product update» كمحتوى للحملة",
+     "h": "أقوى موضوع عضوي ينتج أيضاً نقرات متتبعة أكثر لكل وصول عند استخدامه مع دعوة الحملة.",
+     "m": "نقرات الروابط ÷ الوصول",
+     "d": 14
+    },
+    "score": 8
+   },
+   {
+    "id": "src-unknown",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "العملاء المحتملون",
+    "title": "مصدر كثير من العملاء المحتملين غير مسجل",
+    "why": "العملاء بلا مصدر لا يُنسبون لأي قناة، فتبدو القنوات الجيدة أضعف من حقيقتها.",
+    "ev": [
+     "30% من 151 عميل محتمل بلا مصدر."
+    ],
+    "obj": "القدرة على قياس ما ينجح",
+    "action": "أضف حقلاً إلزامياً «كيف عرفتنا؟» أو التقط قيم UTM في النموذج.",
+    "metric": "نسبة العملاء الذين لهم مصدر",
+    "conf": "high",
+    "need": "لا شيء",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 8
+   },
+   {
+    "id": "seg-best",
+    "kind": "opp",
+    "cls": "measured",
+    "seg": "Agencies",
+    "plat": "العملاء المحتملون",
+    "title": "«Agencies» هو أقوى شريحة عملاء لديك",
+    "why": "حملة موجهة للشريحة الأعلى تأهيلاً هي أكثر طريقة مدعومة بالدليل لرفع جودة العملاء.",
+    "ev": [
+     "Agencies: 38% مؤهلون (32 عميل)",
+     "Retail: 29% مؤهلون (35 عميل)",
+     "Logistics: 28% مؤهلون (32 عميل)",
+     "Software: 17% مؤهلون (35 عميل)"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "نفّذ حملة موجهة إلى Agencies مبنية على حقائق المنتج المعتمدة فقط.",
+    "metric": "العملاء المؤهلون من Agencies؛ نسبة المؤهلين من عملاء الحملة",
+    "conf": "med",
+    "need": "تعبئة حقل الشريحة لكل عميل",
+    "v": 3,
+    "e": 2,
+    "f": 2,
+    "u": 2,
+    "make": "campaign",
+    "exp": {
+     "t": "رسالة موجهة لـ Agencies مقابل رسالة عامة",
+     "h": "ذكر الشريحة في العنوان يرفع نسبة العملاء المؤهلين.",
+     "m": "المؤهلون ÷ عملاء الحملة",
+     "d": 21
+    },
+    "score": 8
+   },
+   {
+    "id": "pf-depth",
+    "kind": "strong",
+    "cls": "obs",
+    "seg": "Agencies",
+    "plat": "السيرة المؤسسية والمشاريع",
+    "title": "خبرة مشاريع متكررة في «Agencies»",
+    "why": "عدة مشاريع منجزة لنفس نوع العميل دليل يُعرض لا ادعاء يُقال.",
+    "ev": [
+     "Team workspace rollout for a Cairo creative agency (2025)",
+     "Campaign production tracking for a digital marketing agency (2026)"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "نفّذ حملة موجهة إلى Agencies تستشهد بالمشاريع المعتمدة كدليل.",
+    "metric": "العملاء المؤهلون من Agencies",
+    "conf": "med",
+    "need": "إذن العميل قبل ذكر اسمه علناً",
+    "v": 3,
+    "e": 2,
+    "f": 2,
+    "u": 2,
+    "make": "campaign",
+    "score": 8
+   },
+   {
+    "id": "cta-mix",
+    "kind": "weak",
+    "cls": "obs",
+    "plat": "الموقع وكل القنوات",
+    "title": "هناك أكثر من دعوة لاتخاذ إجراء مستخدمة",
+    "why": "عندما تطلب المواد من الناس أشياء مختلفة، يقل من يستجيب ويصعب مقارنة النتائج بين القنوات.",
+    "ev": [
+     "“Start your free trial” — Website — home page (EN)",
+     "“Contact sales” — Website — home page (EN)",
+     "“Request a demo” — Company brochure 2024 (PDF text)"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "اختر دعوة أساسية واحدة في معرفة الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.",
+    "metric": "فحص الجودة: نسبة المواد التي تستخدم الدعوة الأساسية؛ معدل الاستفسار قبل وبعد",
+    "conf": "med",
+    "need": "لا شيء للتنفيذ. قياس الأثر يحتاج أحداث GA4.",
+    "v": 2,
+    "e": 2,
+    "f": 1,
+    "u": 2,
+    "make": "exp",
+    "exp": {
+     "t": "دعوة أساسية واحدة مقابل الوضع الحالي",
+     "h": "إذا استخدمت كل الصفحات والمنشورات الدعوة الأساسية وحدها، سترتفع نسبة من يرسلون استفساراً.",
+     "m": "الاستفسارات ÷ الجلسات",
+     "d": 21
+    },
+    "score": 7
+   },
+   {
+    "id": "pf-noout",
+    "kind": "weak",
+    "cls": "obs",
+    "plat": "السيرة المؤسسية والمشاريع",
+    "title": "3 من 5 مشروعاً بلا نتيجة مذكورة",
+    "why": "اسم المشروع يُظهر نشاطاً؛ والنتيجة تُظهر قيمة. BrandPilot لن يختلق نتائج.",
+    "ev": [
+     "Campaign production tracking for a digital marketing agency",
+     "Sprint board setup for a software studio in Alexandria",
+     "Delivery follow-up board for a logistics operator"
+    ],
+    "obj": "ثقة واتساق العلامة",
+    "action": "أضف سطر نتيجة واقعياً لكل مشروع (ما الذي سُلِّم أو تغيّر).",
+    "metric": "المشاريع التي لها نتيجة",
+    "conf": "high",
+    "need": "نتيجة لكل مشروع",
+    "v": 2,
+    "e": 3,
+    "f": 1,
+    "u": 1,
+    "make": "task",
+    "score": 7
+   },
+   {
+    "id": "ch-best",
+    "kind": "strong",
+    "cls": "measured",
+    "plat": "GA4",
+    "title": "زوار Email هم الأعلى في معدل الاستفسار",
+    "why": "هذه القناة تجلب بالفعل زواراً لديهم نية؛ تنميتها أقل مخاطرة من إصلاح قناة ضعيفة.",
+    "ev": [
+     "Email: 21 استفسار من 777 جلسة (2.70%)",
+     "متوسط الموقع: 1.32%"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "استثمر جهداً أكبر في Email: محتوى أكثر وصفحات أفضل ومتابعة أوضح.",
+    "metric": "الجلسات والاستفسارات من هذه القناة",
+    "conf": "high",
+    "need": "جودة العملاء حسب القناة",
+    "v": 2,
+    "e": 3,
+    "f": 2,
+    "u": 1,
+    "make": "campaign",
+    "score": 6
+   },
+   {
+    "id": "cadence",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "منشورات التواصل",
+    "title": "توقف النشر لمدة 19 يوماً",
+    "why": "النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظارك.",
+    "ev": [
+     "لا توجد منشورات بين 2026-09-06 و 2026-09-25.",
+     "56 منشور في 56 يوم نشر ضمن الاستيراد."
+    ],
+    "obj": "ظهور ملائم",
+    "action": "اعتمد تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.",
+    "metric": "أطول فجوة بين المنشورات (أيام)",
+    "conf": "high",
+    "need": "لا شيء",
+    "v": 1,
+    "e": 3,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 6
+   },
+   {
+    "id": "lang",
+    "kind": "opp",
+    "cls": "measured",
+    "plat": "منشورات التواصل",
+    "title": "المنشورات العربية تحقق تفاعلاً أعلى من الإنجليزية",
+    "why": "اللغة رافعة قليلة التكلفة: نفس الفكرة يمكن نشرها باللغة التي يفضلها الجمهور.",
+    "ev": [
+     "العربية: 4.3% من الوصول (25 منشور)",
+     "الإنجليزية: 3.4% من الوصول (31 منشور)"
+    ],
+    "obj": "ظهور ملائم",
+    "action": "ابدأ الحملات باللغة الأقوى واختبر هل تجلب استفسارات أكثر أيضاً.",
+    "metric": "النقرات والاستفسارات حسب اللغة",
+    "conf": "med",
+    "need": "وسوم UTM لكل لغة",
+    "v": 2,
+    "e": 2,
+    "f": 1,
+    "u": 1,
+    "make": "exp",
+    "exp": {
+     "t": "تصميم عربي مقابل إنجليزي",
+     "h": "اللغة الأعلى تفاعلاً تحقق أيضاً استفسارات أكثر لكل نقرة.",
+     "m": "الاستفسارات ÷ النقرات حسب لغة utm_content",
+     "d": 21
+    },
+    "score": 6
+   },
+   {
+    "id": "plat-roles",
+    "kind": "opp",
+    "cls": "measured",
+    "plat": "منشورات التواصل",
+    "title": "فيسبوك وإنستجرام يؤديان دورين مختلفين",
+    "why": "معاملة المنصتين بنفس الطريقة تهدر قوة كل منهما.",
+    "ev": [
+     "فيسبوك: تفاعل 2.9% من الوصول، نقرات 1.14% (28 منشور)",
+     "إنستجرام: تفاعل 5.0%، نقرات 0.53% (28 منشور)",
+     "تعريفات المقاييس تختلف بين المنصتين؛ قارن الاتجاه لا القيم الدقيقة."
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "استخدم فيسبوك للمنشورات التي تقود لصفحة الهبوط، وإنستجرام لجذب الانتباه والرسائل.",
+    "metric": "النقرات ÷ الوصول لكل منصة؛ الاستفسارات حسب المصدر",
+    "conf": "med",
+    "need": "بيانات مصدر العملاء لتأكيد المنصة التي تجلب المؤهلين",
+    "v": 2,
+    "e": 2,
+    "f": 1,
+    "u": 1,
+    "make": "task",
+    "score": 6
+   },
+   {
+    "id": "seo-q",
+    "kind": "opp",
+    "cls": "measured",
+    "plat": "Search Console",
+    "title": "الناس يبحثون عمّا تقدمه لكن قلّما يصلون إليك",
+    "why": "هذه العبارات تُظهر صفحاتك بالفعل. التقدم بضعة مراكز يكلف عادة أقل من شراء نفس الزيارات.",
+    "ev": [
+     "«برنامج إدارة المهام»: 17.0k ظهور، 146 نقرة (0.9%)، متوسط المركز 11.3",
+     "«task board for teams»: 13.7k ظهور، 241 نقرة (1.8%)، متوسط المركز 8.5",
+     "«shared task board»: 9,311 ظهور، 208 نقرة (2.2%)، متوسط المركز 7.2"
+    ],
+    "obj": "ظهور ملائم",
+    "action": "أنشئ أو حسّن صفحة لكل عبارة: ضع العبارة في العنوان، أجب عن الحاجة مباشرة، وأضف الدعوة الأساسية.",
+    "metric": "النقرات ومتوسط المركز لهذه العبارات",
+    "conf": "med",
+    "need": "الاستفسارات حسب صفحة الهبوط لتأكيد تحويل زوار البحث",
+    "v": 2,
+    "e": 3,
+    "f": 2,
+    "u": 1,
+    "make": "task",
+    "score": 6
+   },
+   {
+    "id": "pf-seg",
+    "kind": "opp",
+    "cls": "obs",
+    "seg": "Logistics",
+    "plat": "السيرة المؤسسية والمشاريع",
+    "title": "مشاريعك تُظهر شريحة لا يذكرها تموضعك: «Logistics»",
+    "why": "العمل المنجز يكشف من يشتري فعلاً. الشرائح الموجودة في المشاريع والغائبة عن الجمهور المعلن فرصة تموضع غير مستغلة.",
+    "ev": [
+     "Logistics: 1 مشروع"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "أضف Logistics إلى الجمهور المعتمد إن أردت المزيد من هذا العمل ثم استهدفه.",
+    "metric": "العملاء حسب الشريحة",
+    "conf": "med",
+    "need": "هل كانت هذه المشاريع مربحة وقابلة للتكرار",
+    "v": 2,
+    "e": 2,
+    "f": 1,
+    "u": 1,
+    "make": "campaign",
+    "score": 6
+   },
+   {
+    "id": "brand-doc",
+    "kind": "strong",
+    "cls": "obs",
+    "plat": "العلامة",
+    "title": "نبرة الصوت والألوان موثقة ومعتمدة",
+    "why": "الإرشادات الموثقة تسمح بفحص كل مادة تلقائياً بدلاً من الفحص بالعين.",
+    "ev": [
+     "“Plain, friendly and practical. Avoid jargon and exaggerated promises.” — Brand guidelines",
+     "“Brand colours: #1D4ED8, #4338CA, #0F172A, #FFFFFF, #38BDF8” — Brand guidelines"
+    ],
+    "obj": "ثقة واتساق العلامة",
+    "action": "حافظ على تحديث الإرشادات؛ BrandPilot يطبقها في فحص الجودة.",
+    "metric": "فحوص الألوان والدعوة في فحص الجودة",
+    "conf": "high",
+    "need": "لا شيء",
+    "v": 1,
+    "e": 3,
+    "f": 1,
+    "u": 1,
+    "make": "task",
+    "score": 5
+   },
+   {
+    "id": "eng-drop",
+    "kind": "weak",
+    "cls": "measured",
+    "plat": "منشورات التواصل",
+    "title": "التفاعل أقل من مستواك المعتاد",
+    "why": "المقارنة مع منشوراتك السابقة وليس مع معيار للصناعة.",
+    "ev": [
+     "آخر 28 يوماً: 3.1% تفاعل لكل وصول (20 منشور)",
+     "المستوى السابق: 4.2% (36 منشور)",
+     "السبب غير معروف: قد يكون تنوع المواضيع أو فجوة النشر أو تغييرات المنصة."
+    ],
+    "obj": "ظهور ملائم",
+    "action": "قارن مواضيع المنشورات الأخيرة بأقوى موضوع قبل تغيير أي شيء آخر.",
+    "metric": "التفاعل ÷ الوصول على 28 يوماً",
+    "conf": "med",
+    "need": "شهر إضافي لتأكيد الاتجاه",
+    "v": 1,
+    "e": 2,
+    "f": 1,
+    "u": 2,
+    "make": "task",
+    "score": 5
+   },
+   {
+    "id": "src-best",
+    "kind": "strong",
+    "cls": "measured",
+    "plat": "العملاء المحتملون",
+    "title": "Referral يجلب أفضل العملاء جودة",
+    "why": "الجودة لا الكمية هي ما يتحول إلى عملاء.",
+    "ev": [
+     "Referral: 12 من 21 مؤهلون (57%)",
+     "كل العملاء: 30% مؤهلون"
+    ],
+    "obj": "استفسارات مؤهلة",
+    "action": "حافظ على Referral ونمِّه؛ ادرس ما شاهده هؤلاء قبل الاستفسار.",
+    "metric": "العملاء المؤهلون من هذا المصدر",
+    "conf": "med",
+    "need": "نتائج المبيعات لكل عميل لتأكيد الإيراد",
+    "v": 2,
+    "e": 2,
+    "f": 2,
+    "u": 1,
+    "make": "campaign",
+    "score": 5
+   },
+   {
+    "id": "no-spend",
+    "kind": "gap",
+    "cls": "gap",
+    "plat": "منشورات التواصل",
+    "title": "لا توجد بيانات إنفاق — تعذّر حساب تكلفة العميل",
+    "why": "تكلفة العميل تحتاج الإنفاق والعملاء مرتبطين بنفس الحملة.",
+    "ev": [
+     "عمود الإنفاق فارغ في كل صفوف منشورات التواصل المستوردة."
+    ],
+    "obj": "القدرة على قياس ما ينجح",
+    "action": "أضف عمود الإنفاق عند تصدير المنشورات المدفوعة.",
+    "metric": "صفوف بها إنفاق",
+    "conf": "high",
+    "need": "تصدير الإنفاق",
+    "v": 1,
+    "e": 3,
+    "f": 1,
+    "u": 1,
+    "make": "task",
+    "score": 5
+   }
+  ]
+ },
+ "server": {
+  "period": {
+   "from": "2026-07-27",
+   "to": "2026-10-18"
+  },
+  "synthetic": true,
+  "items": [
+   {
+    "id": "ch-best",
+    "title": "Email visitors enquire at the highest rate",
+    "why": "This channel already brings people with intent; growing it is lower-risk than fixing a weak one.",
+    "action": "Invest more effort in Email: more content, better pages, clearer follow-up.",
+    "evidence": [
+     {
+      "metric": "enquiry_rate",
+      "value": 0.02702702702702703,
+      "text": "Email: 21 enquiries from 777 sessions (2.70%)"
+     },
+     {
+      "metric": "enquiry_rate",
+      "value": 0.013214011046633573,
+      "rows": 1680,
+      "text": "Site average: 1.32% (189 enquiries from 14303 sessions)"
+     }
+    ],
+    "kind": "strong",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "ch-leak",
+    "title": "Organic Social brings many visits but few enquiries",
+    "why": "Attention is being won but not converted.",
+    "action": "Send Organic Social traffic to a dedicated landing page with one CTA instead of general pages.",
+    "evidence": [
+     {
+      "metric": "enquiry_rate",
+      "value": 0.002444528018051899,
+      "text": "Organic Social: 37% of sessions, enquiry rate 0.24% vs site 1.32%"
+     },
+     {
+      "text": "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
+     }
+    ],
+    "kind": "weak",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "page-leak",
+    "title": "Landing page /pricing under-converts",
+    "why": "A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.",
+    "action": "Review /pricing: put the primary CTA above the fold, shorten the form, state the offer in the first screen.",
+    "evidence": [
+     {
+      "metric": "enquiry_rate",
+      "value": 0.004028197381671702,
+      "text": "/pricing: 4965 sessions (35%), enquiry rate 0.40% vs site 1.32%"
+     }
+    ],
+    "kind": "weak",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "mobile-gap",
+    "title": "Mobile visitors enquire far less than desktop visitors",
+    "why": "If the mobile path is harder, every channel pays for it.",
+    "action": "Test the enquiry path on a phone: form length, button size, load time, WhatsApp/click-to-call option.",
+    "evidence": [
+     {
+      "metric": "enquiry_rate",
+      "value": 0.008015353352901333,
+      "text": "Mobile: 62% of sessions, enquiry rate 0.80%"
+     },
+     {
+      "metric": "enquiry_rate",
+      "value": 0.0216712580348944,
+      "text": "Desktop: enquiry rate 2.17%"
+     }
+    ],
+    "kind": "weak",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "seo-q",
+    "title": "People search for what you offer but rarely reach you",
+    "why": "These queries already show your pages. Moving a few positions up usually costs less than buying the same visits.",
+    "action": "Create or improve one page per query: put the phrase in the title, answer the need directly, add the primary CTA.",
+    "evidence": [
+     {
+      "metric": "ctr",
+      "value": 0.008570086874853252,
+      "text": "\"برنامج إدارة المهام\": 17036 impressions, 146 clicks (0.9%), average position 11.3"
+     },
+     {
+      "metric": "ctr",
+      "value": 0.017627267407840843,
+      "text": "\"task board for teams\": 13672 impressions, 241 clicks (1.8%), average position 8.5"
+     },
+     {
+      "metric": "ctr",
+      "value": 0.022339168725163786,
+      "text": "\"shared task board\": 9311 impressions, 208 clicks (2.2%), average position 7.2"
+     }
+    ],
+    "kind": "opp",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "src-unknown",
+    "title": "The source of many leads is not recorded",
+    "why": "Leads with no source cannot be credited to any channel, so good channels look weaker than they are.",
+    "action": "Add a required \"How did you hear about us?\" field or capture UTM values in the form.",
+    "evidence": [
+     {
+      "metric": "unknown_source_share",
+      "value": 0.304635761589404,
+      "rows": 151,
+      "text": "30% of 151 leads have an empty source field."
+     }
+    ],
+    "kind": "weak",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "src-best",
+    "title": "Referral brings your best-quality leads",
+    "why": "Quality, not volume, is what turns into customers.",
+    "action": "Protect and grow Referral; study what these leads saw before enquiring.",
+    "evidence": [
+     {
+      "metric": "qualified_share",
+      "value": 0.5714285714285714,
+      "rows": 21,
+      "text": "Referral: 12 of 21 leads qualified (57%)"
+     },
+     {
+      "metric": "qualified_share",
+      "value": 0.2980132450331126,
+      "rows": 151,
+      "text": "All leads: 30% qualified (151 leads)"
+     }
+    ],
+    "kind": "strong",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "seg-best",
+    "title": "\"Agencies\" is your strongest customer segment",
+    "why": "A campaign aimed at the segment that already qualifies best is the most evidence-backed way to raise lead quality.",
+    "action": "Run a campaign addressed to Agencies, built only from approved product facts.",
+    "evidence": [
+     {
+      "metric": "qualified_share",
+      "value": 0.375,
+      "rows": 32,
+      "text": "Agencies: 38% qualified (32 leads)"
+     },
+     {
+      "metric": "qualified_share",
+      "value": 0.2857142857142857,
+      "rows": 35,
+      "text": "Retail: 29% qualified (35 leads)"
+     },
+     {
+      "metric": "qualified_share",
+      "value": 0.28125,
+      "rows": 32,
+      "text": "Logistics: 28% qualified (32 leads)"
+     },
+     {
+      "metric": "qualified_share",
+      "value": 0.17142857142857143,
+      "rows": 35,
+      "text": "Software: 17% qualified (35 leads)"
+     }
+    ],
+    "kind": "opp",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "theme-best",
+    "title": "\"how-to tips\" is your strongest content theme",
+    "why": "Your own history shows what the audience responds to — a better guide than generic best practice.",
+    "action": "Publish more \"how-to tips\" posts and end each with the primary CTA and a tracked link.",
+    "evidence": [
+     {
+      "metric": "engagement_rate",
+      "value": 0.05251458738538483,
+      "rows": 20,
+      "text": "\"how-to tips\": engagement 5.3% of reach across 20 posts; link clicks 1.06% of reach"
+     },
+     {
+      "metric": "engagement_rate",
+      "value": 0.037914004990319605,
+      "rows": 56,
+      "text": "Account average engagement: 3.8%; weakest theme \"product update\": 1.6%"
+     },
+     {
+      "text": "Engagement is an awareness signal, not proof of enquiries."
+     }
+    ],
+    "kind": "strong",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "cadence",
+    "title": "Posting stopped for 19 days",
+    "why": "Irregular publishing makes results hard to read and gives followers no reason to expect you.",
+    "action": "Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.",
+    "evidence": [
+     {
+      "metric": "posting_gap_days",
+      "value": 19,
+      "text": "No posts between 2026-09-06 and 2026-09-25."
+     },
+     {
+      "metric": "posts",
+      "value": 56,
+      "rows": 56,
+      "text": "56 posts across 56 posting days in the import."
+     }
+    ],
+    "kind": "weak",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "eng-drop",
+    "title": "Engagement is below your own baseline",
+    "why": "The comparison is with your own earlier posts, not an industry benchmark.",
+    "action": "Check the theme mix of recent posts against the strongest theme before changing anything else.",
+    "evidence": [
+     {
+      "metric": "engagement_rate",
+      "value": 0.030530751775557717,
+      "rows": 20,
+      "text": "Last 28 days: 3.1% engagement per reach (20 posts)"
+     },
+     {
+      "metric": "engagement_rate",
+      "value": 0.04191272704057203,
+      "rows": 36,
+      "text": "Earlier baseline: 4.2% (36 posts)"
+     },
+     {
+      "text": "Cause unknown: could be theme mix, the posting gap, or platform changes."
+     }
+    ],
+    "kind": "weak",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "lang",
+    "title": "Arabic posts earn more engagement than English posts",
+    "why": "Language is a cheap lever: the same idea can be published in the language the audience prefers.",
+    "action": "Lead campaigns with the stronger language and test whether it also brings more enquiries.",
+    "evidence": [
+     {
+      "metric": "engagement_rate",
+      "value": 0.0429748230653208,
+      "rows": 25,
+      "text": "Arabic: 4.3% of reach (25 posts)"
+     },
+     {
+      "metric": "engagement_rate",
+      "value": 0.03383683541464144,
+      "rows": 31,
+      "text": "English: 3.4% of reach (31 posts)"
+     }
+    ],
+    "kind": "opp",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "no-spend",
+    "kind": "gap",
+    "basis": "insufficient",
+    "synthetic": true,
+    "title": "No spend data — cost per lead cannot be calculated",
+    "why": "Not enough verified input to draw a conclusion here.",
+    "action": "Include the spend column when exporting paid posts.",
+    "needs": "Include the spend column when exporting paid posts.",
+    "evidence": []
+   },
+   {
+    "id": "plat-roles",
+    "title": "Facebook and Instagram do different jobs",
+    "why": "Treating both platforms the same wastes the strength of each.",
+    "action": "Use Facebook for posts that link to the landing page; use Instagram for attention and DMs.",
+    "evidence": [
+     {
+      "metric": "engagement_rate",
+      "value": 0.028685215093231537,
+      "rows": 28,
+      "text": "Facebook: engagement 2.9% of reach, link clicks 1.14% (28 posts)"
+     },
+     {
+      "metric": "engagement_rate",
+      "value": 0.0498586664766384,
+      "rows": 28,
+      "text": "Instagram: engagement 5.0%, link clicks 0.53% (28 posts)"
+     },
+     {
+      "text": "Metric definitions differ between platforms; compare direction, not exact values."
+     }
+    ],
+    "kind": "opp",
+    "basis": "data",
+    "synthetic": true
+   },
+   {
+    "id": "brand-doc",
+    "kind": "strong",
+    "basis": "facts",
+    "synthetic": true,
+    "title": "Tone of voice and colours are documented and approved",
+    "why": "Documented guidelines let every asset be checked automatically instead of by eye.",
+    "action": "Keep the approved guidelines up to date as the brand evolves.",
+    "evidence": [
+     {
+      "factId": "<fact>",
+      "text": "Plain, friendly and practical. Avoid jargon and exaggerated promises."
+     },
+     {
+      "factId": "<fact>",
+      "text": "Brand colours: #1D4ED8, #4338CA, #0F172A, #FFFFFF, #38BDF8"
+     }
+    ]
+   }
+  ]
+ }
+}
