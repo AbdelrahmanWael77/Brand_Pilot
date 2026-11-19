@@ -1,7 +1,7 @@
 // FlowNest regression baseline (P1 checkpoint 1, 2026-11-19). Browser-free half: the recorded FlowNest company
 // (test/fixtures/flownest/state.json) is saved through the normal state route and the server audit must equal the
 // recorded one. The browser half (the recommendations every screen shows) is ui-tests/flownest-baseline.ui.mjs.
-// P1 moves all recommendations to the server; it must reproduce `baseline.recs` or list every difference with a reason.
+// Re-recorded after P1 (the pre-P1 baseline is commit fc8a772; every difference is in docs/ui-audit/p1-baseline-diff.md).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -12,14 +12,17 @@ const read = (f) => JSON.parse(readFileSync(new URL(`./fixtures/flownest/${f}`, 
 const baseline = read('baseline.json');
 const state = read('state.json');
 
-test('baseline file: one recommendation list per language, same ids, each with a title, action and evidence', () => {
-  const { en, ar } = baseline.recs;
+test('baseline file: per period, one recommendation list per language, same ids, each with a title, action, evidence and confidence', () => {
+  assert.deepEqual(Object.keys(baseline.recs).sort(), ['28', 'all']);
+  for (const { en, ar } of Object.values(baseline.recs)) {
   assert.ok(en.length > 0);
   assert.deepEqual(ar.map((x) => x.id), en.map((x) => x.id));
   assert.equal(new Set(en.map((x) => x.id)).size, en.length, 'ids are unique');
   for (const x of en) {
     assert.ok(x.title && x.action, `${x.id}: title and action`);
     assert.ok(Array.isArray(x.ev), `${x.id}: evidence list`);
+    assert.ok(['high', 'med', 'low'].includes(x.confidence.level) && x.confidence.why, `${x.id}: confidence and reason`);
+  }
   }
 });
 

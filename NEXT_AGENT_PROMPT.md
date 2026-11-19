@@ -1,4 +1,4 @@
-> 2026-11-19 P1 checkpoint 2: code + diff committed; NEXT = re-record the FlowNest baseline in its own commit (npm run baseline:flownest -- --write; baseline recs are now keyed by range all/28), then npm test + npm run test:ui all green, push improve-UIUX, tell brand-pilot-13 it may continue, STOP for the owner (next phase P2). Detail: IMPLEMENTATION_STATUS.md, docs/ui-audit/p1-baseline-diff.md.
+> 2026-11-19 P1 DONE and pushed (brand-pilot-56): server audit = only source of recommendations, evidence card, confidence, period, digits. npm test 371/371, npm run test:ui 2/2. STOP: wait for the owner. Next phase per owner order: P2 (4.5 and P3 skipped — no AI key). Diff: docs/ui-audit/p1-baseline-diff.md.
 
 > 2026-11-19 P1 checkpoint 1 DONE (brand-pilot-56): FlowNest baseline recorded (22 browser recommendations EN+AR, 15 server audit items) in test/fixtures/flownest/; npm test 362/362, npm run test:ui 1/1. STOP: the owner must approve before checkpoint 2 (rest of P1: server = only source of recommendations, evidence card, confidence + reason, period, Intl/digits per company). See IMPLEMENTATION_STATUS.md.
 
