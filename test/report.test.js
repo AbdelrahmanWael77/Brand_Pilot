@@ -140,7 +140,7 @@ test('Markdown download: headers, numbers, escaping of company text, Arabic labe
   assert.match(en, /### Strengths\n\n\*\*Search visitors enquire at the highest rate\*\* — from your imported data/);
   assert.match(en, /Evidence:\n- Search: 30 enquiries from 900 sessions/); // the audit looks at all rows, not one period
   assert.match(en, /### Weaknesses/);
-  assert.match(en, /1 approved fact\(s\) in the Knowledge Hub/);
+  assert.match(en, /1 approved fact\(s\) in Company knowledge/);
   assert.match(en, /- \*\*Search push\*\* — draft; 1 of 2 assets approved; from recommendation `ch-best`/);
   assert.doesNotMatch(en, /synthetic/i);
 

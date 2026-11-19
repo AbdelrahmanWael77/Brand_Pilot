@@ -422,7 +422,7 @@ export function computeAudit(data, facts, { lang = 'en' } = {}) {
     });
   } else {
     const missing = [tone.length ? null : L('tone of voice', 'نبرة الصوت'), brand.length ? null : L('brand identity (colours)', 'هوية العلامة (الألوان)')].filter(Boolean).join(L(' and ', ' و'));
-    insufficient('brand-doc', null, L('Brand guidelines are not approved yet', 'إرشادات العلامة غير معتمدة بعد'), L(`Approve a fact for ${missing} in the Knowledge Hub.`, `اعتمد حقيقة لـ${missing} في مركز المعرفة.`));
+    insufficient('brand-doc', null, L('Brand guidelines are not approved yet', 'إرشادات العلامة غير معتمدة بعد'), L(`Approve a fact for ${missing} in Company knowledge.`, `اعتمد حقيقة لـ${missing} في معرفة الشركة.`));
   }
 
   return { synthetic: items.some((i) => i.synthetic), items };

@@ -1,6 +1,6 @@
 // AI fact extraction from one source (task 9.5).
 // The model reads the text of one source (a website page, a document, a PDF's text) and proposes facts
-// for the Knowledge Hub. What it returns is a proposal: the server stores nothing, and the browser adds
+// for Company knowledge. What it returns is a proposal: the server stores nothing, and the browser adds
 // the results as pending findings that the user approves or rejects (task 9.6).
 // The evidence invariant of task 2.3 holds here too: a fact is kept only when its quote is found in the
 // submitted text. A fact the model cannot quote never reaches review.
@@ -13,7 +13,7 @@ export const KINDS = ['website', 'document', 'portfolio', 'plan', 'brand'];
 const LANG_NAMES = { en: 'English', ar: 'Arabic' };
 
 /**
- * Knowledge Hub categories: id, English name, and the one-line meaning given to the model.
+ * Company knowledge categories: id, English name, and the one-line meaning given to the model.
  * The ids and names are a copy of `CATS` in public/index.html (there is no build step to share one list);
  * test/extract.test.js fails when the two lists differ.
  */

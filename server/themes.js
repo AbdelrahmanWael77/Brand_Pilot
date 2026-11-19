@@ -1,5 +1,5 @@
 // AI theme suggestions for posts (task 8.6).
-// The model may only choose among this company's approved content themes (Knowledge Hub category
+// The model may only choose among this company's approved content themes (Company knowledge category
 // `themes`), read through `approvedFacts`. What it returns is a suggestion: the server stores nothing,
 // and a post gets a theme only when the user confirms it in the Tag posts step.
 import { approvedFacts } from './knowledge.js';
