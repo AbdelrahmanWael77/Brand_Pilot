@@ -44,3 +44,24 @@ test('page: the FlowNest demo action renders and runs only when the server flag 
   // the flag is true only when the server says exactly true
   assert.match(html, /const demoOn=\(\)=>!!\(SRV\.cfg&&SRV\.cfg\.demo===true\)/);
 });
+
+test('page: demo controls need a demo company AND the server flag (a leftover demo company shows none when the flag is off)', () => {
+  const html = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+  assert.match(html, /const demoUI=c=>!!\(c&&c\.demo&&demoOn\(\)\);/);
+  // the Demo guide, its open panel, the "load synthetic demo" button and the fixture loaders render only through demoUI
+  assert.match(html, /function guideHTML\(c\)\{if\(!demoUI\(c\)\)return'';/);
+  assert.match(html, /S\.ui\.guide&&demoUI\(c\)\?'gopen'/);
+  assert.match(html, /demoUI\(c\)&&!c\.sources\.length\?`<button class="btn" data-a="loadDemo">/);
+  assert.match(html, /\$\{demoUI\(c\)\?`<div class="note"><b>\$\{L\('Demo fixtures'/);
+  // the actions refuse to run outside demo mode, even if called directly
+  for (const a of ['loadDemo(){', 'loadBase(){', 'loadCamp(id){']) assert.ok(html.includes(` ${a}const c=C();if(!demoUI(c))return;`), a);
+  // no other place shows a demo control on c.demo alone
+  assert.equal((html.match(/data-a="(loadDemo|loadBase|loadCamp|guideT)"/g) || []).length > 0, true);
+  assert.doesNotMatch(html, /if\(!c\.demo\)return''/);
+});
+
+test('page: Settings does not claim BrandPilot never changes connected accounts (Canva can write)', () => {
+  const html = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /never publishes, spends money or changes your accounts/);
+  assert.match(html, /If you connect Canva, BrandPilot creates designs and uploads your logo in your Canva account, only when you ask it to\./);
+});
