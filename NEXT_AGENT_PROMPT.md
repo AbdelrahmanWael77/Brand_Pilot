@@ -1,4 +1,4 @@
-> 2026-11-19 UX RECOVERY (branch improve-UIUX): B1 shell, B2 Company knowledge, B3 Insights DONE and committed. In progress: B4 journeys C (hiring post in Campaign Studio), D (AI Content Series), E (Review & export). Read the UX RECOVERY entry at the top of IMPLEMENTATION_STATUS.md.
+> 2026-11-19 UX RECOVERY (branch improve-UIUX): B1 shell, B2 Company knowledge, B3 Insights, B4 Studio/Series/Export journeys DONE and committed. In progress: B5 journey B (Performance → recommendation → action) + trend chart unfinished week + mobile pass. Read the UX RECOVERY entry at the top of IMPLEMENTATION_STATUS.md.
 
 > 2026-11-19: 69 DONE (not committed) — Studio header: title switcher no longer inherits the global dashed details border/margin (it sat below the breadcrumb); New / Edit answers / ⋯ all 38px and centred; meta line flush with the breadcrumb. Company knowledge: topic cards cannot grow past their column (.ks single minmax(0,1fr) track; long theme badges wrap) — fixes Content themes spilling under Restrictions. Next: owner reviews; commit. npm test 355/355.
 
