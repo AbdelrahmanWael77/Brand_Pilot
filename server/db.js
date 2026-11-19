@@ -138,8 +138,18 @@ CREATE TABLE IF NOT EXISTS report_schedules (
 );
 `;
 
+/** Columns added after a table first shipped (P1): added once, if missing. */
+const ADDED_COLUMNS = [
+  ['company_settings', 'digits', 'TEXT'], // 'latn' (default) | 'arab' — how Arabic text writes numbers
+  ['company_settings', 'qualified_def', 'INTEGER'], // 1 = a "qualified lead" definition is written, 0 = empty, NULL = unknown
+];
+
 export function initSchema(db) {
   db.exec(SCHEMA);
+  for (const [table, col, type] of ADDED_COLUMNS) {
+    const has = db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === col);
+    if (!has) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`);
+  }
 }
 
 /** Open (and create if needed) the BrandPilot database. Pass ':memory:' in tests. */

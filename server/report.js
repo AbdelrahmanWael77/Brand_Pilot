@@ -41,7 +41,7 @@ export function buildReport(db, companyId, { range = '28', now = new Date(), lan
   const row = db.prepare('SELECT name FROM companies WHERE id = ?').get(companyId);
   if (!row) return null;
   const m = metrics(db, companyId, range);
-  const a = audit(db, companyId, { lang });
+  const a = audit(db, companyId, { lang, range }); // P1: findings for the same period as the KPIs
   const facts = approvedFacts(db, companyId);
   const camps = createCampaigns(db).list(companyId);
   const currency = db.prepare('SELECT currency FROM company_settings WHERE company_id = ?').get(companyId)?.currency ?? null;

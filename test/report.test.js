@@ -138,7 +138,7 @@ test('Markdown download: headers, numbers, escaping of company text, Arabic labe
   assert.match(en, /\| Enquiry rate \| 1\.75% \| /);
   assert.match(en, /\| Leads \| no data \| — \|/);
   assert.match(en, /### Strengths\n\n\*\*Search visitors enquire at the highest rate\*\* — from your imported data/);
-  assert.match(en, /Evidence:\n- Search: 30 enquiries from 900 sessions/); // the audit looks at all rows, not one period
+  assert.match(en, /Evidence:\n- Search: 20 enquiries from 500 sessions \(4\.00%\)/); // P1: findings use the report's period (7 days) like the KPIs, no longer all rows
   assert.match(en, /### Weaknesses/);
   assert.match(en, /1 approved fact\(s\) in Company knowledge/);
   assert.match(en, /- \*\*Search push\*\* — draft; 1 of 2 assets approved; from recommendation `ch-best`/);
@@ -150,7 +150,7 @@ test('Markdown download: headers, numbers, escaping of company text, Arabic labe
   assert.match(ar, /### نقاط القوة/);
   // Findings are written in Arabic by the server audit; no "findings are English" note.
   assert.match(ar, /\*\*زوار Search هم الأعلى في معدل الاستفسار\*\* — من بياناتك المستوردة/);
-  assert.match(ar, /- Search: 30 استفسار من 900 جلسة \(3\.33%\)/);
+  assert.match(ar, /- Search: 20 استفسار من 500 جلسة \(4\.00%\)/); // P1: the report's period, as above
   assert.match(ar, /الظهور في البحث العضوي غير معروف\*\* — استورد تصدير الأداء من Search Console\./);
   assert.doesNotMatch(ar, /بالإنجليزية حالياً|visitors enquire|Import a /);
   assert.doesNotMatch(en, /[\u0600-\u06FF]/); // and the English report has no Arabic in it
@@ -203,7 +203,7 @@ test('printable HTML: self-contained, locked down, escaped, right direction per 
   assert.match(en, /<td>Website sessions<\/td><td class="n"><span class="ltr">2,000<\/span><\/td><td class="n"><span class="ltr">\+400\.0%<\/span><\/td>/);
   assert.match(en, /<td>Leads<\/td><td class="n"><span class="nd">no data<\/span><\/td>/);
   assert.match(en, /<h3>Strengths<\/h3>/);
-  assert.match(en, /Search: 30 enquiries from 900 sessions/);
+  assert.match(en, /Search: 20 enquiries from 500 sessions/); // P1: the report's period, as above
   assert.match(en, /@media print/);
   assert.doesNotMatch(en, />0<\/span><\/td>/); // sessions etc. exist; missing numbers are never 0
   assert.doesNotMatch(en, /PENDING|REJECTED/);
