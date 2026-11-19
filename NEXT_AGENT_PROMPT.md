@@ -1,4 +1,4 @@
-> 2026-11-19 UX RECOVERY (branch improve-UIUX): B1 shell DONE and committed. In progress: B2 Company knowledge (questions as one compact list, empty topics folded) + onboarding copy (page picker, Home explainer cards). Read the UX RECOVERY entry at the top of IMPLEMENTATION_STATUS.md.
+> 2026-11-19 UX RECOVERY (branch improve-UIUX): B1 shell + B2 Company knowledge DONE and committed. In progress: B3 Insights (audit cards: title, one-line why, action, buttons; evidence/measure/confidence under Details; page title Insights) + Home. Read the UX RECOVERY entry at the top of IMPLEMENTATION_STATUS.md.
 
 > 2026-11-19: 69 DONE (not committed) — Studio header: title switcher no longer inherits the global dashed details border/margin (it sat below the breadcrumb); New / Edit answers / ⋯ all 38px and centred; meta line flush with the breadcrumb. Company knowledge: topic cards cannot grow past their column (.ks single minmax(0,1fr) track; long theme badges wrap) — fixes Content themes spilling under Restrictions. Next: owner reviews; commit. npm test 355/355.
 
