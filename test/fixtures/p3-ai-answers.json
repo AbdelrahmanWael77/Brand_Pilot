@@ -1,5 +1,5 @@
 {
-  "note": "Real answers of claude-sonnet-5-5 (prompt director-2026-11-20b) on the synthetic FlowNest demo, last 28 days (21 Sep - 18 Oct 2026), recorded 2026-11-20 during P3. Every number in them is true; the number check must verify them all.",
+  "note": "Real answers of claude-sonnet-5-5 on the synthetic FlowNest demo, last 28 days (21 Sep - 18 Oct 2026), recorded 2026-11-20 during P3 (prompts director-2026-11-20b and -20c; the last 20 are the false-alarm run of checkpoint 2). Every number in them is true; the number check must verify them all.",
   "answers": [
     {
       "lang": "en",
@@ -69,6 +69,247 @@
         "audit:page-leak",
         "audit:mobile-gap",
         "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "What should we do first?",
+      "answer": "Start by fixing the conflicting offer. Your website says a 14-day free trial, while the company brochure says 7 days, and your brand guidelines say to always state 14 days. Approve the 14-day offer, then retire or correct the brochure. After that, work on conversion: the /pricing page had 1,676 sessions with an enquiry rate of 0.42% against 1.36% for the whole site. Mobile visitors enquire at 0.81% against 2.27% on desktop. The conversion figures rest on demo (synthetic) data.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:page-leak",
+        "audit:mobile-gap",
+        "fact:fjy12vto"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "What is our cost per lead per channel?",
+      "answer": "Cost per lead cannot be calculated for any channel in this period (2026-09-21 to 2026-10-18). Spend was not measured: the spend column is empty in the imported social post rows, and search has no spend data either. Without spend, cost per lead is null for Facebook, Instagram, LinkedIn and search. Leads are recorded by source in your CRM file: Facebook 12, Instagram 4, search 12 and LinkedIn 0. These are counts only, not costs. To get a cost per lead, include the spend column when exporting paid posts. The data is synthetic demo data.",
+      "support": [
+        "metric:cost_per_lead",
+        "metric:spend",
+        "audit:no-spend",
+        "channel:facebook.leads",
+        "channel:instagram.leads",
+        "channel:search.leads",
+        "channel:linkedin.leads"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Which content themes work best for us?",
+      "answer": "\"How-to tips\" is your strongest content theme in this period: engagement was 4.5% of reach across 7 posts, against an account average of 3.1%. The weakest theme is \"offer\" at 2.3%. Engagement is an awareness signal, not proof of enquiries. Arabic posts also earned more engagement (4.2% of reach, 8 posts) than English posts (2.3%, 12 posts). All of this rests on demo data. Your how-to tips series is also in the marketing plan.",
+      "support": [
+        "audit:theme-best",
+        "audit:lang",
+        "fact:fmi1jhxp"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Do our Arabic or English posts perform better?",
+      "answer": "Arabic posts perform better on engagement. In the period 2026-09-21 to 2026-10-18, Arabic posts earned 4.2% engagement per reach across 8 posts, while English posts earned 2.3% across 12 posts. This is demo data. Engagement is an awareness signal, not proof of enquiries, and the data does not show whether Arabic posts also bring more leads or enquiries. The suggested next step is to lead campaigns with Arabic and test whether it also brings more enquiries.",
+      "support": [
+        "audit:lang"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "How did our results change compared with the previous period?",
+      "answer": "Results are mixed: social reach and social leads grew, while engagement per reach and search enquiries fell. Facebook reach was 19,981 versus 12,349 in the previous period, and Instagram reach was 13,952 versus 8,900 in the previous period. Overall engagement per reach was 3.1% versus 4.1% in the previous period, and Instagram fell from 6.11% in the previous period to 3.88%. Facebook leads were 12 versus 9 in the previous period, Instagram leads were 4 versus 1 in the previous period, and search leads were 12 versus 15 in the previous period. Search enquiries were 31 versus 40 in the previous period, and the search enquiry rate was 2.02% versus 2.6% in the previous period, while search sessions stayed almost flat at 1,534 versus 1,537. LinkedIn has no measured data and spend is not measured, so cost per lead cannot be compared. All of this is demo data with small samples, and leads are counted by the source the team recorded in its CRM, not tracked by the platforms.",
+      "support": [
+        "channel:facebook.reach",
+        "channel:instagram.reach",
+        "audit:eng-drop",
+        "channel:search.enq"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Which lead source brings the best-quality leads?",
+      "answer": "Search has the best lead quality of the sources that can be ranked, but the sample is small. In this period, 4 of its 12 leads were qualified (33%). Facebook had 3 qualified out of 12 (25%). Instagram had 0 qualified out of 4 leads, but it is not ranked because it has fewer than 10 leads. LinkedIn recorded 0 leads. Referral leads are listed outside the channels: 6 of 7 were qualified, which looks strong but is too few to judge. The audit also says a source needs 15+ leads before its quality can be judged, and no source reaches that yet. In addition, 13 leads have no recorded source, so some good leads may be credited to nobody. These are CRM source labels, not platform-tracked conversions, and the data is synthetic demo data.",
+      "support": [
+        "channel:search.qshare",
+        "channel:facebook.qshare",
+        "channel:instagram.leads",
+        "audit:src-best",
+        "audit:src-unknown"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "How can we get more enquiries from mobile visitors?",
+      "answer": "Mobile is the biggest gap in the enquiry path. In the period 2026-09-21 to 2026-10-18, mobile made up 62% of sessions but converted at only 0.81%, against 2.27% on desktop and a site average of 1.36%. The data does not say why mobile converts worse, so test the phone path first: form length, button size, load time, and a WhatsApp or click-to-call option. Two related fixes: /pricing has 1,676 sessions (35%) and an enquiry rate of 0.42%, so put its main call to action above the fold and shorten the form there. Organic social traffic converts at 0.39%, so send it to a dedicated landing page with one call to action. Your materials use several different calls to action (free trial, contact sales, request a demo), so pick one primary one. All of this rests on demo data. Mobile and desktop are not split by channel, so I can't say which channel's mobile visitors are weakest.",
+      "support": [
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "audit:ch-leak",
+        "audit:cta-mix",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Which search queries should we improve, and how?",
+      "answer": "These three queries already show your pages but get few clicks, so they are the ones to improve first. Note that this is demo data. 1) \"برنامج إدارة المهام\" has the most impressions (5,652) but only 49 clicks (0.9%) at average position 11.4. 2) \"task board for teams\" has 4,506 impressions and 81 clicks (1.8%) at position 8.6. 3) \"shared task board\" has 3,126 impressions and 69 clicks (2.2%) at position 7.1. For each query, create or improve one page: put the phrase in the page title, answer the need directly, and add your primary call to action. For comparison, all organic search together had 22,719 impressions and 792 clicks (3.49% CTR) in this period, so all three queries are below that average. Before adding the call to action, choose one primary CTA, because your materials currently use several. If you mention the trial, state it as 14 days, as your brand guidelines require.",
+      "support": [
+        "audit:seo-q",
+        "audit:cta-mix",
+        "channel:search.sctr",
+        "fact:fjy12vto"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Should we focus more on Facebook or Instagram?",
+      "answer": "Don't shift effort to one platform yet; give each a separate job. This rests on demo data. Instagram leads on engagement: 3.88% of reach vs 2.47% on Facebook. Facebook leads on link clicks: 1.12% of reach vs 0.61% on Instagram. In your CRM, Facebook has 12 leads (3 qualified) and Instagram has 4 (0 qualified). Instagram's sample is under the 10-lead minimum for ranking, and these are sources your team recorded, not conversions tracked by the platforms. Website visits and enquiries are not split by platform, and spend is not measured, so cost per lead cannot be calculated. Instagram engagement was 6.11% in the previous period, down to 3.88% now.",
+      "support": [
+        "channel:facebook.clickRate",
+        "channel:instagram.engRate",
+        "audit:plat-roles"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Give me a plan for this week.",
+      "answer": "This plan rests on demo data for 2026-09-21 to 2026-10-18. Monday: settle the offer. Your website says a 14-day trial but the 2024 brochure says 7 days, so approve 14 days, as the brand guidelines require, and retire the old brochure. Tuesday: pick one primary call to action, because three different ones are in use. Wednesday: fix the /pricing page, which has 1,676 sessions but a 0.42% enquiry rate against 1.36% for the whole site. Put the CTA above the fold and shorten the form. Thursday: restart a fixed weekly posting calendar after a 19-day gap, with more how-to tips posts, which earn 4.5% engagement against a 3.1% account average. Arabic posts also earn 4.2% against 2.3% for English, so lead with Arabic. Friday: add a required \"How did you hear about us?\" field, because 27% of 48 leads have no source recorded. Cost per lead cannot be judged, because spend is not measured.",
+      "support": [
+        "audit:page-leak",
+        "audit:offer-conflict",
+        "audit:cta-mix",
+        "audit:cadence",
+        "audit:theme-best",
+        "audit:lang",
+        "audit:src-unknown"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما الذي يجب أن نفعله أولاً؟",
+      "answer": "ابدأ بتوحيد العرض: موادك تذكر مدتين مختلفتين للتجربة، 14 يوماً في الموقع و7 أيام في الكتيّب 2024، وإرشادات العلامة تقول أن تذكر 14 يوماً دائماً. اعتمد العرض الحالي في معرفة الشركة وصحّح الوثيقة القديمة أو احذفها قبل إطلاق أي حملة. ثم راجع صفحة الهبوط /pricing: فيها 1,676 جلسة (35%) ومعدل الاستفسار 0.42% مقابل 1.36% لمتوسط الموقع، وهذه النصيحة مبنية على بيانات تجريبية. بعدها سجّل مصدر كل عميل محتمل، لأن 27% من 48 عميلاً محتملاً بلا مصدر مسجل، وهذه أيضاً بيانات تجريبية.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:page-leak",
+        "audit:src-unknown",
+        "fact:fjy12vto",
+        "fact:f5ff41d6",
+        "fact:fazo5613"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "كم تكلفة العميل المحتمل لكل قناة؟",
+      "answer": "لا يمكن حساب تكلفة العميل المحتمل لأي قناة في الفترة من 2026-09-21 إلى 2026-10-18، لأن الإنفاق غير مقاس (قيمته غير مسجلة وليست صفرًا). عمود الإنفاق فارغ في كل صفوف منشورات التواصل الاجتماعي المستوردة، وتكلفة العميل المحتمل نفسها غير مقاسة في فيسبوك وإنستغرام والبحث العضوي. لينكدإن لا توجد له بيانات منشورات، وعدد العملاء المحتملين المسجل له 0. للمقارنة فقط، عدد العملاء المحتملين في هذه الفترة: فيسبوك 12 وإنستغرام 4 والبحث 12. وهذه البيانات تجريبية. لحساب التكلفة أضف عمود الإنفاق عند تصدير المنشورات المدفوعة، واربطه بالعملاء المحتملين من الحملة نفسها.",
+      "support": [
+        "metric:spend",
+        "metric:cost_per_lead",
+        "audit:no-spend",
+        "channel:facebook.leads",
+        "channel:instagram.leads",
+        "channel:search.leads",
+        "channel:linkedin.leads"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما أفضل مواضيع المحتوى أداءً لدينا؟",
+      "answer": "أقوى موضوع محتوى لديك هو \"how-to tips\": بلغ التفاعل فيه 4.5% من الوصول عبر 7 منشورات، وبلغت النقرات على الروابط 1.06% من الوصول. متوسط التفاعل في الحساب 3.1%، وأضعف موضوع هو \"offer\" بنسبة 2.3%. كما أن المنشورات العربية حققت تفاعلًا أعلى (4.2% في 8 منشورات) من الإنجليزية (2.3% في 12 منشورًا). هذه الأرقام للفترة من 2026-09-21 إلى 2026-10-18 وتستند إلى بيانات تجريبية. التفاعل مؤشر على الوعي وليس دليلًا على الاستفسارات، لذلك انشر المزيد من منشورات \"how-to tips\" واختمها بدعوة واحدة أساسية مع رابط متتبَّع.",
+      "support": [
+        "audit:theme-best",
+        "audit:lang"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "هل منشوراتنا العربية أفضل أم الإنجليزية؟",
+      "answer": "بحسب البيانات، منشوراتك العربية أفضل في التفاعل. في الفترة من 2026-09-21 إلى 2026-10-18 بلغ التفاعل في المنشورات العربية 4.2% من الوصول (8 منشورات)، مقابل 2.3% للإنجليزية (12 منشورًا). التفاعل مؤشر على الانتباه وليس دليلًا على الاستفسارات، ولا توجد بيانات تربط اللغة بالاستفسارات أو بالعملاء المحتملين. جرّب قيادة الحملات باللغة الأقوى وراقب هل تجلب استفسارات أكثر. هذه النتيجة مبنية على بيانات تجريبية.",
+      "support": [
+        "audit:lang",
+        "audit:theme-best"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "كيف تغيّرت نتائجنا مقارنة بالفترة السابقة؟",
+      "answer": "الأرقام تجريبية، والمقارنة متاحة حسب القناة فقط. ارتفع الوصول والعملاء المحتملون في Facebook وInstagram، بينما تراجعت الاستفسارات في البحث العضوي.\nFacebook: الوصول 19981 مقابل 12349 في الفترة السابقة، والعملاء المحتملون 12 مقابل 9 في الفترة السابقة، لكن معدل التفاعل انخفض إلى 2.47% من 2.61% في الفترة السابقة.\nInstagram: الوصول 13952 مقابل 8900 في الفترة السابقة، والعملاء المحتملون 4 مقابل 1 في الفترة السابقة، لكن معدل التفاعل انخفض إلى 3.88% من 6.11% في الفترة السابقة.\nالبحث العضوي: الجلسات شبه ثابتة، 1534 مقابل 1537 في الفترة السابقة، لكن الاستفسارات 31 مقابل 40 في الفترة السابقة، ومعدل الاستفسار 2.02% مقابل 2.6% في الفترة السابقة، والعملاء المحتملون 12 مقابل 15 في الفترة السابقة.\nتنبيه: الإنفاق غير مقاس، وأعداد العملاء المحتملين صغيرة، ولا توجد أرقام للموقع كله في الفترة السابقة. لا توجد بيانات لقناة LinkedIn.",
+      "support": [
+        "channel:facebook.reach",
+        "channel:facebook.leads",
+        "channel:facebook.engRate",
+        "channel:instagram.reach",
+        "channel:instagram.leads",
+        "channel:instagram.engRate",
+        "channel:search.sessions",
+        "channel:search.enq",
+        "channel:search.enqRate",
+        "channel:search.leads",
+        "metric:spend"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "أي مصدر يجلب أفضل العملاء المحتملين؟",
+      "answer": "بحسب البيانات التجريبية للفترة من 2026-09-21 إلى 2026-10-18، البحث العضوي هو أفضل مصدر من حيث جودة العملاء المحتملين. من بين 12 عميلًا محتملًا جاء منه 4 عملاء مؤهلين، أي نسبة 33.33%. يليه فيسبوك بنسبة 25%: 3 عملاء مؤهلين من 12. أما إنستغرام فسجّل 4 عملاء محتملين دون أي عميل مؤهل، وعينته أقل من الحد المطلوب للترتيب (10 عملاء محتملين). ولينكدإن 0 عملاء محتملين. من حيث عدد العملاء المحتملين لا يوجد متصدر، فالبحث العضوي وفيسبوك سجّلا 12 لكل منهما. في الفترة السابقة كانت نسبة العملاء المؤهلين من البحث العضوي 40%، فهي أقل الآن. خذ هذه الأرقام بحذر: المصدر يسجّله الفريق يدويًا في ملف العملاء وليس تتبعًا من المنصة، والعينات صغيرة. كذلك 27% من العملاء المحتملين بلا مصدر مسجّل، فقد تكون بعض القنوات أقوى مما يظهر.",
+      "support": [
+        "channel:search.qshare",
+        "channel:facebook.qshare",
+        "channel:instagram.leads",
+        "audit:src-unknown",
+        "audit:src-best"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "كيف نزيد الاستفسارات من زوار الجوال؟",
+      "answer": "البيانات تُظهر أن زوار الجوال يمثلون 62% من الجلسات، لكن معدل الاستفسار عندهم 0.81% مقابل 2.27% لسطح المكتب، ومتوسط الموقع 1.36%. الخطوة الأولى أن تجرّب مسار الاستفسار على هاتف حقيقي: طول النموذج، حجم الزر، سرعة التحميل، وخيار واتساب أو الاتصال المباشر. وصفحة /pricing تحوّل أقل من المتوسط (معدل الاستفسار 0.42% من 1,676 جلسة)، فضع زر الدعوة الرئيسي أعلى الصفحة، واختصر النموذج، واذكر العرض في الشاشة الأولى. كذلك زوار التواصل الاجتماعي العضوي يستفسرون بمعدل 0.39% فقط، فوجّههم إلى صفحة هبوط واحدة بدعوة واحدة. هذه التوصيات مبنية على بيانات تجريبية، ولم يُقاس سبب الضعف على الجوال تحديدًا، لذلك اختبر قبل التعميم. وانتبه إلى أن عرض التجربة المجانية متضارب في موادك (14 يومًا مقابل 7 أيام)، فاعتمد 14 يومًا كما في إرشادات العلامة.",
+      "support": [
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "audit:ch-leak",
+        "audit:offer-conflict",
+        "fact:fjy12vto",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما صفحة الهبوط التي تحتاج إلى تحسين ولماذا؟",
+      "answer": "الصفحة التي تحتاج إلى تحسين هي /pricing. في الفترة من 2026-09-21 إلى 2026-10-18 سجّلت 1,676 جلسة (35% من الجلسات)، لكن معدل الاستفسار فيها 0.42% مقابل 1.36% لمتوسط الموقع. وهذه الصفحة هي أرخص مكان لزيادة الاستفسارات لأن الزوار موجودون فيها أصلًا. ما تفعله: ضع زر الدعوة الأساسي في أعلى الصفحة، واختصر النموذج، واذكر العرض في الشاشة الأولى. وهذه النتيجة مبنية على بيانات تجريبية. كما أن الجلسات القادمة من التواصل الاجتماعي العضوي تتحول إلى استفسارات بمعدل 0.39% فقط، فيمكنك توجيهها إلى صفحة هبوط مخصصة بدعوة واحدة بدل الصفحات العامة.",
+      "support": [
+        "audit:page-leak",
+        "audit:ch-leak",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "هل نركّز على فيسبوك أم إنستجرام؟",
+      "answer": "لا تختر منصة واحدة وتترك الأخرى، فلكل منها دور مختلف. هذه الأرقام للفترة من 2026-09-21 إلى 2026-10-18، وهي مبنية على بيانات تجريبية.\nفيسبوك أفضل في جلب الزيارات والعملاء المحتملين: معدل النقر على الروابط 1.12% مقابل 0.61% في إنستجرام، وسجّل 12 عميلًا محتملًا مقابل 4.\nإنستجرام أفضل في التفاعل: 3.88% من الوصول مقابل 2.47% في فيسبوك. لكن تفاعل إنستجرام كان 6.11% في الفترة السابقة، فهو في انخفاض.\nعدد العملاء المحتملين صغير ولا يوجد متصدر رسمي فيه. من بين 4 عملاء محتملين من إنستجرام لم يتأهل أحد، ومن بين 12 من فيسبوك تأهل 3. الإنفاق غير مقاس، فلا يمكن حساب تكلفة العميل المحتمل لأي منهما. وزيارات الموقع لا تُنسب إلى منصة بعينها.\nالخلاصة: إن كان هدفك استفسارات وعملاء، فاجعل فيسبوك الأساس واربط منشوراته بصفحة الهبوط. واستخدم إنستجرام لجذب الانتباه والرسائل الخاصة.",
+      "support": [
+        "channel:facebook.clickRate",
+        "channel:instagram.clickRate",
+        "channel:facebook.leads",
+        "channel:instagram.leads",
+        "channel:facebook.engRate",
+        "channel:instagram.engRate",
+        "audit:plat-roles"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما خطتنا للأسبوع القادم؟",
+      "answer": "هذه خطة مقترحة للأسبوع القادم مبنية على بنود التدقيق. الأرقام أدناه للفترة الحالية، ومعظمها يقوم على بيانات تجريبية.\n1. وحّد العرض: مدة التجربة 14 يومًا في الموقع و7 أيام في الكتيّب. اعتمد 14 يومًا، فهي المدة المطلوبة في إرشادات العلامة، وصحّح الكتيّب القديم.\n2. راجع صفحة /pricing: فيها 1,676 جلسة ومعدل الاستفسار 0.42% مقابل 1.36% للموقع. ضع زر الإجراء الرئيسي أعلى الصفحة وقصّر النموذج.\n3. وجّه زوار Organic Social إلى صفحة هبوط واحدة بزر واحد، فمعدل الاستفسار عندهم 0.39%.\n4. اختبر مسار الاستفسار على الجوال: معدله 0.81% مقابل 2.27% على سطح المكتب.\n5. التزم بجدول نشر أسبوعي ثابت بعد توقف 19 يومًا، وانشر محتوى \"how-to tips\" (التفاعل 4.5% من الوصول مقابل متوسط 3.1%). جرّب النشر بالعربية، فتفاعل المنشورات العربية 4.2% مقابل 2.3% للإنجليزية.\nلا أستطيع تحديد ميزانية أو تكلفة العميل المحتمل لأن الإنفاق غير مقاس.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:page-leak",
+        "audit:ch-leak",
+        "audit:mobile-gap",
+        "audit:cadence",
+        "audit:theme-best",
+        "audit:lang",
+        "fact:fjy12vto",
+        "metric:spend"
       ]
     }
   ]

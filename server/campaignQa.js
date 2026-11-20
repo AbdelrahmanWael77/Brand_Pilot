@@ -102,7 +102,7 @@ export function computeCampaignQa(campaign, facts, auditItems, allFacts = null) 
   }
 
   // P3: every number in the copy is checked against the approved facts (copy states offers and facts, not data).
-  // Advisory: shown with the unverified numbers, it does not count as a failed check.
+  // Owner 2026-11-20: an unverified number blocks downloads, like an unapproved fact.
   if (facts) {
     const pool = factPool(facts);
     const bad = [];
@@ -111,9 +111,9 @@ export function computeCampaignQa(campaign, facts, auditItems, allFacts = null) 
       const nums = checkText(txt(a), pool).numbers.filter((n) => n.status !== 'verified');
       if (nums.length) { bad.push(a.id); found.push(...nums.map((n) => n.raw)); }
     }
-    checks.push({ id: 'numbers', pass: bad.length === 0, advisory: true, basis: 'facts', affected: bad, numbers: [...new Set(found)].slice(0, 20), detail: 'Every number in the copy is found in an approved fact (the number check).' });
+    checks.push({ id: 'numbers', pass: bad.length === 0, basis: 'facts', affected: bad, numbers: [...new Set(found)].slice(0, 20), detail: 'Every number in the copy is found in an approved fact (the number check).' });
   }
-  const failed = checks.filter((c) => !c.pass && !c.advisory).length;
+  const failed = checks.filter((c) => !c.pass).length;
   return {
     checks,
     passed: checks.length - failed,

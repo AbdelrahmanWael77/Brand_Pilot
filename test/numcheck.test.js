@@ -29,13 +29,27 @@ test('extraction: Arabic-Indic digits and marks, percentages, thousands; dates, 
   assert.equal(normalize('١٫٣٦٪ و٤٬٧٧٤'), '1.36% و4,774');
   const n = extractNumbers('معدل ١٫٣٦٪ من ٤٬٧٧٤ جلسة، و۵۰ زيارة');
   assert.deepEqual(n.map((x) => [x.raw, x.value, x.pct]), [['١٫٣٦٪', 1.36, true], ['٤٬٧٧٤', 4774, false], ['۵۰', 50, false]]);
-  const e = extractNumbers('1. Fix /pricing (21 Sep to 18 Oct 2026, 2026-10-18): 0.42% on 1,676 sessions, 2 customers, 12 percent, 15 في المئة, 4.8k visits, GA4, 2024 brochure');
+  const e = extractNumbers('1. Fix /pricing (21 Sep to 18 Oct 2026, 2026-10-18): 0.42% on 1,676 sessions, in 3 steps, 12 percent, 15 في المئة, 4.8k visits, GA4, 2024 brochure');
   const checked = e.filter((x) => !x.plain).map((x) => [x.raw, x.value, x.pct]);
   assert.deepEqual(checked, [['0.42%', 0.42, true], ['1,676', 1676, false], ['12 percent', 12, true], ['15 في المئة', 15, true], ['4.8k', 4800, false]]);
   assert.ok(e.find((x) => x.raw === '1').plain, 'list marker');
-  assert.ok(e.find((x) => x.raw === '2').plain, 'small count');
+  assert.ok(e.find((x) => x.raw === '3').plain, 'a small number that is not a data count');
   assert.ok(e.find((x) => x.raw === '2024').plain, 'year');
   assert.ok(!e.some((x) => x.raw === '21' || x.raw === '18' || x.raw === '10'), 'dates are skipped');
+});
+
+test('small counts (0-10) are checked next to a data word; list numbering, steps, durations, dates and years are not', () => {
+  assert.deepEqual(status('Instagram leads went from 1 to 4.'), ['1:verified', '4:verified']);
+  assert.notEqual(status('We got 7 Instagram leads.')[0], '7:verified');
+  assert.deepEqual(status('We got 7 Instagram leads.').length, 1, 'checked');
+  assert.deepEqual(status('Instagram brought 4 leads.'), ['4:verified']);
+  assert.deepEqual(status('Only 2 customers so far.'), ['2:verified']);
+  assert.notEqual(status('Only 5 customers so far.')[0], '5:verified', 'checked and caught');
+  assert.deepEqual(status('سجّل إنستجرام 4 عملاء محتملين.'), ['4:verified']);
+  assert.notEqual(status('جاء من إنستجرام 7 عملاء محتملين.')[0], '7:verified');
+  assert.notEqual(status('جاء من إنستجرام ٧ عملاء محتملين.')[0], '٧:verified', 'Arabic-Indic digit');
+  for (const t of ['Step 3: fix the form.', 'Do these 3 things first.', 'Run it for 7 days.', '1. Fix the form', 'Since 2024, 3 weeks ago.']) assert.deepEqual(status(t), [], t);
+  assert.deepEqual(extractNumbers('Visit https://flownest.example/p/12345 or call +20 100 123 4567.').filter((n) => !n.plain), [], 'links and phone numbers');
 });
 
 test('true numbers pass, rounded at the precision written; wrong rounding does not', () => {
@@ -105,8 +119,18 @@ test('two real answers with the structured-claims prompt (P3): every number veri
   }
   // the two sentence shapes behind the first false alarms
   assert.deepEqual(status("Organic search brings the most enquiries: 31 of the site's 65 in this period, a 2.02% enquiry rate from 1,534 sessions."), ['31:verified', '65:verified', '2.02%:verified', '1,534:verified']);
-  assert.deepEqual(status('Facebook and Instagram combined show 7 enquiries from 1,781 sessions (0.39%).'), ['1,781:verified', '0.39%:verified']);
+  assert.deepEqual(status('Facebook and Instagram combined show 7 enquiries from 1,781 sessions (0.39%).'), ['7:verified', '1,781:verified', '0.39%:verified']);
   assert.deepEqual(status('Facebook had 1,781 sessions.'), ['1,781:mismatch'], 'the combined number is not Facebook’s alone');
+});
+
+test('the sentence shapes behind the false alarms of the 20-question run are read correctly', () => {
+  assert.deepEqual(status('Facebook had 3 qualified out of 12 (25%).'), ['3:verified', '12:verified', '25%:verified'], 'a total after "out of"');
+  assert.deepEqual(status('Instagram had 0 qualified out of 4 leads, but it is not ranked because it has fewer than 10 leads.'), ['0:verified', '4:verified', '10:verified'], 'the ranking threshold');
+  assert.deepEqual(status('In your CRM, Facebook has 12 leads (3 qualified) and Instagram has 4 (0 qualified).'), ['12:verified', '3:verified', '4:verified', '0:verified']);
+  assert.deepEqual(status('فيسبوك أفضل في جلب العملاء المحتملين: معدل النقر 1.12% مقابل 0.61% في إنستجرام، وسجّل 12 عميلًا محتملًا مقابل 4.'), ['1.12%:verified', '0.61%:verified', '12:verified', '4:verified'], 'the other side of a comparison');
+  // and the same shapes still catch swaps
+  assert.notEqual(status('Facebook recorded 4 leads vs 12 on Instagram.')[0], '4:verified');
+  assert.notEqual(status('Organic Social has an enquiry rate of 37%.')[0], '37%:verified');
 });
 
 test('the main claim decides: an unverified number in it blocks the answer, elsewhere it is only marked', () => {
@@ -170,7 +194,7 @@ test('route: an AI answer with true numbers is verified; one whose main claim is
     assert.deepEqual(bad.body.check.reason, { code: 'unverified', raw: '3.4%' });
     const rows = trailOf(a.db, a.co, 'answer');
     assert.deepEqual(rows.map((r) => r.detail.check.blocked), [false, true]);
-    assert.equal(rows[0].prompt_version, 'director-2026-11-20b');
+    assert.equal(rows[0].prompt_version, 'director-2026-11-20c');
   } finally { a.close(); }
 });
 

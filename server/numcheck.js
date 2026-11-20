@@ -34,7 +34,15 @@ const DATE_SPANS = [
   new RegExp(`\\b(?:${MONTHS})\\b\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?`, 'gi'),
   new RegExp(`\\d{1,2}\\s+(?:${AR_MONTHS})(?:\\s+\\d{4})?`, 'g'),
   new RegExp(`(?:${AR_MONTHS})\\s+\\d{4}`, 'g'),
+  // not figures: links and e-mail addresses, phone numbers
+  /(?:https?:\/\/|www\.)[^\s<>"]+|[\w.+-]+@[\w-]+\.[\w.]+/gi,
+  /\+?\d[\d\s-]{8,}\d/g,
 ];
+/** Words that make a small count (0-10) a figure to check: "4 leads", "leads: 4", "from 1 to 4" after "leads". */
+const DATA_WORDS = /\b(leads?|enquir(?:y|ies)|inquir(?:y|ies)|sessions?|visits?|visitors?|customers?|clients?|projects?|posts?|sources?|qualified)\b|عميل|عملاء|عميلًا|عميلاً|عميلان|محتمل|استفسار|جلس|زيار|زوار|مشروع|مشاريع|منشور|مصدر|مصادر|مؤهل/i;
+const STEP_WORDS = /\b(step|steps|phase|week|weeks|day|days|month|months|year|years|hour|hours|minute|minutes|times?|x)\s*$|خطوة|الخطوة|المرحلة\s*$/i;
+/** A time amount ("7 days", "14 يوماً") only matches another time amount. */
+export const TIME_AFTER = /^\s*-?\s*(day|days|week|weeks|month|months|year|years|hour|hours|minute|minutes|يوم|يومًا|يوماً|يوما|أيام|ايام|أسبوع|أسابيع|شهر|أشهر|شهور|سنة|سنوات|ساعة|ساعات|دقيقة|دقائق)(?![A-Za-z])/i;
 const NUM = /(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?(\s?[kK]\b)?(\s?%|\s?(?:percent|per cent|في المئة|في المائة|بالمئة|بالمائة))?/g;
 const APPROX = /(about|around|roughly|nearly|almost|approximately|some|over|under|more than|less than|حوالي|حوالى|نحو|قرابة|تقريبا|تقريبًا|أكثر من|أقل من|ما يقارب)\s*$/i;
 
@@ -63,7 +71,10 @@ export function extractNumbers(text) {
     const lineStart = t.lastIndexOf('\n', start - 1) + 1;
     const listMarker = /^\s*$/.test(t.slice(lineStart, start)) && /^[.)]\s/.test(t.slice(end, end + 2)) && !pct && !decimals;
     const year = !pct && !decimals && !m[3] && /^(19|20)\d\d$/.test(intPart) && !m[1].includes(',');
-    const small = !pct && !decimals && !m[3] && value <= 10;
+    // a small count is checked only next to a data word in its clause (before it, or the words right after it)
+    const clauseBefore = t.slice(Math.max(0, start - 40), start).split(/[.;:,،!?؟\n]/).pop();
+    const wordsAfter = t.slice(end, end + 30).split(/[.;:,!?؟\n]/)[0];
+    const small = !pct && !decimals && !m[3] && value <= 10 && (!(DATA_WORDS.test(clauseBefore) || DATA_WORDS.test(wordsAfter)) || STEP_WORDS.test(t.slice(Math.max(0, start - 12), start)));
     let approxStep = step;
     if (APPROX.test(t.slice(Math.max(0, start - 22), start)) && !decimals) {
       const zeros = (intPart.match(/0+$/) || [''])[0].length;
@@ -106,7 +117,7 @@ const METRICS = {
   spend: ['spend', 'spent', 'budget', 'إنفاق', 'الإنفاق', 'ميزانية'],
   posts: ['posts', 'post', 'منشور', 'منشورات', 'المنشورات'],
 };
-const PREV = /\b(previous|prior|before|earlier|last period|fell|rose|dropped|declined|grew|increased|decreased|down from|up from|compared with|compared to|versus the|was|were)\b|السابقة|السابق|الماضية|قبل|انخفض|ارتفع|تراجع|زاد|مقارنة|كان|كانت/i;
+const PREV = /\b(previous|prior|before|earlier|last period|fell|rose|dropped|declined|grew|increased|decreased|went from|moved from|down from|up from|compared with|compared to|versus the|was|were)\b|from\s+\d[\d,.]*%?\s+to\s+\d|السابقة|السابق|الماضية|قبل|انخفض|ارتفع|تراجع|زاد|مقارنة|كان|كانت|من\s+\d[\d,.]*%?\s+إلى\s+\d/i;
 const CLAUSE = /[;:()\[\]،؛\n]|,(?!\d{3})|\s(?:vs\.?|versus|against|compared with|while|whereas|but|مقابل|بينما|لكن)\s/gi;
 const SENTENCE = /[.!?؟\n](?!\d)/g;
 
@@ -141,16 +152,18 @@ function clausesAround(t, pos) {
   for (const m of sentence.matchAll(CLAUSE)) cuts.push(m.index, m.index + m[0].length);
   cuts.push(sentence.length);
   const parts = [];
-  for (let i = 0; i < cuts.length; i += 2) parts.push([s0 + cuts[i], s0 + cuts[i + 1]]);
+  const VS = /vs\.?|versus|against|compared with|مقابل/i;
+  for (let i = 0; i < cuts.length; i += 2) parts.push([s0 + cuts[i], s0 + cuts[i + 1], i > 0 && VS.test(sentence.slice(cuts[i - 1], cuts[i]))]);
   const idx = parts.findIndex(([a, b]) => pos >= a && pos <= b);
   const own = idx < 0 ? [s0, s1] : parts[idx];
-  const before = idx < 0 ? [] : parts.slice(0, idx).reverse();
-  return { sentence, own: t.slice(own[0], own[1]), ownAt: own, before: before.map(([a, b]) => t.slice(a, b)) };
+  // looking back for a subject, the second side of a comparison is skipped: it names what the topic is compared with
+  const before = idx < 0 ? [] : parts.slice(0, idx).reverse().filter((p) => !p[2]);
+  return { sentence, own: t.slice(own[0], own[1]), ownAt: own, ownVs: idx >= 0 && !!parts[idx][2], before: before.map(([a, b]) => t.slice(a, b)) };
 }
 
 /** Subject and metric of the number at `pos` in `text`: its own clause first, else the nearest clause before it. */
 function aboutAt(text, pos, subjects) {
-  const { sentence, ownAt, before } = clausesAround(text, pos);
+  const { sentence, ownAt, ownVs, before } = clausesAround(text, pos);
   // the words that belong to this number: from the previous number in its clause up to it, and after it up to the next
   // number, unless "of" ties it to that next number ("31 of the site's 65": "site" is about 65)
   const [a, b] = ownAt;
@@ -168,14 +181,18 @@ function aboutAt(text, pos, subjects) {
   const local = clause.slice(from, rel) + (to < clause.length && /^\s*(of|out of|من)\s/i.test(after) ? '' : after);
   let subj = termsIn(local, subjects);
   if (!subj.size) subj = termsIn(clause.slice(0, rel), subjects); // earlier in the same clause
+  // the other side of a comparison ("12 leads vs 4") without a subject of its own: who it is about is left open
+  const open = ownVs && !subj.size;
   // an earlier clause: words tied to another number by "of" ("31 of the site's 65") are about that number, not the topic
-  for (const x of before) { if (subj.size) break; subj = termsIn(x.replace(/\b(?:of|out of)\s+(?:the\s+)?[^\d]{0,40}?\d[\d,.]*%?|من\s+[^\d]{0,40}?\d[\d,.]*%?/gi, ' '), subjects); }
+  for (const x of open ? [] : before) { if (subj.size) break; subj = termsIn(x.replace(/\b(?:of|out of)\s+(?:the\s+)?[^\d]{0,40}?\d[\d,.]*%?|من\s+[^\d]{0,40}?\d[\d,.]*%?/gi, ' '), subjects); }
   // Facebook and Instagram named together: GA4 counts their visits as one social channel
   if (subj.has('facebook') && subj.has('instagram')) subj.add('social');
-  const ownMetric = termsIn(local, METRICS);
-  let metric = ownMetric;
+  // a total after another number of the same clause: "3 qualified out of 12", "4 of its 12 leads", "3 من 12" (not "a rate of 37%")
+  const ofTotal = /\d/.test(clause.slice(0, from)) && /\b(?:out of|of)(?:\s+(?:its|their|the|all))?\s*$|من بين\s*$|من\s*$/i.test(clause.slice(from, rel));
+  const ownMetric = termsIn(ofTotal ? after : local, METRICS);
+  let metric = ownMetric.size ? ownMetric : termsIn(clause.slice(0, rel), METRICS);
   for (const b of before) { if (metric.size) break; metric = termsIn(b, METRICS); }
-  return { subj, metric, ownMetric, sentence };
+  return { subj, metric, ownMetric, sentence, sentMetric: termsIn(sentence, METRICS) };
 }
 
 // ---- the pool of known numbers ----------------------------------------------------------------------------------
@@ -197,6 +214,7 @@ export function buildPool(db, companyId, { range = '28', question = '', extraFac
   const period = ctx.metrics.period;
   const m = metrics(db, companyId, ctx.metrics.range);
   const prevPeriod = m.previous ?? ctx.channels?.previous ?? null;
+  const fromTextLater = [];
   const add = (e) => entries.push({ subj: new Set(), metric: new Set(), ownMetric: new Set(), period: 'cur', ...e });
   const pctOf = (v) => v * 100;
 
@@ -252,9 +270,11 @@ export function buildPool(db, companyId, { range = '28', question = '', extraFac
       }
     }
     // other numeric leaves (social traffic combined, unassigned lead sources)
-    const walk = (o, p, subj) => { for (const [k, v] of Object.entries(o ?? {})) { if (typeof v === 'number' && !/^(dataFrom|dataTo)$/.test(k)) add({ value: RATE.test(k) ? pctOf(v) : v, pct: RATE.test(k), subj: new Set([subj]), metric: new Set([CH_METRIC[k]].filter(Boolean)), source: { type: 'channel', id: `${p}.${k}`, label: `${p}.${k}`, period: ctx.channels.period } }); else if (v && typeof v === 'object' && !Array.isArray(v)) walk(v, `${p}.${k}`, subj); } };
+    const walk = (o, p, subj) => { for (const [k, v] of Object.entries(o ?? {})) { if (typeof v === 'number' && !/^(dataFrom|dataTo)$/.test(k)) add({ value: RATE.test(k) ? pctOf(v) : v, pct: RATE.test(k), subj: subj instanceof Set ? subj : new Set([subj]), metric: new Set([CH_METRIC[k]].filter(Boolean)), source: { type: 'channel', id: `${p}.${k}`, label: `${p}.${k}`, period: ctx.channels.period } }); else if (v && typeof v === 'object' && !Array.isArray(v)) walk(v, `${p}.${k}`, subj); } };
     walk(ctx.channels.socialWebsiteCombined, 'socialWebsiteCombined', 'social');
-    for (const u of ctx.channels.unassignedLeadSources ?? []) if (u && typeof u === 'object') walk(u, `unassigned.${u.source ?? u.name ?? ''}`, `name:${String(u.source ?? u.name ?? '').toLowerCase()}`);
+    for (const [metricKey, rk] of Object.entries(ctx.channels.ranking ?? {})) for (const nr of rk?.notRanked ?? []) if (typeof nr?.reason === 'string') fromTextLater.push([`${nr.channel}: ${nr.reason}`, { type: 'channel', id: `ranking.${metricKey}`, period: ctx.channels.period }, 'any', new Set([CH_SUBJ[nr.channel] ?? `name:${nr.channel}`])]);
+    for (const rule of ctx.channels.rules ?? []) if (typeof rule === 'string') fromTextLater.push([rule, { type: 'channel', id: 'rules', period: null }, 'any', null]);
+    for (const u of ctx.channels.unassignedLeadSources ?? []) if (u && typeof u === 'object') { const nm = String(u.source ?? u.name ?? '').toLowerCase(); const g = termsIn(nm, subjects); walk(u, `unassigned.${nm}`, g.size ? g : new Set([`name:${nm}`])); }
   }
 
   // text written by BrandPilot itself for this period: audit evidence, calculations, titles, confidence
@@ -263,7 +283,7 @@ export function buildPool(db, companyId, { range = '28', question = '', extraFac
     for (const n of extractNumbers(t)) {
       const a = aboutAt(normalize(t), n.start, subjects);
       const prevWords = /previous|before|earlier|السابقة|قبل/.test(a.sentence.toLowerCase());
-      add({ value: n.value, pct: n.pct, decimals: n.decimals, subj: a.subj.size || !defaultSubj ? a.subj : defaultSubj, metric: a.metric, ownMetric: a.ownMetric.size ? a.ownMetric : rateOf(a.metric, n.pct), period: perTag === 'cur' && prevWords && /this period|الفترة/i.test(a.sentence) ? 'any' : perTag, source: { ...source, label: t.slice(0, 300) } });
+      add({ value: n.value, pct: n.pct, decimals: n.decimals, time: TIME_AFTER.test(normalize(t).slice(n.end, n.end + 14)), subj: a.subj.size || !defaultSubj ? a.subj : defaultSubj, metric: a.metric, ownMetric: a.ownMetric.size ? a.ownMetric : rateOf(a.metric, n.pct), period: perTag === 'cur' && prevWords && /this period|الفترة/i.test(a.sentence) ? 'any' : perTag, source: { ...source, label: t.slice(0, 300) } });
     }
   };
   for (const [items, lang] of [[auditEn?.items ?? [], 'en'], [auditAr?.items ?? [], 'ar']]) {
@@ -286,6 +306,7 @@ export function buildPool(db, companyId, { range = '28', question = '', extraFac
       for (const a of i.assumptions ?? []) fromText(a, src, 'cur', dflt);
     }
   }
+  for (const [t, src, per, subj] of fromTextLater) fromText(t, src, per, subj);
   // approved facts (no period: they are true until their review date)
   for (const f of extraFacts ?? ctx.facts) fromText(f.text, { type: 'fact', id: f.id, period: null }, 'any');
   // the question itself, and the period's length
@@ -298,7 +319,7 @@ export function buildPool(db, companyId, { range = '28', question = '', extraFac
 export function factPool(facts) {
   const entries = [];
   for (const f of facts) {
-    for (const n of extractNumbers(f.text)) entries.push({ value: n.value, pct: n.pct, subj: new Set(), metric: new Set(), ownMetric: new Set(), period: 'any', source: { type: 'fact', id: f.id, label: f.text, period: null } });
+    for (const n of extractNumbers(f.text)) entries.push({ value: n.value, pct: n.pct, time: TIME_AFTER.test(normalize(f.text).slice(n.end, n.end + 14)), subj: new Set(), metric: new Set(), ownMetric: new Set(), period: 'any', source: { type: 'fact', id: f.id, label: f.text, period: null } });
   }
   return { entries, subjects: SUBJECTS, period: null };
 }
@@ -326,12 +347,15 @@ export function checkText(text, pool, { support = [] } = {}) {
     if (n.plain) continue;
     const about = aboutAt(t, n.start, pool.subjects);
     const after = t.slice(n.end, n.end + 12);
-    const cands = pool.entries.filter((e) => matches(n, e) && (!e.unit || e.unit.test(after)));
+    const isTime = TIME_AFTER.test(after);
+    const cands = pool.entries.filter((e) => matches(n, e) && (!e.unit || e.unit.test(after)) && (e.unit || !!e.time === isTime));
     const r = { raw: n.raw, start: n.start, end: n.end, value: n.value, pct: n.pct };
     if (!cands.length) { numbers.push({ ...r, status: 'unverified' }); continue; }
+    // a small count (0-10) is too common a value: it must also be about the same metric when the answer names one
+    const smallOk = (e) => n.pct || n.decimals || n.value > 10 || !about.sentMetric.size || overlap(about.sentMetric, e.metric) || overlap(about.sentMetric, e.ownMetric);
     const subjOk = (e) => !about.subj.size || !e.subj.size || overlap(about.subj, e.subj) || (e.subj.has('site') && !about.subj.size);
     const metricOk = (e) => !about.ownMetric.size || !e.ownMetric.size || overlap(about.ownMetric, e.ownMetric);
-    const fits = cands.filter((e) => subjOk(e) && metricOk(e));
+    const fits = cands.filter((e) => subjOk(e) && metricOk(e) && smallOk(e));
     const prevOk = PREV.test(about.sentence);
     const inPeriod = fits.filter((e) => e.period !== 'prev' || prevOk);
     const rank = (e) => (sup.has(`${e.source.type}:${e.source.id}`) ? 0 : 1) + (e.period === 'cur' ? 0 : 0.5) + (overlap(about.subj, e.subj) ? 0 : 0.25);
@@ -385,8 +409,8 @@ export function checkAnswer(text, pool, { claims = [], support = [] } = {}) {
   return { ...res, main, blocked: !!bad, reason: bad ? { code: bad.status, raw: bad.raw, ...(bad.actual ? { actual: bad.actual.label } : {}) } : null };
 }
 
-/** Counts for the trail (no text). */
-export const summary = (c) => ({ ...c.counts, blocked: !!c.blocked, ...(c.reason ? { reason: c.reason.code } : {}) });
+/** Counts for the trail; a held-back answer also keeps its full text and main claim, so the block can be reviewed. */
+export const summary = (c, text = null) => ({ ...c.counts, blocked: !!c.blocked, ...(c.reason ? { reason: c.reason.code, reasonNumber: c.reason.raw } : {}), ...(c.blocked && typeof text === 'string' ? { heldBack: text.slice(0, 8000), mainClaim: c.main ? text.slice(c.main[0], c.main[1]) : null } : {}) });
 
 const AR_DIG = (s) => String(s).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]).replace(/\./g, '٫').replace(/,/g, '٬');
 const fmt = (v, d = 0) => new Intl.NumberFormat('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);

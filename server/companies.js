@@ -13,6 +13,7 @@ import { createTrail, RULES_VERSION, TRAIL_KINDS } from './trail.js';
 import { createTrack, STEP_KINDS, WINDOWS } from './track.js';
 import { buildPool, checkAnswer, checkText, demoSample, summary as checkSummary } from './numcheck.js';
 import { rulesAnswer } from './rulesDirector.js';
+import { gaps } from './gaps.js';
 import { suggestThemes, cleanPosts } from './themes.js';
 import { draftBrief, cleanDraftRequest, polishPost, cleanPolishRequest } from './recs.js';
 import { suggestBrief, cleanSuggestRequest } from './campaignBrief.js';
@@ -287,6 +288,13 @@ export function createCompanies(
     res.json({ trail: rows });
   });
 
+  // P3 checkpoint 2: the "not enough data" items as what you have / what you need / what it unlocks.
+  router.get('/:id/gaps', requireCompany, (req, res) => {
+    const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+    const range = RANGES.includes(String(req.query.range)) ? String(req.query.range) : '28';
+    res.json({ range, items: gaps(db, req.company.id, { range, lang }) ?? [] });
+  });
+
   // P3: the Director's rules engine runs here (no AI model, or the AI failed): the server produces the answer, checks
   // its numbers and records it.
   router.post('/:id/director/rules', requireCompany, (req, res) => {
@@ -297,7 +305,7 @@ export function createCompanies(
     const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
     const r = rulesAnswer(db, req.company.id, { question, lang, range });
     const check = checkAnswer(r.text, buildPool(db, req.company.id, { range, question }), { support: r.support });
-    const trailId = trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: 'rules', promptVersion: RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer: r.text.slice(0, 2000), support: r.support.map((s) => `${s.type}:${s.id}`), insufficient: r.insufficient, check: checkSummary(check), producedBy: 'server' } });
+    const trailId = trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: 'rules', promptVersion: RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer: r.text.slice(0, 2000), support: r.support.map((s) => `${s.type}:${s.id}`), insufficient: r.insufficient, check: checkSummary(check, r.text), producedBy: 'server' } });
     res.json({ ...r, engine: 'rules', range, check, trailId });
   });
 
@@ -311,7 +319,7 @@ export function createCompanies(
     const pool = buildPool(db, req.company.id, { range });
     const checks = texts.map((t, i) => (i === 0 ? checkAnswer(t, pool) : { ...checkText(t, pool), main: null, blocked: false, reason: null }));
     const all = { counts: checks.reduce((a, c) => { for (const k of Object.keys(c.counts)) a[k] = (a[k] || 0) + c.counts[k]; return a; }, {}), blocked: checks[0].blocked, reason: checks[0].reason };
-    const trailId = source === 'import' ? trail.append(req.company.id, { kind: 'number_check', subject: 'import', userId: req.user.id, engine: 'rules', promptVersion: RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { source, range, texts: texts.length, ...checkSummary(all) } }) : null;
+    const trailId = source === 'import' ? trail.append(req.company.id, { kind: 'number_check', subject: 'import', userId: req.user.id, engine: 'rules', promptVersion: RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { source, range, texts: texts.length, ...checkSummary({ ...all, main: checks[0].main }, texts[0]) } }) : null;
     res.json({ checks, blocked: all.blocked, reason: all.reason, range, trailId });
   });
 
@@ -384,7 +392,7 @@ export function createCompanies(
       // P3: every number of the answer is checked against the same period; an unverified main claim blocks the answer
       const check = r && r.answer ? checkAnswer(r.answer, buildPool(db, req.company.id, { range, question }), { claims: r.claims, support: r.support }) : null;
       // P5: every answer is recorded: the model id and prompt version (or that nothing could be answered), the support
-      const trailId = r ? trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: r.model ?? 'none', promptVersion: r.model ? PROMPT_VERSION : null, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer: (r.answer ?? '').slice(0, 2000), support: r.support.map((s) => `${s.type}:${s.id}`), insufficient: !!r.insufficient, unsupported: !!r.unsupported, ...(check ? { check: checkSummary(check), claims: (r.claims ?? []).length } : {}) } }) : null;
+      const trailId = r ? trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: r.model ?? 'none', promptVersion: r.model ? PROMPT_VERSION : null, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer: (r.answer ?? '').slice(0, 2000), support: r.support.map((s) => `${s.type}:${s.id}`), insufficient: !!r.insufficient, unsupported: !!r.unsupported, ...(check ? { check: checkSummary(check, r.answer), claims: (r.claims ?? []).length } : {}) } }) : null;
       res.json(r && { ...r, ...(check ? { check } : {}), trailId });
     } catch (e) {
       if (!(e instanceof AiError)) throw e;

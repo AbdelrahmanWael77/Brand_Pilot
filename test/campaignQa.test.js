@@ -235,7 +235,7 @@ test('16b: a carousel slide with no button, caption or body is not asked for the
   assert.equal(by(run(campaign({ brief: { url: 'not a link' } }))).links.pass, false);
 });
 
-test('P3: every number in campaign copy must come from an approved fact; an invented one is flagged, without blocking downloads', () => {
+test('P3: every number in campaign copy must come from an approved fact; an invented one blocks downloads (EN)', () => {
   const ok = run();
   assert.equal(by(ok).numbers.pass, true);
   const c = campaign();
@@ -245,11 +245,29 @@ test('P3: every number in campaign copy must come from an approved fact; an inve
   const r = run(c);
   const n = by(r).numbers;
   assert.equal(n.pass, false);
-  assert.equal(n.advisory, true);
   assert.deepEqual(n.affected, [a0.id]);
   assert.deepEqual(n.numbers, ['4,500']);
-  assert.equal(r.failed, 0, 'advisory: not a failed check');
+  assert.equal(r.failed, 1, 'a failed check, like an unapproved fact');
+  assert.equal(r.exportable, false, 'downloads blocked');
   // the same number once it is an approved fact
   const r2 = run(c, [...FACTS, fact('proof', 'Used by 4,500 teams')]);
   assert.equal(by(r2).numbers.pass, true);
+  assert.equal(r2.exportable, true, 'approved with evidence: downloads open again');
+  // or the number is removed from the copy
+  a0.fields[k] = { ...a0.fields[k], v: a0.fields[k].v.replace(' Join 4,500 teams already using it.', '') };
+  assert.equal(by(run(c)).numbers.pass, true);
+});
+
+test('P3: the same in Arabic copy, with Arabic-Indic digits', () => {
+  const c = campaign();
+  const a = c.assets.find((x) => x.lang === 'ar');
+  const k = Object.keys(a.fields)[0];
+  a.fields[k] = { ...a.fields[k], v: a.fields[k].v + ' انضم إلى ٤٬٥٠٠ فريق يستخدمونه.' };
+  const r = run(c);
+  assert.equal(by(r).numbers.pass, false);
+  assert.deepEqual(by(r).numbers.affected, [a.id]);
+  assert.deepEqual(by(r).numbers.numbers, ['٤٬٥٠٠']);
+  assert.equal(r.exportable, false);
+  // an approved fact written with Western digits covers it
+  assert.equal(by(run(c, [...FACTS, fact('proof', 'يستخدمه 4,500 فريق')])).numbers.pass, true);
 });
