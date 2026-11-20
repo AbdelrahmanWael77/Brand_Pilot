@@ -240,6 +240,7 @@ export function confidence(q, L, fmt) {
   if (!q) return { level: 'med', why: L('Medium: rule-based, no sample size to weigh.', 'متوسطة: قاعدة ثابتة بلا حجم عينة للموازنة.') };
   if (q.rule) return { level: 'low', why: L('Low: not a conclusion — there is not enough data for this check yet.', 'منخفضة: ليست استنتاجاً — لا توجد بيانات كافية لهذا الفحص بعد.') };
   if (q.certain) return { level: 'high', why: L('High: ', 'عالية: ') + q.why };
+  if (q.level) return { level: q.level, why: { low: L('Low: ', 'منخفضة: '), med: L('Medium: ', 'متوسطة: '), high: L('High: ', 'عالية: ') }[q.level] + q.why };
   const sample = q.n / Math.max(1, q.min);
   const margin = q.margin ?? null;
   const cover = q.cover ?? null;

@@ -103,7 +103,7 @@ const breakdown = (rows, key) =>
  * @param {object[]} facts approved facts from `approvedFacts`
  * @param {{lang?: 'en'|'ar'}} [options] language of titles, reasons, actions, evidence and needs (default English)
  */
-export function computeAudit(data, facts, { lang = 'en', prev = null, findings = null, sources = null, defs = null, now = null, fmt = null, period = null, cover = null } = {}) {
+export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefore = null, periodEnd = null, findings = null, sources = null, defs = null, now = null, fmt = null, period = null, cover = null } = {}) {
   /** Wording in the asked language; the rules and numbers are the same. */
   const L = (en, ar) => (lang === 'ar' ? ar : en);
   /** Number wording: plain digits by default (unchanged for callers that pass no formatter); `audit()` passes the locale one. */
@@ -324,7 +324,50 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, findings =
 
   /* ---- Social (Meta) ---- */
   const m = data.meta;
-  if (!m.length) {
+  // Posting cadence (fix 2026-11-20, owner review of P1): a gap that started before the period is still a problem inside
+  // it, so with a period chosen the gaps are counted from the last post BEFORE the period (postedBefore); and a gap that
+  // is still open at the end of the period (no posts since) counts too (periodEnd). Without these options: as before.
+  const postingGap = (rows) => {
+    const days = [...new Set(rows.map((x) => x.date))].sort();
+    const seq = postedBefore ? [postedBefore, ...days] : days;
+    let gap = 0;
+    let after = '';
+    let open = false;
+    for (let i = 1; i < seq.length; i++) {
+      const d = dayDiff(seq[i - 1], seq[i]);
+      if (d > gap) { gap = d; after = seq[i - 1]; }
+    }
+    if (periodEnd && seq.length && seq[seq.length - 1] < periodEnd) {
+      const d = dayDiff(seq[seq.length - 1], periodEnd);
+      if (d > gap) { gap = d; after = seq[seq.length - 1]; open = true; }
+    }
+    return { days, seq, gap, after, open };
+  };
+  const cadenceItem = (rows, pg) => {
+    const where = postedBefore ? L('in this period', 'في هذه الفترة') : L('in the import', 'ضمن الاستيراد');
+    conclude('weak', 'meta', {
+      id: 'cadence',
+      q: pg.open
+        ? { level: 'med', why: L(`no posts in your imported data since ${pg.after}; if your last social export ended earlier, the gap may be in the export rather than in your posting.`, `لا منشورات في بياناتك المستوردة منذ ${pg.after}؛ إن كان آخر تصدير للمنشورات قد انتهى قبل ذلك فقد تكون الفجوة في التصدير لا في النشر.`) }
+        : { n: rows.length, min: 10, margin: pg.gap / T.cadenceMaxGap - 1, unit: L('posts', 'منشور') },
+      calc: [L(`Longest gap between posting days: ${n(pg.gap)} days (rule: more than ${n(T.cadenceMaxGap)})${postedBefore ? `, counted from the last post before this period (${postedBefore})` : ''}${pg.open ? `, still open on ${periodEnd}` : ''}`, `أطول فجوة بين أيام النشر: ${n(pg.gap)} يوماً (القاعدة: أكثر من ${n(T.cadenceMaxGap)})${postedBefore ? `، محسوبة من آخر منشور قبل هذه الفترة (${postedBefore})` : ''}${pg.open ? `، وما زالت مستمرة في ${periodEnd}` : ''}`)],
+      title: pg.open ? L(`No posts for ${n(pg.gap)} days`, `لا منشورات منذ ${n(pg.gap)} يوماً`) : L(`Posting stopped for ${n(pg.gap)} days`, `توقف النشر لمدة ${n(pg.gap)} يوماً`),
+      why: L('Irregular publishing makes results hard to read and gives followers no reason to expect you.', 'النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظارك.'),
+      action: L('Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.', 'اعتمد تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.'),
+      evidence: [
+        pg.open
+          ? { metric: 'posting_gap_days', value: pg.gap, text: L(`No posts since ${pg.after} (until ${periodEnd}).`, `لا منشورات منذ ${pg.after} (حتى ${periodEnd}).`) }
+          : { metric: 'posting_gap_days', value: pg.gap, text: L(`No posts between ${pg.after} and ${addDays(pg.after, pg.gap)}.`, `لا توجد منشورات بين ${pg.after} و ${addDays(pg.after, pg.gap)}.`) },
+        { metric: 'posts', value: rows.length, rows: rows.length, text: L(`${n(rows.length)} posts across ${n(pg.days.length)} posting days ${where}.`, `${n(rows.length)} منشور في ${n(pg.days.length)} يوم نشر ${where}.`) },
+      ],
+      ...(pg.open ? { assume: [L('Counts only the posts in your imported data.', 'يحسب فقط المنشورات الموجودة في بياناتك المستوردة.')] } : {}),
+    });
+  };
+  if (!m.length && postedBefore) {
+    // Social data exists, but no post falls in this period: the gap is the finding, not a missing connection.
+    const pg = postingGap(m);
+    if (pg.gap > T.cadenceMaxGap) cadenceItem(m, pg);
+  } else if (!m.length) {
     insufficient('no-meta', 'meta', L('Social performance is not connected', 'أداء وسائل التواصل غير مربوط'), L('Import a Meta Business Suite export in Integrations & Data.', 'استورد تصدير Meta Business Suite من «التكاملات والبيانات».'));
   } else {
     // Engagement per person reached. Posts tagged "campaign" are not a content theme.
@@ -356,34 +399,13 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, findings =
       });
     }
 
-    // Posting cadence: the longest gap between two posting days.
-    const days = [...new Set(m.map((x) => x.date))].sort();
-    if (days.length < 2) {
+    // Posting cadence: the longest gap between two posting days (see postingGap above).
+    const pg = postingGap(m);
+    const days = pg.days;
+    if (pg.seq.length < 2 && !pg.open) {
       insufficient('cadence', 'meta', L('Posting rhythm cannot be checked yet', 'لا يمكن فحص انتظام النشر بعد'), L('Posts from at least two different days are needed.', 'يلزم وجود منشورات من يومين مختلفين على الأقل.'));
     } else {
-      let gap = 0;
-      let after = '';
-      for (let i = 1; i < days.length; i++) {
-        const d = dayDiff(days[i - 1], days[i]);
-        if (d > gap) {
-          gap = d;
-          after = days[i - 1];
-        }
-      }
-      if (gap > T.cadenceMaxGap) {
-        conclude('weak', 'meta', {
-          id: 'cadence',
-          q: { n: m.length, min: 10, margin: gap / T.cadenceMaxGap - 1, unit: L('posts', 'منشور') },
-          calc: [L(`Longest gap between posting days: ${n(gap)} days (rule: more than ${n(T.cadenceMaxGap)})`, `أطول فجوة بين أيام النشر: ${n(gap)} يوماً (القاعدة: أكثر من ${n(T.cadenceMaxGap)})`)],
-          title: L(`Posting stopped for ${n(gap)} days`, `توقف النشر لمدة ${n(gap)} يوماً`),
-          why: L('Irregular publishing makes results hard to read and gives followers no reason to expect you.', 'النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظارك.'),
-          action: L('Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.', 'اعتمد تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.'),
-          evidence: [
-            { metric: 'posting_gap_days', value: gap, text: L(`No posts between ${after} and ${addDays(after, gap)}.`, `لا توجد منشورات بين ${after} و ${addDays(after, gap)}.`) },
-            { metric: 'posts', value: m.length, rows: m.length, text: L(`${n(m.length)} posts across ${n(days.length)} posting days in the import.`, `${n(m.length)} منشور في ${n(days.length)} يوم نشر ضمن الاستيراد.`) },
-          ],
-        });
-      }
+      if (pg.gap > T.cadenceMaxGap) cadenceItem(m, pg);
 
       // Engagement in the last 28 days of posts against the earlier baseline (campaign posts left out of the recent window, as in the browser).
       const cut = addDays(days[days.length - 1], -(T.recentDays - 1));
@@ -540,6 +562,8 @@ export function audit(db, companyId, { lang = 'en', range = 'all', now = null } 
     ...computeAudit(data, knowledge.approvedFacts(companyId), {
       lang,
       prev: p && p.prev && r !== 'all' ? { meta: all.meta.filter((x) => x.date >= p.prev[0] && x.date <= p.prev[1]) } : null,
+      postedBefore: r !== 'all' && p ? all.meta.map((x) => x.date).filter((d) => d < p.cur[0]).sort().pop() ?? null : null,
+      periodEnd: p ? p.cur[1] : null,
       findings: knowledge.listFacts(companyId),
       sources,
       defs: settings.qualified_def === null || settings.qualified_def === undefined ? null : { qualified: settings.qualified_def === 1 },

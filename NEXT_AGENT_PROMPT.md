@@ -1,3 +1,5 @@
+> 2026-11-20 P1 fix (posting gap) committed with its diff; NEXT = re-record the FlowNest baseline in its own commit, push, then STOP: the owner chooses who owns P2. Before P3: task P3-pre (Director uses the selected period).
+
 > 2026-11-19 P1 DONE and pushed (brand-pilot-56): server audit = only source of recommendations, evidence card, confidence, period, digits. npm test 371/371, npm run test:ui 2/2. STOP: wait for the owner. Next phase per owner order: P2 (4.5 and P3 skipped — no AI key). Diff: docs/ui-audit/p1-baseline-diff.md.
 
 > 2026-11-19 P1 checkpoint 1 DONE (brand-pilot-56): FlowNest baseline recorded (22 browser recommendations EN+AR, 15 server audit items) in test/fixtures/flownest/; npm test 362/362, npm run test:ui 1/1. STOP: the owner must approve before checkpoint 2 (rest of P1: server = only source of recommendations, evidence card, confidence + reason, period, Intl/digits per company). See IMPLEMENTATION_STATUS.md.

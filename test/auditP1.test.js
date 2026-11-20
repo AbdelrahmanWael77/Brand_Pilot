@@ -121,3 +121,34 @@ test('Arabic wording and Arabic-Indic digits when the company chose them; Wester
   assert.match(latn.ev[0], /60 استفسار من 1,200 جلسة \(5\.00%\)/);
   assert.equal(ar.confidence.level, latn.confidence.level);
 });
+
+test('posting gap: a gap that started before the period still shows in the period (owner review, 2026-11-20)', () => {
+  const post = (date) => ({ date, platform: 'facebook', theme: 'tips', language: 'en', reach: 100, engagements: 5, link_clicks: 1 });
+  // Period 2026-09-21 → 2026-10-18; the last post before it was on 2026-09-06; posting resumed on 2026-09-25.
+  const meta = ['2026-09-25', '2026-10-02', '2026-10-09', '2026-10-16'].map(post);
+  const opts = { postedBefore: '2026-09-06', periodEnd: '2026-10-18' };
+  const x = item(computeAudit({ ...none, meta }, [], opts).items, 'cadence');
+  assert.equal(x.title, 'Posting stopped for 19 days');
+  assert.equal(x.ev[0], 'No posts between 2026-09-06 and 2026-09-25.');
+  assert.equal(x.ev[1], '4 posts across 4 posting days in this period.');
+  assert.match(x.calc[0], /counted from the last post before this period \(2026-09-06\)/);
+  // without the last post before the period, the same rows show no gap (the behaviour that was a bug)
+  assert.equal(item(computeAudit({ ...none, meta }, [], {}).items, 'cadence'), undefined);
+});
+
+test('posting gap: no posts at all in the period but posts before it → "No posts for N days", not "not connected"', () => {
+  const items = computeAudit({ ...none, meta: [] }, [], { postedBefore: '2026-09-06', periodEnd: '2026-10-18' }).items;
+  const x = item(items, 'cadence');
+  assert.equal(x.title, 'No posts for 42 days');
+  assert.equal(x.ev[0], 'No posts since 2026-09-06 (until 2026-10-18).');
+  assert.equal(x.conf, 'med', 'the export may simply end earlier: not High');
+  assert.match(x.confidence.why, /^Medium: no posts in your imported data since 2026-09-06; if your last social export ended earlier/);
+  assert.ok(x.assumptions.includes('Counts only the posts in your imported data.'));
+  assert.equal(item(items, 'no-meta'), undefined, 'social data exists, so it is not "not connected"');
+  // a gap still open at the end of the period also counts when posts exist in it
+  const post = (date) => ({ date, platform: 'facebook', theme: 'tips', language: 'en', reach: 100, engagements: 5, link_clicks: 1 });
+  const open = item(computeAudit({ ...none, meta: [post('2026-09-22'), post('2026-09-24')] }, [], { postedBefore: '2026-09-20', periodEnd: '2026-10-18' }).items, 'cadence');
+  assert.equal(open.title, 'No posts for 24 days');
+  // no social data at all: still "not connected"
+  assert.ok(item(computeAudit({ ...none }, [], { periodEnd: '2026-10-18' }).items, 'no-meta'));
+});

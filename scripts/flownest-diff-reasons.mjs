@@ -9,7 +9,13 @@ wording. Every item now also carries its period, data used, calculation, assumpt
 
 **How to read the tables.** Part A compares like with like (all imported data) and so shows only what moving the
 rules changed. Part B shows what the screens' default period (the last 28 days, 2026-09-21 → 2026-10-18) changes
-on top of that. "position" is the item's place in the list (1 = first).`;
+on top of that. "position" is the item's place in the list (1 = first).
+
+**Correction after the owner's review (2026-11-20).** The first P1 version hid the posting gap in the 28-day view because
+the gap started before the period. That was wrong: a gap that started before the period is still happening inside it.
+With a period chosen, gaps are now counted from the last post before the period, and a gap still open at the end of the
+period counts too ("No posts for N days", Medium confidence, because the social export may simply end earlier). With no
+social posts at all in the period but posts before it, the item is the gap, not "Social performance is not connected".`;
 
 const WORDING = 'Wording: the server text is now the only wording (it was already the text of reports and the AI Director); same rule, same numbers.';
 const QUOTES = 'Typography only: the server writes straight quotes "…" where the browser used curly ones “…”; same text.';
@@ -41,6 +47,7 @@ export const REASONS = {
   'B:*:position': 'Order follows the priority score; it moved because confidence changed with the period or because items above it left the list.',
   'B:seg-best:removed': 'In the last 28 days no two customer segments reach 15 leads each, so the check cannot run. It now appears under “Not enough data yet” (“Customer segments cannot be compared yet” — two segments need 15+ leads each). With 90 days or all data it is a recommendation again.',
   'B:src-best:removed': 'In the last 28 days no lead source reaches 15 leads, so its quality cannot be judged. It now appears under “Not enough data yet” (“Lead sources cannot be compared yet”). With 90 days or all data it is a recommendation again.',
-  'B:cadence:removed': 'The 19-day posting gap (no posts between 2026-09-06 and 2026-09-25) starts before this period (from 2026-09-21); between the posting days inside the last 28 days no gap is longer than 14 days, so there is nothing to report for this period. With all data it is shown again.',
+  'B:cadence:ev': 'The 19-day gap (no posts between 2026-09-06 and 2026-09-25) started before the period (2026-09-21) and continued inside it, so it is shown in the 28-day view too, counted from the last post before the period (correction of 2026-11-20). The post count now covers this period.',
+  'B:cadence:conf': 'The 28-day sample is smaller, so the computed confidence changed. ' + CONF,
   'B:eng-drop:ev': 'With a period chosen, the engagement trend now compares this period with the period before it (as the KPI cards do: “vs the 28 days before”) instead of the last 28 days against all earlier posts. Before this change the rule could never run in the 28-day view.',
 };
