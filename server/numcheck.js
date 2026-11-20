@@ -80,7 +80,11 @@ export function extractNumbers(text) {
       const zeros = (intPart.match(/0+$/) || [''])[0].length;
       approxStep = Math.max(step, 10 ** zeros);
     }
-    out.push({ raw, start, end: start + m[0].trimEnd().length, value, decimals, step: approxStep, pct, plain: listMarker || year || small });
+    // a list number inside a line: right after the end of a sentence or a colon, followed by ")" ("… trust. 3) Visitors")
+    const inlineList = !pct && !decimals && /(^|[.:;!?؟،])\s*$/.test(t.slice(Math.max(0, start - 3), start)) && t[end] === ')';
+    // a day of a plan, not a figure: "Days 61-90", "At day 90", "اليوم 90", "الأيام 31-60" (a duration stated as data, "19 days", is still checked)
+    const planDay = !pct && !decimals && /(\bdays?|اليوم|الأيام|يوم|أيام)\s*(\d+\s*[-–]\s*)?$/i.test(t.slice(Math.max(0, start - 16), start));
+    out.push({ raw, start, end: start + m[0].trimEnd().length, value, decimals, step: approxStep, pct, plain: listMarker || inlineList || planDay || year || small });
   }
   return out;
 }
@@ -113,7 +117,8 @@ const METRICS = {
   impressions: ['impressions', 'impression', 'ظهور', 'مرات الظهور'],
   position: ['position', 'positions', 'rank', 'ranking', 'ترتيب', 'موضع', 'المركز', 'مركز'],
   engagement: ['engagement', 'engagements', 'تفاعل', 'التفاعل'],
-  reach: ['reach', 'الوصول'],
+  reach: ['reach', 'الوصول', 'وصول'],
+  projects: ['projects', 'project', 'مشاريع', 'مشروع', 'المشاريع'],
   spend: ['spend', 'spent', 'budget', 'إنفاق', 'الإنفاق', 'ميزانية'],
   posts: ['posts', 'post', 'منشور', 'منشورات', 'المنشورات'],
 };
@@ -354,11 +359,13 @@ export function checkText(text, pool, { support = [] } = {}) {
     // a small count (0-10) is too common a value: it must also be about the same metric when the answer names one
     const smallOk = (e) => n.pct || n.decimals || n.value > 10 || !about.sentMetric.size || overlap(about.sentMetric, e.metric) || overlap(about.sentMetric, e.ownMetric);
     const subjOk = (e) => !about.subj.size || !e.subj.size || overlap(about.subj, e.subj) || (e.subj.has('site') && !about.subj.size);
-    const metricOk = (e) => !about.ownMetric.size || !e.ownMetric.size || overlap(about.ownMetric, e.ownMetric);
+    const own = n.pct && about.ownMetric.has('enquiries') ? new Set([...about.ownMetric, 'enquiry_rate']) : about.ownMetric;
+    const metricOk = (e) => !own.size || !e.ownMetric.size || overlap(own, e.ownMetric);
     const fits = cands.filter((e) => subjOk(e) && metricOk(e) && smallOk(e));
     const prevOk = PREV.test(about.sentence);
     const inPeriod = fits.filter((e) => e.period !== 'prev' || prevOk);
-    const rank = (e) => (sup.has(`${e.source.type}:${e.source.id}`) ? 0 : 1) + (e.period === 'cur' ? 0 : 0.5) + (overlap(about.subj, e.subj) ? 0 : 0.25);
+    const sameMetric = (e) => overlap(about.metric, e.metric) || overlap(about.metric, e.ownMetric);
+    const rank = (e) => (sup.has(`${e.source.type}:${e.source.id}`) ? 0 : 1) + (e.period === 'cur' ? 0 : 0.5) + (overlap(about.subj, e.subj) ? 0 : 0.25) + (sameMetric(e) ? 0 : 1.5); // the metric outweighs a citation
     if (inPeriod.length) {
       const best = inPeriod.sort((a, b) => rank(a) - rank(b))[0];
       numbers.push({ ...r, status: 'verified', source: best.source });

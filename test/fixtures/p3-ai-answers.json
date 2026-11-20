@@ -1,5 +1,5 @@
 {
-  "note": "Real answers of claude-sonnet-5-5 on the synthetic FlowNest demo, last 28 days (21 Sep - 18 Oct 2026), recorded 2026-11-20 during P3 (prompts director-2026-11-20b and -20c; the last 20 are the false-alarm run of checkpoint 2). Every number in them is true; the number check must verify them all.",
+  "note": "Real answers of claude-sonnet-5-5 on the synthetic FlowNest demo, last 28 days (21 Sep - 18 Oct 2026), recorded 2026-11-20 during P3 (prompts director-2026-11-20b and -20c; answers 7-26 are the false-alarm run of checkpoint 2, answers 27-46 the held-out run of 2026-11-21). Every number in them is true; the number check must verify them all.",
   "answers": [
     {
       "lang": "en",
@@ -310,6 +310,243 @@
         "audit:lang",
         "fact:fjy12vto",
         "metric:spend"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "How healthy is our marketing overall?",
+      "answer": "Overall health is mixed. This view rests on demo data for 21 Sep to 18 Oct 2026. There is demand, but conversion leaks and measurement gaps hold results back.\nWhat works: the site had 4,774 sessions and 65 enquiries, a 1.36% enquiry rate. There were 48 leads, 16 of them qualified (33%). Email converts best, at 3.02%. \"How-to tips\" is the strongest content theme, with 4.5% engagement of reach.\nWhat needs attention: Organic Social brings 37% of sessions but only a 0.39% enquiry rate. Mobile is 62% of sessions and converts at 0.81%, against 2.27% on desktop. The /pricing page converts at 0.42%. Engagement is 3.1%, down from 4.1% in the period before, and posting stopped for 19 days. Search enquiry rate is 2.02%, against 2.6% in the previous period.\nWhat we cannot judge: spend is not measured, so cost per lead cannot be calculated. 27% of leads have no recorded source, and LinkedIn has no data. Your materials also state two trial lengths, 14 days and 7 days.",
+      "support": [
+        "metric:sessions",
+        "metric:enquiries",
+        "metric:enquiry_rate",
+        "metric:leads",
+        "audit:ch-leak",
+        "audit:mobile-gap",
+        "audit:eng-drop"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "When should we post, and how often?",
+      "answer": "The data cannot say which days or times to post. It has no day-of-week or time-of-day breakdown, so I can't recommend a posting schedule or an ideal frequency without guessing. What it does show is that posting was irregular: the audit found a 19-day stretch with no posts, and the 20 posts in this period fall on 20 different days. Engagement was 3.1% of reach this period against 4.1% in the previous period, but the cause is unknown. It could be the theme mix, the posting gap or platform changes. The audit recommends a fixed weekly calendar. For what to post, \"how-to tips\" is your strongest theme at 4.5% engagement across 7 posts, and Arabic posts earn more engagement (4.2%) than English ones (2.3%). To answer the timing question, export post data with the publishing date and time for each post.",
+      "support": [
+        "audit:cadence",
+        "audit:eng-drop",
+        "audit:theme-best",
+        "audit:lang"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "What should our next campaign be about?",
+      "answer": "Run a \"how-to tips\" campaign, led in Arabic, with one clear call to action and a dedicated landing page. How-to tips is your strongest theme: engagement of 4.5% of reach across 7 posts, against an account average of 3.1%. Arabic posts also earn more engagement than English ones: 4.2% across 8 posts versus 2.3% across 12 posts. Engagement shows awareness, not enquiries, so test whether it also brings enquiries. Organic Social visitors enquire at only 0.39%, against 1.36% for the whole site, so send campaign traffic to one landing page rather than general pages. Before launch, settle the trial length. Brand guidelines say to always state 14 days, but the 2024 brochure says 7 days. All of this rests on demo data. Spend was not measured, so cost per lead cannot be calculated.",
+      "support": [
+        "audit:theme-best",
+        "audit:lang",
+        "audit:ch-leak",
+        "audit:offer-conflict",
+        "fact:fhp1biq4"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "How many enquiries does email bring, and is it worth growing?",
+      "answer": "In this period, email brought 8 enquiries from 265 sessions, an enquiry rate of 3.02%. The site average is 1.36% (65 enquiries from 4,774 sessions), so email converts at more than twice the site average and is the highest-converting channel. It looks worth growing, but treat that as a first step: 8 enquiries is a small sample, and the data is demo data. Spend is not measured, so there is no cost per lead for email. The lead-source data also cannot judge email's lead quality, because a source needs 15+ leads before it can be compared.",
+      "support": [
+        "audit:ch-best",
+        "metric:enquiry_rate",
+        "audit:src-best"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Which customer segment should we target?",
+      "answer": "The data can't yet say which segment is best. The segment comparison needs at least two segments with 15 or more leads each, with the segment filled in on every lead, and that input is missing. This advice rests on demo data. The portfolio does give two directions to test. Agencies is the segment with repeated project experience: a Cairo creative agency (2025) and a digital marketing agency (2026). Logistics appears in one project but is missing from your stated audience, which today is small and medium-sized businesses in Egypt and the operations and project leads who coordinate their teams. To get a real answer, record the segment on each lead.",
+      "support": [
+        "audit:seg-best",
+        "audit:pf-depth",
+        "audit:pf-seg"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "What is our engagement rate on Instagram, and is it improving?",
+      "answer": "Instagram's engagement rate is 3.88% of reach in the period 2026-09-21 to 2026-10-18 (542 engagements on 13,952 reach, 10 posts). It is not improving: in the previous period it was 6.11% (544 engagements on 8,900 reach, 6 posts). Reach grew, but engagements stayed almost flat, so the rate fell. Instagram is still the best channel on engagement rate, ahead of Facebook at 2.47%. Platforms count engagement differently, so compare direction rather than exact values. The cause of the drop is unknown, and this is demo data.",
+      "support": [
+        "channel:instagram.engRate",
+        "channel:instagram.eng",
+        "channel:instagram.reach",
+        "channel:facebook.engRate",
+        "audit:plat-roles",
+        "audit:eng-drop"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "How much of our website traffic comes from organic social?",
+      "answer": "Organic Social made up about 37% of website sessions in the period 2026-09-21 to 2026-10-18. That is 1,781 of the site's 4,774 sessions. GA4 does not split these visits by platform, so we cannot say how many came from Facebook and how many from Instagram. These visits convert poorly: the enquiry rate is 0.39%, against 1.36% for the whole site. This is demo data.",
+      "support": [
+        "audit:ch-leak",
+        "metric:sessions",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Is our brand messaging consistent across our materials?",
+      "answer": "Only partly. Your tone of voice and brand colours are documented and approved, but the offer, the calls to action and some promotional claims differ between materials. The trial length is the clearest conflict: the website and brand guidelines say 14 days, while the 2024 brochure says 7 days. The materials also use three different calls to action: \"Start your free trial\", \"Contact sales\" and \"Request a demo\". The brochure also contains claims that are not approved: a #1 ranking and a guaranteed productivity result. Your brand guidelines say not to quote rankings or guaranteed results. Note that the company materials here are demo data.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:cta-mix",
+        "audit:claims",
+        "audit:brand-doc",
+        "fact:fhp1biq4",
+        "fact:fjkfcfkq"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "What are the biggest risks in our marketing right now?",
+      "answer": "The biggest risks are these, in order. 1) Your materials disagree on the offer: the website says a 14-day free trial, the 2024 brochure says 7 days. 2) The brochure contains unapproved claims, a \"#1 in Egypt\" ranking and a productivity guarantee, which can damage trust and breach ad platform policies. 3) Visitors are not turning into enquiries. Mobile is 62% of sessions but converts at 0.81% against 2.27% on desktop, and /pricing converts at 0.42% against a site average of 1.36%. 4) Measurement gaps: 27% of 48 leads have no recorded source, and spend is not measured, so cost per lead cannot be calculated. 5) Social momentum is slipping: posting stopped for 19 days, and engagement was 3.1% of reach against 4.1% in the previous period. The conversion, source, posting and engagement figures are demo data, so treat them as indicative.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:claims",
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "audit:src-unknown",
+        "audit:no-spend",
+        "audit:cadence",
+        "audit:eng-drop"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Give me a 30, 60 and 90-day plan.",
+      "answer": "This plan rests on demo (synthetic) data for 2026-09-21 to 2026-10-18.\n\nDays 1-30: fix the basics first, starting with the conflicting trial length, the mixed calls to action and the missing lead sources. Your website says a 14-day trial, the 2024 brochure says 7 days, and the brand guidelines say to always state 14 days. Choose one primary call to action, because \"Start your free trial\", \"Contact sales\" and \"Request a demo\" are all in use. Make the lead source a required field, because 27% of 48 leads have an empty source. Test the enquiry path on a phone: mobile is 62% of sessions and converts at 0.81%, against 2.27% on desktop. Fix /pricing, which has a 0.42% enquiry rate against 1.36% for the site.\n\nDays 31-60: use what already works. Send Organic Social visitors to a dedicated landing page, since their enquiry rate is 0.39% against 1.36% for the site. Publish more \"how-to tips\" posts, which get 4.5% engagement of reach against a 3.1% account average. Lead with Arabic, which earns 4.2% of reach against 2.3% for English, and test whether it also brings more enquiries. Restart a fixed weekly calendar after the 19-day posting gap. Improve the page for \"task board for teams\", which had 4,506 impressions and 81 clicks.\n\nDays 61-90: grow and measure. Put more effort into Email, where 8 enquiries came from 265 sessions (3.02%). Run a campaign aimed at Agencies that cites your approved projects, and add an outcome line to the 3 of 5 projects that have none. Add the spend column to your exports, because spend is not measured and cost per lead cannot be calculated yet. LinkedIn shows no post data and 0 leads, so decide whether it deserves a place in the plan. At day 90, compare engagement with this period's 3.1%; the previous period was 4.1%.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:cta-mix",
+        "audit:src-unknown",
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "audit:ch-leak",
+        "audit:theme-best",
+        "audit:ch-best"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما مستوى أداء تسويقنا بشكل عام؟",
+      "answer": "الصورة العامة مختلطة: هناك طلب فعلي على المنتج، لكن التحويل ضعيف في أكثر من نقطة. وكل ما يلي مبني على بيانات تجريبية.\nخلال آخر 28 يومًا سجّل الموقع 4774 جلسة و65 استفسارًا بمعدل استفسار 1.36%، ومعها 48 عميلًا محتملًا منهم 16 عميلًا مؤهلًا وعميلان.\nالإنفاق وتكلفة العميل المحتمل غير مقاسين، لذلك لا يمكن الحكم على كفاءة الميزانية.\nالبريد الإلكتروني هو الأفضل تحويلًا بمعدل استفسار 3.02% (8 استفسارات من 265 جلسة).\nفي المقابل، Organic Social يجلب 37% من الجلسات لكن معدل استفساره 0.39%. والجوال يشكّل 62% من الجلسات بمعدل استفسار 0.81% مقابل 2.27% لسطح المكتب. وصفحة /pricing معدل استفسارها 0.42%.\nتفاعل المنشورات 3.1% مقابل 4.1% في الفترة السابقة، وتوقف النشر 19 يومًا.\nمدة التجربة المجانية مذكورة 14 يومًا في الموقع و7 أيام في الكتيّب، ويجب توحيدها.\nالأولوية: حسّن مسار الاستفسار على الجوال وصفحة /pricing، ووجّه زوار التواصل الاجتماعي إلى صفحة هبوط مخصصة، ثم وحّد العرض.",
+      "support": [
+        "metric:sessions",
+        "metric:enquiries",
+        "metric:enquiry_rate",
+        "metric:leads",
+        "audit:ch-leak",
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "audit:ch-best"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "متى يجب أن ننشر، وكم مرة؟",
+      "answer": "لا أستطيع تحديد أفضل وقت للنشر ولا العدد المثالي من المنشورات، لأن البيانات لا تربط يوم النشر أو ساعته بالنتائج. المطلوب لذلك هو تاريخ ووقت كل منشور مع نتائجه. هذا ما تقوله البيانات حاليًا، وهي بيانات تجريبية: في هذه الفترة نُشر 20 منشورًا، وتوقف النشر 19 يومًا. النشر غير المنتظم يصعّب قراءة النتائج. لذلك ابدأ بتقويم أسبوعي ثابت، ثم قارن النتائج بعد عدة أسابيع. عند اختيار المحتوى، ركّز على موضوع \"how-to tips\" وهو الأقوى تفاعلًا.",
+      "support": [
+        "audit:cadence",
+        "audit:theme-best"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما موضوع حملتنا القادمة؟",
+      "answer": "أقترح أن تكون حملتك القادمة سلسلة نصائح الاستخدام العملية. هذا أقوى موضوع محتوى عندك: تفاعل 4.5% من الوصول مقابل متوسط 3.1% للحساب. انشرها بالعربية أولًا، فمنشورات العربية حققت 4.2% من الوصول (8 منشورات) مقابل 2.3% للإنجليزية (12 منشورًا). وجّه الحملة إلى الوكالات، فلديك مشاريع منجزة لوكالات يمكنك الاستشهاد بها دون ادعاءات غير مثبتة. اختم كل منشور بدعوة واحدة هي «ابدأ تجربتك المجانية»، واذكر مدة التجربة 14 يومًا كما في إرشادات العلامة، ووجّه الزوار إلى صفحة هبوط مخصصة بدل الصفحات العامة. تنبيه: التفاعل مؤشر وعي وليس دليلًا على الاستفسارات، وهذه التوصية مبنية على بيانات تجريبية.",
+      "support": [
+        "audit:theme-best",
+        "audit:lang",
+        "audit:pf-depth",
+        "fact:f6mrsrrh",
+        "fact:fhp1biq4"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "كم استفساراً يأتي من البريد الإلكتروني، وهل يستحق التوسع؟",
+      "answer": "في الفترة من 2026-09-21 إلى 2026-10-18 جاء من البريد الإلكتروني 8 استفسارات من 265 جلسة، أي معدل استفسار 3.02%. متوسط الموقع كله 1.36% (65 استفساراً من 4,774 جلسة). للمقارنة، سجّل البحث العضوي 31 استفساراً بمعدل 2.02%. هذه الأرقام مبنية على بيانات تجريبية.\n\nيستحق البريد الإلكتروني التوسع بحذر. معدله هو الأعلى بين القنوات المقاسة، لكن العينة صغيرة (8 استفسارات فقط)، فلا تبنِ عليها قراراً كبيراً. الإنفاق وتكلفة العميل المحتمل غير مقاسين، لذلك لا يمكن الحكم على الجدوى المالية. ابدأ بزيادة محتوى النشرة وتحسين الصفحات التي تقود إليها، ثم راقب هل يبقى المعدل مرتفعاً مع زيادة الجلسات.",
+      "support": [
+        "audit:ch-best",
+        "metric:spend",
+        "channel:search.enq"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "أي شريحة من العملاء يجب أن نستهدف؟",
+      "answer": "لا يمكنني تحديد الشريحة الأفضل من البيانات الآن. مقارنة الشرائح تحتاج إلى 15 عميلاً محتملاً على الأقل لكل شريحة، مع تسجيل الشريحة في بيانات كل عميل، وهذه النتيجة مبنية على بيانات تجريبية. أما من مصادرك، فالشريحة الوحيدة التي لها خبرة مشاريع متكررة هي Agencies، مثل مشروع وكالة إبداعية في القاهرة ومشروع وكالة تسويق رقمي. وتُظهر مشاريعك أيضاً قطاع Logistics، وهو غير مذكور في جمهورك المعتمد. جمهورك المعتمد حالياً هو الشركات الصغيرة والمتوسطة في مصر ومسؤولو العمليات والمشاريع. ابدأ بتسجيل الشريحة في كل عميل محتمل لتتمكن من المقارنة لاحقاً.",
+      "support": [
+        "audit:seg-best",
+        "audit:pf-depth",
+        "audit:pf-seg",
+        "fact:f3l9114h",
+        "fact:f6phueha"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما معدل التفاعل على إنستجرام، وهل يتحسن؟",
+      "answer": "معدل التفاعل على إنستجرام في آخر 28 يوماً هو 3.88% (542 تفاعلاً من وصول 13952). لا، هو لا يتحسن: كان في الفترة السابقة 6.11%. ارتفع الوصول من 8900 في الفترة السابقة إلى 13952، بينما بقي التفاعل شبه ثابت (544 في الفترة السابقة)، لذلك انخفض المعدل. ما زال إنستجرام أعلى من فيسبوك في التفاعل (2.47%). هذه الأرقام بيانات تجريبية، وسبب الانخفاض غير معروف من الأرقام المتاحة.",
+      "support": [
+        "channel:instagram.engRate",
+        "channel:instagram.eng",
+        "channel:instagram.reach",
+        "channel:facebook.engRate"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "كم من زيارات موقعنا يأتي من التواصل الاجتماعي؟",
+      "answer": "في الفترة من 2026-09-21 إلى 2026-10-18 بلغت الجلسات القادمة من التواصل الاجتماعي 1781 جلسة، من أصل 4774 جلسة للموقع كله، أي نحو 37%. من هذه الجلسات جاءت 7 استفسارات فقط، بمعدل استفسار 0.39% مقابل 1.36% لمتوسط الموقع. لا يمكن توزيع هذه الجلسات بين فيسبوك وإنستغرام، لأن جلسات كل منصة غير مقاسة. ولم يُسجَّل شيء من لينكدإن. هذه الأرقام مبنية على بيانات تجريبية.",
+      "support": [
+        "metric:sessions",
+        "audit:ch-leak"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "هل رسائل علامتنا متسقة في كل موادنا؟",
+      "answer": "لا، الرسائل غير متسقة بالكامل. التفاصيل:\n1. مدة التجربة المجانية: الموقع (الصفحة الإنجليزية) يذكر 14 يومًا، والكتيّب يذكر 7 أيام، بينما إرشادات العلامة تقول: يجب ذكر مدة التجربة دائمًا 14 يومًا.\n2. دعوات الإجراء متعددة: \"Start your free trial\" و\"Contact sales\" و\"Request a demo\". هذا يشتت الجمهور ويصعّب مقارنة النتائج بين القنوات. اختر دعوة أساسية واحدة واستخدمها في كل المواد.\n3. الكتيّب يحتوي ادعاءين غير معتمدين: ادعاء بالمرتبة الأولى وادعاء بنتيجة مضمونة. وهما يخالفان إرشادات العلامة التي تمنع ذكر الترتيب والنتائج المضمونة.\n4. نقطة إيجابية: نبرة الصوت والألوان موثقة ومعتمدة (واضحة وعملية وبلا وعود مبالغ فيها).\nملاحظة: هذه المواد مبنية على بيانات تجريبية.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:cta-mix",
+        "audit:claims",
+        "audit:brand-doc"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما أكبر المخاطر في تسويقنا الآن؟",
+      "answer": "أكبر المخاطر تبدأ من موادك نفسها. أولًا، عرض التجربة المجانية متضارب: الموقع يذكر 14 يومًا بينما الكتيّب يذكر 7 أيام. ثانيًا، الكتيّب فيه ادعاءات ترويجية غير معتمدة، وهي ترتيب «الأول» وضمان مضاعفة الإنتاجية، ولا ينبغي إعادة استخدامها. ثالثًا، في الأداء، وهنا الأرقام من بيانات تجريبية: زوار الجوال يمثلون 62% من الجلسات لكن معدل استفسارهم 0.81% مقابل 2.27% لسطح المكتب. صفحة /pricing معدل استفسارها 0.42% مقابل 1.36% لمتوسط الموقع. و27% من العملاء المحتملين بلا مصدر مسجل. رابعًا، الإنفاق غير مقيس، فلا يمكن حساب تكلفة العميل المحتمل. وأيضًا توقف النشر 19 يومًا، وانخفض التفاعل إلى 3.1% مقابل 4.1% في الفترة السابقة.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:claims",
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "audit:src-unknown",
+        "audit:no-spend",
+        "audit:cadence",
+        "audit:eng-drop"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "أعطني خطة لثلاثين وستين وتسعين يوماً.",
+      "answer": "الخطة مبنية على بيانات الفترة من 2026-09-21 إلى 2026-10-18، وأغلب أرقامها بيانات تجريبية.\nالشهر الأول، ثبّت الأساس: وحّد مدة التجربة، فالموقع يذكر 14 يوماً والكتيّب يذكر 7 أيام، وإرشادات العلامة تطلب ذكر 14 يوماً دائماً.\nاختر دعوة رئيسية واحدة للإجراء بدل الدعوات الثلاث المستخدمة الآن.\nسجّل مصدر كل عميل محتمل، فمصدر 27% من 48 عميلاً محتملاً فارغ.\nأضف عمود الإنفاق عند التصدير، فتكلفة العميل المحتمل غير مقاسة الآن.\nاستأنف النشر بجدول أسبوعي ثابت، فقد توقف النشر 19 يوماً.\nالشهر الثاني، أصلح التحويل: صفحة /pricing معدل الاستفسار فيها 0.42% مقابل 1.36% للموقع، فضع الدعوة الرئيسية أعلى الصفحة واختصر النموذج.\nوجّه زوار Organic Social إلى صفحة هبوط مخصصة، فمعدل الاستفسار لديهم 0.39%.\nاختبر مسار الاستفسار على الجوال، فمعدله 0.81% مقابل 2.27% على سطح المكتب.\nالشهر الثالث، وسّع ما ينجح: البريد الإلكتروني أعلى معدل استفسار بنسبة 3.02% من 265 جلسة، فاستثمر فيه أكثر.\nانشر بالعربية أكثر، فالتفاعل 4.2% مقابل 2.3% للإنجليزية، وركّز على محتوى «how-to tips» الذي بلغ تفاعله 4.5%.\nحسّن صفحة لعبارة البحث «برنامج إدارة المهام»، فلها 5,652 ظهوراً ونسبة نقر 0.9%.\nأطلق حملة موجهة للوكالات تعتمد على مشروعين معتمدين كدليل.\nلا تقارن المصادر ولا الشرائح قبل أن يتجاوز كل منها 15 عميلاً محتملاً.",
+      "support": [
+        "audit:offer-conflict",
+        "audit:page-leak",
+        "audit:ch-best"
       ]
     }
   ]

@@ -48,6 +48,11 @@ numbers; only the link shown on click was wrong.
 No English "demo", none of the loanwords the glossary replaces, no "أبدأ". Latin words only for names from the data
 (Organic Social, /pricing, "how-to tips").
 
-## After this report
+## After this report (separate commit)
 
-The false alarms and the two source links are fixed in a separate commit; these 20 answers join the fixture.
+Fixed: list numbers inside a line, plan day labels (EN and AR) no longer checked (a duration stated as data, "19 days",
+still is); a percentage in a clause about enquiries is an enquiry rate; "وصول" counts as reach; among equal values the
+source shown is the one about the same metric ("projects" is now a metric). Re-checked with the fixed code: held-out
+answers 184 numbers checked (7 plan days and list numbers are no longer counted), 0 flagged, 0 blocked; the
+checkpoint-2 answers still 195 / 0 / 0. These 20 answers join the fixture (46 real answers in all); the error tests
+(invented, wrong rounding, swapped, Arabic-Indic, fake percentage, other period) still pass.

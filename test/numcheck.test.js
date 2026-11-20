@@ -110,7 +110,7 @@ test('the six real AI answers of Phase 4.5 (claude-sonnet-5-5 on this demo data)
   assert.ok(n >= 60, `${n} numbers checked`);
 });
 
-test('two real answers with the structured-claims prompt (P3): every number verified, none blocked', () => {
+test('every real AI answer in the fixture (46: checkpoint 1, the false-alarm run, the held-out run): every number verified, none blocked', () => {
   const fx = JSON.parse(fs.readFileSync(new URL('./fixtures/p3-ai-answers.json', import.meta.url), 'utf8'));
   for (const a of fx.answers) {
     const c = checkAnswer(a.answer, buildPool(db, co, { range: '28', question: a.question }), { support: a.support });
@@ -131,6 +131,20 @@ test('the sentence shapes behind the false alarms of the 20-question run are rea
   // and the same shapes still catch swaps
   assert.notEqual(status('Facebook recorded 4 leads vs 12 on Instagram.')[0], '4:verified');
   assert.notEqual(status('Organic Social has an enquiry rate of 37%.')[0], '37%:verified');
+});
+
+test('the shapes behind the false alarms of the held-out run (2026-11-21), and the source shown for a number', () => {
+  assert.deepEqual(status('It can damage trust. 3) Visitors are not turning into enquiries.'), [], 'a list number inside a line');
+  assert.deepEqual(status('Days 61-90: grow and measure. At day 90, compare engagement.'), [], 'plan day labels');
+  assert.deepEqual(status('الأيام 61-90: قِس النتائج. في اليوم 90 قارن التفاعل.'), [], 'plan day labels in Arabic');
+  assert.deepEqual(status('Posting stopped for 19 days.'), ['19:verified'], 'a duration stated as data is still checked');
+  assert.deepEqual(status('سجّل البحث العضوي 31 استفساراً بمعدل 2.02%.'), ['31:verified', '2.02%:verified']);
+  assert.deepEqual(status('معدل التفاعل على إنستجرام 3.88% (542 تفاعلاً من وصول 13952).'), ['3.88%:verified', '542:verified', '13952:verified']);
+  // the same value exists elsewhere: the source shown is the one about the same metric
+  const eng = checkText('Lead with Arabic, which earns 4.2% of reach against 2.3% for English.', pool).numbers[1];
+  assert.notEqual(eng.source.id, 'mobile-gap', 'not the desktop enquiry rate');
+  const proj = checkText('Add an outcome line to the 3 of 5 projects that lack one.', pool).numbers;
+  assert.equal(proj.find((n) => n.raw === '3').source.id, 'pf-noout');
 });
 
 test('the main claim decides: an unverified number in it blocks the answer, elsewhere it is only marked', () => {
