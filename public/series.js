@@ -221,7 +221,7 @@
         if (pos[0] === 't') lh = h;
       }
     }
-    const face = (wt, px) => `${wt} ${px}px ${ar ? '"Noto Sans Arabic","Plus Jakarta Sans"' : '"Plus Jakarta Sans","Noto Sans Arabic"'},system-ui,sans-serif`;
+    const face = (wt, px) => `${wt} ${px}px ${ar ? '"IBM Plex Sans Arabic","Plus Jakarta Sans"' : '"Plus Jakarta Sans","IBM Plex Sans Arabic"'},system-ui,sans-serif`;
     g.direction = ar ? 'rtl' : 'ltr'; g.textAlign = ar ? 'right' : 'left'; g.textBaseline = 'alphabetic';
     const up = (s) => (st.upper && !ar ? String(s || '').toUpperCase() : String(s || ''));
     const textW = cover && lay === 'split' ? W * 0.48 - m : W - 2 * m;
@@ -1135,7 +1135,7 @@
     // Campaign Studio's "post in your content series" lane now points here.
     root.serLane = () => `<div class="card sx-pointer"><div><b>${L('Series posts have their own workspace', 'لمنشورات السلاسل مساحة عمل خاصة')}</b><p class="small">${L('AI Content Series: your signature style, a topic, a finished branded post.', 'سلاسل المحتوى الذكية: أسلوبك المميز وموضوع ومنشور جاهز بهويتك.')}</p></div><button class="btn pri" data-a="go" data-v="series">${L('Open AI Content Series', 'افتح سلاسل المحتوى الذكية')}</button></div>`;
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && S && S.ui && (S.ui.sxZ || S.ui.sxP) && S.ui.view === 'series') { e.stopImmediatePropagation(); if (S.ui.sxP) S.ui.sxP = null; else S.ui.sxZ = null; R(); } }, true);
-    if (document.fonts && document.fonts.load) Promise.all(['800 40px "Plus Jakarta Sans"', '500 20px "Plus Jakarta Sans"', '800 40px "Noto Sans Arabic"'].map((f) => document.fonts.load(f).catch(() => null))).then(() => paintAll());
+    if (document.fonts && document.fonts.load) Promise.all(['800 40px "Plus Jakarta Sans"', '500 20px "Plus Jakarta Sans"', '800 40px "IBM Plex Sans Arabic"'].map((f) => document.fonts.load(f).catch(() => null))).then(() => paintAll());
   }
 
   root.BPSeries = { install, view, draw, kitStyle, fixStyle, splitHead, paintAll };
