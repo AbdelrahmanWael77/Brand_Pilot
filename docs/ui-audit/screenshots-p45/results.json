@@ -1,0 +1,271 @@
+{
+  "model": {
+    "configured": true,
+    "provider": "anthropic",
+    "model": "claude-sonnet-5-5"
+  },
+  "promptVersion": "director-2026-11-20",
+  "leakCounts": {
+    "ANTHROPIC_API_KEY": {
+      "database": 0,
+      "apiResponsesToPage": 0,
+      "pageDomAndStorage": 0,
+      "serverConsole": 0,
+      "reportMarkdown": 0
+    },
+    "BRANDPILOT_OPENROUTER_API_KEY": {
+      "database": 0,
+      "apiResponsesToPage": 0,
+      "pageDomAndStorage": 0,
+      "serverConsole": 0,
+      "reportMarkdown": 0
+    },
+    "CLOUDFLARE_API_TOKEN": {
+      "database": 0,
+      "apiResponsesToPage": 0,
+      "pageDomAndStorage": 0,
+      "serverConsole": 0,
+      "reportMarkdown": 0
+    },
+    "CANVA_CLIENT_SECRET": {
+      "database": 0,
+      "apiResponsesToPage": 0,
+      "pageDomAndStorage": 0,
+      "serverConsole": 0,
+      "reportMarkdown": 0
+    },
+    "TOKEN_KEY": {
+      "database": 0,
+      "apiResponsesToPage": 0,
+      "pageDomAndStorage": 0,
+      "serverConsole": 0,
+      "reportMarkdown": 0
+    }
+  },
+  "answers": [
+    {
+      "n": 1,
+      "lang": "en",
+      "question": "What should we do first?",
+      "src": "ai",
+      "rulesLabelShown": false,
+      "roundTripMs": 8865,
+      "providerMs": 8389,
+      "tokens": {
+        "input": 12822,
+        "output": 1065
+      },
+      "model": "claude-sonnet-5-5",
+      "period": {
+        "from": "2026-09-21",
+        "to": "2026-10-18",
+        "range": "28",
+        "src": "ai"
+      },
+      "trail": {
+        "engine": "claude-sonnet-5-5",
+        "promptVersion": "director-2026-11-20",
+        "support": [
+          "audit:offer-conflict",
+          "fact:f1ucqdj7",
+          "fact:f26bhgbv",
+          "fact:fkbiuwcx",
+          "audit:claims",
+          "audit:page-leak",
+          "audit:mobile-gap",
+          "audit:src-unknown",
+          "metric:enquiry_rate"
+        ],
+        "insufficient": false
+      },
+      "answer": "Start with the quick fix that protects everything else: settle your offer. Your website says the free trial is 14 days, but the 2024 brochure says 7 days, and your brand guidelines say to always state 14 days. Approve the 14-day offer in Company knowledge and retire or correct the brochure. The same brochure also carries unapproved claims (\"#1 in Egypt\", \"guaranteed to double productivity\"), so reject those at the same time. This costs almost nothing and stops any campaign from going out with the wrong offer.\n\nSecond, fix where visitors already arrive and don't enquire. This advice rests on demo data for 21 Sep to 18 Oct 2026. The site-wide enquiry rate is 1.36%, but /pricing converts at only 0.42% on 1,676 sessions (35% of visits). Mobile visitors, 62% of sessions, enquire at 0.81% against 2.27% on desktop. Test the enquiry path on a phone and put one clear call to action at the top of /pricing.\n\nThird, add a required \"How did you hear about us?\" field. 27% of the 48 leads have no recorded source, so you cannot tell which channel is working."
+    },
+    {
+      "n": 2,
+      "lang": "en",
+      "question": "What is our cost per lead?",
+      "src": "ai",
+      "rulesLabelShown": false,
+      "roundTripMs": 4501,
+      "providerMs": 4040,
+      "tokens": {
+        "input": 12825,
+        "output": 401
+      },
+      "model": "claude-sonnet-5-5",
+      "period": {
+        "from": "2026-09-21",
+        "to": "2026-10-18",
+        "range": "28",
+        "src": "ai"
+      },
+      "trail": {
+        "engine": "claude-sonnet-5-5",
+        "promptVersion": "director-2026-11-20",
+        "support": [
+          "metric:spend",
+          "metric:cost_per_lead",
+          "metric:leads",
+          "metric:qualified_leads",
+          "audit:no-spend",
+          "channel:facebook.cpl",
+          "channel:instagram.cpl",
+          "channel:search.cpl"
+        ],
+        "insufficient": true
+      },
+      "answer": "We can't give you a cost per lead: it was not measured. No spend figure exists for 21 Sep to 18 Oct 2026, because the spend column is empty in all 20 imported social post rows. Cost per lead needs spend and leads tied to the same campaign. Leads were recorded in that period (48 in total, 16 of them qualified), but without spend the cost can't be calculated. It is also not zero. Per channel, cost per lead is also not available for Facebook, Instagram or search. To fix this, include the spend column when you export paid posts. This is based on demo data."
+    },
+    {
+      "n": 3,
+      "lang": "en",
+      "question": "Which channel brings us the most enquiries, and is it worth more effort?",
+      "src": "ai",
+      "rulesLabelShown": false,
+      "roundTripMs": 12954,
+      "providerMs": 11869,
+      "tokens": {
+        "input": 12839,
+        "output": 1551
+      },
+      "model": "claude-sonnet-5-5",
+      "period": {
+        "from": "2026-09-21",
+        "to": "2026-10-18",
+        "range": "28",
+        "src": "ai"
+      },
+      "trail": {
+        "engine": "claude-sonnet-5-5",
+        "promptVersion": "director-2026-11-20",
+        "support": [
+          "channel:search.enq",
+          "channel:search.sessions",
+          "channel:search.enqRate",
+          "channel:search.leads",
+          "channel:search.qshare",
+          "channel:instagram.qshare",
+          "channel:instagram.leads",
+          "channel:linkedin.leads",
+          "metric:enquiries",
+          "metric:enquiry_rate",
+          "metric:spend",
+          "audit:ch-best",
+          "audit:seo-q",
+          "audit:src-unknown"
+        ],
+        "insufficient": false
+      },
+      "answer": "Organic search brings the most enquiries we can attribute: 31 of the site's 65 in the period 21 Sep to 18 Oct 2026. It had 1,534 sessions and an enquiry rate of 2.02%, against a site average of 1.36%. Email converts best, at 3.02% (8 enquiries from 265 sessions), but its volume is small. Social visits convert worst: 7 enquiries from 1,781 sessions (0.39%). GA4 does not split those between Facebook and Instagram, so I can't credit either platform with enquiries. LinkedIn has no data and no recorded leads.\n\nSearch looks worth more effort, with caveats:\n- There is an opening. Queries like \"task board for teams\" and \"shared task board\" already show our pages at positions 7 to 9 but get only 1.8% to 2.2% of clicks, and the Arabic query \"برنامج إدارة المهام\" is at position 11.4 with 0.9%. Improving one page per query is the suggested step.\n- Search is slipping. Enquiries fell from 40 to 31 against the previous period, the enquiry rate from 2.6% to 2.02%, and leads from 15 to 12.\n- Search leads have the best qualified share (33%, 4 of 12). Facebook is at 25% and Instagram has 0 qualified leads, but only from 4 leads, too few to rank.\n- Spend is not measured, so I can't say whether more effort pays back in cost per lead.\n- Email is promising but should be treated as a small sample. Growing it is lower-risk than fixing a weak channel, but 8 enquiries is not much to judge on.\n\nAll of this rests on demo data. Also, 27% of leads have no recorded source, so channel credit may be understated."
+    },
+    {
+      "n": 4,
+      "lang": "ar",
+      "question": "ما الذي يجب أن نفعله أولاً؟",
+      "src": "ai",
+      "rulesLabelShown": false,
+      "roundTripMs": 11733,
+      "providerMs": 11223,
+      "tokens": {
+        "input": 12910,
+        "output": 1276
+      },
+      "model": "claude-sonnet-5-5",
+      "period": {
+        "from": "2026-09-21",
+        "to": "2026-10-18",
+        "range": "28",
+        "src": "ai"
+      },
+      "trail": {
+        "engine": "claude-sonnet-5-5",
+        "promptVersion": "director-2026-11-20",
+        "support": [
+          "audit:offer-conflict",
+          "fact:fkbiuwcx",
+          "fact:f1ucqdj7",
+          "fact:f26bhgbv",
+          "audit:page-leak",
+          "audit:mobile-gap",
+          "audit:src-unknown",
+          "metric:enquiry_rate",
+          "metric:spend"
+        ],
+        "insufficient": false
+      },
+      "answer": "أبدأ بخطوة رخيصة وسريعة: وحّد العرض. موادك تذكر مدتين مختلفتين للتجربة المجانية: 14 يومًا على الموقع و7 أيام في كتيّب الشركة 2024. إرشادات العلامة تنص على ذكر المدة 14 يومًا دائمًا. اعتمد عرض الـ14 يومًا (تجربة مجانية لمدة 14 يوم) في معرفة الشركة، وصحّح الكتيّب القديم أو اسحبه قبل أي حملة جديدة.\n\nبعد ذلك، عالج تسرّب الاستفسارات، لأن الزوار موجودون أصلًا. هذه الأرقام من بيانات تجريبية، فالنصيحة مبنية على بيانات demo:\n1. صفحة /pricing: معدل الاستفسار فيها 0.42% مقابل 1.36% لمتوسط الموقع. ضع زر الإجراء الرئيسي في أول الشاشة، وقصّر النموذج، واذكر العرض في الشاشة الأولى.\n2. الجوال: معدل الاستفسار 0.81% مقابل 2.27% على سطح المكتب، والجوال يشكّل 62% من الزيارات. جرّب مسار الاستفسار على هاتفك.\n3. سجّل مصدر كل عميل محتمل: 27% من الـ48 عميلًا محتملًا بلا مصدر، ولهذا لا يمكن نسب النتائج لقناة بدقة.\n\nتكلفة العميل المحتمل غير قابلة للحساب حاليًا لأن بيانات الإنفاق غير مقاسة."
+    },
+    {
+      "n": 5,
+      "lang": "ar",
+      "question": "كم تكلفة العميل المحتمل لدينا؟",
+      "src": "ai",
+      "rulesLabelShown": false,
+      "roundTripMs": 5680,
+      "providerMs": 5215,
+      "tokens": {
+        "input": 12911,
+        "output": 630
+      },
+      "model": "claude-sonnet-5-5",
+      "period": {
+        "from": "2026-09-21",
+        "to": "2026-10-18",
+        "range": "28",
+        "src": "ai"
+      },
+      "trail": {
+        "engine": "claude-sonnet-5-5",
+        "promptVersion": "director-2026-11-20",
+        "support": [
+          "metric:cost_per_lead",
+          "metric:spend",
+          "metric:leads",
+          "metric:qualified_leads",
+          "metric:customers",
+          "audit:no-spend",
+          "audit:src-unknown"
+        ],
+        "insufficient": true
+      },
+      "answer": "لا يمكن حساب تكلفة العميل المحتمل حاليًا، فهي غير مقاسة. السبب أن بيانات الإنفاق غير موجودة: عمود الإنفاق فارغ في كل صفوف المنشورات المستوردة، وبدون الإنفاق لا يمكن قسمته على العملاء المحتملين. المتوفر لدينا في الفترة من 21 سبتمبر إلى 18 أكتوبر 2026 هو 48 عميلًا محتملًا، منهم 16 مؤهلًا، وعميلان فقط تحولا إلى عملاء. لكن بلا إنفاق لا نعرف التكلفة، ولا يصح اعتبارها صفرًا. وهذه الأرقام كلها تجريبية (demo). لحساب التكلفة أضف عمود الإنفاق عند تصدير المنشورات المدفوعة، واربط الإنفاق والعملاء المحتملين بالحملة نفسها. كما أن 27% من العملاء المحتملين بلا مصدر مسجل، وهذا يصعّب نسبهم إلى قناة بعينها."
+    },
+    {
+      "n": 6,
+      "lang": "ar",
+      "question": "ما أكبر نقطة ضعف تسويقية لدينا؟",
+      "src": "ai",
+      "rulesLabelShown": false,
+      "roundTripMs": 14661,
+      "providerMs": 14121,
+      "tokens": {
+        "input": 12915,
+        "output": 2036
+      },
+      "model": "claude-sonnet-5-5",
+      "period": {
+        "from": "2026-09-21",
+        "to": "2026-10-18",
+        "range": "28",
+        "src": "ai"
+      },
+      "trail": {
+        "engine": "claude-sonnet-5-5",
+        "promptVersion": "director-2026-11-20",
+        "support": [
+          "metric:enquiry_rate",
+          "metric:enquiries",
+          "metric:sessions",
+          "metric:spend",
+          "audit:ch-leak",
+          "audit:mobile-gap",
+          "audit:page-leak",
+          "audit:offer-conflict",
+          "fact:fkbiuwcx"
+        ],
+        "insufficient": false
+      },
+      "answer": "أكبر نقطة ضعف في بيانات الفترة من 21 سبتمبر إلى 18 أكتوبر 2026 هي أن الزيارات لا تتحول إلى استفسارات. معدل التحويل في الموقع 1.36% فقط (65 استفساراً من 4,774 جلسة). والتسرّب يظهر في ثلاثة مواضع:\n\n- السوشيال العضوي: يمثل 37% من الجلسات، لكن معدل الاستفسار فيه 0.39%. السبب المحتمل أن المنشورات توجّه الناس إلى صفحات لا تطابق ما وعدت به، لكن هذه فرضية وليست قياساً.\n- الموبايل: يمثل 62% من الجلسات ومعدل الاستفسار فيه 0.81%، مقابل 2.27% على الديسكتوب.\n- صفحة /pricing: تستقبل 35% من الجلسات (1,676 جلسة) ومعدل الاستفسار فيها 0.42%.\n\nما تفعله أولاً: وجّه زيارات السوشيال إلى صفحة هبوط واحدة بدعوة واحدة للإجراء، وجرّب مسار الاستفسار على الهاتف، وضع الدعوة الرئيسية في أعلى صفحة /pricing.\n\nوهناك خطر آخر أسهل إصلاحاً: موادك تذكر عرضين مختلفين. الموقع يقول تجربة 14 يوماً والبروشور يقول 7 أيام. وتعليمات العلامة تنص على ذكر مدة التجربة 14 يوماً دائماً.\n\nكل أرقام الأداء هنا من بيانات تجريبية، لذا ابنِ عليها قراراتك بحذر. وتكلفة الاستفسار الواحد غير قابلة للحساب لأن الإنفاق غير مقاس."
+    }
+  ]
+}
