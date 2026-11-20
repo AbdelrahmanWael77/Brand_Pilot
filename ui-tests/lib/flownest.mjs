@@ -49,7 +49,7 @@ export async function withFlowNest(fn, { viewport = { width: 1366, height: 900 }
     const page = await (await browser.newContext({ viewport })).newPage();
     page.on('pageerror', (e) => errors.push(e.message));
     page.on('dialog', (d) => d.accept());
-    await page.goto(base);
+    await page.goto(base, { waitUntil: 'domcontentloaded' }); // not 'load': an external font request must not block the tests
     await page.waitForSelector('#authf');
     await page.click('#authMode');
     await page.fill('input[name=email]', 'flownest-baseline@example.test');

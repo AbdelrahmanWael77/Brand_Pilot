@@ -16,11 +16,12 @@ test('Arabic text uses IBM Plex Sans Arabic shipped with the app, not a font fro
 });
 
 test('one menu: five sections, then Data and Settings; every older screen is a tab of one section', () => {
-  assert.match(html, /const MENU=\(\)=>\[\['home','dash',L\('Home','الرئيسية'\),\['dash','analytics','growth'\]\],\['next','bulb',L\('Next steps','الخطوات التالية'\),\['audit','director','auto'\]\],\['camp','studio',L\('Campaigns','الحملات'\),\['studio','series','qa'\]\],\['rep','export',L\('Reports','التقارير'\),\['export'\]\],\['co','building',L\('Company','الشركة'\),\['onboard','know'\]\]\];/);
+  assert.match(html, /const MENU=\(\)=>\[\['home','dash',L\('Home','الرئيسية'\),\['dash','analytics','growth'\]\],\['next','bulb',L\('Next steps','الخطوات التالية'\),\['audit','director','auto'\]\],\['camp','studio',L\('Campaigns','الحملات'\),\['studio','series','qa'\]\],\['rep','export',L\('Reports','التقارير'\),\['reports'\]\],\['co','building',L\('Company','الشركة'\),\['onboard','know'\]\]\];/);
   assert.match(html, /const MENU_FOOT=\(\)=>\[\['data','db',L\('Data','البيانات'\),\['integ'\]\],\['set','trust',L\('Settings','الإعدادات'\),\['trust'\]\]\];/);
   // no screen is left without a section
-  const views = [...html.matchAll(/^V\.([a-z]+)=/gm)].map((m) => m[1]).filter((v) => !['dash0'].includes(v));
-  const inMenu = ['dash', 'analytics', 'growth', 'audit', 'director', 'auto', 'studio', 'series', 'qa', 'export', 'onboard', 'know', 'integ', 'trust'];
+  const views = [...html.matchAll(/^V\.([a-z]+)=/gm)].map((m) => m[1]).filter((v) => v !== 'export'); // export = the old screen; it now opens Check & download
+  const inMenu = ['dash', 'analytics', 'growth', 'audit', 'director', 'auto', 'studio', 'series', 'qa', 'reports', 'onboard', 'know', 'integ', 'trust'];
+  assert.match(html, /V\.export=c=>\{S\.ui\.view='qa';return V\.qa\(c\)\};/);
   for (const v of views) assert.ok(inMenu.includes(v), `screen ${v} has a place in the menu`);
 });
 

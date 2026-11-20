@@ -8,7 +8,7 @@ import { withFlowNest } from './lib/flownest.mjs';
 /** Section (sidebar item) → its tabs → the controls each tab must offer. */
 export const MENU_FEATURES = {
   dash: { label: 'Home', tabs: {
-    dash: ['.hk', '[data-c=range]'], // KPIs and period
+    dash: ['.hk', '[data-c=range]', '.hn .ns-i', '.hk-f [data-v=analytics]', '.hk-f [data-v=growth]'], // KPIs, period, your next step, all numbers, leads
     analytics: ['[data-a=pl]', '[data-c=mt]'], // platform tabs, trend metric
     growth: ['[data-c=def]', 'form[data-s=expAdd]'], // lead definitions, experiments
   } },
@@ -20,10 +20,10 @@ export const MENU_FEATURES = {
   studio: { label: 'Campaigns', tabs: {
     studio: ['[data-a=campNew], [data-a=stHome]'], // Studio home, or the open campaign with its way back
     series: ['[data-a=sxNewT]', 'form[data-s=sxCreate]'],
-    qa: ['[data-a=approveAll]'], // Brand QA (a campaign with assets exists in this test)
+    qa: ['[data-a=approveAll]', '#cdl [data-a=ex][data-v=zip]', '#cdl [data-a=ex][data-v=strategy]', '#cdl [data-a=ex][data-v=calendar]', '#cdl [data-a=ex][data-v=campjson]', '#cdl [data-a=jCamp]'], // Brand QA, then the campaign downloads and publishing schedule (a campaign with assets exists in this test)
   } },
-  export: { label: 'Reports', tabs: {
-    export: ['[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=ex]'],
+  reports: { label: 'Reports', tabs: {
+    reports: ['[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=repRange]', '[data-a=ex][data-v=exec]', '[data-a=ex][data-v=audit]', '[data-a=ex][data-v=knowledge]', '[data-a=ex][data-v=pkg]'],
   } },
   know: { label: 'Company', tabs: {
     onboard: ['[data-a=srcAdd]', '[data-a=discover]'],

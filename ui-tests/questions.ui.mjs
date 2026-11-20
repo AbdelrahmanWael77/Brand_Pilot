@@ -1,6 +1,6 @@
 // P2 (owner rule 2): each of the three questions is answered within 2 clicks of login, in English and Arabic.
 // The test starts every question from Settings (the worst place to land after login) and counts every click.
-// Checkpoint 1: questions 1 and 2. Question 3 (a campaign you can use) is added in checkpoint 2.
+// Q3: "Create campaign" on a recommendation makes the campaign and its drafts in English and Arabic in one click.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { withFlowNest } from './lib/flownest.mjs';
@@ -41,6 +41,31 @@ test('Q1 "How is my marketing doing?" and Q2 "What should I do next, and why?" i
       const why = await page.evaluate(() => { const d = document.querySelector('main .ns-list .ns-i:first-child .ns-why'); const e = d.querySelector('.evc'); return { open: d.open, calc: !!e && /÷/.test(e.innerText), conf: !!e && !!e.querySelector('.cf'), visible: !!e && e.getBoundingClientRect().height > 0 }; });
       assert.deepEqual(why, { open: true, calc: true, conf: true, visible: true }, `${lang} Q2: why — calculation and confidence`);
       assert.ok(clicks <= 2, `${lang} Q2 clicks ${clicks}`);
+    }
+    assert.deepEqual(errors, []);
+  });
+});
+
+test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create campaign gives drafts in English and Arabic, ready to download', { timeout: 300_000 }, async () => {
+  await withFlowNest(async ({ page, errors }) => {
+    for (const lang of ['en', 'ar']) {
+      await page.evaluate((l) => { if (S.lang !== l) A.lang(); OPENW.clear(); A.go('trust'); }, lang);
+      await page.waitForTimeout(400);
+      const before = await page.evaluate(() => C().campaigns.length);
+      let clicks = 0;
+      const click = async (sel) => { clicks++; await page.click(sel); await page.waitForTimeout(600); };
+      await click('#gside .gs-nav [data-a=go][data-v=audit]');
+      await page.waitForFunction(() => document.querySelector('main .ns-list [data-a=recCamp]'), null, { timeout: 15000 });
+      await click('main .ns-list [data-a=recCamp]');
+      const r = await page.evaluate(() => { const k = C().campaigns[C().campaigns.length - 1]; return { view: S.ui.view, n: C().campaigns.length, assets: k ? k.assets.length : 0, langs: k ? [...new Set(k.assets.map((a) => a.lang))].sort() : [], drafts: k ? k.assets.every((a) => a.status !== 'approved') : false, download: !!document.querySelector('main [data-a=aDl]'), rec: k && k.rec }; });
+      assert.equal(r.view, 'studio', `${lang} Q3: the campaign opens`);
+      assert.equal(r.n, before + 1);
+      assert.ok(r.assets > 0, `${lang} Q3: drafts made`);
+      assert.deepEqual(r.langs, ['ar', 'en'], `${lang} Q3: English and Arabic drafts`);
+      assert.ok(r.drafts, 'drafts are not approved by themselves');
+      assert.ok(r.download, `${lang} Q3: a download is on screen`);
+      assert.ok(r.rec, 'linked to the recommendation it came from');
+      assert.ok(clicks <= 2, `${lang} Q3 clicks ${clicks}`);
     }
     assert.deepEqual(errors, []);
   });
