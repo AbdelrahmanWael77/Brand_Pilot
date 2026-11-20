@@ -46,7 +46,7 @@ test('Q1 "How is my marketing doing?" and Q2 "What should I do next, and why?" i
   });
 });
 
-test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create campaign gives drafts in English and Arabic; downloads open once a person approves the strategy (owner decision 2026-11-21)', { timeout: 300_000 }, async () => {
+test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create campaign gives drafts in English and Arabic; downloads open once a person approves the strategy (owner decision 2026-11-20)', { timeout: 300_000 }, async () => {
   await withFlowNest(async ({ page, errors }) => {
     for (const lang of ['en', 'ar']) {
       await page.evaluate((l) => { if (S.lang !== l) A.lang(); OPENW.clear(); A.go('trust'); }, lang);

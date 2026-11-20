@@ -1,4 +1,4 @@
-// Owner rule (2026-11-21): fonts ship with the app. Opening every screen in English and Arabic (and the sign-in page)
+// Owner rule (2026-11-20): fonts ship with the app. Opening every screen in English and Arabic (and the sign-in page)
 // must not request anything from Google Fonts (fonts.googleapis.com / fonts.gstatic.com).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

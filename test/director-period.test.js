@@ -1,4 +1,4 @@
-// P3-pre (2026-11-21): the AI Director uses the same period as the screens. For the recorded FlowNest company and each
+// P3-pre (2026-11-20): the AI Director uses the same period as the screens. For the recorded FlowNest company and each
 // period (7, 28, 90 days, all data) the Director's context carries exactly the KPIs, recommendations and channel numbers
 // the screens show for that period, and an answer that cites a KPI is checked against that same period.
 import { test } from 'node:test';
@@ -14,8 +14,8 @@ import { buildContext, buildPrompt, ask } from '../server/director.js';
 const state = JSON.parse(readFileSync(new URL('./fixtures/flownest/state.json', import.meta.url), 'utf8'));
 function flownest() {
   const db = openDb(':memory:');
-  db.prepare("INSERT INTO users (id, email, password_hash, created_at) VALUES ('u', 'u@example.com', 'x', '2026-11-21')").run();
-  db.prepare("INSERT INTO companies (id, name, created_by, created_at) VALUES ('c', 'FlowNest', 'u', '2026-11-21')").run();
+  db.prepare("INSERT INTO users (id, email, password_hash, created_at) VALUES ('u', 'u@example.com', 'x', '2026-11-20')").run();
+  db.prepare("INSERT INTO companies (id, name, created_by, created_at) VALUES ('c', 'FlowNest', 'u', '2026-11-20')").run();
   createKnowledge(db).mirror('c', state);
   createData(db).mirror('c', state);
   return db;
