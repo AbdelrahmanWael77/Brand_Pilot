@@ -1,7 +1,7 @@
 {
  "about": "Recommendations BrandPilot produces for the synthetic FlowNest demo company (rules engine, no AI). Pre-P1 version: commit fc8a772. recs[range][lang] = what the screens list (since P1: the server audit) for all data and the last 28 days; server = GET /api/companies/:id/audit. Rebuild: node scripts/flownest-baseline.mjs --write",
- "recordedAt": "2026-11-19",
- "commit": "abd4440",
+ "recordedAt": "2026-11-20",
+ "commit": "cf0c4c4",
  "counts": {
   "sources": 6,
   "findings": 51,
@@ -869,6 +869,67 @@
      "confidence": {
       "level": "med",
       "why": "Medium: 10 posts (2.0× the minimum of 5), 46% past the threshold, data on 24 of 28 days."
+     },
+     "rule": false,
+     "engine": "rules",
+     "period": {
+      "from": "2026-09-21",
+      "to": "2026-10-18",
+      "range": "28",
+      "days": 28
+     },
+     "rows": {
+      "meta": 20
+     },
+     "sources": [],
+     "assumptions": [
+      "Reach and engagements are as Meta reports them; engagement is an awareness signal, not proof of enquiries."
+     ]
+    },
+    {
+     "id": "cadence",
+     "calc": [
+      "Longest gap between posting days: 19 days (rule: more than 14), counted from the last post before this period (2026-09-06)"
+     ],
+     "title": "Posting stopped for 19 days",
+     "why": "Irregular publishing makes results hard to read and gives followers no reason to expect you.",
+     "action": "Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.",
+     "evidence": [
+      {
+       "metric": "posting_gap_days",
+       "value": 19,
+       "text": "No posts between 2026-09-06 and 2026-09-25."
+      },
+      {
+       "metric": "posts",
+       "value": 20,
+       "rows": 20,
+       "text": "20 posts across 20 posting days in this period."
+      }
+     ],
+     "kind": "weak",
+     "basis": "data",
+     "synthetic": true,
+     "dataset": "meta",
+     "cls": "measured",
+     "plat": "Social posts",
+     "obj": "Relevant visibility",
+     "metric": "Longest gap between posts (days)",
+     "need": "None",
+     "v": 1,
+     "e": 2,
+     "f": 1,
+     "u": 2,
+     "score": 5,
+     "make": "task",
+     "ev": [
+      "No posts between 2026-09-06 and 2026-09-25.",
+      "20 posts across 20 posting days in this period."
+     ],
+     "conf": "med",
+     "confidence": {
+      "level": "med",
+      "why": "Medium: 20 posts (2.0× the minimum of 10), 36% past the threshold, data on 24 of 28 days."
      },
      "rule": false,
      "engine": "rules",
@@ -2036,6 +2097,67 @@
      "confidence": {
       "level": "med",
       "why": "متوسطة: 10 منشور (2.0 ضعف الحد الأدنى 5)، 46% بعد العتبة، بيانات 24 من 28 يوماً."
+     },
+     "rule": false,
+     "engine": "rules",
+     "period": {
+      "from": "2026-09-21",
+      "to": "2026-10-18",
+      "range": "28",
+      "days": 28
+     },
+     "rows": {
+      "meta": 20
+     },
+     "sources": [],
+     "assumptions": [
+      "الوصول والتفاعل كما تذكرهما Meta؛ والتفاعل مؤشر وعي وليس دليلاً على استفسارات."
+     ]
+    },
+    {
+     "id": "cadence",
+     "calc": [
+      "أطول فجوة بين أيام النشر: 19 يوماً (القاعدة: أكثر من 14)، محسوبة من آخر منشور قبل هذه الفترة (2026-09-06)"
+     ],
+     "title": "توقف النشر لمدة 19 يوماً",
+     "why": "النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظارك.",
+     "action": "اعتمد تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.",
+     "evidence": [
+      {
+       "metric": "posting_gap_days",
+       "value": 19,
+       "text": "لا توجد منشورات بين 2026-09-06 و 2026-09-25."
+      },
+      {
+       "metric": "posts",
+       "value": 20,
+       "rows": 20,
+       "text": "20 منشور في 20 يوم نشر في هذه الفترة."
+      }
+     ],
+     "kind": "weak",
+     "basis": "data",
+     "synthetic": true,
+     "dataset": "meta",
+     "cls": "measured",
+     "plat": "منشورات التواصل",
+     "obj": "ظهور ملائم",
+     "metric": "أطول فجوة بين المنشورات (أيام)",
+     "need": "لا شيء",
+     "v": 1,
+     "e": 2,
+     "f": 1,
+     "u": 2,
+     "score": 5,
+     "make": "task",
+     "ev": [
+      "لا توجد منشورات بين 2026-09-06 و 2026-09-25.",
+      "20 منشور في 20 يوم نشر في هذه الفترة."
+     ],
+     "conf": "med",
+     "confidence": {
+      "level": "med",
+      "why": "متوسطة: 20 منشور (2.0 ضعف الحد الأدنى 10)، 36% بعد العتبة، بيانات 24 من 28 يوماً."
      },
      "rule": false,
      "engine": "rules",

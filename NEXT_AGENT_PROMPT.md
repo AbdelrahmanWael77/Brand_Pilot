@@ -1,4 +1,4 @@
-> 2026-11-20 P1 fix (posting gap) committed with its diff; NEXT = re-record the FlowNest baseline in its own commit, push, then STOP: the owner chooses who owns P2. Before P3: task P3-pre (Director uses the selected period).
+> 2026-11-20 P1 fix (posting gap) + re-recorded baseline pushed. npm test 373/373, npm run test:ui 2/2. STOP: the owner chooses who owns P2 (see the P2 ownership proposal in chat). Before P3: task P3-pre.
 
 > 2026-11-19 P1 DONE and pushed (brand-pilot-56): server audit = only source of recommendations, evidence card, confidence, period, digits. npm test 371/371, npm run test:ui 2/2. STOP: wait for the owner. Next phase per owner order: P2 (4.5 and P3 skipped — no AI key). Diff: docs/ui-audit/p1-baseline-diff.md.
 
