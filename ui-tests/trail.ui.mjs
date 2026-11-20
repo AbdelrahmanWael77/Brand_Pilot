@@ -58,6 +58,32 @@ test('Settings → Activity comes from the server trail and shows recommendation
       for (let i = 0; i < 50 && !document.querySelector('[data-trail-card] [data-trail=fact_decision]'); i++) await new Promise((r) => setTimeout(r, 100));
     }, fid);
     assert.ok(await page.evaluate(() => !!document.querySelector('main [data-trail-card] [data-trail=fact_decision]')), 'fact decision listed');
+    // owner 2026-11-20: Activity is in Settings only; Tasks → History and Home link to it; browser notes are not shown
+    for (const lang of ['en', 'ar']) {
+      const where = await page.evaluate(async (l) => {
+        if (S.lang !== l) A.lang();
+        const out = {};
+        for (const v of ['auto', 'dash']) {
+          A.go(v);
+          await new Promise((r) => setTimeout(r, 300));
+          const link = document.querySelector('main [data-a=seeAct]');
+          out[v] = { card: !!document.querySelector('main [data-trail-card]'), link: link ? link.textContent.trim() : null, notes: document.querySelector('main').innerHTML.includes('act-old') };
+        }
+        document.querySelector('main [data-a=seeAct]').click();
+        await new Promise((r) => setTimeout(r, 400));
+        out.after = { view: S.ui.view, card: !!document.querySelector('main [data-trail-card]') };
+        out.browserNotes = [...document.querySelectorAll('main')].some((m) => C().activity.some((a) => a.en && m.innerText.includes(L(a.en, a.ar))));
+        return out;
+      }, lang);
+      const label = lang === 'ar' ? 'اعرض النشاط في الإعدادات' : 'See activity in Settings';
+      for (const v of ['auto', 'dash']) {
+        assert.equal(where[v].card, false, `${lang} ${v}: no activity card outside Settings`);
+        assert.equal(where[v].link, label, `${lang} ${v}: link to Settings`);
+        assert.equal(where[v].notes, false);
+      }
+      assert.deepEqual(where.after, { view: 'trust', card: true });
+      assert.equal(where.browserNotes, false, `${lang}: browser notes are not shown`);
+    }
     assert.deepEqual(errors, []);
   });
 });

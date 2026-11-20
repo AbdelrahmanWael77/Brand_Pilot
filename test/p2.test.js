@@ -46,7 +46,10 @@ test('fonts ship with the app: no file in public/ points at Google Fonts', async
 });
 
 test('strategy gate (owner 2026-11-20): drafts do not approve the strategy; campaign downloads need it', () => {
-  assert.match(html, /const stratOk=k=>!!k&&\(k\.approved===true\|\|!!k\.kind\)&&!factGate\(C\(\),k\);/); // P4: and every linked fact still approved
+  // P4: and every linked fact still approved; P5 fix: and the server has recorded the approval (its trail id)
+  assert.match(html, /const stratOk=k=>!!k&&k\.approved===true&&!!k\.stratTrail&&!factGate\(C\(\),k\);/);
+  assert.doesNotMatch(html, /k\.approved=true;k\.approvedAt=Date\.now\(\);k\.factIds=campFacts\(c,k\);stratTrail/); // Generate no longer approves by itself
+  assert.ok(html.includes("const r=await api('POST','/api/companies/'+c.id+'/campaigns/'+encodeURIComponent(k.id)+'/approve-strategy'"));
   assert.doesNotMatch(html, /camp\.approved=true;camp\.versions\.push\(\{n:1/); // generating drafts no longer approves
   assert.ok(html.includes("if(['zip','calendar','campjson'].includes(kind)&&k&&!stratOk(k))return toast(GATE(),'err');"));
   assert.ok(html.includes("aDl(id){if(!stratOk(curCamp(C())))return toast(GATE(),'err');"));
