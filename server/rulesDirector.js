@@ -12,6 +12,7 @@ import { metrics } from './metrics.js';
 import { approvedFacts } from './knowledge.js';
 import { dataRows } from './data.js';
 import { portfolio } from './auditMeta.js';
+import { gaps } from './gaps.js';
 
 const fmtN = (v) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(v);
 const pct = (q, n) => (n ? `${((q / n) * 100).toFixed(0)}%` : '—');
@@ -61,7 +62,8 @@ export function rulesAnswer(db, companyId, { question, lang = 'en', range = '28'
   }
   if (/additional data|data do you need|missing data|what data|بيانات (إضافية|ناقصة)|ما البيانات/.test(t)) {
     const g = A.filter((x) => x.basis === 'insufficient');
-    return R(L('Data that would improve my decisions', 'بيانات تحسّن قراراتي'), g.length ? g.map((x) => `- **${x.title}** — ${x.needs || x.need || ''}`).join('\n') : L('All core datasets are present. The next improvement is sales outcomes per lead.', 'كل البيانات الأساسية موجودة. التحسين التالي هو نتائج المبيعات لكل عميل.'), { used: [L('Measurement completeness checks', 'فحوص اكتمال القياس')], actions: [integ], cls: 'fact', support: sup(...g) });
+    const gs = gaps(db, companyId, { range, lang }) ?? [];
+    return R(L('Data that would improve my decisions', 'بيانات تحسّن قراراتي'), gs.length ? gs.map((x) => `**${x.title}**\n- ${L('What you have', 'ما لديك')}: ${x.have}\n- ${L('What you need', 'ما تحتاجه')}: ${x.need}\n- ${L('What it unlocks', 'ما الذي يتيحه')}: ${x.unlocks}`).join('\n\n') : L('All core datasets are present. The next improvement is sales outcomes per lead.', 'كل البيانات الأساسية موجودة. التحسين التالي هو نتائج المبيعات لكل عميل.'), { used: [L('Measurement completeness checks', 'فحوص اكتمال القياس')], actions: [integ], cls: 'fact', support: sup(...g) });
   }
   if (/create.*campaign|أنشئ.*حملة|launch.*campaign/.test(t)) {
     const x = find('seg-best') || ranked.find((y) => y.make === 'campaign');
