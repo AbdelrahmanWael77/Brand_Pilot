@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
+import { TRAIL_SCHEMA } from './trail.js';
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
@@ -160,6 +161,7 @@ const ADDED_COLUMNS = [
 
 export function initSchema(db) {
   db.exec(SCHEMA);
+  db.exec(TRAIL_SCHEMA); // P5: the append-only audit trail
   for (const [table, col, type] of ADDED_COLUMNS) {
     const has = db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === col);
     if (!has) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`);

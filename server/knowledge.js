@@ -19,6 +19,9 @@
  * "approved" finding is stored as `pending` and reported back as downgraded.
  */
 
+import crypto from 'node:crypto';
+import { createTrail } from './trail.js';
+
 const STATUSES = ['pending', 'approved', 'rejected'];
 const MAX_ID = 200;
 
@@ -77,6 +80,7 @@ const isoDay = (t) => new Date(t).toISOString().slice(0, 10);
 const isDate = (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v + 'T00:00:00Z'));
 
 export function createKnowledge(db) {
+  const trail = createTrail(db); // P5: every recorded decision is also written to the append-only trail
   const q = {
     approvals: db.prepare(
       `SELECT a.fact_id, a.status, a.by_user, a.at, a.review_by, a.legacy, u.email FROM fact_approvals a
@@ -93,7 +97,7 @@ export function createKnowledge(db) {
        review_by = excluded.review_by, legacy = 0`,
     ),
     undecide: db.prepare('DELETE FROM fact_approvals WHERE company_id = ? AND fact_id = ?'),
-    oneFact: db.prepare('SELECT id, type, ev, status FROM facts WHERE company_id = ? AND id = ?'),
+    oneFact: db.prepare('SELECT id, type, ev, status, text FROM facts WHERE company_id = ? AND id = ?'),
     deleteSources: db.prepare('DELETE FROM sources WHERE company_id = ?'),
     deleteFacts: db.prepare('DELETE FROM facts WHERE company_id = ?'),
     insertSource: db.prepare(
@@ -178,17 +182,25 @@ export function createKnowledge(db) {
     const today = isoDay(now);
     const max = isoDay(now + REVIEW.maxDays * DAY);
     const out = [];
+    const batch = crypto.randomUUID(); // P5: the decisions of one request share a batch in the trail
     // The first recorded decision starts tracking: what the browser state shows as approved now was approved before.
     if (!q.since.get(companyId)?.approvals_since) {
       const now0 = new Set(decisions.map((d) => d.id)); // decided in this request: recorded as this person's
-      for (const f of q.facts.all(companyId, 'approved', 'approved')) if (!now0.has(f.id)) q.legacy.run(companyId, f.id);
+      const legacy = [];
+      for (const f of q.facts.all(companyId, 'approved', 'approved')) if (!now0.has(f.id)) { q.legacy.run(companyId, f.id); legacy.push(f.id); }
       q.setSince.run(companyId, new Date(now).toISOString());
+      trail.append(companyId, { kind: 'tracking_started', userId, now: new Date(now), dataHash: trail.fingerprint(companyId), detail: { legacy: legacy.length, factIds: legacy } });
     }
     const recs = new Map(q.approvals.all(companyId).map((a) => [a.fact_id, a]));
     for (const d of decisions) {
       const f = q.oneFact.get(companyId, d.id);
       if (!f) { out.push({ id: d.id, error: 'not_found' }); continue; }
-      if (d.status === 'pending') { q.undecide.run(companyId, d.id); out.push({ id: d.id }); continue; }
+      if (d.status === 'pending') {
+        // only a decision that existed is recorded as withdrawn
+        if (q.undecide.run(companyId, d.id).changes) trail.append(companyId, { kind: 'fact_decision', subject: d.id, userId, batch, now: new Date(now), dataHash: trail.fingerprint(companyId), detail: { status: 'pending', text: f.text } });
+        out.push({ id: d.id });
+        continue;
+      }
       if (d.status === 'approved' && !hasEvidence(f)) { out.push({ id: d.id, error: 'no_evidence' }); continue; }
       // the browser re-sends what it shows as approved; that never turns "approved before tracking began" into a new
       // approval — only an explicit re-approval (with a review date) does
@@ -200,6 +212,7 @@ export function createKnowledge(db) {
         if (!isDate(reviewBy) || reviewBy <= today || reviewBy > max) { out.push({ id: d.id, error: 'invalid_review' }); continue; }
       }
       q.decide.run(companyId, d.id, d.status, userId, new Date(now).toISOString(), reviewBy);
+      trail.append(companyId, { kind: 'fact_decision', subject: d.id, userId, batch, now: new Date(now), dataHash: trail.fingerprint(companyId), detail: { status: d.status, reviewBy, text: f.text, reapproval: prev?.status === 'approved' } });
       out.push({ id: d.id });
     }
     const by = new Map(listFacts(companyId, null, { now }).map((x) => [x.id, x]));
@@ -208,10 +221,12 @@ export function createKnowledge(db) {
 
   const tracked = (companyId) => !!q.since.get(companyId)?.approvals_since;
   /** Demo mode only (the route checks it): an approved, recorded fact gets yesterday as its review date. */
-  function demoExpire(companyId, factId, { now = Date.now() } = {}) {
-    if (!q.oneFact.get(companyId, factId)) return { error: 'not_found' };
+  function demoExpire(companyId, factId, { now = Date.now(), userId = null } = {}) {
+    const f = q.oneFact.get(companyId, factId);
+    if (!f) return { error: 'not_found' };
     const r = db.prepare("UPDATE fact_approvals SET review_by = ? WHERE company_id = ? AND fact_id = ? AND status = 'approved'").run(isoDay(now - DAY), companyId, factId);
     if (!r.changes) return { error: 'not_approved' };
+    trail.append(companyId, { kind: 'fact_decision', subject: factId, userId, now: new Date(now), dataHash: trail.fingerprint(companyId), detail: { status: 'demo_expired', reviewBy: isoDay(now - DAY), text: f.text } });
     return { fact: listFacts(companyId, null, { now }).find((f) => f.id === factId) };
   }
   return { mirror, listFacts, decide, tracked, demoExpire, approvedFacts: (companyId, o) => listFacts(companyId, 'approved', o) };

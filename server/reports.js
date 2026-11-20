@@ -7,11 +7,14 @@
  */
 import crypto from 'node:crypto';
 import { buildReport, RANGES, REPORT_LANGS } from './report.js';
+import { createTrail } from './trail.js';
+import { audit } from './audit.js';
 
 /** Newest snapshots kept per company; older ones are deleted when a new one is saved. */
 export const REPORTS_MAX = 50;
 
 export function createReports(db) {
+  const trail = createTrail(db);
   const q = {
     insert: db.prepare('INSERT INTO reports (id, company_id, range, lang, auto, created_at, data) VALUES (?, ?, ?, ?, ?, ?, ?)'),
     list: db.prepare('SELECT id, range, lang, auto, created_at, data FROM reports WHERE company_id = ? ORDER BY created_at DESC, rowid DESC'),
@@ -28,17 +31,22 @@ export function createReports(db) {
     auto: r.auto === 1,
     createdAt: r.created_at,
     period: data.period ?? null,
+    trailId: data.trail?.report ?? null, // P5: the trail row of this save (null for reports saved before the trail)
     synthetic: !!data.synthetic,
   });
 
   /** Builds the report now and stores it. Returns the list entry, or null for an unknown company. */
-  function save(companyId, { range = '28', lang = 'en', auto = false, now = new Date() } = {}) {
+  function save(companyId, { range = '28', lang = 'en', auto = false, now = new Date(), userId = null } = {}) {
     if (!RANGES.includes(range) || !REPORT_LANGS.includes(lang)) throw new TypeError('invalid report options');
     const data = buildReport(db, companyId, { range, now, lang });
     if (!data) return null;
     const row = { id: crypto.randomUUID(), range, lang, auto: auto ? 1 : 0, created_at: data.generatedAt };
     db.exec('BEGIN');
     try {
+      // P5: the recommendations this report rests on, as recorded in the audit trail (recorded now if new)
+      const recs = trail.recordRecs(companyId, range, audit(db, companyId, { lang, range, now }).items, { now });
+      data.trail = { batch: recs.batch, ids: recs.ids };
+      data.trail.report = trail.append(companyId, { kind: 'report', subject: row.id, userId, now, engine: 'rules', dataHash: trail.fingerprint(companyId), batch: recs.batch, detail: { range, lang, auto: !!auto, recommendations: Object.keys(recs.ids).length } });
       q.insert.run(row.id, companyId, row.range, row.lang, row.auto, row.created_at, JSON.stringify(data));
       q.trim.run(companyId, companyId, REPORTS_MAX);
       db.exec('COMMIT');

@@ -39,7 +39,8 @@ test('a saved report is a snapshot: it keeps its numbers when the data changes l
   assert.equal(res.status, 201);
   const { report: saved } = await res.json();
   assert.match(saved.id, /^[0-9a-f-]{36}$/);
-  assert.deepEqual({ ...saved, id: 0, createdAt: 0 }, { id: 0, range: 'all', lang: 'ar', auto: false, createdAt: 0, period: { from: '2026-11-01', to: '2026-11-01', days: 1 }, synthetic: false });
+  assert.match(saved.trailId, /^[0-9a-f-]{36}$/); // P5: the save is a trail row
+  assert.deepEqual({ ...saved, id: 0, createdAt: 0, trailId: 0 }, { id: 0, range: 'all', lang: 'ar', auto: false, createdAt: 0, period: { from: '2026-11-01', to: '2026-11-01', days: 1 }, synthetic: false, trailId: 0 });
 
   await put(companyId, ga4(9000)); // the company's data changes after the save
 

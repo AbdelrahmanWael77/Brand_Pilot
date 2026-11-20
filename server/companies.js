@@ -8,7 +8,8 @@ import { createReports } from './reports.js';
 import { campaignQa } from './campaignQa.js';
 import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
-import { buildContext, ask, ASK, cleanHistory } from './director.js';
+import { buildContext, ask, ASK, cleanHistory, PROMPT_VERSION } from './director.js';
+import { createTrail, RULES_VERSION, TRAIL_KINDS } from './trail.js';
 import { suggestThemes, cleanPosts } from './themes.js';
 import { draftBrief, cleanDraftRequest, polishPost, cleanPolishRequest } from './recs.js';
 import { suggestBrief, cleanSuggestRequest } from './campaignBrief.js';
@@ -37,6 +38,7 @@ export function createCompanies(
   const askLimiter = createLimiter(askLimit); // AI questions per user
   const extractLimiter = createLimiter(extractLimit); // AI source readings per user
   const reports = createReports(db);
+  const trail = createTrail(db);
   const reportLimiter = createLimiter(reportLimit); // saved reports per user
   /** One report in the asked format: JSON, a Markdown download, or a printable page. */
   const sendReport = (res, report, format, lang) => {
@@ -199,7 +201,7 @@ export function createCompanies(
     const wait = reportLimiter.retryAfter(req.user.id);
     if (wait) return res.status(429).set('Retry-After', String(wait)).json({ error: 'too_many_attempts' });
     reportLimiter.hit(req.user.id);
-    res.status(201).json({ report: reports.save(req.company.id, { range, lang }) });
+    res.status(201).json({ report: reports.save(req.company.id, { range, lang, userId: req.user.id }) });
   });
   router.get('/:id/reports', requireCompany, (req, res) => {
     res.json({ reports: reports.list(req.company.id) });
@@ -243,7 +245,55 @@ export function createCompanies(
     if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
     const range = req.query.range === undefined ? 'all' : req.query.range;
     if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
-    res.json(audit(db, req.company.id, { lang, range }));
+    const a = audit(db, req.company.id, { lang, range });
+    // P5: recorded in the audit trail when the inputs changed since the last record (the body stays the audit itself)
+    if (a) res.set('X-Trail-Batch', trail.recordRecs(req.company.id, range, a.items).batch);
+    res.json(a);
+  });
+
+  // P5: the company's audit trail, newest first (append-only: there is no route that changes or removes a row).
+  router.get('/:id/trail', requireCompany, (req, res) => {
+    const lang = req.query.lang === 'ar' ? 'ar' : 'en';
+    const limit = Number.parseInt(String(req.query.limit ?? '100'), 10) || 100;
+    if (req.query.batch !== undefined) return res.json({ trail: trail.batch(req.company.id, String(req.query.batch), lang) });
+    let rows = trail.list(req.company.id, { limit: req.query.kind ? 500 : limit, lang });
+    if (req.query.kind !== undefined) {
+      if (!TRAIL_KINDS.includes(String(req.query.kind))) return res.status(400).json({ error: 'invalid_kind' });
+      rows = rows.filter((r) => r.kind === req.query.kind).slice(0, limit);
+    }
+    res.json({ trail: rows });
+  });
+
+  // P5: an answer of the rules engine (it runs in the page when no AI model is set up) is recorded like an AI answer.
+  router.post('/:id/trail/answer', requireCompany, (req, res) => {
+    const b = req.body ?? {};
+    const question = typeof b.question === 'string' ? b.question.trim() : '';
+    if (!question || question.length > ASK.question) return res.status(400).json({ error: 'invalid_question' });
+    const lang = b.lang ?? 'en';
+    if (lang !== 'en' && lang !== 'ar') return res.status(400).json({ error: 'invalid_lang' });
+    const range = RANGES.includes(String(b.range)) ? String(b.range) : '28';
+    const ids = (Array.isArray(b.support) ? b.support : []).filter((x) => typeof x === 'string' && x.length <= 200).slice(0, 50);
+    const answer = typeof b.answer === 'string' ? b.answer.slice(0, 2000) : '';
+    const local = b.engine === 'endpoint'; // the owner's own local endpoint, set up in Settings
+    const id = trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: local ? 'local endpoint' : 'rules', promptVersion: local ? null : RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer, support: ids, insufficient: b.insufficient === true } });
+    res.status(201).json({ trailId: id });
+  });
+
+  // P5: a person approves a campaign's strategy. Recorded in the trail with the facts the campaign uses. The browser
+  // sends the name and fact ids too, because the campaign may reach the server's copy only with the next save.
+  router.post('/:id/campaigns/:cid/approve-strategy', requireCompany, (req, res) => {
+    const cid = String(req.params.cid).slice(0, 200);
+    const known = campaigns.get(req.company.id, cid);
+    const name = known?.name ?? (typeof req.body?.name === 'string' ? req.body.name.trim().slice(0, 300) : '');
+    if (!name) return res.status(404).json({ error: 'not_found' });
+    const asked = Array.isArray(req.body?.factIds) ? req.body.factIds.filter((x) => typeof x === 'string').slice(0, 200) : known?.factIds ?? [];
+    // only facts that are approved now count; the rest are listed as not approved
+    const ok = new Set(knowledge.approvedFacts(req.company.id).map((f) => f.id));
+    const factIds = asked.filter((x) => ok.has(x));
+    const notApproved = asked.filter((x) => !ok.has(x));
+    if (notApproved.length) return res.status(409).json({ error: 'facts_not_approved', factIds: notApproved });
+    const id = trail.append(req.company.id, { kind: 'strategy_approval', subject: cid, userId: req.user.id, dataHash: trail.fingerprint(req.company.id), detail: { name, factIds, mirrored: !!known } });
+    res.status(201).json({ trailId: id });
   });
 
   // What the AI Marketing Director is allowed to know about this company: approved facts, KPIs, audit items.
@@ -265,7 +315,10 @@ export function createCompanies(
     try {
       // The period the owner is looking at (P3-pre): KPIs, recommendations and channels all cover it (default 28 days).
       const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
-      res.json(await ask(db, ai, req.company.id, { question, lang, range, history: cleanHistory(req.body.history) }));
+      const r = await ask(db, ai, req.company.id, { question, lang, range, history: cleanHistory(req.body.history) });
+      // P5: every answer is recorded: the model id and prompt version (or that nothing could be answered), the support
+      const trailId = r ? trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: r.model ?? 'none', promptVersion: r.model ? PROMPT_VERSION : null, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer: (r.answer ?? '').slice(0, 2000), support: r.support.map((s) => `${s.type}:${s.id}`), insufficient: !!r.insufficient, unsupported: !!r.unsupported } }) : null;
+      res.json(r && { ...r, trailId });
     } catch (e) {
       if (!(e instanceof AiError)) throw e;
       // The provider's own message stays in the server log.
@@ -378,7 +431,7 @@ export function createCompanies(
   // Without demo mode the route does not exist (404), like any unknown path.
   router.post('/:id/facts/:fid/demo-expire', requireCompany, (req, res) => {
     if (!demo) return res.status(404).json({ error: 'not_found' });
-    const r = knowledge.demoExpire(req.company.id, String(req.params.fid));
+    const r = knowledge.demoExpire(req.company.id, String(req.params.fid), { userId: req.user.id });
     if (r.error) return res.status(r.error === 'not_found' ? 404 : 409).json({ error: r.error });
     res.json({ fact: r.fact });
   });

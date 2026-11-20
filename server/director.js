@@ -234,6 +234,9 @@ export function isEmptyContext(context) {
  * `history` = earlier turns of the same conversation (cleanHistory): only for what a follow-up refers to.
  * → `{ answer, support: [{ type, id, text, synthetic }], insufficient, unsupported, synthetic, model, next, needs? }`
  */
+/** P5: changes whenever buildPrompt's instructions change; stored with every AI answer in the audit trail. */
+export const PROMPT_VERSION = 'director-2026-11-20';
+
 export async function ask(db, ai, companyId, { question, lang = 'en', range = '28', history = [] }) {
   const context = buildContext(db, companyId, { range });
   if (!context) return null;

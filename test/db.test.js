@@ -11,7 +11,7 @@ test('schema init is idempotent', () => {
     .prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
     .all()
     .map((r) => r.name);
-  assert.deepEqual(tables, ['app_settings', 'campaign_assets', 'campaign_mirror', 'campaigns', 'companies', 'company_settings', 'company_state', 'data_mirror', 'data_rows', 'fact_approvals', 'facts', 'memberships', 'report_schedules', 'reports', 'sessions', 'sources', 'users']);
+  assert.deepEqual(tables, ['app_settings', 'campaign_assets', 'campaign_mirror', 'campaigns', 'companies', 'company_settings', 'company_state', 'data_mirror', 'data_rows', 'fact_approvals', 'facts', 'memberships', 'report_schedules', 'reports', 'sessions', 'sources', 'trail', 'trail_marks', 'users']);
   db.close();
 });
 
