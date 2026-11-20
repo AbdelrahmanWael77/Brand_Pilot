@@ -14,6 +14,12 @@
  * SCORE_MIN evaluated steps on.
  *
  * Attribution limits: a result says what happened after a step, not that the step caused it.
+ *
+ * Demo history (owner 2026-11-20): the synthetic FlowNest demo ends before today, so its own steps would only ever be
+ * waiting. In demo mode only (BRANDPILOT_DEMO=1), for the FlowNest demo company only (state.demo === 'flownest' and every
+ * data row synthetic), seedDemo() saves DEMO_STEPS earlier steps from the company's own recommendations, started inside
+ * its synthetic data. Their baselines come from the same plan code and they are evaluated by the same evaluateDue();
+ * nothing is hard-coded. Every such step, and its trail rows, is marked demo.
  */
 import crypto from 'node:crypto';
 import { createData, KINDS } from './data.js';
@@ -25,6 +31,9 @@ export const SCORE_MIN = 5;
 export const MIN_CHANGE = 0.05;
 export const WINDOWS = [7, 14, 28, 56, 90];
 export const STEP_KINDS = ['campaign', 'task'];
+export const DEMO_STEPS = 5;
+/** Which FlowNest recommendations the demo history uses, in this order (the first DEMO_STEPS that have a number to move). */
+export const DEMO_RECS = ['mobile-gap', 'ch-leak', 'page-leak', 'seo-q', 'eng-drop', 'src-unknown', 'ch-best', 'cadence', 'theme-best'];
 
 
 const addDays = (d, n) => {
@@ -98,8 +107,10 @@ export function createTrack(db) {
   const trail = createTrail(db);
   const q = {
     insert: db.prepare(`INSERT INTO track_steps (id, company_id, kind, ref, rec_id, title_en, title_ar, metric, scope_key, scope_value, direction,
-      baseline, baseline_n, baseline_from, baseline_to, target, window_days, start, window_end, created_by, created_at, data_hash)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`),
+      baseline, baseline_n, baseline_from, baseline_to, target, window_days, start, window_end, created_by, created_at, data_hash, demo)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`),
+    demoCount: db.prepare('SELECT COUNT(*) n FROM track_steps WHERE company_id = ? AND demo = 1'),
+    synthetic: db.prepare('SELECT COUNT(*) n, COALESCE(SUM(synthetic), 0) s, MIN(date) first, MAX(date) last FROM data_rows WHERE company_id = ?'),
     byRef: db.prepare('SELECT * FROM track_steps WHERE company_id = ? AND kind = ? AND ref = ?'),
     list: db.prepare('SELECT * FROM track_steps WHERE company_id = ? ORDER BY created_at DESC, rowid DESC'),
     pending: db.prepare('SELECT * FROM track_steps WHERE company_id = ? AND outcome IS NULL AND metric IS NOT NULL'),
@@ -119,7 +130,7 @@ export function createTrack(db) {
    * Save the plan when a recommendation becomes a campaign or a task. Idempotent per (kind, ref): the first plan stays.
    * → { step } | { error: 'not_found' (no such recommendation now) | 'invalid' }
    */
-  function start(companyId, userId, { recId, kind, ref, range = '28', windowDays = 28 }, { now = new Date() } = {}) {
+  function start(companyId, userId, { recId, kind, ref, range = '28', windowDays = 28 }, { now = new Date(), startAt = null, demo = false } = {}) {
     if (!STEP_KINDS.includes(kind) || typeof ref !== 'string' || !ref || ref.length > 200 || typeof recId !== 'string') return { error: 'invalid' };
     if (!WINDOWS.includes(windowDays)) return { error: 'invalid' };
     const old = q.byRef.get(companyId, kind, ref);
@@ -129,7 +140,7 @@ export function createTrack(db) {
     if (!item) return { error: 'not_found' };
     const ar = audit(db, companyId, { lang: 'ar', range, now })?.items.find((x) => x.id === recId);
     const plan = planFor(item);
-    const startDay = isoDay(now);
+    const startDay = startAt ?? isoDay(now); // startAt: demo history only (a start inside the synthetic data)
     const windowEnd = addDays(startDay, windowDays - 1);
     let baseline = null;
     let baselineN = null;
@@ -151,9 +162,9 @@ export function createTrack(db) {
     db.exec('SAVEPOINT track_start');
     try {
       q.insert.run(id, companyId, kind, ref, recId, item.title, ar?.title ?? null, plan?.metric ?? null, plan?.scopeKey ?? null, plan?.scopeValue ?? null, plan?.dir ?? null,
-        baseline, baselineN, bFrom, bTo, plan ? targetOf(baseline, plan.dir) : null, windowDays, startDay, windowEnd, userId, now.toISOString(), trail.fingerprint(companyId));
+        baseline, baselineN, bFrom, bTo, plan ? targetOf(baseline, plan.dir) : null, windowDays, startDay, windowEnd, userId, startAt ? `${startDay}T09:00:00.000Z` : now.toISOString(), trail.fingerprint(companyId), demo ? 1 : 0);
       const s = q.byRef.get(companyId, kind, ref);
-      trail.append(companyId, { kind: 'step_tracked', subject: recId, userId, now, engine: 'rules', dataHash: s.data_hash, detail: { stepId: id, stepKind: kind, ref, title: { en: s.title_en, ar: s.title_ar }, metric: s.metric, scope: s.scope_key ? { [s.scope_key]: s.scope_value } : null, direction: s.direction, baseline: s.baseline, baselineN: s.baseline_n, baselinePeriod: s.baseline_from ? [s.baseline_from, s.baseline_to] : null, target: s.target, window: [s.start, s.window_end] } });
+      trail.append(companyId, { kind: 'step_tracked', subject: recId, userId, now, engine: 'rules', dataHash: s.data_hash, detail: { ...(demo ? { demo: true } : {}), stepId: id, stepKind: kind, ref, title: { en: s.title_en, ar: s.title_ar }, metric: s.metric, scope: s.scope_key ? { [s.scope_key]: s.scope_value } : null, direction: s.direction, baseline: s.baseline, baselineN: s.baseline_n, baselinePeriod: s.baseline_from ? [s.baseline_from, s.baseline_to] : null, target: s.target, window: [s.start, s.window_end] } });
       db.exec('RELEASE track_start');
     } catch (e) {
       db.exec('ROLLBACK TO track_start');
@@ -175,7 +186,7 @@ export function createTrack(db) {
       const outcome = enough ? judge(s.baseline, m.value, s.direction) : 'inconclusive';
       db.exec('SAVEPOINT track_eval');
       try {
-        const tid = trail.append(companyId, { kind: 'evaluation', subject: s.rec_id, now, engine: 'rules', dataHash: trail.fingerprint(companyId), detail: { stepId: s.id, stepKind: s.kind, ref: s.ref, title: { en: s.title_en, ar: s.title_ar }, metric: s.metric, scope: s.scope_key ? { [s.scope_key]: s.scope_value } : null, direction: s.direction, baseline: s.baseline, baselineN: s.baseline_n, baselinePeriod: [s.baseline_from, s.baseline_to], result: m.value, resultN: m.n, window: [s.start, s.window_end], outcome, minChange: MIN_CHANGE } });
+        const tid = trail.append(companyId, { kind: 'evaluation', subject: s.rec_id, now, engine: 'rules', dataHash: trail.fingerprint(companyId), detail: { ...(s.demo ? { demo: true } : {}), stepId: s.id, stepKind: s.kind, ref: s.ref, title: { en: s.title_en, ar: s.title_ar }, metric: s.metric, scope: s.scope_key ? { [s.scope_key]: s.scope_value } : null, direction: s.direction, baseline: s.baseline, baselineN: s.baseline_n, baselinePeriod: [s.baseline_from, s.baseline_to], result: m.value, resultN: m.n, window: [s.start, s.window_end], outcome, minChange: MIN_CHANGE } });
         q.evaluate.run(outcome, m.value, m.n, now.toISOString(), tid, s.id);
         db.exec('RELEASE track_eval');
         done++;
@@ -186,6 +197,28 @@ export function createTrack(db) {
       }
     }
     return done;
+  }
+
+  /**
+   * Demo history: only call it in demo mode (the route checks BRANDPILOT_DEMO). Saves DEMO_STEPS earlier steps for the
+   * FlowNest demo company, once, then evaluates them with evaluateDue. Returns how many steps were saved.
+   */
+  function seedDemo(companyId, state, { now = new Date() } = {}) {
+    if (state?.demo !== 'flownest' || q.demoCount.get(companyId).n > 0) return 0;
+    const d = q.synthetic.get(companyId);
+    if (!d.n || d.s !== d.n) return 0; // only on synthetic data, never next to real rows
+    const items = audit(db, companyId, { lang: 'en', range: '28', now })?.items ?? [];
+    const recs = DEMO_RECS.filter((id) => planFor(items.find((x) => x.id === id))).slice(0, DEMO_STEPS);
+    let saved = 0;
+    recs.forEach((recId, i) => {
+      // 28-day windows ending 0, 7, 14 … days before the last synthetic day; the baseline is the 28 days before each
+      const startAt = addDays(d.last, -27 - 7 * i);
+      if (addDays(startAt, -28) < d.first) return;
+      const r = start(companyId, null, { recId, kind: i % 2 ? 'campaign' : 'task', ref: `demo-${i + 1}`, range: '28', windowDays: 28 }, { now, startAt, demo: true });
+      if (r.step) saved++;
+    });
+    evaluateDue(companyId, { now });
+    return saved;
   }
 
   /** The track record: the steps (newest first), the score once SCORE_MIN steps are evaluated, the next review date. */
@@ -205,10 +238,11 @@ export function createTrack(db) {
       waitingUntil: waiting[0] ?? null,
       dataTo,
       minChange: MIN_CHANGE,
+      demo: steps.some((s) => s.demo), // the record includes demo history (synthetic data)
     };
   }
 
-  return { start, evaluateDue, record };
+  return { start, evaluateDue, record, seedDemo };
 }
 
 /** A step as the API returns it. */
@@ -218,6 +252,6 @@ function view(s) {
     metric: s.metric, scope: s.scope_key ? { key: s.scope_key, value: s.scope_value } : null, direction: s.direction,
     baseline: s.baseline, baselineN: s.baseline_n, baselinePeriod: s.baseline_from ? [s.baseline_from, s.baseline_to] : null,
     target: s.target, unit: s.metric ? MEASURES[s.metric].unit : null, window: [s.start, s.window_end], windowDays: s.window_days,
-    createdAt: s.created_at, outcome: s.outcome, result: s.result, resultN: s.result_n, evaluatedAt: s.evaluated_at, trailId: s.trail_id,
+    createdAt: s.created_at, demo: s.demo === 1, outcome: s.outcome, result: s.result, resultN: s.result_n, evaluatedAt: s.evaluated_at, trailId: s.trail_id,
   };
 }

@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS track_steps (
   result_n        INTEGER,
   evaluated_at    TEXT,
   trail_id        TEXT,
+  demo            INTEGER NOT NULL DEFAULT 0, -- 1 = demo history of the synthetic FlowNest company (BRANDPILOT_DEMO=1 only)
   UNIQUE (company_id, kind, ref)
 );
 CREATE INDEX IF NOT EXISTS track_steps_company ON track_steps (company_id, created_at);

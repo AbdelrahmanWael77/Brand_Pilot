@@ -162,8 +162,9 @@ export function createCompanies(
       db.exec('ROLLBACK');
       throw e;
     }
-    // P6: new data may cover a step's review window; evaluating must never make the save itself fail
-    try { track.evaluateDue(req.company.id); } catch (e) { console.error('track evaluation failed:', e.message); }
+    // P6: new data may cover a step's review window; evaluating must never make the save itself fail. Demo mode only:
+    // the FlowNest demo company gets its demo history (synthetic data) once.
+    try { if (demo) track.seedDemo(req.company.id, state); track.evaluateDue(req.company.id); } catch (e) { console.error('track evaluation failed:', e.message); }
     res.json({ ok: true, updatedAt, knowledge: mirrored, data: mirroredData, campaigns: mirroredCampaigns });
   });
 

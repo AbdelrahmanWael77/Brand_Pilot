@@ -132,6 +132,7 @@ const titleIn = (t, lang) => (typeof t === 'string' ? t : (t && (t[lang] || t.en
 function view(r, lang) {
   const d = JSON.parse(r.detail);
   const L = (en, ar) => (lang === 'ar' ? ar : en);
+  const DEMO = (x) => (x.demo ? L('Demo history (synthetic data): ', 'سجل تجريبي (بيانات اصطناعية): ') : '');
   const st = { approved: L('approved', 'اعتُمدت'), rejected: L('rejected', 'رُفضت'), pending: L('sent back to review', 'أعيدت إلى المراجعة'), demo_expired: L('put past its review date (demo)', 'جُعلت متجاوزة لتاريخ مراجعتها (تجربة)') };
   const summary = {
     recommendation: () => L(`Recommendation recorded: ${titleIn(d.title, 'en')}`, `سُجّلت توصية: ${titleIn(d.title, 'ar')}`),
@@ -139,8 +140,8 @@ function view(r, lang) {
     fact_decision: () => L(`Fact ${st[d.status] || d.status}: “${d.text}”${d.reviewBy ? ` (review by ${d.reviewBy})` : ''}`, `حقيقة — ${st[d.status] || d.status}: «${d.text}»${d.reviewBy ? ` (المراجعة قبل ${d.reviewBy})` : ''}`),
     tracking_started: () => L(`Approval tracking started; ${d.legacy} fact(s) approved before it`, `بدأ تسجيل الاعتمادات؛ ${d.legacy} حقيقة اعتُمدت قبله`),
     strategy_approval: () => L(`Strategy approved: ${d.name}`, `اعتُمدت الاستراتيجية: ${d.name}`),
-    step_tracked: () => L(`Step tracked (${d.stepKind === 'campaign' ? 'campaign' : 'task'}): ${titleIn(d.title, 'en')}`, `بدأت متابعة خطوة (${d.stepKind === 'campaign' ? 'حملة' : 'مهمة'}): ${titleIn(d.title, 'ar')}`),
-    evaluation: () => L(`Step evaluated — ${OUT.en[d.outcome] || d.outcome}: ${titleIn(d.title, 'en')}`, `قُيّمت خطوة — ${OUT.ar[d.outcome] || d.outcome}: ${titleIn(d.title, 'ar')}`),
+    step_tracked: () => DEMO(d) + L(`Step tracked (${d.stepKind === 'campaign' ? 'campaign' : 'task'}): ${titleIn(d.title, 'en')}`, `بدأت متابعة خطوة (${d.stepKind === 'campaign' ? 'حملة' : 'مهمة'}): ${titleIn(d.title, 'ar')}`),
+    evaluation: () => DEMO(d) + L(`Step evaluated — ${OUT.en[d.outcome] || d.outcome}: ${titleIn(d.title, 'en')}`, `قُيّمت خطوة — ${OUT.ar[d.outcome] || d.outcome}: ${titleIn(d.title, 'ar')}`),
     report: () => L(`Report saved (${d.range === 'all' ? 'all data' : `last ${d.range} days`}, ${d.lang === 'ar' ? 'Arabic' : 'English'})`, `حُفظ تقرير (${d.range === 'all' ? 'كل البيانات' : `آخر ${d.range} يوماً`}، ${d.lang === 'ar' ? 'العربية' : 'الإنجليزية'})`),
   }[r.kind];
   return { id: r.id, at: r.at, kind: r.kind, subject: r.subject, by: r.user_email, engine: r.engine, promptVersion: r.prompt_version, dataHash: r.data_hash, batch: r.batch, detail: d, summary: summary ? summary() : r.kind };
