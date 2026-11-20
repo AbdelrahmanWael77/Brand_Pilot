@@ -12,7 +12,7 @@
     "dev": "node --watch server/index.js",
     "test": "node --test",
     "seed:dev": "node scripts/seed-dev-user.js",
-    "test:ui": "node --test \"ui-tests/*.ui.mjs\"",
+    "test:ui": "node --test --test-concurrency=1 \"ui-tests/*.ui.mjs\"",
     "baseline:flownest": "node scripts/flownest-baseline.mjs"
   },
   "dependencies": {

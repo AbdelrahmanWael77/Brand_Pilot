@@ -46,7 +46,7 @@ test('Q1 "How is my marketing doing?" and Q2 "What should I do next, and why?" i
   });
 });
 
-test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create campaign gives drafts in English and Arabic, ready to download', { timeout: 300_000 }, async () => {
+test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create campaign gives drafts in English and Arabic; downloads open once a person approves the strategy (owner decision 2026-11-21)', { timeout: 300_000 }, async () => {
   await withFlowNest(async ({ page, errors }) => {
     for (const lang of ['en', 'ar']) {
       await page.evaluate((l) => { if (S.lang !== l) A.lang(); OPENW.clear(); A.go('trust'); }, lang);
@@ -57,7 +57,7 @@ test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create c
       await click('#gside .gs-nav [data-a=go][data-v=audit]');
       await page.waitForFunction(() => document.querySelector('main .ns-list [data-a=recCamp]'), null, { timeout: 15000 });
       await click('main .ns-list [data-a=recCamp]');
-      const r = await page.evaluate(() => { const k = C().campaigns[C().campaigns.length - 1]; return { view: S.ui.view, n: C().campaigns.length, assets: k ? k.assets.length : 0, langs: k ? [...new Set(k.assets.map((a) => a.lang))].sort() : [], drafts: k ? k.assets.every((a) => a.status !== 'approved') : false, download: !!document.querySelector('main [data-a=aDl]'), rec: k && k.rec }; });
+      const r = await page.evaluate(() => { const k = C().campaigns[C().campaigns.length - 1]; return { view: S.ui.view, n: C().campaigns.length, assets: k ? k.assets.length : 0, langs: k ? [...new Set(k.assets.map((a) => a.lang))].sort() : [], drafts: k ? k.assets.every((a) => a.status !== 'approved') : false, download: !!document.querySelector('main [data-a=aDl]'), rec: k && k.rec, strategyApproved: !!(k && k.approved === true) }; });
       assert.equal(r.view, 'studio', `${lang} Q3: the campaign opens`);
       assert.equal(r.n, before + 1);
       assert.ok(r.assets > 0, `${lang} Q3: drafts made`);
@@ -65,6 +65,7 @@ test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create c
       assert.ok(r.drafts, 'drafts are not approved by themselves');
       assert.ok(r.download, `${lang} Q3: a download is on screen`);
       assert.ok(r.rec, 'linked to the recommendation it came from');
+      assert.equal(r.strategyApproved, false, 'the strategy waits for a person (ui-tests/strategy-gate.ui.mjs covers blocked → allowed)');
       assert.ok(clicks <= 2, `${lang} Q3 clicks ${clicks}`);
     }
     assert.deepEqual(errors, []);
