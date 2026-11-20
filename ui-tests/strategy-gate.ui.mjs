@@ -1,4 +1,4 @@
-// Owner decision (2026-11-21): "Create campaign" makes the campaign and its drafts in one click, but nothing of it can be
+// Owner decision (2026-11-20): "Create campaign" makes the campaign and its drafts in one click, but nothing of it can be
 // downloaded until a person approves the strategy. Blocked before approval, allowed after, in English and Arabic.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

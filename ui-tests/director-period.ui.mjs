@@ -1,4 +1,4 @@
-// P3-pre (2026-11-21): the Director uses the period on screen. For 7, 28, 90 days and all data, in English and Arabic,
+// P3-pre (2026-11-20): the Director uses the period on screen. For 7, 28, 90 days and all data, in English and Arabic,
 // the answer's "Period used" line and the Director's grounding line show the same period as Next steps.
 // Without an AI key the rules engine answers; the AI path is covered by test/director-period.test.js.
 import { test } from 'node:test';

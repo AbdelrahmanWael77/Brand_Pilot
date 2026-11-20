@@ -68,7 +68,7 @@ export function shapeContext({ name, facts, metrics: m, audit: a, channels = nul
 }
 
 /** Context for one company. Returns null when the company does not exist.
- *  `range` ('7' | '28' | '90' | 'all', default '28') is the period the owner is looking at (P3-pre, 2026-11-21): the KPIs,
+ *  `range` ('7' | '28' | '90' | 'all', default '28') is the period the owner is looking at (P3-pre, 2026-11-20): the KPIs,
  *  the recommendations and the channel comparison all cover it, exactly as on the screens, so a number the model quotes
  *  can be checked against the same period. */
 export function buildContext(db, companyId, { range = '28' } = {}) {

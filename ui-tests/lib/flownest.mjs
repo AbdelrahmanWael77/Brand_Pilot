@@ -74,10 +74,12 @@ export async function withFlowNest(fn, { viewport = { width: 1366, height: 900 }
     // 4. save, and wait until the server holds this exact state
     const saved = await page.evaluate(async () => {
       await syncNow();
-      return await synced(C());
+      const ok = await synced(C());
+      if (typeof decWait === 'function') await decWait(C()); // P4: the approvals are recorded on the server before anything reads them
+      return ok;
     });
     if (!saved) throw new Error('the FlowNest state did not reach the server');
-    return await fn({ page, base, errors, requests });
+    return await fn({ page, base, errors, requests, db });
   } finally {
     await browser.close();
     server.close();

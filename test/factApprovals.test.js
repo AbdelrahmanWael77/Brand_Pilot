@@ -1,4 +1,4 @@
-// P4 (2026-11-21): fact approvals recorded on the server — who approved, when, and until when (review date).
+// P4 (2026-11-20): fact approvals recorded on the server — who approved, when, and until when (review date).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/app.js';

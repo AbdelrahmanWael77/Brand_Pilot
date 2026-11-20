@@ -7,7 +7,7 @@
  *
  * `approvedFacts` is the ONLY read path other server code may use for facts.
  *
- * P4 (2026-11-21): approval is the server's record, not the browser's. fact_approvals holds each person's decision (who,
+ * P4 (2026-11-20): approval is the server's record, not the browser's. fact_approvals holds each person's decision (who,
  * when, review-by date). A fact counts as approved only with an approved record whose review date has not passed
  * ("expired" otherwise). Tracking starts with the company's FIRST recorded decision: the facts the browser state shows as
  * approved at that moment get a legacy record ("approved before tracking began"). From then on an approval that exists
@@ -180,7 +180,8 @@ export function createKnowledge(db) {
     const out = [];
     // The first recorded decision starts tracking: what the browser state shows as approved now was approved before.
     if (!q.since.get(companyId)?.approvals_since) {
-      for (const f of q.facts.all(companyId, 'approved', 'approved')) q.legacy.run(companyId, f.id);
+      const now0 = new Set(decisions.map((d) => d.id)); // decided in this request: recorded as this person's
+      for (const f of q.facts.all(companyId, 'approved', 'approved')) if (!now0.has(f.id)) q.legacy.run(companyId, f.id);
       q.setSince.run(companyId, new Date(now).toISOString());
     }
     const recs = new Map(q.approvals.all(companyId).map((a) => [a.fact_id, a]));

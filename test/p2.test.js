@@ -45,8 +45,8 @@ test('fonts ship with the app: no file in public/ points at Google Fonts', async
   assert.ok(existsSync(new URL('../public/vendor/fonts/PlusJakartaSans.LICENSE.txt', import.meta.url)), 'OFL licence shipped');
 });
 
-test('strategy gate (owner 2026-11-21): drafts do not approve the strategy; campaign downloads need it', () => {
-  assert.match(html, /const stratOk=k=>!!k&&\(k\.approved===true\|\|!!k\.kind\);/);
+test('strategy gate (owner 2026-11-20): drafts do not approve the strategy; campaign downloads need it', () => {
+  assert.match(html, /const stratOk=k=>!!k&&\(k\.approved===true\|\|!!k\.kind\)&&!factGate\(C\(\),k\);/); // P4: and every linked fact still approved
   assert.doesNotMatch(html, /camp\.approved=true;camp\.versions\.push\(\{n:1/); // generating drafts no longer approves
   assert.ok(html.includes("if(['zip','calendar','campjson'].includes(kind)&&k&&!stratOk(k))return toast(GATE(),'err');"));
   assert.ok(html.includes("aDl(id){if(!stratOk(curCamp(C())))return toast(GATE(),'err');"));

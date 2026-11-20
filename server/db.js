@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS company_settings (
   company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
   currency   TEXT
 );
--- P4 (2026-11-21): a person's decision on a fact, recorded by the server (never taken from the browser state).
+-- P4 (2026-11-20): a person's decision on a fact, recorded by the server (never taken from the browser state).
 -- legacy = 1: the fact was already approved when the server started tracking approvals for the company.
 CREATE TABLE IF NOT EXISTS fact_approvals (
   company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
