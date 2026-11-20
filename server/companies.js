@@ -263,7 +263,7 @@ export function createCompanies(
     askLimiter.hit(req.user.id);
     if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
     try {
-      // The Analytics period the owner is looking at, for the channel comparison in the context (default 28 days).
+      // The period the owner is looking at (P3-pre): KPIs, recommendations and channels all cover it (default 28 days).
       const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
       res.json(await ask(db, ai, req.company.id, { question, lang, range, history: cleanHistory(req.body.history) }));
     } catch (e) {

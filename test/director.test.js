@@ -57,7 +57,7 @@ test('empty company: no facts, KPIs null with a reason, only "insufficient" audi
   assert.deepEqual(c.company, { name: 'Empty Co' });
   assert.deepEqual(c.facts, []);
   assert.equal(c.synthetic, false);
-  assert.equal(c.metrics.range, 'all');
+  assert.equal(c.metrics.range, '28'); // P3-pre: the Director uses the screens' period (default last 28 days), no longer all data
   assert.equal(c.metrics.period, null);
   const kpis = Object.values(c.metrics.kpis);
   assert.ok(kpis.length >= 16);
