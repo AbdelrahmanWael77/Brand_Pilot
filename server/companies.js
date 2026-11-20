@@ -369,7 +369,26 @@ export function createCompanies(
   router.get('/:id/facts', requireCompany, (req, res) => {
     const status = req.query.status;
     if (status !== undefined && !STATUSES.includes(status)) return res.status(400).json({ error: 'invalid_status' });
-    res.json({ facts: knowledge.listFacts(req.company.id, status ?? null) });
+    res.json({ facts: knowledge.listFacts(req.company.id, status ?? null), ...(knowledge.tracked(req.company.id) ? { tracked: true } : {}) }); // tracked: approvals are recorded on the server (P4)
+  });
+
+  // P4: a person's decisions on facts — approve (with a review date), reject, or back to pending. The server records who
+  // and when; the browser state can never grant an approval by itself once a company is tracked.
+  router.post('/:id/facts/decisions', requireCompany, (req, res) => {
+    const list = req.body?.decisions;
+    if (!Array.isArray(list) || !list.length || list.length > 500) return res.status(400).json({ error: 'invalid_decisions' });
+    const ok = list.every((d) => d && typeof d.id === 'string' && d.id.length > 0 && d.id.length <= 200 && ['approved', 'rejected', 'pending'].includes(d.status) && (d.reviewBy === undefined || typeof d.reviewBy === 'string'));
+    if (!ok) return res.status(400).json({ error: 'invalid_decisions' });
+    db.exec('BEGIN');
+    let results;
+    try {
+      results = knowledge.decide(req.company.id, req.user.id, list.map((d) => ({ id: d.id, status: d.status, ...(d.reviewBy !== undefined ? { reviewBy: d.reviewBy } : {}) })));
+      db.exec('COMMIT');
+    } catch (e) {
+      db.exec('ROLLBACK');
+      throw e;
+    }
+    res.json({ results });
   });
 
   // Read one public web page for this company (the browser cannot: cross-origin rules).

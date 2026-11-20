@@ -116,6 +116,18 @@ CREATE TABLE IF NOT EXISTS company_settings (
   company_id TEXT PRIMARY KEY REFERENCES companies(id) ON DELETE CASCADE,
   currency   TEXT
 );
+-- P4 (2026-11-21): a person's decision on a fact, recorded by the server (never taken from the browser state).
+-- legacy = 1: the fact was already approved when the server started tracking approvals for the company.
+CREATE TABLE IF NOT EXISTS fact_approvals (
+  company_id TEXT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  fact_id    TEXT NOT NULL,
+  status     TEXT NOT NULL CHECK (status IN ('approved', 'rejected')),
+  by_user    TEXT REFERENCES users(id) ON DELETE SET NULL,
+  at         TEXT,
+  review_by  TEXT,
+  legacy     INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (company_id, fact_id)
+);
 -- Saved marketing reports: a snapshot of what the report said at that moment (never rebuilt).
 CREATE TABLE IF NOT EXISTS reports (
   id         TEXT PRIMARY KEY,
@@ -142,6 +154,8 @@ CREATE TABLE IF NOT EXISTS report_schedules (
 const ADDED_COLUMNS = [
   ['company_settings', 'digits', 'TEXT'], // 'latn' (default) | 'arab' — how Arabic text writes numbers
   ['company_settings', 'qualified_def', 'INTEGER'], // 1 = a "qualified lead" definition is written, 0 = empty, NULL = unknown
+  ['company_settings', 'approvals_since', 'TEXT'], // P4: when the server started recording fact approvals for the company
+  ['campaigns', 'fact_ids', 'TEXT'], // P4: JSON list of the approved facts the campaign uses
 ];
 
 export function initSchema(db) {

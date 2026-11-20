@@ -10,7 +10,7 @@
  * stay browser-only and are reported in `notChecked`.
  */
 import { createCampaigns } from './campaigns.js';
-import { approvedFacts } from './knowledge.js';
+import { approvedFacts, createKnowledge } from './knowledge.js';
 import { audit } from './audit.js';
 
 /** Wording that claims a ranking, a guarantee, a percentage or a customer count (same pattern as the browser). */
@@ -24,7 +24,7 @@ const txt = (a) => Object.values(a.fields).map((f) => f.v).join('\n');
  * Pure. `campaign` from the mirror, `facts` from `approvedFacts`, `auditItems` from `audit(...).items`.
  * → `{ checks: [{ id, pass, basis, affected, detail }], passed, failed, exportable, notChecked }`
  */
-export function computeCampaignQa(campaign, facts, auditItems) {
+export function computeCampaignQa(campaign, facts, auditItems, allFacts = null) {
   const b = campaign.brief;
   const as = campaign.assets;
   const copy = as.filter((a) => a.type !== 'guide');
@@ -94,6 +94,12 @@ export function computeCampaignQa(campaign, facts, auditItems) {
     );
   }
 
+  // P4: every fact the campaign uses is still approved (not rejected, withdrawn or past its review date)
+  if (allFacts && campaign.factIds && campaign.factIds.length) {
+    const by = new Map(allFacts.map((f) => [f.id, f]));
+    chk('facts-current', 'facts', campaign.factIds.filter((id) => by.get(id)?.status !== 'approved'), 'Every fact the campaign uses is still approved and not past its review date.');
+  }
+
   const failed = checks.filter((c) => !c.pass).length;
   return {
     checks,
@@ -111,6 +117,6 @@ export function campaignQa(db, companyId, campaignId) {
   if (!campaign) return null;
   return {
     campaign: { id: campaign.id, name: campaign.name, rec: campaign.rec },
-    ...computeCampaignQa(campaign, approvedFacts(db, companyId), audit(db, companyId).items),
+    ...computeCampaignQa(campaign, approvedFacts(db, companyId), audit(db, companyId).items, createKnowledge(db).listFacts(companyId)),
   };
 }

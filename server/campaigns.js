@@ -103,6 +103,8 @@ export function cleanCampaign(c) {
       approved: c.approved === true,
       createdAt: Number.isFinite(c.at) && c.at > 0 && c.at < 8.64e15 ? new Date(c.at).toISOString() : null,
       brief: cleanBrief(c.brief),
+      // P4: the approved facts the campaign uses (ids only; checked against their approval on every QA run)
+      factIds: [...new Set((Array.isArray(c.factIds) ? c.factIds : []).filter(isId))].slice(0, 200),
       assets,
     },
     skipped,
@@ -113,7 +115,7 @@ export function createCampaigns(db) {
   const q = {
     deleteAll: db.prepare('DELETE FROM campaigns WHERE company_id = ?'), // assets go with them (cascade)
     insertCampaign: db.prepare(
-      'INSERT INTO campaigns (company_id, id, pos, name, slug, rec, approved, created_at, brief) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO campaigns (company_id, id, pos, name, slug, rec, approved, created_at, brief, fact_ids) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     ),
     insertAsset: db.prepare(
       `INSERT INTO campaign_assets (company_id, campaign_id, id, pos, type, lang, channel, n, status, flagged, fields)
@@ -130,7 +132,7 @@ export function createCampaigns(db) {
               (SELECT COUNT(*) FROM campaign_assets a WHERE a.company_id = c.company_id AND a.campaign_id = c.id AND a.status = 'approved') AS approved_assets
        FROM campaigns c WHERE c.company_id = ? ORDER BY c.pos`,
     ),
-    one: db.prepare('SELECT id, name, slug, rec, approved, created_at, brief FROM campaigns WHERE company_id = ? AND id = ?'),
+    one: db.prepare('SELECT id, name, slug, rec, approved, created_at, brief, fact_ids FROM campaigns WHERE company_id = ? AND id = ?'),
     assets: db.prepare(
       'SELECT id, type, lang, channel, n, status, flagged, fields FROM campaign_assets WHERE company_id = ? AND campaign_id = ? ORDER BY pos',
     ),
@@ -161,7 +163,7 @@ export function createCampaigns(db) {
       result.skipped += r.skipped;
       const c = r.campaign;
       seen.add(c.id);
-      q.insertCampaign.run(companyId, c.id, result.campaigns, c.name, c.slug, c.rec, c.approved ? 1 : 0, c.createdAt, JSON.stringify(c.brief));
+      q.insertCampaign.run(companyId, c.id, result.campaigns, c.name, c.slug, c.rec, c.approved ? 1 : 0, c.createdAt, JSON.stringify(c.brief), JSON.stringify(c.factIds));
       c.assets.forEach((a, i) =>
         q.insertAsset.run(companyId, c.id, a.id, i, a.type, a.lang, a.channel, a.n, a.status, a.flagged ? 1 : 0, JSON.stringify(a.fields)),
       );
@@ -184,6 +186,7 @@ export function createCampaigns(db) {
     return {
       ...head(r),
       brief: JSON.parse(r.brief),
+      factIds: r.fact_ids ? JSON.parse(r.fact_ids) : [], // campaigns saved before P4: none recorded
       assets: q.assets.all(companyId, r.id).map((a) => ({
         id: a.id, type: a.type, lang: a.lang, channel: a.channel, n: a.n, status: a.status, flagged: a.flagged === 1, fields: JSON.parse(a.fields),
       })),
