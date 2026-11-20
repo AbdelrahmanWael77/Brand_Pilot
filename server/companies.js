@@ -10,6 +10,7 @@ import { metrics, RANGES } from './metrics.js';
 import { audit } from './audit.js';
 import { buildContext, ask, ASK, cleanHistory, PROMPT_VERSION } from './director.js';
 import { createTrail, RULES_VERSION, TRAIL_KINDS } from './trail.js';
+import { createTrack, STEP_KINDS, WINDOWS } from './track.js';
 import { suggestThemes, cleanPosts } from './themes.js';
 import { draftBrief, cleanDraftRequest, polishPost, cleanPolishRequest } from './recs.js';
 import { suggestBrief, cleanSuggestRequest } from './campaignBrief.js';
@@ -39,6 +40,7 @@ export function createCompanies(
   const extractLimiter = createLimiter(extractLimit); // AI source readings per user
   const reports = createReports(db);
   const trail = createTrail(db);
+  const track = createTrack(db);
   const reportLimiter = createLimiter(reportLimit); // saved reports per user
   /** One report in the asked format: JSON, a Markdown download, or a printable page. */
   const sendReport = (res, report, format, lang) => {
@@ -160,6 +162,8 @@ export function createCompanies(
       db.exec('ROLLBACK');
       throw e;
     }
+    // P6: new data may cover a step's review window; evaluating must never make the save itself fail
+    try { track.evaluateDue(req.company.id); } catch (e) { console.error('track evaluation failed:', e.message); }
     res.json({ ok: true, updatedAt, knowledge: mirrored, data: mirroredData, campaigns: mirroredCampaigns });
   });
 
@@ -249,6 +253,22 @@ export function createCompanies(
     // P5: recorded in the audit trail when the inputs changed since the last record (the body stays the audit itself)
     if (a) res.set('X-Trail-Batch', trail.recordRecs(req.company.id, range, a.items, { lang, other: () => audit(db, req.company.id, { lang: lang === 'ar' ? 'en' : 'ar', range })?.items }).batch);
     res.json(a);
+  });
+
+  // P6: a recommendation became a campaign or a task: save its plan (metric, baseline, direction, target, window).
+  router.post('/:id/track', requireCompany, (req, res) => {
+    const b = req.body ?? {};
+    const kind = String(b.kind ?? '');
+    const range = b.range === undefined ? '28' : String(b.range);
+    const windowDays = b.windowDays === undefined ? 28 : Number(b.windowDays);
+    if (!STEP_KINDS.includes(kind) || !RANGES.includes(range) || !WINDOWS.includes(windowDays) || typeof b.recId !== 'string' || typeof b.ref !== 'string') return res.status(400).json({ error: 'invalid_step' });
+    const r = track.start(req.company.id, req.user.id, { recId: b.recId, kind, ref: b.ref, range, windowDays });
+    if (r.error) return res.status(r.error === 'not_found' ? 404 : 400).json({ error: r.error === 'not_found' ? 'not_found' : 'invalid_step' });
+    res.status(201).json({ step: r.step });
+  });
+  // P6: the track record (evaluates the steps whose window the data now covers).
+  router.get('/:id/track', requireCompany, (req, res) => {
+    res.json(track.record(req.company.id));
   });
 
   // P5: the company's audit trail, newest first (append-only: there is no route that changes or removes a row).

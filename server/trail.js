@@ -9,6 +9,8 @@
  *   tracking_started   the server started recording approvals; the facts already approved then
  *   strategy_approval  a person approved a campaign's strategy (and the facts it uses)
  *   report             a report snapshot was saved, with the trail ids of the recommendations in it
+ *   step_tracked       P6: a recommendation became a campaign or task; its plan (metric, baseline, direction, target, window)
+ *   evaluation         P6: that step's window is covered by data; the result and the outcome
  *
  * Every row keeps: when, who (user id and the e-mail at that moment), engine, prompt or rules version, and the data
  * fingerprint (data_mirror hash + the approved facts) the row rests on.
@@ -20,7 +22,7 @@
 import crypto from 'node:crypto';
 
 export const RULES_VERSION = 'rules-2026-11-20';
-export const TRAIL_KINDS = ['recommendation', 'answer', 'fact_decision', 'tracking_started', 'strategy_approval', 'report'];
+export const TRAIL_KINDS = ['recommendation', 'answer', 'fact_decision', 'tracking_started', 'strategy_approval', 'report', 'step_tracked', 'evaluation'];
 
 export const TRAIL_SCHEMA = `
 CREATE TABLE IF NOT EXISTS trail (
@@ -122,6 +124,7 @@ export function createTrail(db) {
   return { append, recordRecs, fingerprint, list, batch: batchRows };
 }
 
+const OUT = { en: { met: 'met', no_change: 'no change', not_met: 'not met', inconclusive: 'inconclusive' }, ar: { met: 'تحقّق', no_change: 'بلا تغيير', not_met: 'لم يتحقّق', inconclusive: 'غير حاسم' } };
 /** A recommendation title in one language (a plain string in rows written before titles were bilingual). */
 const titleIn = (t, lang) => (typeof t === 'string' ? t : (t && (t[lang] || t.en || t.ar)) || '');
 
@@ -136,6 +139,8 @@ function view(r, lang) {
     fact_decision: () => L(`Fact ${st[d.status] || d.status}: “${d.text}”${d.reviewBy ? ` (review by ${d.reviewBy})` : ''}`, `حقيقة — ${st[d.status] || d.status}: «${d.text}»${d.reviewBy ? ` (المراجعة قبل ${d.reviewBy})` : ''}`),
     tracking_started: () => L(`Approval tracking started; ${d.legacy} fact(s) approved before it`, `بدأ تسجيل الاعتمادات؛ ${d.legacy} حقيقة اعتُمدت قبله`),
     strategy_approval: () => L(`Strategy approved: ${d.name}`, `اعتُمدت الاستراتيجية: ${d.name}`),
+    step_tracked: () => L(`Step tracked (${d.stepKind === 'campaign' ? 'campaign' : 'task'}): ${titleIn(d.title, 'en')}`, `بدأت متابعة خطوة (${d.stepKind === 'campaign' ? 'حملة' : 'مهمة'}): ${titleIn(d.title, 'ar')}`),
+    evaluation: () => L(`Step evaluated — ${OUT.en[d.outcome] || d.outcome}: ${titleIn(d.title, 'en')}`, `قُيّمت خطوة — ${OUT.ar[d.outcome] || d.outcome}: ${titleIn(d.title, 'ar')}`),
     report: () => L(`Report saved (${d.range === 'all' ? 'all data' : `last ${d.range} days`}, ${d.lang === 'ar' ? 'Arabic' : 'English'})`, `حُفظ تقرير (${d.range === 'all' ? 'كل البيانات' : `آخر ${d.range} يوماً`}، ${d.lang === 'ar' ? 'العربية' : 'الإنجليزية'})`),
   }[r.kind];
   return { id: r.id, at: r.at, kind: r.kind, subject: r.subject, by: r.user_email, engine: r.engine, promptVersion: r.prompt_version, dataHash: r.data_hash, batch: r.batch, detail: d, summary: summary ? summary() : r.kind };

@@ -375,7 +375,9 @@ export function decorate(items, ctx) {
     delete x.q;
     delete x.sourcesUsed;
     delete x.assume;
-    delete x.subject;
+    // P6: the subject (channel, page, source, segment) stays readable for the track record's plan (server/track.js),
+    // but not enumerable: it is not sent to the page and not part of the recorded recommendation output.
+    if (x.subject !== undefined) Object.defineProperty(x, 'subject', { value: x.subject, enumerable: false, writable: false });
     delete x.weakest;
   }
   return items;
