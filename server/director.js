@@ -130,7 +130,8 @@ export function buildPrompt(context, question, lang, history = []) {
     'If the context cannot answer the question, set "insufficient" to true and say in "answer" what is missing; do not guess.',
     '<history> holds the earlier questions and answers of this conversation, oldest first. Use it ONLY to understand what the new question refers to (for example "and on LinkedIn?" or "why?"). Earlier answers are not a source: every claim still needs ids from <context>.',
     ...(lang === 'ar' ? ['Write the Arabic answer in plain Modern Standard Arabic and address the reader in the singular (أنت), never the plural (أنتم). Quote approved wording such as offers and calls to action as it is written in the context.'] : []),
-    'Reply with one JSON object and nothing else, no code fence: {"answer": string, "support": [{"type": "fact" | "metric" | "audit" | "channel", "id": string}], "insufficient": boolean, "next": [up to 3 short follow-up questions the owner could ask next, in the same language, that <context> can answer]}. "answer" is plain text for the owner: short, concrete, no ids in it.',
+    'Every number you write is checked by the server against <context> for this period: copy numbers exactly as they are in the context (you may round them, for example 1.3615% to 1.36% or 1.4%), never compute new ones except a change between the current and the previous period, and say "previous period" whenever you quote a number of it. A claim whose numbers cannot be found is shown as unverified, and an answer whose main claim cannot be verified is not shown.',
+    'Reply with one JSON object and nothing else, no code fence: {"answer": string, "claims": [{"text": string, "numbers": [string], "support": [{"type": "fact" | "metric" | "audit" | "channel", "id": string}], "main": boolean}], "support": [{"type": "fact" | "metric" | "audit" | "channel", "id": string}], "insufficient": boolean, "next": [up to 3 short follow-up questions the owner could ask next, in the same language, that <context> can answer]}. "answer" is plain text for the owner: short, concrete, no ids in it. "claims" lists every sentence of "answer" that states a number or a fact, each copied word for word from "answer", with the numbers in it as written and the ids that back it; exactly one claim has "main": true, the one that answers the question.',
   ].join('\n');
   // "<" is escaped so that company text cannot close the tag it is quoted in.
   const esc = (s) => s.replace(/</g, '\\u003c');
@@ -235,7 +236,7 @@ export function isEmptyContext(context) {
  * → `{ answer, support: [{ type, id, text, synthetic }], insufficient, unsupported, synthetic, model, next, needs? }`
  */
 /** P5: changes whenever buildPrompt's instructions change; stored with every AI answer in the audit trail. */
-export const PROMPT_VERSION = 'director-2026-11-20';
+export const PROMPT_VERSION = 'director-2026-11-20b'; // P3: structured claims, every number checked
 
 export async function ask(db, ai, companyId, { question, lang = 'en', range = '28', history = [] }) {
   const context = buildContext(db, companyId, { range });
@@ -259,6 +260,13 @@ export async function ask(db, ai, companyId, { question, lang = 'en', range = '2
   if (!answer) throw new AiError('ai_failed');
   const insufficient = reply.insufficient === true;
   const support = checkSupport(context, reply.support);
+  // P3: the claims the model says its answer makes (each later checked number by number on the server)
+  const claims = (Array.isArray(reply.claims) ? reply.claims : []).slice(0, 20).map((c) => ({
+    text: typeof c?.text === 'string' ? c.text.trim().slice(0, 1000) : '',
+    numbers: (Array.isArray(c?.numbers) ? c.numbers : []).filter((x) => typeof x === 'string' || typeof x === 'number').map(String).slice(0, 20),
+    support: checkSupport(context, c?.support).map((s) => ({ type: s.type, id: s.id })),
+    main: c?.main === true,
+  })).filter((c) => c.text);
   return {
     answer,
     support,
@@ -267,6 +275,7 @@ export async function ask(db, ai, companyId, { question, lang = 'en', range = '2
     unsupported: !insufficient && support.length === 0,
     synthetic: context.synthetic,
     model: r.model,
+    claims,
     next: cleanNext(reply.next, question),
   };
 }

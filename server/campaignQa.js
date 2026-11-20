@@ -12,6 +12,7 @@
 import { createCampaigns } from './campaigns.js';
 import { approvedFacts, createKnowledge } from './knowledge.js';
 import { audit } from './audit.js';
+import { factPool, checkText } from './numcheck.js';
 
 /** Wording that claims a ranking, a guarantee, a percentage or a customer count (same pattern as the browser). */
 export const RISK = /(#\s?1\b|number one|\bbest\b|guarantee|\bdouble\b|award|\d+\s?%|\d[\d,]*\+\s*(customers|clients|users)|الأفضل|رقم ?1|مضمون|ضمان)/i;
@@ -100,7 +101,19 @@ export function computeCampaignQa(campaign, facts, auditItems, allFacts = null) 
     chk('facts-current', 'facts', campaign.factIds.filter((id) => by.get(id)?.status !== 'approved'), 'Every fact the campaign uses is still approved and not past its review date.');
   }
 
-  const failed = checks.filter((c) => !c.pass).length;
+  // P3: every number in the copy is checked against the approved facts (copy states offers and facts, not data).
+  // Advisory: shown with the unverified numbers, it does not count as a failed check.
+  if (facts) {
+    const pool = factPool(facts);
+    const bad = [];
+    const found = [];
+    for (const a of copy) {
+      const nums = checkText(txt(a), pool).numbers.filter((n) => n.status !== 'verified');
+      if (nums.length) { bad.push(a.id); found.push(...nums.map((n) => n.raw)); }
+    }
+    checks.push({ id: 'numbers', pass: bad.length === 0, advisory: true, basis: 'facts', affected: bad, numbers: [...new Set(found)].slice(0, 20), detail: 'Every number in the copy is found in an approved fact (the number check).' });
+  }
+  const failed = checks.filter((c) => !c.pass && !c.advisory).length;
   return {
     checks,
     passed: checks.length - failed,

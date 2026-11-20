@@ -11,6 +11,8 @@ import { audit } from './audit.js';
 import { buildContext, ask, ASK, cleanHistory, PROMPT_VERSION } from './director.js';
 import { createTrail, RULES_VERSION, TRAIL_KINDS } from './trail.js';
 import { createTrack, STEP_KINDS, WINDOWS } from './track.js';
+import { buildPool, checkAnswer, checkText, demoSample, summary as checkSummary } from './numcheck.js';
+import { rulesAnswer } from './rulesDirector.js';
 import { suggestThemes, cleanPosts } from './themes.js';
 import { draftBrief, cleanDraftRequest, polishPost, cleanPolishRequest } from './recs.js';
 import { suggestBrief, cleanSuggestRequest } from './campaignBrief.js';
@@ -285,7 +287,48 @@ export function createCompanies(
     res.json({ trail: rows });
   });
 
-  // P5: an answer of the rules engine (it runs in the page when no AI model is set up) is recorded like an AI answer.
+  // P3: the Director's rules engine runs here (no AI model, or the AI failed): the server produces the answer, checks
+  // its numbers and records it.
+  router.post('/:id/director/rules', requireCompany, (req, res) => {
+    const question = typeof req.body?.question === 'string' ? req.body.question.trim() : '';
+    if (!question || question.length > ASK.question) return res.status(400).json({ error: 'invalid_question' });
+    const lang = req.body.lang ?? 'en';
+    if (lang !== 'en' && lang !== 'ar') return res.status(400).json({ error: 'invalid_lang' });
+    const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
+    const r = rulesAnswer(db, req.company.id, { question, lang, range });
+    const check = checkAnswer(r.text, buildPool(db, req.company.id, { range, question }), { support: r.support });
+    const trailId = trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: 'rules', promptVersion: RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer: r.text.slice(0, 2000), support: r.support.map((s) => `${s.type}:${s.id}`), insufficient: r.insufficient, check: checkSummary(check), producedBy: 'server' } });
+    res.json({ ...r, engine: 'rules', range, check, trailId });
+  });
+
+  // P3: the number check on any text the page holds: a pasted answer from another AI ("Import Claude answer"). The first
+  // text is the main claim. Recorded in the trail (counts only).
+  router.post('/:id/numcheck', requireCompany, (req, res) => {
+    const texts = Array.isArray(req.body?.texts) ? req.body.texts : null;
+    if (!texts || !texts.length || texts.length > 40 || texts.some((x) => typeof x !== 'string' || x.length > 4000)) return res.status(400).json({ error: 'invalid_texts' });
+    const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
+    const source = req.body.source === 'import' ? 'import' : 'other';
+    const pool = buildPool(db, req.company.id, { range });
+    const checks = texts.map((t, i) => (i === 0 ? checkAnswer(t, pool) : { ...checkText(t, pool), main: null, blocked: false, reason: null }));
+    const all = { counts: checks.reduce((a, c) => { for (const k of Object.keys(c.counts)) a[k] = (a[k] || 0) + c.counts[k]; return a; }, {}), blocked: checks[0].blocked, reason: checks[0].reason };
+    const trailId = source === 'import' ? trail.append(req.company.id, { kind: 'number_check', subject: 'import', userId: req.user.id, engine: 'rules', promptVersion: RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { source, range, texts: texts.length, ...checkSummary(all) } }) : null;
+    res.json({ checks, blocked: all.blocked, reason: all.reason, range, trailId });
+  });
+
+  // P3, demo mode only: a sample answer with deliberate mistakes, checked by the real number check, recorded as a demo.
+  router.post('/:id/numcheck/demo', requireCompany, (req, res) => {
+    if (!demo) return res.status(404).json({ error: 'not_found' });
+    const lang = req.body?.lang === 'ar' ? 'ar' : 'en';
+    const range = RANGES.includes(String(req.body?.range)) ? String(req.body.range) : '28';
+    const sample = demoSample(db, req.company.id, { range, lang });
+    if (!sample) return res.status(409).json({ error: 'no_data' });
+    const check = checkAnswer(sample.text, buildPool(db, req.company.id, { range }));
+    const trailId = trail.append(req.company.id, { kind: 'number_check', subject: 'demo', userId: req.user.id, engine: 'rules', promptVersion: RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { demo: true, source: 'demo', range, lang, ...checkSummary(check), expected: sample.expected.map((e) => e.kind) } });
+    res.json({ text: sample.text, expected: sample.expected, check, range, trailId });
+  });
+
+  // P5: an answer of the owner's own local endpoint (Settings → Use another AI) is recorded as reported by the page. The
+  // rules engine no longer uses this route: its answers are produced and recorded on the server (POST .../director/rules).
   router.post('/:id/trail/answer', requireCompany, (req, res) => {
     const b = req.body ?? {};
     const question = typeof b.question === 'string' ? b.question.trim() : '';
@@ -295,7 +338,8 @@ export function createCompanies(
     const range = RANGES.includes(String(b.range)) ? String(b.range) : '28';
     const ids = (Array.isArray(b.support) ? b.support : []).filter((x) => typeof x === 'string' && x.length <= 200).slice(0, 50);
     const answer = typeof b.answer === 'string' ? b.answer.slice(0, 2000) : '';
-    const local = b.engine === 'endpoint'; // the owner's own local endpoint, set up in Settings
+    if (b.engine !== 'endpoint') return res.status(400).json({ error: 'use_director_rules' });
+    const local = true; // the owner's own local endpoint, set up in Settings
     const id = trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: local ? 'local endpoint' : 'rules', promptVersion: local ? null : RULES_VERSION, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer, support: ids, insufficient: b.insufficient === true } });
     res.status(201).json({ trailId: id });
   });
@@ -337,9 +381,11 @@ export function createCompanies(
       // The period the owner is looking at (P3-pre): KPIs, recommendations and channels all cover it (default 28 days).
       const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
       const r = await ask(db, ai, req.company.id, { question, lang, range, history: cleanHistory(req.body.history) });
+      // P3: every number of the answer is checked against the same period; an unverified main claim blocks the answer
+      const check = r && r.answer ? checkAnswer(r.answer, buildPool(db, req.company.id, { range, question }), { claims: r.claims, support: r.support }) : null;
       // P5: every answer is recorded: the model id and prompt version (or that nothing could be answered), the support
-      const trailId = r ? trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: r.model ?? 'none', promptVersion: r.model ? PROMPT_VERSION : null, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer: (r.answer ?? '').slice(0, 2000), support: r.support.map((s) => `${s.type}:${s.id}`), insufficient: !!r.insufficient, unsupported: !!r.unsupported } }) : null;
-      res.json(r && { ...r, trailId });
+      const trailId = r ? trail.append(req.company.id, { kind: 'answer', subject: question, userId: req.user.id, engine: r.model ?? 'none', promptVersion: r.model ? PROMPT_VERSION : null, dataHash: trail.fingerprint(req.company.id), detail: { lang, range, answer: (r.answer ?? '').slice(0, 2000), support: r.support.map((s) => `${s.type}:${s.id}`), insufficient: !!r.insufficient, unsupported: !!r.unsupported, ...(check ? { check: checkSummary(check), claims: (r.claims ?? []).length } : {}) } }) : null;
+      res.json(r && { ...r, ...(check ? { check } : {}), trailId });
     } catch (e) {
       if (!(e instanceof AiError)) throw e;
       // The provider's own message stays in the server log.

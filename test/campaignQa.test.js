@@ -25,9 +25,9 @@ const by = (r) => Object.fromEntries(r.checks.map((c) => [c.id, c]));
 
 test('a clean, fully approved manual campaign passes every check and is exportable', () => {
   const r = run();
-  assert.deepEqual(r.checks.map((c) => c.id), ['cta-used', 'cta-approved', 'offer-approved', 'offer-numbers', 'claims', 'placeholders', 'language', 'links', 'review', 'recommendation']);
+  assert.deepEqual(r.checks.map((c) => c.id), ['cta-used', 'cta-approved', 'offer-approved', 'offer-numbers', 'claims', 'placeholders', 'language', 'links', 'review', 'recommendation', 'numbers']);
   assert.deepEqual(r.checks.filter((c) => !c.pass), []);
-  assert.equal(r.passed, 10);
+  assert.equal(r.passed, 11);
   assert.equal(r.failed, 0);
   assert.equal(r.exportable, true);
   assert.deepEqual(r.notChecked, NOT_CHECKED);
@@ -172,7 +172,7 @@ test('route: checks use approved facts and the server audit; pending, rejected a
   assert.equal(c.recommendation.pass, true);
   assert.equal(c['cta-used'].pass, true);
   assert.equal(r.failed, 2);
-  assert.equal(r.passed, 8);
+  assert.equal(r.passed, 9); // P3: + the number check on the copy
   assert.equal(r.exportable, false);
   assert.deepEqual(r.notChecked, NOT_CHECKED);
 
@@ -233,4 +233,23 @@ test('16b: a carousel slide with no button, caption or body is not asked for the
   assert.deepEqual(by(run(campaign({ assets: [asset('en1', 'en'), asset('ar1', 'ar'), plain] })))['cta-used'].affected, ['p2']);
   assert.equal(by(run(campaign({ brief: { url: '' } }))).links.pass, true);
   assert.equal(by(run(campaign({ brief: { url: 'not a link' } }))).links.pass, false);
+});
+
+test('P3: every number in campaign copy must come from an approved fact; an invented one is flagged, without blocking downloads', () => {
+  const ok = run();
+  assert.equal(by(ok).numbers.pass, true);
+  const c = campaign();
+  const a0 = c.assets[0];
+  const k = Object.keys(a0.fields)[0];
+  a0.fields[k] = { ...a0.fields[k], v: a0.fields[k].v + ' Join 4,500 teams already using it.' };
+  const r = run(c);
+  const n = by(r).numbers;
+  assert.equal(n.pass, false);
+  assert.equal(n.advisory, true);
+  assert.deepEqual(n.affected, [a0.id]);
+  assert.deepEqual(n.numbers, ['4,500']);
+  assert.equal(r.failed, 0, 'advisory: not a failed check');
+  // the same number once it is an approved fact
+  const r2 = run(c, [...FACTS, fact('proof', 'Used by 4,500 teams')]);
+  assert.equal(by(r2).numbers.pass, true);
 });

@@ -101,8 +101,10 @@ test('Director answers: AI answers keep the model id and prompt version; rules-e
   assert.equal(row.subject, 'Where should we post?');
   assert.deepEqual(row.detail.support, ['fact:f1']);
   assert.match(row.dataHash, /^[0-9a-f]{16}$/);
-  const rr = await call('POST', `/api/companies/${co}/trail/answer`, alice, { question: 'ما أكبر نقطة ضعف؟', lang: 'ar', range: '7', answer: 'إجابة محرك القواعد' });
-  assert.equal(rr.status, 201);
+  // P3: the rules engine answers on the server and records its own answer
+  const rr = await call('POST', `/api/companies/${co}/director/rules`, alice, { question: 'ما أكبر نقطة ضعف؟', lang: 'ar', range: '7' });
+  assert.equal((await call('POST', `/api/companies/${co}/trail/answer`, alice, { question: 'q', answer: 'reported by the page' })).status, 400, 'the page cannot report a rules answer any more');
+  assert.equal(rr.status, 200);
   const rid = (await rr.json()).trailId;
   const rules = (await trailOf(co, alice, '?kind=answer&lang=ar')).find((x) => x.id === rid);
   assert.equal(rules.engine, 'rules');

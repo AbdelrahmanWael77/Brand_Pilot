@@ -1,0 +1,75 @@
+{
+  "note": "Real answers of claude-sonnet-5-5 (prompt director-2026-11-20b) on the synthetic FlowNest demo, last 28 days (21 Sep - 18 Oct 2026), recorded 2026-11-20 during P3. Every number in them is true; the number check must verify them all.",
+  "answers": [
+    {
+      "lang": "en",
+      "question": "Which channel brings us the most enquiries, and is it worth more effort?",
+      "answer": "Organic search brings the most enquiries that can be tied to a channel: 31 of the site's 65 in this period (28 days to 18 Oct 2026), a 2.02% enquiry rate from 1,534 sessions. That compares with 1.36% for the whole site. Email converts best at 3.02%, but that is only 8 enquiries from 265 sessions. Social visits are not split by platform. Facebook and Instagram combined show 7 enquiries from 1,781 sessions (0.39%), so I cannot credit enquiries to either one, and LinkedIn has no data. I would put more effort into search, with one caution: search enquiries were 40 in the previous period and 31 now, with the rate down from 2.6% to 2.02%. The search queries that already show your pages have low click-through (for example 0.9% for \"برنامج إدارة المهام\" at average position 11.4), so improving those pages is the clearest next step. Spend is not measured, so I cannot say whether search is cheaper than other channels. The channel comparison does not name a leader on enquiry rate because too few channels have enough data, and all figures here are demo data.",
+      "support": [
+        "channel:search.enq",
+        "channel:search.enqRate",
+        "metric:enquiries",
+        "audit:ch-best",
+        "audit:seo-q"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما أكبر نقطة ضعف تسويقية لدينا؟",
+      "answer": "التقرير لا يرتّب نقاط الضعف حسب حجمها، لكن أكبرها أثرًا في البيانات هو ضعف تحويل الزيارات إلى استفسارات. هذا الكلام مبني على بيانات تجريبية للفترة من 2026-09-21 إلى 2026-10-18. متوسط معدل الاستفسار في الموقع 1.36%. وأوضح فجوة عند زوار الجوال، فهم 62% من الجلسات ومعدل استفسارهم 0.81% مقابل 2.27% لزوار الحاسوب. وتظهر الفجوة نفسها في مكانين آخرين. الأول الزيارات القادمة من السوشيال العضوي، وهي 37% من الجلسات بمعدل استفسار 0.39%. والثاني صفحة /pricing، وهي 35% من الجلسات بمعدل استفسار 0.42%. الخطوة الأولى أن تجرّب مسار الاستفسار على الهاتف: طول النموذج وحجم الزر وسرعة التحميل، مع خيار واتساب أو اتصال مباشر. وهناك خطر منفصل: موادك تذكر مدتين للتجربة المجانية، 14 يومًا في الموقع و7 أيام في الكتيّب.",
+      "support": [
+        "audit:mobile-gap",
+        "audit:ch-leak",
+        "audit:page-leak",
+        "audit:offer-conflict",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Which channel brings us the most enquiries, and is it worth more effort?",
+      "answer": "Organic search is the channel with the most measured enquiries: 31 from 1,534 sessions (2.02% enquiry rate) in 2026-09-21 to 2026-10-18. The site total was 65 enquiries. Email followed with 8 enquiries from 265 sessions (3.02%), which is the highest rate but a small base. Facebook and Instagram combined had 7 enquiries from 1,781 sessions (0.39%). GA4 does not split social visits by platform, so I cannot credit enquiries to Facebook or Instagram separately, and LinkedIn has no data. About 19 enquiries are not attributed to any of these channels, so search is the top measured channel rather than a proven overall leader.\n\nSearch is worth more effort, but with caution. Its share of qualified leads is the best ranked (33%, 4 of 12 leads), and several queries already show your pages with low click rates, such as \"task board for teams\" at 1.8% on 4,506 impressions. However, search enquiries fell from 40 in the previous period to 31, and its rate fell from 2.6% to 2.02%. Spend is not measured, so I cannot say whether more effort is cost-effective. All of this rests on demo data.",
+      "support": [
+        "channel:search.enq",
+        "channel:search.sessions",
+        "channel:search.enqRate",
+        "audit:ch-best",
+        "audit:seo-q",
+        "audit:no-spend"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما أكبر نقطة ضعف تسويقية لدينا؟",
+      "answer": "أكبر نقطة ضعف هي أن الزيارات لا تتحول إلى استفسارات، وأوضح مثال على ذلك السوشيال العضوي. السوشيال العضوي يمثل 37% من الجلسات، لكن معدل الاستفسار فيه 0.39% مقابل 1.36% لمتوسط الموقع. الجوال يمثل 62% من الجلسات ومعدل الاستفسار فيه 0.81% مقابل 2.27% على سطح المكتب. وصفحة /pricing تمثل 35% من الجلسات ومعدل الاستفسار فيها 0.42%. الخطوة الأولى: وجّه زيارات السوشيال العضوي إلى صفحة هبوط واحدة بدعوة واحدة للإجراء. السبب فرضية وليس قياسًا، وهي أن المنشورات تقود إلى صفحات لا تطابق ما وعدت به. هذه الأرقام والنصيحة مبنية على بيانات تجريبية.",
+      "support": [
+        "audit:ch-leak",
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Which channel brings us the most enquiries, and is it worth more effort?",
+      "answer": "Organic search brings the most enquiries that can be attributed to a channel: 31 from 1,534 sessions (2.02% enquiry rate) in 21 Sep–18 Oct 2026. Email converts better, at 3.02%, but that is only 8 enquiries from 265 sessions, so the sample is small. Social is weaker: organic social visits enquire at 0.39%. Facebook and Instagram enquiries are not split by platform, so I can't credit either one. Search is worth more effort, but with caution. Its enquiries were 40 in the previous period and its enquiry rate was 2.6%, so it is slipping. It also has the best share of qualified leads (33%), while three queries show many impressions but few clicks (CTR 0.9%–2.2%). Spend is not measured, so I can't say whether the effort pays back in cost terms. This is based on demo data.",
+      "support": [
+        "channel:search.enq",
+        "channel:search.enqRate",
+        "audit:ch-best",
+        "audit:seo-q"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "ما أكبر نقطة ضعف تسويقية لدينا؟",
+      "answer": "بحسب بيانات الفترة من 2026-09-21 إلى 2026-10-18 (بيانات تجريبية)، أكبر نقطة ضعف هي أن الزيارات لا تتحول إلى استفسارات. معدل الاستفسار في الموقع كله 1.36%، لكن السوشيال العضوي يمثل 37% من الجلسات ومعدل استفساره 0.39% فقط. صفحة /pricing تستحوذ على 35% من الجلسات ومعدل استفسارها 0.42%. وزوار الموبايل يمثلون 62% من الجلسات ومعدل استفسارهم 0.81% مقابل 2.27% على سطح المكتب. هذا الترتيب استنتاج مني، فالتدقيق لا يرتب البنود حسب الأهمية، وسبب ضعف السوشيال فرضية وليس قياسًا. الخطوة الأولى: وجّه زيارات السوشيال إلى صفحة هبوط واحدة بدعوة واحدة، وراجع /pricing، واختبر مسار الاستفسار على الهاتف.",
+      "support": [
+        "audit:ch-leak",
+        "audit:page-leak",
+        "audit:mobile-gap",
+        "metric:enquiry_rate"
+      ]
+    }
+  ]
+}
