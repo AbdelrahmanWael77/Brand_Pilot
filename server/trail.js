@@ -90,20 +90,23 @@ export function createTrail(db) {
 
   /**
    * Record the recommendations of one period if their inputs changed since the last record; otherwise return the
-   * earlier record. → { batch, ids: { itemId: trailId } }.
+   * earlier record. → { batch, ids: { itemId: trailId } }. items are in `lang`; `other()` returns the same items in the
+   * other language (called only when a record is written), so every title is stored in English and Arabic.
    */
-  function recordRecs(companyId, range, items, { now = new Date() } = {}) {
+  function recordRecs(companyId, range, items, { now = new Date(), lang = 'en', other = null } = {}) {
     const fp = sha([fingerprint(companyId), range, RULES_VERSION, now.getUTCFullYear(), items.map((x) => [x.id, x.kind, x.conf, x.rule])]);
     const key = 'recs:' + range;
     const m = q.mark.get(companyId, key);
     if (m && m.fingerprint === fp) return { batch: m.batch, ids: JSON.parse(m.ids) };
     const batch = crypto.randomUUID();
     const dataHash = fingerprint(companyId);
+    const alt = new Map((other ? other() || [] : []).map((x) => [x.id, x.title]));
     const ids = {};
     for (const x of items) {
+      const title = lang === 'ar' ? { en: alt.get(x.id) ?? null, ar: x.title } : { en: x.title, ar: alt.get(x.id) ?? null };
       ids[x.id] = append(companyId, {
         kind: 'recommendation', subject: x.id, engine: 'rules', promptVersion: RULES_VERSION, dataHash, batch, now,
-        detail: { range, title: x.title, kind: x.kind, basis: x.basis, confidence: x.confidence || null, calc: x.calc || [], period: x.period || null, rule: !!x.rule },
+        detail: { range, title, kind: x.kind, basis: x.basis, confidence: x.confidence || null, calc: x.calc || [], period: x.period || null, rule: !!x.rule },
       });
     }
     q.setMark.run(companyId, key, fp, batch, JSON.stringify(ids));
@@ -119,13 +122,16 @@ export function createTrail(db) {
   return { append, recordRecs, fingerprint, list, batch: batchRows };
 }
 
+/** A recommendation title in one language (a plain string in rows written before titles were bilingual). */
+const titleIn = (t, lang) => (typeof t === 'string' ? t : (t && (t[lang] || t.en || t.ar)) || '');
+
 /** A trail row as the API returns it (the stored detail plus a readable summary). */
 function view(r, lang) {
   const d = JSON.parse(r.detail);
   const L = (en, ar) => (lang === 'ar' ? ar : en);
   const st = { approved: L('approved', 'اعتُمدت'), rejected: L('rejected', 'رُفضت'), pending: L('sent back to review', 'أعيدت إلى المراجعة'), demo_expired: L('put past its review date (demo)', 'جُعلت متجاوزة لتاريخ مراجعتها (تجربة)') };
   const summary = {
-    recommendation: () => L(`Recommendation recorded: ${d.title}`, `سُجّلت توصية: ${d.title}`),
+    recommendation: () => L(`Recommendation recorded: ${titleIn(d.title, 'en')}`, `سُجّلت توصية: ${titleIn(d.title, 'ar')}`),
     answer: () => L(`AI Director answered (${r.engine === 'rules' ? 'rules engine' : r.engine}): ${r.subject}`, `أجاب مدير التسويق (${r.engine === 'rules' ? 'محرك القواعد' : r.engine}): ${r.subject}`),
     fact_decision: () => L(`Fact ${st[d.status] || d.status}: “${d.text}”${d.reviewBy ? ` (review by ${d.reviewBy})` : ''}`, `حقيقة — ${st[d.status] || d.status}: «${d.text}»${d.reviewBy ? ` (المراجعة قبل ${d.reviewBy})` : ''}`),
     tracking_started: () => L(`Approval tracking started; ${d.legacy} fact(s) approved before it`, `بدأ تسجيل الاعتمادات؛ ${d.legacy} حقيقة اعتُمدت قبله`),

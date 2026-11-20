@@ -70,8 +70,14 @@ test('recommendations: one row each, with fingerprint, rules version and period;
     assert.match(r.dataHash, /^[0-9a-f]{16}$/);
     assert.match(r.at, /^\d{4}-\d\d-\d\dT/);
     assert.equal(r.detail.range, '28');
-    assert.ok(r.detail.title && r.detail.basis && 'confidence' in r.detail);
+    assert.ok(r.detail.basis && 'confidence' in r.detail);
+    // the title in both languages, whichever language the screen was in
+    assert.equal(r.detail.title.en, items.find((i) => i.id === r.subject).title);
+    assert.ok(r.detail.title.ar && /[؀-ۿ]/.test(r.detail.title.ar), `${r.subject}: Arabic title`);
   }
+  const ar = await (await call('GET', `/api/companies/${co}/audit?range=28&lang=ar`, alice)).json();
+  const recsAr = await trailOf(co, alice, `?batch=${batch}&lang=ar`);
+  for (const r of recsAr) assert.equal(r.summary, `سُجّلت توصية: ${ar.items.find((i) => i.id === r.subject).title}`);
   // read again (and in Arabic): same batch, no new rows
   const n = rows(co).length;
   assert.equal((await call('GET', `/api/companies/${co}/audit?range=28&lang=ar`, alice)).headers.get('x-trail-batch'), batch);

@@ -247,7 +247,7 @@ export function createCompanies(
     if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
     const a = audit(db, req.company.id, { lang, range });
     // P5: recorded in the audit trail when the inputs changed since the last record (the body stays the audit itself)
-    if (a) res.set('X-Trail-Batch', trail.recordRecs(req.company.id, range, a.items).batch);
+    if (a) res.set('X-Trail-Batch', trail.recordRecs(req.company.id, range, a.items, { lang, other: () => audit(db, req.company.id, { lang: lang === 'ar' ? 'en' : 'ar', range })?.items }).batch);
     res.json(a);
   });
 

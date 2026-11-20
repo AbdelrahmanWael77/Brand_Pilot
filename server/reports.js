@@ -44,7 +44,7 @@ export function createReports(db) {
     db.exec('BEGIN');
     try {
       // P5: the recommendations this report rests on, as recorded in the audit trail (recorded now if new)
-      const recs = trail.recordRecs(companyId, range, audit(db, companyId, { lang, range, now }).items, { now });
+      const recs = trail.recordRecs(companyId, range, audit(db, companyId, { lang, range, now }).items, { now, lang, other: () => audit(db, companyId, { lang: lang === 'ar' ? 'en' : 'ar', range, now }).items });
       data.trail = { batch: recs.batch, ids: recs.ids };
       data.trail.report = trail.append(companyId, { kind: 'report', subject: row.id, userId, now, engine: 'rules', dataHash: trail.fingerprint(companyId), batch: recs.batch, detail: { range, lang, auto: !!auto, recommendations: Object.keys(recs.ids).length } });
       q.insert.run(row.id, companyId, row.range, row.lang, row.auto, row.created_at, JSON.stringify(data));
