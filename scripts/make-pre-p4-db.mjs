@@ -24,6 +24,7 @@ const rep = await fetch(`${base}/api/companies/${co.id}/reports`, { method: 'POS
 if (rep.status !== 201) throw new Error('report ' + rep.status);
 server.close();
 db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+db.exec('PRAGMA journal_mode = DELETE'); // one plain file: opening it creates no -wal / -shm side files
 db.close();
 for (const f of [file + '-wal', file + '-shm']) fs.rmSync(f, { force: true });
 console.log('written', file, fs.statSync(file).size, 'bytes; company', co.id);

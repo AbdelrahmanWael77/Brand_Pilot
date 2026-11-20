@@ -24,7 +24,7 @@ const copy = () => {
 const counts = (d) => Object.fromEntries(['users', 'companies', 'facts', 'data_rows', 'campaigns', 'campaign_assets', 'reports', 'company_state'].map((t) => [t, d.prepare(`SELECT COUNT(*) n FROM ${t}`).get().n]));
 
 test('the fixture really is pre-P4 (no approvals table, no new columns)', () => {
-  const d = new DatabaseSync(SRC.pathname.replace(/^\/([A-Za-z]:)/, '$1'), { readOnly: true });
+  const d = new DatabaseSync(copy(), { readOnly: true }); // a copy: the fixture file itself is never opened
   assert.equal(d.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE name = 'fact_approvals'").get().n, 0);
   assert.ok(!d.prepare('PRAGMA table_info(company_settings)').all().some((c) => c.name === 'approvals_since'));
   assert.ok(!d.prepare('PRAGMA table_info(campaigns)').all().some((c) => c.name === 'fact_ids'));
