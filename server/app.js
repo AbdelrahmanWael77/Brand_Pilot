@@ -32,7 +32,7 @@ export function parseTrustProxy(v) {
  * production uses the defaults (`ai` is built from ANTHROPIC_API_KEY / AI_MODEL). `meta` and `google` take
  * { config, fetch, syncLimit, now } for createMeta / createGoogle (tests pass a stubbed network).
  */
-export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), imageAi = createImageAi(), imageLimit = { max: 20, windowMs: 10 * 60_000 }, visualLimit = { max: 30, windowMs: 10 * 60_000 }, askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, canva: canvaOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY) } = {}) {
+export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai = createAi(), imageAi = createImageAi(), imageLimit = { max: 20, windowMs: 10 * 60_000 }, visualLimit = { max: 30, windowMs: 10 * 60_000 }, askLimit, reportLimit, extractLimit, meta: metaOptions, google: googleOptions, canva: canvaOptions, trustProxy = parseTrustProxy(process.env.TRUST_PROXY), demo = process.env.BRANDPILOT_DEMO === '1' } = {}) {
   const app = express();
   app.disable('x-powered-by');
   // Behind a reverse proxy the client's address is in X-Forwarded-For; trusted only when the owner says so
@@ -109,6 +109,8 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
     ...(canPick ? { provider: ai.provider, model: ai.model, selected: ai.selected, options: ai.options() } : {}),
   });
   app.get('/api/ai/status', auth.requireAuth, (_req, res) => res.json(aiStatus()));
+  // Demo mode (BRANDPILOT_DEMO=1, off by default): only then may the page offer the synthetic FlowNest demo company.
+  app.get('/api/config', auth.requireAuth, (_req, res) => res.json({ demo: !!demo }));
   app.put('/api/ai/model', auth.requireAuth, (req, res) => {
     const id = typeof req.body?.id === 'string' ? req.body.id : '';
     if (!canPick || !ai.select(id)) return res.status(400).json({ error: 'unknown_model' });

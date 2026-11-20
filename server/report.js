@@ -41,7 +41,7 @@ export function buildReport(db, companyId, { range = '28', now = new Date(), lan
   const row = db.prepare('SELECT name FROM companies WHERE id = ?').get(companyId);
   if (!row) return null;
   const m = metrics(db, companyId, range);
-  const a = audit(db, companyId, { lang });
+  const a = audit(db, companyId, { lang, range }); // P1: findings for the same period as the KPIs
   const facts = approvedFacts(db, companyId);
   const camps = createCampaigns(db).list(companyId);
   const currency = db.prepare('SELECT currency FROM company_settings WHERE company_id = ?').get(companyId)?.currency ?? null;
@@ -94,10 +94,10 @@ const T = {
     basis: { data: 'from your imported data', facts: 'from your approved facts' },
     evidence: 'Evidence', action: 'Recommended action',
     gaps: 'Not enough data yet', gapsNote: 'These checks could not be answered. They are not conclusions.',
-    knowledge: 'Approved knowledge', factsN: (n) => `${n} approved fact(s) in the Knowledge Hub`,
+    knowledge: 'Approved knowledge', factsN: (n) => `${n} approved fact(s) in Company knowledge`,
     campaigns: 'Campaigns', noCampaigns: 'No campaigns yet.', approved: 'approved', draft: 'draft', assets: (a, n) => `${a} of ${n} assets approved`,
     fromRec: 'from recommendation', manual: 'created manually',
-    footer: 'Numbers come from validated imported rows; findings from the server audit; facts are the ones approved in the Knowledge Hub.',
+    footer: 'Numbers come from validated imported rows; findings from the server audit; facts are the ones approved in Company knowledge.',
     kpi: {
       sessions: 'Website sessions', enquiries: 'Enquiries', enquiry_rate: 'Enquiry rate', leads: 'Leads', qualified_leads: 'Qualified leads',
       qualified_share: 'Qualified share', customers: 'Customers', reach: 'Reach', impressions: 'Impressions', engagements: 'Engagements',
@@ -115,10 +115,10 @@ const T = {
     basis: { data: 'من بياناتك المستوردة', facts: 'من حقائقك المعتمدة' },
     evidence: 'الدليل', action: 'الإجراء الموصى به',
     gaps: 'لا توجد بيانات كافية بعد', gapsNote: 'تعذّرت الإجابة عن هذه الفحوص. هذه ليست استنتاجات.',
-    knowledge: 'المعرفة المعتمدة', factsN: (n) => `${n} حقيقة معتمدة في مركز المعرفة`,
+    knowledge: 'المعرفة المعتمدة', factsN: (n) => `${n} حقيقة معتمدة في معرفة الشركة`,
     campaigns: 'الحملات', noCampaigns: 'لا توجد حملات بعد.', approved: 'معتمدة', draft: 'مسودة', assets: (a, n) => `${a} من ${n} مادة معتمدة`,
     fromRec: 'من التوصية', manual: 'أُنشئت يدوياً',
-    footer: 'الأرقام من الصفوف المستوردة المتحقق منها؛ والنتائج من تدقيق الخادم؛ والحقائق هي المعتمدة في مركز المعرفة.',
+    footer: 'الأرقام من الصفوف المستوردة المتحقق منها؛ والنتائج من تدقيق الخادم؛ والحقائق هي المعتمدة في معرفة الشركة.',
     englishNote: 'نصوص النتائج (العناوين والأدلة والإجراءات) يكتبها تدقيق الخادم بالإنجليزية حالياً.',
     kpi: {
       sessions: 'جلسات الموقع', enquiries: 'الاستفسارات', enquiry_rate: 'معدل الاستفسار', leads: 'العملاء المحتملون', qualified_leads: 'العملاء المؤهلون',

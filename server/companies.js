@@ -70,6 +70,9 @@ export function createCompanies(
     putCurrency: db.prepare(
       'INSERT INTO company_settings (company_id, currency) VALUES (?, ?) ON CONFLICT(company_id) DO UPDATE SET currency = excluded.currency',
     ),
+    putSettings: db.prepare(
+      'UPDATE company_settings SET digits = ?, qualified_def = ? WHERE company_id = ?',
+    ),
     deleteCompany: db.prepare('DELETE FROM companies WHERE id = ?'),
     getState: db.prepare('SELECT data, updated_at FROM company_state WHERE company_id = ?'),
     putState: db.prepare(
@@ -146,6 +149,10 @@ export function createCompanies(
       mirroredCampaigns = campaigns.mirror(req.company.id, state);
       // Currency of the money columns: a 3-letter code, or none (then reports show plain numbers).
       q.putCurrency.run(req.company.id, typeof state.currency === 'string' && /^[A-Z]{3}$/.test(state.currency) ? state.currency : null);
+      // P1: how Arabic text writes numbers (company choice), and whether a "qualified lead" definition is written
+      // (the audit's "defs" gap). Only these two facts leave the blob; the definition text stays in the state.
+      const defs = state.defs && typeof state.defs === 'object' ? state.defs : null;
+      q.putSettings.run(state.digits === 'arab' ? 'arab' : 'latn', defs ? (typeof defs.qualified === 'string' && defs.qualified.trim() ? 1 : 0) : null, req.company.id);
       db.exec('COMMIT');
     } catch (e) {
       db.exec('ROLLBACK');
@@ -229,11 +236,14 @@ export function createCompanies(
     res.json(metrics(db, req.company.id, range));
   });
 
-  // Audit items from validated rows and approved facts; each states its basis and evidence.
+  // The recommendations (P1: the only source — every screen shows these). Each states its basis, evidence, period,
+  // calculation, assumptions and confidence. range = the period the screen shows (default all data).
   router.get('/:id/audit', requireCompany, (req, res) => {
     const lang = req.query.lang === undefined ? 'en' : req.query.lang;
     if (!REPORT_LANGS.includes(lang)) return res.status(400).json({ error: 'invalid_lang' });
-    res.json(audit(db, req.company.id, { lang }));
+    const range = req.query.range === undefined ? 'all' : req.query.range;
+    if (!RANGES.includes(range)) return res.status(400).json({ error: 'invalid_range' });
+    res.json(audit(db, req.company.id, { lang, range }));
   });
 
   // What the AI Marketing Director is allowed to know about this company: approved facts, KPIs, audit items.
@@ -253,7 +263,7 @@ export function createCompanies(
     askLimiter.hit(req.user.id);
     if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
     try {
-      // The Analytics period the owner is looking at, for the channel comparison in the context (default 28 days).
+      // The period the owner is looking at (P3-pre): KPIs, recommendations and channels all cover it (default 28 days).
       const range = RANGES.includes(String(req.body.range)) ? String(req.body.range) : '28';
       res.json(await ask(db, ai, req.company.id, { question, lang, range, history: cleanHistory(req.body.history) }));
     } catch (e) {
