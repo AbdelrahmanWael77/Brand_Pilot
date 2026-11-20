@@ -155,6 +155,15 @@ test('the main claim decides: an unverified number in it blocks the answer, else
   const bad = checkAnswer(text, pool, { claims: [{ text: 'Instagram could grow 250% with more posts.', main: true }] });
   assert.equal(bad.blocked, true);
   assert.deepEqual(bad.reason, { code: 'unverified', raw: '250%' });
+  // only a contradiction blocks (owner 2026-11-21): an unknown number whose metric is not recognised stays unverified
+  const unknown = checkAnswer('We aim for 4,321 by spring, then review.', pool);
+  assert.deepEqual(unknown.numbers.map((x) => [x.raw, x.status, x.recognised]), [['4,321', 'unverified', false]]);
+  assert.equal(unknown.blocked, false, 'not recognised: shown as unverified, not blocked');
+  const wrongValue = checkAnswer('The site had 5,312 sessions this period.', pool);
+  assert.equal(wrongValue.blocked, true, 'a wrong value for a recognised metric blocks');
+  assert.equal(checkAnswer('This period the site received 63 enquiries.', pool).blocked, true, 'another period blocks');
+  assert.equal(checkAnswer('معدل الاستفسار في الموقع ١٫٣٧٪.', pool).blocked, true, 'wrong rounding, Arabic-Indic digits');
+  assert.equal(checkAnswer('Instagram leads grew 250% this month.', pool).blocked, true, 'fake percentage');
   const swapped = checkAnswer('Mobile visitors enquire at 2.27%.', pool);
   assert.equal(swapped.blocked, true);
   assert.equal(swapped.reason.code, 'mismatch');

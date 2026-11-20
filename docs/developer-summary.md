@@ -68,6 +68,7 @@ Check carefully:
     (`trail.detail.check.heldBack`, `mainClaim`, `reasonNumber`) after release, and add real answers to
     `test/fixtures/p3-ai-answers.json` (46 now) when a false alarm is fixed. Reports: `docs/ui-audit/p3-false-alarms.md`,
     `docs/ui-audit/p3-heldout.md`.
+- **Blocking rule (owner 2026-11-21):** an answer is held back only for a contradiction in its main claim (swapped number, another period, wrong value for a recognised metric); a number whose metric is not recognised is shown as unverified without blocking. Fresh re-runs of both 20-question sets: 0 answers blocked (181 and 167 numbers checked; 1 false alarm, outside a main claim).
 - **Campaign copy now blocks downloads** when a number in it is not in an approved fact. Campaigns that already contain
   such numbers will be blocked after deploy; the page offers "Add it as an approved fact (with evidence)" or "Remove it
   from the copy".

@@ -56,3 +56,22 @@ source shown is the one about the same metric ("projects" is now a metric). Re-c
 answers 184 numbers checked (7 plan days and list numbers are no longer counted), 0 flagged, 0 blocked; the
 checkpoint-2 answers still 195 / 0 / 0. These 20 answers join the fixture (46 real answers in all); the error tests
 (invented, wrong rounding, swapped, Arabic-Indic, fake percentage, other period) still pass.
+
+## Blocking refinement (owner 2026-11-21)
+
+An answer is now held back only for a **contradiction** in its main claim: a number that belongs to another subject or
+metric (swapped), a number of another period, or a wrong value for a metric the check recognised. A number whose metric
+is not recognised is shown as unverified but does not block. All error tests still pass (invented, wrong rounding,
+swapped, other period, Arabic-Indic digits, fake percentage), plus a test that an unrecognised number does not block.
+
+Both 20-question sets were run again with the real model (fresh answers, code after the refinement):
+
+| | Numbers checked | Not verified | Answers blocked |
+|---|---|---|---|
+| Checkpoint-2 set (20) | 181 | 1 (a false alarm, not in a main claim) | 0 |
+| Held-out set (20) | 167 | 0 | 0 |
+
+Under the previous rule these 40 answers would also have had 0 blocked: none had an unverified number in its main claim.
+The one false alarm ("بينما سجّل إنستجرام 4 فقط وبلا أي عميل مؤهل": the 4 leads is true, read with the word for
+"qualified" after it as qualified leads) is not fixed, and its answer is not added to the fixture, because this step
+changes only the blocking rule.

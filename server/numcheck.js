@@ -355,7 +355,9 @@ export function checkText(text, pool, { support = [] } = {}) {
     const isTime = TIME_AFTER.test(after);
     const cands = pool.entries.filter((e) => matches(n, e) && (!e.unit || e.unit.test(after)) && (e.unit || !!e.time === isTime));
     const r = { raw: n.raw, start: n.start, end: n.end, value: n.value, pct: n.pct };
-    if (!cands.length) { numbers.push({ ...r, status: 'unverified' }); continue; }
+    // recognised: the words around the number name a metric, so a value not found for it is a wrong value, not just unknown
+    const recognised = about.metric.size > 0;
+    if (!cands.length) { numbers.push({ ...r, status: 'unverified', recognised }); continue; }
     // a small count (0-10) is too common a value: it must also be about the same metric when the answer names one
     const smallOk = (e) => n.pct || n.decimals || n.value > 10 || !about.sentMetric.size || overlap(about.sentMetric, e.metric) || overlap(about.sentMetric, e.ownMetric);
     const subjOk = (e) => !about.subj.size || !e.subj.size || overlap(about.subj, e.subj) || (e.subj.has('site') && !about.subj.size);
@@ -412,7 +414,10 @@ export function checkAnswer(text, pool, { claims = [], support = [] } = {}) {
     if (i >= 0) main = [i, i + needle.length];
   }
   if (!main) main = firstClaimSpan(text);
-  const bad = main ? res.numbers.find((x) => x.status !== 'verified' && x.start >= main[0] && x.start < main[1]) : null;
+  // Owner 2026-11-21: block only on a contradiction in the main claim: a swapped number (mismatch), a number of another
+  // period, or a wrong value for a recognised metric. A number whose metric is not recognised stays unverified, not blocking.
+  const contradiction = (x) => x.status === 'mismatch' || x.status === 'other_period' || (x.status === 'unverified' && x.recognised);
+  const bad = main ? res.numbers.find((x) => contradiction(x) && x.start >= main[0] && x.start < main[1]) : null;
   return { ...res, main, blocked: !!bad, reason: bad ? { code: bad.status, raw: bad.raw, ...(bad.actual ? { actual: bad.actual.label } : {}) } : null };
 }
 
