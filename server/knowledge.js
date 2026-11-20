@@ -207,7 +207,14 @@ export function createKnowledge(db) {
   }
 
   const tracked = (companyId) => !!q.since.get(companyId)?.approvals_since;
-  return { mirror, listFacts, decide, tracked, approvedFacts: (companyId, o) => listFacts(companyId, 'approved', o) };
+  /** Demo mode only (the route checks it): an approved, recorded fact gets yesterday as its review date. */
+  function demoExpire(companyId, factId, { now = Date.now() } = {}) {
+    if (!q.oneFact.get(companyId, factId)) return { error: 'not_found' };
+    const r = db.prepare("UPDATE fact_approvals SET review_by = ? WHERE company_id = ? AND fact_id = ? AND status = 'approved'").run(isoDay(now - DAY), companyId, factId);
+    if (!r.changes) return { error: 'not_approved' };
+    return { fact: listFacts(companyId, null, { now }).find((f) => f.id === factId) };
+  }
+  return { mirror, listFacts, decide, tracked, demoExpire, approvedFacts: (companyId, o) => listFacts(companyId, 'approved', o) };
 }
 
 /** The only read path later phases may use for "facts": approved ones, for one company. */

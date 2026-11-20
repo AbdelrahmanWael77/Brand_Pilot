@@ -56,7 +56,7 @@ export function createApp({ db = openDb(), authLimits, fetchUrl, fetchLimit, ai 
 
   const auth = createAuth(db, { limits: authLimits });
   app.locals.db = db;
-  const companies = createCompanies(db, { fetchUrl, fetchLimit, ai, askLimit, reportLimit, extractLimit });
+  const companies = createCompanies(db, { fetchUrl, fetchLimit, ai, askLimit, reportLimit, extractLimit, demo: !!demo });
   app.locals.requireAuth = auth.requireAuth;
   app.locals.requireCompany = companies.requireCompany;
   app.locals.ai = ai;

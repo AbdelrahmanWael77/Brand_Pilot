@@ -28,7 +28,7 @@ const MAX_NAME = 120;
  */
 export function createCompanies(
   db,
-  { fetchUrl = createFetchUrl(), fetchLimit = { max: 60, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 }, reportLimit = { max: 30, windowMs: 10 * 60_000 }, extractLimit = { max: 60, windowMs: 10 * 60_000 } } = {},
+  { fetchUrl = createFetchUrl(), fetchLimit = { max: 60, windowMs: 10 * 60_000 }, ai = null, askLimit = { max: 20, windowMs: 10 * 60_000 }, reportLimit = { max: 30, windowMs: 10 * 60_000 }, extractLimit = { max: 60, windowMs: 10 * 60_000 }, demo = false } = {},
 ) {
   const knowledge = createKnowledge(db);
   const data = createData(db);
@@ -374,6 +374,15 @@ export function createCompanies(
 
   // P4: a person's decisions on facts — approve (with a review date), reject, or back to pending. The server records who
   // and when; the browser state can never grant an approval by itself once a company is tracked.
+  // Demo mode only (BRANDPILOT_DEMO=1): put an approved fact past its review date, so expiry can be tried by hand.
+  // Without demo mode the route does not exist (404), like any unknown path.
+  router.post('/:id/facts/:fid/demo-expire', requireCompany, (req, res) => {
+    if (!demo) return res.status(404).json({ error: 'not_found' });
+    const r = knowledge.demoExpire(req.company.id, String(req.params.fid));
+    if (r.error) return res.status(r.error === 'not_found' ? 404 : 409).json({ error: r.error });
+    res.json({ fact: r.fact });
+  });
+
   router.post('/:id/facts/decisions', requireCompany, (req, res) => {
     const list = req.body?.decisions;
     if (!Array.isArray(list) || !list.length || list.length > 500) return res.status(400).json({ error: 'invalid_decisions' });
