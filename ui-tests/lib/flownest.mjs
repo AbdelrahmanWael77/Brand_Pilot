@@ -47,6 +47,8 @@ export async function withFlowNest(fn, { viewport = { width: 1366, height: 900 }
   const errors = [];
   try {
     const page = await (await browser.newContext({ viewport })).newPage();
+    const requests = []; // every URL the page asks for, from the first load (tests check no request leaves for a font service)
+    page.on('request', (q) => requests.push(q.url()));
     page.on('pageerror', (e) => errors.push(e.message));
     page.on('dialog', (d) => d.accept());
     await page.goto(base, { waitUntil: 'domcontentloaded' }); // not 'load': an external font request must not block the tests
@@ -75,7 +77,7 @@ export async function withFlowNest(fn, { viewport = { width: 1366, height: 900 }
       return await synced(C());
     });
     if (!saved) throw new Error('the FlowNest state did not reach the server');
-    return await fn({ page, base, errors });
+    return await fn({ page, base, errors, requests });
   } finally {
     await browser.close();
     server.close();

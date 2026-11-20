@@ -31,3 +31,16 @@ test('Settings: no internal "product decisions" notes (moved to docs), and the f
   assert.match(html, /function guideDock\(c,v\)\{if\(!c\|\|v==='trust'\|\|/);
   assert.match(html, /main#main\{padding-bottom:96px\}/);
 });
+
+test('fonts ship with the app: no file in public/ points at Google Fonts', async () => {
+  const { readdirSync, statSync } = await import('node:fs');
+  const walk = (d) => readdirSync(d).flatMap((n) => { const p = `${d}/${n}`; return statSync(p).isDirectory() ? walk(p) : [p]; });
+  const root = new URL('../public', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
+  const texts = walk(root).filter((p) => /\.(html|css|js|mjs)$/.test(p) && !/vendor\/(pdf|xlsx)/.test(p));
+  for (const p of texts) assert.doesNotMatch(readFileSync(p, 'utf8'), /fonts\.(googleapis|gstatic)\.com/, p);
+  for (const w of [400, 500, 600, 700, 800]) for (const sub of ['latin', 'latin-ext']) {
+    assert.ok(existsSync(new URL(`../public/vendor/fonts/plus-jakarta-sans-${sub}-${w}-normal.woff2`, import.meta.url)), `${sub} ${w}`);
+    assert.ok(html.includes(`@font-face{font-family:"Plus Jakarta Sans";font-style:normal;font-weight:${w};font-display:swap;src:url(/vendor/fonts/plus-jakarta-sans-${sub}-${w}-normal.woff2)`), `@font-face ${sub} ${w}`);
+  }
+  assert.ok(existsSync(new URL('../public/vendor/fonts/PlusJakartaSans.LICENSE.txt', import.meta.url)), 'OFL licence shipped');
+});
