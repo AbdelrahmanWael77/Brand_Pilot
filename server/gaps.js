@@ -55,7 +55,7 @@ export function gaps(db, companyId, { range = '28', lang = 'en' } = {}) {
     if (it.id === 'no-spend') return L(`${n(inPer(rows.meta).length)} social post rows${span}; the spend column is empty in all of them.`, `صفوف منشورات التواصل: ${n(inPer(rows.meta).length)}${span}؛ عمود الإنفاق فارغ فيها كلها.`);
     if (it.id === 'seg-best') { const l = inPer(rows.leads); return L(`${n(l.length)} leads${span}, ${n(l.filter((r) => r.segment).length)} of them with a segment.`, `العملاء المحتملون: ${n(l.length)}${span}، وعدد من سُجّلت شريحته: ${n(l.filter((r) => r.segment).length)}.`); }
     if (it.id === 'src-best') { const l = inPer(rows.leads); return L(`${n(l.length)} leads${span}, ${n(l.filter((r) => r.source).length)} of them with a source.`, `العملاء المحتملون: ${n(l.length)}${span}، وعدد من سُجّل مصدره: ${n(l.filter((r) => r.source).length)}.`); }
-    if (it.id === 'know-gaps' || it.id === 'defs' || it.id === 'pf-none' || it.id === 'brand-doc' || !ds) return L(`${n(approved)} approved facts and ${n(open)} open questions in Company knowledge.`, `في معرفة الشركة: الحقائق المعتمدة ${n(approved)}، والأسئلة المفتوحة ${n(open)}.`);
+    if (it.id === 'know-gaps' || it.id === 'defs' || it.id === 'pf-none' || it.id === 'brand-doc' || !ds) return L(`${n(approved)} approved facts and ${n(open)} open questions in Company info.`, `في معلومات الشركة: الحقائق المعتمدة ${n(approved)}، والأسئلة المفتوحة ${n(open)}.`);
     const all = rows[ds] ?? [];
     if (!all.length) return L(`No ${LABEL[ds][0]} data imported yet.`, `لا توجد بيانات (${LABEL[ds][1]}) مستوردة بعد.`);
     const p = inPer(all).length;
@@ -63,6 +63,6 @@ export function gaps(db, companyId, { range = '28', lang = 'en' } = {}) {
   };
   return a.items.filter((it) => it.basis === 'insufficient').map((it) => {
     const u = UNLOCKS[it.id] ?? DATASET_UNLOCKS[it.dataset] ?? ['More reliable recommendations in this area.', 'توصيات أدق في هذا المجال.'];
-    return { id: it.id, title: it.title, have: haveFor(it), need: it.id === 'know-gaps' ? L(`Answers to the ${n(open)} open questions in Company knowledge.`, `إجابات الأسئلة المفتوحة في معرفة الشركة (${n(open)}).`) : it.needs || it.need || it.action || '', unlocks: L(u[0], u[1]) };
+    return { id: it.id, title: it.title, have: haveFor(it), need: it.id === 'know-gaps' ? L(`Answers to the ${n(open)} open questions in Company info.`, `إجابات الأسئلة المفتوحة في معلومات الشركة (${n(open)}).`) : it.needs || it.need || it.action || '', unlocks: L(u[0], u[1]) };
   });
 }

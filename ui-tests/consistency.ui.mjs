@@ -19,6 +19,7 @@ test('Home, Growth, Insights, the server metrics and the report agree for the sa
         const a = agg(c, P.cur); // what Home's KPI cards and Growth's funnel are computed from
         const home = await view('dash');
         const growth = await view('growth');
+        S.ui.nsMore = true; // P7: Next steps shows 5 rows, the rest after "Show more"
         const insights = await view('audit');
         const m = await get(`/metrics?range=${range}`);
         const rep = await get(`/report?range=${range}`);

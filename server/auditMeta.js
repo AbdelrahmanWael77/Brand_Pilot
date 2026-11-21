@@ -1,3 +1,4 @@
+import { chPlain } from './plain.js';
 /**
  * P1 (2026-11-19): what turns a server audit item into a recommendation every screen can show and defend.
  *
@@ -63,13 +64,13 @@ export function sourceRules(ctx) {
   if (ctas.length > 1) {
     obs({
       id: 'cta-mix', kind: 'weak',
-      title: L('Several different calls to action are in use', 'هناك أكثر من عبارة حثّ على التواصل مستخدمة'),
+      title: L('Several different action buttons are in use', 'يُستخدم أكثر من زر إجراء'),
       why: L('When materials ask people to do different things, fewer people do any of them and results cannot be compared across channels.', 'عندما تطلب المواد من الناس أشياء مختلفة، يقل من يستجيب ويصعب مقارنة النتائج بين القنوات.'),
-      action: L('Choose one primary CTA in Company knowledge and use it on every campaign asset; keep the others as secondary links only.', 'اختر دعوة أساسية واحدة في معرفة الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.'),
+      action: L('Choose one main action button in Company info and use it on every campaign asset; keep the others as secondary links only.', 'اختر زر إجراء أساسي واحد في معلومات الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.'),
       evidence: ctas.map((f) => ({ factId: f.id, text: `“${f.text}” — ${srcN(f.src)}` })),
       sourcesUsed: srcOf(ctas),
-      calc: [L(`${ctas.length} different English calls to action found in your sources (rule: more than 1).`, `${ctas.length} دعوات مختلفة لاتخاذ إجراء في مصادرك (القاعدة: أكثر من 1).`)],
-      q: { certain: true, why: L(`Read directly from your sources: ${ctas.length} calls to action.`, `مقروء مباشرة من مصادرك: ${ctas.length} دعوات لاتخاذ إجراء.`) },
+      calc: [L(`${ctas.length} different English action buttons found in your sources (rule: more than 1).`, `${ctas.length} أزرار إجراء مختلفة في مصادرك (القاعدة: أكثر من 1).`)],
+      q: { certain: true, why: L(`Read directly from your sources: ${ctas.length} action buttons.`, `مقروء مباشرة من مصادرك: ${ctas.length} أزرار إجراء.`) },
     });
   }
   const conflict = findings.find((f) => f.type === 'conflict' && f.status === 'pending');
@@ -78,7 +79,7 @@ export function sourceRules(ctx) {
       id: 'offer-conflict', kind: 'risk',
       title: L('Your own materials state different offers', 'موادك نفسها تذكر عروضاً مختلفة'),
       why: L('A prospect who sees two versions of the offer cannot tell which is true; outdated material also puts campaign copy at risk.', 'العميل المحتمل الذي يرى نسختين من العرض لا يعرف أيهما الصحيح، والمواد القديمة تعرّض نصوص الحملات للخطأ.'),
-      action: L('Approve the current offer in Company knowledge, reject the outdated one, and retire or correct the old document.', 'اعتمد العرض الحالي في معرفة الشركة وارفض القديم، ثم صحّح أو أوقف المستند القديم.'),
+      action: L('Approve the current offer in Company info, reject the outdated one, and retire or correct the old document.', 'اعتمد العرض الحالي في معلومات الشركة وارفض القديم، ثم صحّح أو أوقف المستند القديم.'),
       evidence: [{ factId: conflict.id, text: conflict.text }],
       sourcesUsed: srcOf([conflict]),
       calc: [L('Two sources state different values for the same offer; you have not chosen one yet.', 'مصدران يذكران قيمتين مختلفتين للعرض نفسه؛ لم تختر إحداهما بعد.')],
@@ -106,7 +107,7 @@ export function sourceRules(ctx) {
         id: 'prod-consistent', kind: 'strong',
         title: L('The product is described the same way across sources', 'وصف المنتج متسق عبر المصادر'),
         why: L('Consistent descriptions make campaigns faster to produce and easier for prospects to recognise.', 'الوصف المتسق يسرّع إنتاج الحملات ويسهّل على العملاء تمييز المنتج.'),
-        action: L('Reuse these exact phrases as proof points in campaigns (Campaign Studio does this automatically).', 'أعد استخدام هذه العبارات نفسها كنقاط إثبات في الحملات (استوديو الحملات يفعل ذلك تلقائياً).'),
+        action: L('Reuse these exact phrases as proof points in campaigns (Campaign Studio does this automatically).', 'أعد استخدام هذه العبارات نفسها كنقاط إثبات في الحملات (إنشاء حملة يفعل ذلك تلقائياً).'),
         evidence: [{ text: L(`${prods.length} approved product facts recur in ${others.length} sources: `, `${prods.length} حقائق منتج معتمدة تتكرر في ${others.length} مصادر: `) + others.map((s) => s.title).join(' · ') }],
         sourcesUsed: others.map((s) => s.title),
         calc: [L(`${others.length} sources each repeat at least 2 of your ${prods.length} approved product facts (rule: 2 or more sources).`, `${others.length} مصادر يكرر كل منها حقيقتين على الأقل من ${prods.length} حقائق المنتج المعتمدة (القاعدة: مصدران أو أكثر).`)],
@@ -121,10 +122,10 @@ export function sourceRules(ctx) {
       id: 'know-gaps', kind: 'gap', basis: 'insufficient', synthetic: false,
       title: L(`${unk.length} business question(s) no source could answer`, `${unk.length} سؤال عن النشاط لم يُجب عنه أي مصدر`),
       why: L('Recommendations in these areas would be guesses. BrandPilot leaves them blank rather than inventing answers.', 'التوصيات في هذه المناطق ستكون تخميناً. BrandPilot يتركها فارغة بدلاً من اختلاق إجابات.'),
-      action: L('Answer the open questions in Company knowledge — one line each is enough.', 'أجب عن الأسئلة المفتوحة في معرفة الشركة — سطر واحد لكل سؤال يكفي.'),
+      action: L('Answer the open questions in Company info — one line each is enough.', 'أجب عن الأسئلة المفتوحة في معلومات الشركة — سطر واحد لكل سؤال يكفي.'),
       needs: L('Your answers', 'إجاباتك'),
       evidence: unk.map((f) => ({ factId: f.id, text: reqQ(f.cat) || f.text })),
-      calc: [L(`${unk.length} open question(s) in Company knowledge.`, `${unk.length} سؤال مفتوح في معرفة الشركة.`)],
+      calc: [L(`${unk.length} open question(s) in Company info.`, `${unk.length} سؤال مفتوح في معلومات الشركة.`)],
       q: { certain: true, why: L(`Counted directly: ${unk.length} open question(s).`, `معدود مباشرة: ${unk.length} سؤال مفتوح.`) },
     });
   }
@@ -260,22 +261,23 @@ const O = (L) => ({ enq: L('Qualified enquiries', 'استفسارات مؤهلة
 function meta(id, L, x) {
   const o = O(L);
   const s = x.subject || '';
+  const sp = L(chPlain(s, 'en'), chPlain(s, 'ar')); // P7: a channel in plain words
   const social = L('Social posts', 'منشورات التواصل');
   const leads = L('Leads', 'العملاء المحتملون');
   const M = {
-    'cta-mix': { cls: 'obs', plat: L('Website & all channels', 'الموقع وكل القنوات'), obj: o.enq, metric: L('Brand QA: share of assets using the primary CTA; enquiry rate before and after', 'فحص الجودة: نسبة المواد التي تستخدم الدعوة الأساسية؛ معدل الاستفسار قبل وبعد'), need: L('Nothing to act. GA4 key events are needed to measure the effect.', 'لا شيء للتنفيذ. قياس الأثر يحتاج أحداث GA4.'), v: 2, f: 1, u: 2, make: 'exp', exp: { t: L('One primary CTA vs. the current mix', 'دعوة أساسية واحدة مقابل الوضع الحالي'), h: L('If every page and post uses the single primary CTA, a larger share of visitors will enquire.', 'إذا استخدمت كل الصفحات والمنشورات الدعوة الأساسية وحدها، سترتفع نسبة من يرسلون استفساراً.'), m: L('Enquiries ÷ sessions', 'الاستفسارات ÷ الجلسات'), d: 21 } },
-    'offer-conflict': { cls: 'obs', plat: L('All channels', 'كل القنوات'), obj: o.trust, metric: L('No offer conflicts in Company knowledge or Brand QA', 'عدم وجود تعارض في العروض'), need: L('None', 'لا شيء'), v: 2, f: 1, u: 3, make: 'task' },
-    claims: { cls: 'obs', plat: L('Documents & creatives', 'المستندات والتصاميم'), obj: o.trust, metric: L('Zero unapproved claims in Brand QA', 'صفر ادعاءات غير معتمدة في فحص الجودة'), need: L('Proof documents if you want to keep a claim', 'مستندات إثبات إن أردت الإبقاء على ادعاء'), v: 2, f: 1, u: 2, make: 'task' },
-    'prod-consistent': { cls: 'obs', plat: L('Website & documents', 'الموقع والمستندات'), obj: o.trust, metric: L('Brand QA pass rate', 'نسبة نجاح فحص الجودة'), need: L('Performance data to learn which feature attracts enquiries', 'بيانات أداء لمعرفة أي ميزة تجذب الاستفسارات'), v: 1, f: 1, u: 1, make: 'task' },
-    'brand-doc': { cls: 'obs', plat: L('Brand', 'العلامة'), obj: o.trust, metric: L('Colour and CTA checks in Brand QA', 'فحوص الألوان والدعوة في فحص الجودة'), need: L('None', 'لا شيء'), v: 1, f: 1, u: 1, make: 'task' },
-    'know-gaps': { cls: 'gap', plat: L('Company knowledge', 'معرفة الشركة'), obj: o.enq, metric: L('Open questions remaining', 'عدد الأسئلة المفتوحة'), need: L('Your answers', 'إجاباتك'), v: 2, f: 1, u: 2, make: 'task' },
+    'cta-mix': { cls: 'obs', plat: L('Website & all channels', 'الموقع وكل القنوات'), obj: o.enq, metric: L('Check: share of assets using the main action button; enquiry rate before and after', 'الفحص: نسبة المواد التي تستخدم زر الإجراء الأساسي؛ معدل الاستفسار قبل وبعد'), need: L('Nothing to act. GA4 key events are needed to measure the effect.', 'لا شيء للتنفيذ. قياس الأثر يحتاج أحداث GA4.'), v: 2, f: 1, u: 2, make: 'exp', exp: { t: L('One main action button vs. the current mix', 'زر إجراء أساسي واحد مقابل الوضع الحالي'), h: L('If every page and post uses the single main action button, a larger share of visitors will enquire.', 'إذا استخدمت كل الصفحات والمنشورات زر الإجراء الأساسي وحدها، سترتفع نسبة من يرسلون استفساراً.'), m: L('Enquiries ÷ visits', 'الاستفسارات ÷ الزيارات'), d: 21 } },
+    'offer-conflict': { cls: 'obs', plat: L('All channels', 'كل القنوات'), obj: o.trust, metric: L('No offer conflicts in Company info or the check', 'عدم وجود تعارض في العروض'), need: L('None', 'لا شيء'), v: 2, f: 1, u: 3, make: 'task' },
+    claims: { cls: 'obs', plat: L('Documents & creatives', 'المستندات والتصاميم'), obj: o.trust, metric: L('Zero unapproved claims in the check', 'صفر ادعاءات غير معتمدة في الفحص'), need: L('Proof documents if you want to keep a claim', 'مستندات إثبات إن أردت الإبقاء على ادعاء'), v: 2, f: 1, u: 2, make: 'task' },
+    'prod-consistent': { cls: 'obs', plat: L('Website & documents', 'الموقع والمستندات'), obj: o.trust, metric: L('Check pass rate', 'نسبة نجاح الفحص'), need: L('Performance data to learn which feature attracts enquiries', 'بيانات أداء لمعرفة أي ميزة تجذب الاستفسارات'), v: 1, f: 1, u: 1, make: 'task' },
+    'brand-doc': { cls: 'obs', plat: L('Brand', 'العلامة'), obj: o.trust, metric: L('Colour and action button checks in the check', 'فحوص الألوان وزر الإجراء في الفحص'), need: L('None', 'لا شيء'), v: 1, f: 1, u: 1, make: 'task' },
+    'know-gaps': { cls: 'gap', plat: L('Company info', 'معلومات الشركة'), obj: o.enq, metric: L('Open questions remaining', 'عدد الأسئلة المفتوحة'), need: L('Your answers', 'إجاباتك'), v: 2, f: 1, u: 2, make: 'task' },
     'no-track': { cls: 'obs', plat: 'GA4', obj: o.meas, metric: L('Enquiry events recorded per week', 'أحداث الاستفسار المسجلة أسبوعياً'), need: L('Confirmation of how enquiries reach you today', 'تأكيد طريقة وصول الاستفسارات حالياً'), v: 3, f: 2, u: 3, make: 'task' },
-    'ch-best': { cls: 'measured', plat: 'GA4', obj: o.enq, metric: L('Sessions and enquiries from this channel', 'الجلسات والاستفسارات من هذه القناة'), need: L('Lead quality by channel (leads import)', 'جودة العملاء حسب القناة'), v: 2, f: 2, u: 1, make: 'campaign' },
-    'ch-leak': { cls: 'measured', plat: 'GA4', obj: o.enq, metric: L(`Enquiry rate of ${s} sessions`, `معدل استفسار جلسات ${s}`), need: L('Landing-page level data after the change', 'بيانات لكل صفحة دخول بعد التغيير'), v: 3, f: 2, u: 3, make: 'campaign', exp: { t: L(`Dedicated landing page for ${s}`, `صفحة مخصصة لـ ${s}`), h: L('A page matching the post message with a single CTA converts better than the pricing or blog page.', 'صفحة تطابق رسالة المنشور بدعوة واحدة تحوّل أفضل من صفحة الأسعار أو المدونة.'), m: L('Enquiries ÷ sessions on the landing page', 'الاستفسارات ÷ الجلسات في الصفحة المخصصة'), d: 21 } },
-    'page-leak': { cls: 'measured', plat: 'GA4', obj: o.enq, metric: L(`Enquiry rate on ${s}`, `معدل الاستفسار في ${s}`), need: L('A look at the live page (BrandPilot has not seen its layout)', 'مراجعة الصفحة الفعلية (BrandPilot لم يرَ تصميمها)'), v: 3, f: 2, u: 2, make: 'exp', exp: { t: L(`New first screen on ${s}`, `شاشة أولى جديدة في ${s}`), h: L('Showing the offer and one CTA in the first screen raises the enquiry rate of this page.', 'عرض العرض ودعوة واحدة في أول شاشة يرفع معدل الاستفسار لهذه الصفحة.'), m: L('Enquiries ÷ sessions on the page', 'الاستفسارات ÷ الجلسات في الصفحة'), d: 21 } },
-    'mobile-gap': { cls: 'measured', plat: 'GA4', obj: o.enq, metric: L('Mobile enquiry rate', 'معدل استفسار الموبايل'), need: L('Device-level form analytics would pinpoint the step where people leave', 'تحليلات النموذج حسب الجهاز تحدد خطوة الخروج'), v: 3, f: 2, u: 3, make: 'exp', exp: { t: L('Shorter mobile enquiry form', 'نموذج استفسار أقصر على الموبايل'), h: L('Reducing the mobile form to name and phone raises the mobile enquiry rate.', 'اختصار نموذج الموبايل إلى الاسم والهاتف يرفع معدل الاستفسار.'), m: L('Mobile enquiries ÷ mobile sessions', 'استفسارات الموبايل ÷ جلسات الموبايل'), d: 14 } },
+    'ch-best': { cls: 'measured', plat: 'GA4', obj: o.enq, metric: L('Visits and enquiries from this channel', 'الزيارات والاستفسارات من هذه القناة'), need: L('Lead quality by channel (leads import)', 'جودة العملاء حسب القناة'), v: 2, f: 2, u: 1, make: 'campaign' },
+    'ch-leak': { cls: 'measured', plat: 'GA4', obj: o.enq, metric: L(`Enquiry rate of visits from ${sp}`, `معدل استفسار زوار ${sp}`), need: L('Landing-page level data after the change', 'بيانات لكل صفحة دخول بعد التغيير'), v: 3, f: 2, u: 3, make: 'campaign', exp: { t: L(`Dedicated page for ${sp}`, `صفحة مخصصة لـ ${sp}`), h: L('A page matching the post message with a single action button converts better than the pricing or blog page.', 'صفحة تطابق رسالة المنشور بزر إجراء واحد تحوّل أفضل من صفحة الأسعار أو المدونة.'), m: L('Enquiries ÷ visits on the landing page', 'الاستفسارات ÷ الزيارات في الصفحة المخصصة'), d: 21 } },
+    'page-leak': { cls: 'measured', plat: 'GA4', obj: o.enq, metric: L(`Enquiry rate on ${s}`, `معدل الاستفسار في ${s}`), need: L('A look at the live page (BrandPilot has not seen its layout)', 'مراجعة الصفحة الفعلية (BrandPilot لم يرَ تصميمها)'), v: 3, f: 2, u: 2, make: 'exp', exp: { t: L(`New first screen on ${s}`, `شاشة أولى جديدة في ${s}`), h: L('Showing the offer and one action button in the first screen raises the enquiry rate of this page.', 'عرض العرض وزر إجراء واحد في أول شاشة يرفع معدل الاستفسار لهذه الصفحة.'), m: L('Enquiries ÷ visits on the page', 'الاستفسارات ÷ الزيارات في الصفحة'), d: 21 } },
+    'mobile-gap': { cls: 'measured', plat: 'GA4', obj: o.enq, metric: L('Mobile enquiry rate', 'معدل استفسار الموبايل'), need: L('Device-level form analytics would pinpoint the step where people leave', 'تحليلات النموذج حسب الجهاز تحدد خطوة الخروج'), v: 3, f: 2, u: 3, make: 'exp', exp: { t: L('Shorter mobile enquiry form', 'نموذج استفسار أقصر على الموبايل'), h: L('Reducing the mobile form to name and phone raises the mobile enquiry rate.', 'اختصار نموذج الموبايل إلى الاسم والهاتف يرفع معدل الاستفسار.'), m: L('Mobile enquiries ÷ mobile visits', 'استفسارات الموبايل ÷ زيارات الموبايل'), d: 14 } },
     'no-ga4': { cls: 'gap', plat: 'GA4', obj: o.meas, metric: L('GA4 rows imported', 'صفوف GA4 المستوردة'), need: L('GA4 export', 'تصدير GA4'), v: 3, f: 1, u: 3, make: 'task' },
-    'theme-best': { cls: 'measured', plat: social, obj: o.reach, metric: L('Link clicks and enquiries from tagged posts', 'نقرات الروابط والاستفسارات من المنشورات الموسومة'), need: L('UTM-tagged links to connect posts to enquiries', 'روابط UTM لربط المنشورات بالاستفسارات'), v: 2, f: 1, u: 2, make: 'campaign', exp: { t: L(`“${s}” vs “${x.weakest || ''}” as campaign creative`, `«${s}» مقابل «${x.weakest || ''}» كمحتوى للحملة`), h: L('The strongest organic theme also produces more tracked link clicks per reach when used with the campaign CTA.', 'أقوى موضوع عضوي ينتج أيضاً نقرات متتبعة أكثر لكل وصول عند استخدامه مع دعوة الحملة.'), m: L('Link clicks ÷ reach', 'نقرات الروابط ÷ الوصول'), d: 14 } },
+    'theme-best': { cls: 'measured', plat: social, obj: o.reach, metric: L('Link clicks and enquiries from tagged posts', 'نقرات الروابط والاستفسارات من المنشورات الموسومة'), need: L('UTM-tagged links to connect posts to enquiries', 'روابط UTM لربط المنشورات بالاستفسارات'), v: 2, f: 1, u: 2, make: 'campaign', exp: { t: L(`“${s}” vs “${x.weakest || ''}” as campaign creative`, `«${s}» مقابل «${x.weakest || ''}» كمحتوى للحملة`), h: L('The strongest organic theme also produces more tracked link clicks per reach when used with the campaign action button.', 'أقوى موضوع عضوي ينتج أيضاً نقرات متتبعة أكثر لكل وصول عند استخدامه مع زر إجراء الحملة.'), m: L('Link clicks ÷ reach', 'نقرات الروابط ÷ الوصول'), d: 14 } },
     cadence: { cls: 'measured', plat: social, obj: o.reach, metric: L('Longest gap between posts (days)', 'أطول فجوة بين المنشورات (أيام)'), need: L('None', 'لا شيء'), v: 1, f: 1, u: 2, make: 'task' },
     'eng-drop': { cls: 'measured', plat: social, obj: o.reach, metric: L('Engagement ÷ reach, 28-day window', 'التفاعل ÷ الوصول على 28 يوماً'), need: L('Another month of data to confirm the trend', 'شهر إضافي لتأكيد الاتجاه'), v: 1, f: 1, u: 2, make: 'task' },
     lang: { cls: 'measured', plat: social, obj: o.reach, metric: L('Link clicks and enquiries by language', 'النقرات والاستفسارات حسب اللغة'), need: L('UTM content tags per language', 'وسوم UTM لكل لغة'), v: 2, f: 1, u: 1, make: 'exp', exp: { t: L('Arabic vs English creative', 'تصميم عربي مقابل إنجليزي'), h: L('The language with higher engagement also yields more enquiries per click.', 'اللغة الأعلى تفاعلاً تحقق أيضاً استفسارات أكثر لكل نقرة.'), m: L('Enquiries ÷ link clicks, by utm_content language', 'الاستفسارات ÷ النقرات حسب لغة utm_content'), d: 21 } },
@@ -290,7 +292,7 @@ function meta(id, L, x) {
     defs: { cls: 'gap', plat: leads, obj: o.meas, metric: L('Definition present', 'وجود التعريف'), need: L('Your definition', 'تعريفك'), v: 2, f: 1, u: 2, make: 'task' },
     'no-leads': { cls: 'gap', plat: leads, obj: o.meas, metric: L('Lead rows imported', 'صفوف العملاء المستوردة'), need: L('Leads CSV', 'ملف العملاء'), v: 3, f: 1, u: 3, make: 'task' },
     'no-spend': { cls: 'gap', plat: social, obj: o.meas, metric: L('Rows with spend', 'صفوف بها إنفاق'), need: L('Ad spend export', 'تصدير الإنفاق'), v: 1, f: 1, u: 1, make: 'task' },
-    'pf-none': { cls: 'gap', obj: o.enq, metric: L('Projects recorded in Company knowledge', 'المشاريع المسجلة في معرفة الشركة'), need: L('Company CV / case studies', 'السيرة المؤسسية / دراسات الحالة'), v: 2, f: 1, u: 2, make: 'task' },
+    'pf-none': { cls: 'gap', obj: o.enq, metric: L('Projects recorded in Company info', 'المشاريع المسجلة في معلومات الشركة'), need: L('Company CV / case studies', 'السيرة المؤسسية / دراسات الحالة'), v: 2, f: 1, u: 2, make: 'task' },
     'pf-depth': { cls: 'obs', obj: o.enq, metric: L(`Qualified leads from ${s}`, `العملاء المؤهلون من ${s}`), need: L('Client permission before naming any client publicly', 'إذن العميل قبل ذكر اسمه علناً'), v: 3, f: 2, u: 2, make: 'campaign' },
     'pf-noproof': { cls: 'obs', obj: o.trust, metric: L('Services with at least one project', 'الخدمات التي لها مشروع واحد على الأقل'), need: L('Projects for these services, if they exist', 'مشاريع لهذه الخدمات إن وجدت'), v: 2, f: 1, u: 1, make: 'task' },
     'pf-noout': { cls: 'obs', obj: o.trust, metric: L('Projects with an outcome', 'المشاريع التي لها نتيجة'), need: L('Outcome per project', 'نتيجة لكل مشروع'), v: 2, f: 1, u: 1, make: 'task' },
@@ -309,7 +311,7 @@ const ASSUME = {
   gsc: (L) => L('Search Console figures cover web search only; position is the impression-weighted average.', 'أرقام Search Console تخص بحث الويب فقط؛ والمركز متوسط مرجّح بالظهور.'),
   leads: (L) => L('A qualified lead is a lead whose status is qualified or customer in your import.', 'العميل المؤهل هو من حالته «مؤهل» أو «عميل» في ملفك.'),
   sources: (L) => L('Read from your own documents; pending items are shown as observations, not as approved facts.', 'مقروء من مستنداتك؛ العناصر غير المعتمدة تُعرض كملاحظات لا كحقائق معتمدة.'),
-  facts: (L) => L('Uses only facts you approved in Company knowledge.', 'يستخدم فقط الحقائق التي اعتمدتها في معرفة الشركة.'),
+  facts: (L) => L('Uses only facts you approved in Company info.', 'يستخدم فقط الحقائق التي اعتمدتها في معلومات الشركة.'),
 };
 /** Rule ids whose not-enough-data item is about a dataset or a company input being missing (a card), not a check that could not run. */
 const DATA_GAPS = new Set(['no-ga4', 'no-gsc', 'no-leads', 'no-meta', 'no-spend', 'defs', 'know-gaps', 'pf-none']);

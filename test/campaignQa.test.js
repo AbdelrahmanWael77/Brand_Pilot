@@ -98,7 +98,7 @@ test('offer-numbers, claims, placeholders, language, links, review each report t
 });
 
 test('recommendation: verified only when the server audit produces it from data or facts', () => {
-  const items = [{ id: 'ch-best', basis: 'data', title: 'Search visitors enquire at the highest rate' }, { id: 'no-gsc', basis: 'insufficient', title: 'x' }, { id: 'brand-doc', basis: 'facts', title: 'Brand rules are documented' }];
+  const items = [{ id: 'ch-best', basis: 'data', title: 'Visitors from Search get in touch most often' }, { id: 'no-gsc', basis: 'insufficient', title: 'x' }, { id: 'brand-doc', basis: 'facts', title: 'Brand rules are documented' }];
   let c = by(run(campaign({ rec: 'ch-best' }), FACTS, items)).recommendation;
   assert.equal(c.pass, true);
   assert.equal(c.basis, 'audit');

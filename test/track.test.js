@@ -43,7 +43,7 @@ test('the plan is saved from server data: metric, scope, baseline, direction, ta
   assert.ok(Math.abs(step.target - (1 / 60) * (1 + MIN_CHANGE)) < 1e-12);
   assert.deepEqual(step.window, ['2026-10-01', END]);
   assert.equal(step.outcome, null);
-  assert.equal(step.title.en, 'Mobile visitors enquire far less than desktop visitors');
+  assert.equal(step.title.en, 'Phone visitors get in touch far less than computer visitors');
   assert.match(step.title.ar, /الجوال/);
   // in the trail, with who and the plan
   const [t] = trailRows(db, c, 'step_tracked');

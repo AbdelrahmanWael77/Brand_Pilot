@@ -30,14 +30,14 @@ test('keyboard: arrow keys move between tabs (mirrored in Arabic); a modal keeps
       await page.evaluate((l) => { if (S.lang !== l) A.lang(); A.go('audit'); }, lang);
       await page.waitForFunction(() => document.querySelector('.ns-f [role=tab]'));
       // only the selected tab is in the Tab order (roving tabindex)
-      assert.deepEqual(await page.$$eval('.ns-f [role=tab]', (t) => t.map((x) => x.tabIndex)), [0, -1, -1, -1, -1]);
+      assert.deepEqual(await page.$$eval('.ns-f [role=tab]', (t) => t.map((x) => x.tabIndex)), [0, -1, -1]); // P7: three filters (All, To fix, Opportunities)
       await page.focus('.ns-f [role=tab][data-v=all]');
       await page.keyboard.press(lang === 'ar' ? 'ArrowLeft' : 'ArrowRight'); // the next tab is to the left in Arabic
       await page.waitForTimeout(300);
       assert.deepEqual(await page.evaluate(() => ({ focused: document.activeElement.dataset.v, selected: document.querySelector('.ns-f [aria-selected=true]').dataset.v })), { focused: 'weak', selected: 'weak' }, `${lang}: next filter`);
       await page.keyboard.press('End');
       await page.waitForTimeout(300);
-      assert.equal(await page.evaluate(() => document.activeElement.dataset.v), 'risk', `${lang}: End`);
+      assert.equal(await page.evaluate(() => document.activeElement.dataset.v), 'opp', `${lang}: End`);
       await page.keyboard.press('Home');
       await page.waitForTimeout(300);
       // the section tabs (Recommendations · Ask · My tasks) move focus with the arrow keys too

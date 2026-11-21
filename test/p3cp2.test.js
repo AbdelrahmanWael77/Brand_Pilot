@@ -49,7 +49,7 @@ test('the Arabic prompt carries the glossary of the screens’ words; the Englis
   const en = buildPrompt(ctx, 'q', 'en').system;
   assert.ok(ar.includes(ARABIC_GLOSSARY));
   assert.ok(!en.includes(ARABIC_GLOSSARY));
-  for (const w of ['الجوال', 'سطح المكتب', 'الكتيّب', 'ابدأ', 'بيانات تجريبية', 'التواصل الاجتماعي']) assert.ok(ARABIC_GLOSSARY.includes(w), w);
+  for (const w of ['الجوال', 'سطح المكتب', 'الكتيّب', 'ابدأ', 'بيانات تجريبية', 'السوشيال']) assert.ok(ARABIC_GLOSSARY.includes(w), w);
   assert.match(ARABIC_GLOSSARY, /Never put an English word inside an Arabic sentence \(no "demo"/);
 });
 

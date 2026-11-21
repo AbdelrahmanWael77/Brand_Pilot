@@ -57,7 +57,7 @@ test('a saved report is a snapshot: it keeps its numbers when the data changes l
   // Rendered from the stored snapshot, in the language it was saved in.
   const md = await call('GET', `/api/companies/${companyId}/reports/${saved.id}?format=md`, alice);
   assert.match(md.headers.get('content-type'), /^text\/markdown/);
-  assert.match(await md.text(), /\| جلسات الموقع \| 500 \|/);
+  assert.match(await md.text(), /\| زيارات الموقع \| 500 \|/);
   const html = await call('GET', `/api/companies/${companyId}/reports/${saved.id}?format=html`, alice);
   assert.match(html.headers.get('content-security-policy'), /default-src 'none'/);
   const page = await html.text();

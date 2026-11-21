@@ -160,3 +160,52 @@ Checkpoint 2 applies the same plan to the other screens.
 Settings → Advanced is shown to the account owner. BrandPilot has no user roles yet (every account owns its own
 companies), so today every signed-in owner sees it; a separate admin role needs a server change and is not part of
 P7.
+
+---
+
+## Checkpoint 2 (2026-11-21): what changed, and the three questions per screen
+
+Owner decisions applied in both languages, on every screen and in the server and AI text: call to action = "زر
+الإجراء" (English "action button"); Campaign Studio = "إنشاء حملة"; knowledge = "معلومات الشركة" (the screen is now
+"Company info"); "sessions" = "visits" / "الزيارات"; channels in plain words ("your unpaid social media posts" /
+"منشوراتك على السوشيال", see server/plain.js); Brand QA = "Check" / "الفحص". Settings → Advanced is collapsed by default.
+
+For each screen: **5 s?** can a new user tell what it is for in 5 seconds · **Distracting?** · **What else to remove.**
+
+| Screen | What changed in Checkpoint 2 | 5 s? | Distracting? | What else to remove |
+|---|---|---|---|---|
+| Home | Plain words in the sentence and the next step; 3 short questions in one row; the menu shows your initial and the company name (the e-mail is in the account menu) | Yes | No | The "Compared with…" line |
+| Next steps | No text under the title; "Needs you" is one line and one button, only when something waits; no ask box; 3 filters; a row = number, title, reason, one action; confidence is quiet text inside "See why"; coral only on row 1; 5 rows, then "Show more"; export moved to Reports | Yes | The amber "Needs you" line, when present (it is meant to be seen) | The track record card could move to My tasks |
+| Ask | One page: the question box and 4 short questions; the grounding line, "How answers work", the audit cards and the question tabs are gone; "Test the number check" is a small link, demo only; the conversation list appears once there are conversations | Yes | No | — |
+| My tasks | One line under the title | Yes | The explanation line under "Improvement tasks" | "History and setup checklist" could move into the guide |
+| Campaigns list | Reached from the campaign switcher ("Create something new" / your content) | Mostly | — | A real list page is still to do (see open items) |
+| Campaign Studio | No breadcrumb and no "Template drafts… not model-written"; step bar Brief → Drafts → Check & download; in Drafts the preview is large and the fields open on "Edit" | Yes | No (the action bar under the preview no longer floats over the post list) | The "EXTRAS" label |
+| Check & download | Title "Check & download"; one status line ("Ready to download" / "N things to fix" / "Approve the strategy"); only failing checks are listed, the passing ones behind "Show all checks"; the same step bar | Yes | The version history card next to the checks | Version history could go behind a link |
+| Content series | One line under the title; with no series: one line and "New series"; the form opens after the click | Yes | The form header uses the series colours (dark) | — |
+| Reports | One line under the title; "Download" is the main button; the automatic report folds; no file-format labels | Yes | No | "Company reports" could fold |
+| Company sources | One line under the title; the "no AI model" note is gone (Settings shows it); no "Synthetic" labels | Yes | The character counts on each row | Character counts |
+| Company info | Renamed; one line under the title, no tool names; version and history behind a small "History" link; "Needs you first" kept | Yes | The ring "8/9" | — |
+| Data | One line under the title; light summary band; "Add a file" instead of "Import CSV / JSON / Excel"; plain demo wording | Mostly | File names and date ranges on each source | Per-source details could fold |
+| Settings | Backup buttons in plain words (no "JSON"); Advanced collapsed by default | Yes | The four "Your data" lines | — |
+| Results, Leads | One line under the title; light bands instead of dark gradients | Yes | The "step by step" explanation | That explanation |
+
+## Where things went (Checkpoint 2)
+
+| Item | Before | Now |
+|---|---|---|
+| "Export (MD)" | Next steps header | Reports → Company reports → Marketing audit |
+| Ask box | Next steps | Ask tab (and Home) |
+| "Working well" and "Risks & gaps" filters | Next steps | "All" (strong items) and "To fix" (risks and gaps) |
+| Marketing health | Next steps (folded) | Results |
+| Grounding line, "How answers work" | above the Ask chat | each answer's "Numbers checked" mark |
+| Audit cards and question tabs | Ask start page | Next steps (the same items); 4 short questions on Ask |
+| Breadcrumb and "Template drafts…" | Campaign Studio header | removed; the campaign switcher keeps "Create something new" |
+| Editing fields (Words, Look, Picture) | always open | behind "Edit" |
+| Passing checks | always listed | behind "Show all checks" |
+| Version in use, History | Company info summary | behind "History" |
+| Automatic report | always open | folded under "Automatic report" |
+| E-mail address | bottom of the menu | in the account menu (click your initial) |
+
+**Admin role (handoff):** Settings → Advanced is collapsed by default and visible to every signed-in account owner.
+A real admin role (who may see and change the AI model, AI files and import history) needs a server change and is
+left for later.

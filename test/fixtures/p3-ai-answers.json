@@ -1,5 +1,5 @@
 {
-  "note": "Real answers of claude-sonnet-5-5 on the synthetic FlowNest demo, last 28 days (21 Sep - 18 Oct 2026), recorded 2026-11-20 during P3 (prompts director-2026-11-20b and -20c; answers 7-26 are the false-alarm run of checkpoint 2, answers 27-46 the held-out run of 2026-11-21). Every number in them is true; the number check must verify them all.",
+  "note": "Real answers of claude-sonnet-5-5 on the synthetic FlowNest demo, last 28 days (21 Sep - 18 Oct 2026), recorded 2026-11-20 during P3 (prompts director-2026-11-20b and -20c; answers 7-26 are the false-alarm run of checkpoint 2, answers 27-46 the held-out run of 2026-11-21; answers 47-55 and 56-65 the two P7 runs of 2026-11-21 with prompt director-2026-11-21b, plain words). Every number in them is true; the number check must verify them all.",
   "answers": [
     {
       "lang": "en",
@@ -562,6 +562,254 @@
       "origin": "owner hand test 2026-11-21 (Arabic version of the same sentences)",
       "answer": "على فيسبوك، كان الوصول 12,349 من 6 منشورات في الفترة السابقة و19,981 من 10 منشورات في هذه الفترة. بلغ الوصول 33,933 في آخر 28 يوماً.",
       "support": []
+    },
+    {
+      "lang": "en",
+      "question": "Which channel should we grow first?",
+      "answer": "Grow email first, with unpaid Google search as a close second. Email visitors get in touch most often: 8 enquiries from 265 visits (3.02%), against a site average of 1.36%. That is a small sample, so treat it as a strong hint rather than proof. Unpaid Google search is the other safe bet. It has the best share of qualified leads, 33.33% (4 of 12 leads), and an enquiry rate of 2.02% from 1,534 visits. Only 12 leads sit behind that share. I would not put more effort into unpaid social posts yet: 37% of visits come from them but only 0.39% of those visitors get in touch. Cost per lead is not measured because there is no spend data, so I cannot compare channels on cost.",
+      "support": [
+        "audit:ch-best",
+        "channel:search.qshare",
+        "audit:ch-leak",
+        "metric:cost_per_lead"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "How did our unpaid social media posts do in the last 28 days?",
+      "answer": "Your Facebook and Instagram posts (20 in total) reached 33,933 people, with 42,416 impressions, 1,036 engagements and 309 link clicks in the last 28 days (21 Sep to 18 Oct 2026). Spend is not measured, so the data cannot confirm that every post was unpaid. Instagram got more engagement: 3.88% of reach against 2.47% on Facebook. Facebook brought more link clicks: 224 against 85. Overall engagement was 3.1% of reach, below 4.1% in the previous period. There was also a 19-day gap with no posts. On your website, social media visits were weak at converting: 1,781 visits led to only 7 enquiries (0.39%), against a site average of 1.36%. Leads recorded by your team were 12 for Facebook and 4 for Instagram. These are CRM entries, not platform-tracked conversions. LinkedIn has no post data. All of this is demo data.",
+      "support": [
+        "metric:reach",
+        "metric:engagements",
+        "audit:eng-drop",
+        "audit:ch-leak"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "What should we do first?",
+      "answer": "Start with your unpaid social media posts, which are your biggest leak. They bring 37% of your visits, but only 0.39% of those visitors get in touch, against 1.36% on average. Send them to one dedicated page with a single clear next step instead of general pages. The cause is only a hypothesis (pages that don't match what the post promised), not a measurement. Next in line is the /pricing page, with 1,676 visits and a 0.42% enquiry rate. After that, test the enquiry path on a phone: mobile visitors enquire at 0.81% against 2.27% on desktop. All of this rests on demo data.",
+      "support": [
+        "audit:ch-leak",
+        "audit:page-leak",
+        "audit:mobile-gap",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Is email worth more effort?",
+      "answer": "Probably yes, as a measured test rather than a big bet. Email visitors get in touch most often: 8 enquiries from 265 visits (3.02%), against a site average of 1.36%. The sample is small, though, at only 8 enquiries. Spend is not measured, so the cost of email versus other channels cannot be compared. The per-channel lead comparison also has no email figures, so I can't say how many leads or qualified leads email brought. 27% of the 48 leads have no recorded source, which can hide email's real contribution. This advice rests on demo data. A sensible next step is to put more into email and add a required \"How did you hear about us?\" field to track the result.",
+      "support": [
+        "audit:ch-best",
+        "audit:src-unknown",
+        "metric:enquiry_rate",
+        "metric:spend"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "لماذا نحصل على زيارات واستفسارات قليلة؟",
+      "answer": "هذه الإجابة مبنية على بيانات تجريبية للفترة من 2026-09-21 إلى 2026-10-18. في هذه الفترة سجّلت 4774 زيارة و65 استفسارًا، أي معدل استفسار 1.36%. الزيارات لا تتحول إلى استفسارات في ثلاثة أماكن. أولًا، 37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.39% فقط من هؤلاء الزوار يتواصلون معك. ثانيًا، الزيارات من الجوال تمثل 62% وفيها معدل الاستفسار 0.81% مقابل 2.27% على سطح المكتب. ثالثًا، صفحة /pricing لها 1676 زيارة (35%) ومعدل الاستفسار فيها 0.42%. وقد توقف النشر 19 يومًا، وانخفض التفاعل إلى 3.1% مقابل 4.1% في الفترة السابقة، والسبب غير معروف. كما أن مصدر 27% من العملاء المحتملين غير مسجل، فيصعب نسب النتائج إلى القنوات. ابدأ بتوجيه زوار السوشيال إلى صفحة واحدة مخصصة بخطوة واضحة، ثم اختبر مسار الاستفسار على الجوال وراجع صفحة /pricing.",
+      "support": [
+        "metric:sessions",
+        "metric:enquiries",
+        "metric:enquiry_rate",
+        "audit:ch-leak",
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "audit:cadence",
+        "audit:eng-drop",
+        "audit:src-unknown"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "أي قناة يجب أن ننميها أولاً؟",
+      "answer": "ابدأ بالبحث في جوجل (الزيارات غير المدفوعة). الأرقام أدناه للفترة من 2026-09-21 إلى 2026-10-18، وهي مبنية على بيانات تجريبية. جلب البحث في جوجل 1534 زيارة و31 استفساراً، بمعدل استفسار 2.02% مقابل 1.36% متوسط الموقع. حصة العملاء المؤهلين منه 33% (4 من 12 عميلاً محتملاً)، وهي الأعلى بين القنوات التي توجد بياناتها كافية للمقارنة. والفرصة واضحة: عبارة \"برنامج إدارة المهام\" ظهرت 5652 مرة ولم تجلب سوى 49 نقرة، ومتوسط ترتيبها 11.4. تنبيه: معدل الاستفسار من البحث كان 2.6% في الفترة السابقة (40 استفساراً)، أي أنه تراجع. أما البريد الإلكتروني فمعدله أعلى (3.02%، أي 8 استفسارات من 265 زيارة)، لكن العينة صغيرة، فاجعله الخطوة الثانية. أما منشوراتك على السوشيال فتجلب زيارات كثيرة لكن معدل الاستفسار منها 0.39% فقط، فأصلح صفحة الدخول قبل أن تنميها. ولا توجد بيانات مقاسة للينكدإن.",
+      "support": [
+        "channel:search.sessions",
+        "channel:search.enq",
+        "channel:search.enqRate",
+        "channel:search.qshare",
+        "audit:seo-q",
+        "audit:ch-best",
+        "audit:ch-leak"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "كيف كان أداء منشوراتنا على السوشيال في آخر 28 يوماً؟",
+      "answer": "هذه الأرقام مبنية على بيانات تجريبية للفترة من 2026-09-21 إلى 2026-10-18.\n\nوصلت منشوراتك إلى 33,933 شخصاً، وحققت 1,036 تفاعلاً و309 نقرات على الروابط.\n\nمتوسط التفاعل 3.1% من الوصول، مقابل 4.1% في الفترة السابقة، أي أنه أقل من مستواك المعتاد. السبب غير معروف، وقد يكون مزيج المواضيع أو توقف النشر 19 يوماً.\n\nإنستجرام أعلى تفاعلاً بنسبة 3.88% مقابل 2.47% لفيسبوك. أما فيسبوك فهو الأفضل في النقر على الروابط بنسبة 1.12% مقابل 0.61% لإنستجرام.\n\nالمشكلة في التحويل: 37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.39% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.36% في المتوسط العام.\n\nالإنفاق على المنشورات غير مقاس، ولذلك لا يمكن حساب تكلفة العميل المحتمل.",
+      "support": [
+        "metric:reach",
+        "metric:engagements",
+        "metric:link_clicks",
+        "metric:spend",
+        "metric:cost_per_lead",
+        "audit:eng-drop",
+        "audit:cadence",
+        "audit:ch-leak",
+        "channel:instagram.engRate",
+        "channel:facebook.engRate",
+        "channel:facebook.clickRate",
+        "channel:instagram.clickRate"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "بماذا نبدأ؟",
+      "answer": "ابدأ بإصلاح المكان الذي تضيع فيه الاستفسارات، لأن الزوار موجودون أصلًا. هذه النصيحة مبنية على بيانات تجريبية للفترة الحالية.\n1) صفحة /pricing: فيها 1,676 زيارة (35%) ومعدل الاستفسار 0.42% مقابل 1.36% للموقع كله. ضع زر الإجراء الرئيسي في أول الصفحة، واختصر النموذج، واذكر العرض في الشاشة الأولى.\n2) منشوراتك على السوشيال: 37% من الزيارات تأتي منها، لكن 0.39% فقط من هؤلاء الزوار يتواصلون معك. وجّههم إلى صفحة واحدة مخصصة بخطوة تالية واحدة واضحة.\n3) الجوال: 62% من الزيارات ومعدل الاستفسار 0.81% مقابل 2.27% على سطح المكتب. جرّب مسار الاستفسار على الجوال: طول النموذج وحجم الزر وسرعة التحميل.",
+      "support": [
+        "audit:page-leak",
+        "audit:ch-leak",
+        "audit:mobile-gap",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "هل يستحق البريد جهداً أكبر؟",
+      "answer": "نعم، يستحق البريد الإلكتروني جهداً أكبر، لكن بحذر. في الفترة من 2026-09-21 إلى 2026-10-18 جاءت من البريد 8 استفسارات من 265 زيارة، أي معدل استفسار 3.02%. متوسط الموقع كله 1.36% (65 استفساراً من 4,774 زيارة). أي أن زوار البريد يتواصلون معك أكثر من ضعف المتوسط. هذه بيانات تجريبية، والعينة صغيرة (8 استفسارات فقط)، فاعتبرها مؤشراً وليست حكماً نهائياً. كذلك 27% من 48 عميلاً محتملاً بلا مصدر مسجل، ولا يمكن الحكم على جودة العملاء المحتملين من البريد قبل أن يصل أي مصدر إلى 15 عميلاً محتملاً. الخطوة العملية: زد محتوى البريد، وحسّن الصفحات التي يصل إليها القارئ، ووضّح المتابعة بعد الرسالة. وأضف حقلاً إلزامياً \"كيف سمعت عنا؟\" لتعرف أثر البريد بدقة.",
+      "support": [
+        "audit:ch-best",
+        "audit:src-unknown",
+        "audit:src-best",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Why do we get visits but few enquiries?",
+      "answer": "This advice rests on demo data. In the 28 days from 2026-09-21 to 2026-10-18 you had 4,774 visits and 65 enquiries, which is 1.36%. The data points to three leaks. First, your unpaid social media posts: 37% of visits come from them, but only 0.39% of those visitors get in touch. Why is not measured. One possible cause is that posts send people to pages that don't match what the post promised. Second, phones: 62% of visits are on phones and only 0.81% of those visitors get in touch, against 2.27% on a computer. Third, the /pricing page: 1,676 visits (35% of all) start there and only 0.42% of those visitors get in touch. Email (3.02%) and unpaid Google search (2.02%) convert better. Also, 27% of leads have no recorded source, so some channels may look weaker than they are.",
+      "support": [
+        "metric:sessions",
+        "metric:enquiries",
+        "metric:enquiry_rate",
+        "audit:ch-leak",
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "audit:ch-best",
+        "audit:src-unknown",
+        "channel:search.enqRate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Which channel should we grow first?",
+      "answer": "Grow email first, and work on unpaid Google search alongside it. Email visitors get in touch most often: 8 enquiries from 265 visits (3.02%), against a site average of 1.36%. That sample is small, so treat it as a promising signal rather than proof. Unpaid Google search is the bigger, steadier channel: 31 enquiries from 1,534 visits (2.02%), and 33% of its leads were qualified, the best share of any channel. Its enquiries were 40 in the previous period, so it needs attention. Unpaid social posts are the weakest place to push: 0.39% of their visitors get in touch. Spend is not measured, so I cannot compare cost per lead. All figures come from demo data.",
+      "support": [
+        "audit:ch-best",
+        "channel:search.enq",
+        "channel:search.qshare",
+        "audit:ch-leak",
+        "metric:spend"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "How did our unpaid social media posts do in the last 28 days?",
+      "answer": "Your unpaid posts earned attention but converted weakly (demo data, 21 Sep to 18 Oct 2026). Facebook had 10 posts that reached 19,981 people, with 2.47% engagement and a 1.12% link click rate. Instagram had 10 posts that reached 13,952 people, with 3.88% engagement and a 0.61% link click rate. Engagement across all 20 posts was 3.1%, down from 4.1% in the previous period. On the website, 37% of visits come from your unpaid social posts, but only 0.39% of those visitors get in touch, against 1.36% on average. Facebook had 12 recorded leads (3 qualified) and Instagram had 4 (none qualified), but these counts are small and come from the team's own records, not platform tracking. Posting also stopped for 19 days, from 6 to 25 September. Cost per lead cannot be calculated because spend was not measured. LinkedIn has no post data.",
+      "support": [
+        "channel:facebook.reach",
+        "channel:instagram.reach",
+        "audit:ch-leak",
+        "audit:eng-drop",
+        "audit:cadence"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "What should we do first?",
+      "answer": "Start with the /pricing page. 1,676 visits (35% of all) start there, but only 0.42% of these visitors get in touch, against 1.36% on average. These visitors are already on your site, so this is the cheapest place to gain enquiries. Put the main action button at the top of the page, shorten the form and state the offer on the first screen. Next, test the enquiry path on a phone: 62% of visits come from phones and only 0.81% of those visitors get in touch, against 2.27% on a computer. This advice rests on demo data.",
+      "support": [
+        "audit:page-leak",
+        "audit:mobile-gap",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "en",
+      "question": "Is email worth more effort?",
+      "answer": "Probably yes, but treat it as a promising signal rather than proof. In the 28 days to 18 October 2026, email visitors got in touch most often: 8 enquiries from 265 visits (3.02%), against a site average of 1.36% (65 enquiries from 4,774 visits). The sample is small, with only 8 enquiries. The context also shows no email lead counts, no email spend and no email figures for the previous period. So I can't say whether email brings qualified leads or what it costs. Lead sources cannot be compared yet, because a source needs 15 or more leads. This advice rests on demo data. A low-risk step is to put more effort into email content and follow-up, and to record the lead source properly so you can check the result.",
+      "support": [
+        "audit:ch-best",
+        "audit:src-best",
+        "metric:enquiry_rate",
+        "metric:spend",
+        "metric:cost_per_lead"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "لماذا نحصل على زيارات واستفسارات قليلة؟",
+      "answer": "هذه الإجابة مبنية على بيانات تجريبية للفترة الحالية. في هذه الفترة بلغت الزيارات 4774 وجاء منها 65 استفسارًا فقط، بمعدل استفسار 1.36%. المشكلة في التحويل أكثر منها في عدد الزيارات، وهذه أبرز الأسباب:\n1) 37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.39% فقط من هؤلاء الزوار يتواصلون معك.\n2) 62% من الزيارات من الجوال ولا يتواصل منهم إلا 0.81%، مقابل 2.27% على سطح المكتب.\n3) صفحة /pricing تستقبل 1,676 زيارة (35% من الكل)، لكن 0.42% فقط من زوارها يتواصلون معك.\n4) الزيارات من البحث في جوجل ثابتة تقريبًا: 1534 زيارة مقابل 1537 في الفترة السابقة، لكن الاستفسارات انخفضت إلى 31 مقابل 40 في الفترة السابقة.\nكما توقف النشر 19 يومًا، وقد يكون هذا أحد الأسباب، لكن السبب الفعلي غير مؤكد.",
+      "support": [
+        "metric:sessions",
+        "metric:enquiries",
+        "metric:enquiry_rate",
+        "audit:ch-leak",
+        "audit:mobile-gap",
+        "audit:page-leak",
+        "channel:search.sessions",
+        "channel:search.enq",
+        "audit:cadence"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "أي قناة يجب أن ننميها أولاً؟",
+      "answer": "ابدأ بالبحث في جوجل. في الفترة الحالية (28 يوماً) جاءك منه 1534 زيارة و31 استفساراً، أي معدل استفسار 2.02% مقابل متوسط الموقع 1.36%. ونسبة العملاء المؤهلين بين عملائه المحتملين 33.33%، وهي الأعلى بين القنوات التي لديها بيانات كافية. لكن معدل الاستفسار فيه كان 2.6% في الفترة السابقة، فهناك تراجع يجب إيقافه. والفرصة واضحة: عبارة \"برنامج إدارة المهام\" ظهرت 5652 مرة مقابل 49 نقرة فقط، فحسّن صفحة واحدة لكل عبارة بحث. البريد الإلكتروني أعلى معدلاً بنسبة 3.02% (8 استفسارات من 265 زيارة)، لكن العينة صغيرة، فاجعله خطوتك الثانية. لا تنمِّ منشوراتك على السوشيال أولاً، لأن معدل الاستفسار من زياراتها 0.39% فقط، وأصلح هذا التحويل قبل أي توسع. هذه البيانات تجريبية، والإنفاق غير مقاس، فلا يمكن مقارنة تكلفة القنوات.",
+      "support": [
+        "channel:search.sessions",
+        "channel:search.enq",
+        "channel:search.enqRate",
+        "channel:search.qshare",
+        "audit:seo-q",
+        "audit:ch-best",
+        "audit:ch-leak",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "كيف كان أداء منشوراتنا على السوشيال في آخر 28 يوماً؟",
+      "answer": "هذه الأرقام مبنية على بيانات تجريبية للفترة من 2026-09-21 إلى 2026-10-18.\nوصلت منشوراتك (20 منشوراً) إلى 33933 شخصاً، وحققت 1036 تفاعلاً و309 نقرات على الروابط.\nمعدل التفاعل 3.1% مقابل 4.1% في الفترة السابقة، أي أقل من مستواك المعتاد، والسبب غير معروف.\nفيسبوك: 10 منشورات، وصول 19981، معدل تفاعل 2.47%، و224 نقرة على الروابط (1.12% من الوصول). إنستغرام: 10 منشورات، وصول 13952، معدل تفاعل 3.88%، و85 نقرة (0.61%). إنستغرام الأفضل في التفاعل، وفيسبوك الأفضل في النقرات.\nالإنفاق غير مقاس، لذلك لا يمكن حساب تكلفة العميل المحتمل.\nمن جهة الموقع، 37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.39% فقط من هؤلاء الزوار يتواصلون معك مقابل 1.36% في المتوسط.",
+      "support": [
+        "metric:reach",
+        "metric:engagements",
+        "metric:link_clicks",
+        "metric:spend",
+        "audit:eng-drop",
+        "audit:ch-leak",
+        "channel:facebook.reach",
+        "channel:instagram.reach"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "بماذا نبدأ؟",
+      "answer": "ابدأ بصفحة /pricing، لأن الزوار موجودون فيها أصلًا. خلال الفترة المقاسة بدأت 1,676 زيارة (35% من الكل) من هذه الصفحة، لكن 0.42% فقط من هؤلاء الزوار تواصلوا معك، مقابل 1.36% في المتوسط. ضع زر الإجراء الرئيسي في أعلى الصفحة، واختصر النموذج، واذكر العرض في الشاشة الأولى. بعد ذلك اختبر مسار الاستفسار على الجوال: 62% من زياراتك من الجوال و0.81% فقط منهم يتواصلون، مقابل 2.27% على سطح المكتب. ثم وجّه زوار منشوراتك على السوشيال (37% من الزيارات، ومعدل الاستفسار 0.39%) إلى صفحة واحدة مخصصة. هذه النصائح مبنية على بيانات تجريبية.",
+      "support": [
+        "audit:page-leak",
+        "audit:mobile-gap",
+        "audit:ch-leak",
+        "metric:enquiry_rate"
+      ]
+    },
+    {
+      "lang": "ar",
+      "question": "هل يستحق البريد جهداً أكبر؟",
+      "answer": "نعم، تشير البيانات إلى ذلك، لكن بحذر. في الفترة من 2026-09-21 إلى 2026-10-18 جاء من البريد 8 استفسارات من 265 زيارة، أي معدل استفسار 3.02%، مقابل متوسط الموقع 1.36% (65 استفسارًا من 4,774 زيارة). أي أن زوار البريد يتواصلون معك أكثر من غيرهم، والتوسع فيه أقل مخاطرة من إصلاح قناة ضعيفة. التحفظ: العينة صغيرة (8 استفسارات فقط)، وهذه بيانات تجريبية. كما أن قناة البريد غير مدرجة في المقارنة بين القنوات، فلا أستطيع أن أنسب لها عملاء محتملين أو عملاء. ولا توجد بيانات إنفاق، فتكلفة العميل المحتمل غير مقاسة. ابدأ بزيادة محتوى البريد وتحسين الصفحات التي يوجّه إليها وجعل المتابعة أوضح، وراقب هل يبقى المعدل مرتفعًا.",
+      "support": [
+        "audit:ch-best",
+        "metric:enquiry_rate",
+        "metric:enquiries",
+        "metric:sessions",
+        "metric:spend",
+        "metric:cost_per_lead",
+        "audit:no-spend"
+      ]
     }
   ]
 }

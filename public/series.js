@@ -427,7 +427,8 @@
   function homeView(c) {
     const ss = serOf(c), R_ = typeof nxRun === 'function' ? nxRun(c) : { recs: [] }, all = creativesOf(c);
     const head = ph(L('AI Content Series', 'سلاسل المحتوى الذكية'), L('Recurring branded posts in your own signature style. Teach BrandPilot how a series looks, give it a topic, approve a finished post.', 'منشورات متكررة بأسلوب علامتك المميز. علّم BrandPilot شكل السلسلة، أعطه موضوعاً، واعتمد منشوراً جاهزاً.'), `<button class="btn pri" data-a="sxNewT">${ic('plus', 16)}${L('New series', 'سلسلة جديدة')}</button>`);
-    const setup = S.ui.sxNew || !ss.length ? setupHTML(c, !ss.length) : '';
+    // P7 (owner 2026-11-21): the form opens after "New series"; with no series yet, one line and the button
+    const setup = S.ui.sxNew ? setupHTML(c, false) : !ss.length ? `<section class="card sx-empty7"><p>${L('No series yet. Create one to make recurring posts with one look.', 'لا سلاسل بعد. أنشئ سلسلة لتصنع منشورات متكررة بمظهر واحد.')}</p><button class="btn pri" data-a="sxNewT">${ic('plus', 16)}${L('New series', 'سلسلة جديدة')}</button></section>` : '';
     const cards = ss.map((s) => {
       const st = fixStyle(styleOf(c, s)), mine = all.filter((k) => k.sid === s.id), refs = refsOf(c, s.id), rec = R_.recs.find((r) => r.sid === s.id), d = draftsOf(c)[s.id];
       const pics = mine.slice(-3).reverse().map((k) => cvHTML('h-' + k.id, specOf(c, s, k, { ill: k.ill, layout: k.layout, made: k.made }, 0, k.st), 0.3, k.copy.l1)).concat(refs.slice(-3).map((x) => `<img src="${media(c, x.img).data}" alt="${esc(L('Reference post', 'منشور مرجعي'))}" loading="lazy">`)).slice(0, 3);

@@ -1,7 +1,7 @@
 {
  "about": "Recommendations BrandPilot produces for the synthetic FlowNest demo company (rules engine, no AI). Pre-P1 version: commit fc8a772. recs[range][lang] = what the screens list (since P1: the server audit) for all data and the last 28 days; server = GET /api/companies/:id/audit. Rebuild: node scripts/flownest-baseline.mjs --write",
  "recordedAt": "2026-11-21",
- "commit": "30a97fa",
+ "commit": "5d67579",
  "counts": {
   "sources": 6,
   "findings": 51,
@@ -19,17 +19,17 @@
     {
      "id": "ch-leak",
      "calc": [
-      "Organic Social: 7 enquiries ÷ 1,781 sessions = 0.39%; site 65 ÷ 4,774 = 1.36%",
-      "Rule: 20%+ of sessions (37%) and a rate below half the site rate (0.68%)"
+      "Your unpaid social media posts: 7 enquiries ÷ 1,781 visits = 0.39%; site 65 ÷ 4,774 = 1.36%",
+      "Rule: 20%+ of visits (37%) and a rate below half the site rate (0.68%)"
      ],
-     "title": "Organic Social brings many visits but few enquiries",
+     "title": "Many visits from your unpaid social media posts, but few enquiries",
      "why": "Attention is being won but not converted.",
-     "action": "Send Organic Social visitors to one dedicated page with a single clear next step, instead of general pages.",
+     "action": "Send visitors from your unpaid social media posts to one dedicated page with a single clear next step, instead of general pages.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.0039303761931499155,
-       "text": "Organic Social: 37% of sessions, enquiry rate 0.39% vs site 1.36%"
+       "text": "37% of your visits come from your unpaid social media posts, but only 0.39% of these visitors get in touch, against 1.36% on average."
       },
       {
        "text": "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
@@ -42,7 +42,7 @@
      "cls": "measured",
      "plat": "GA4",
      "obj": "Qualified enquiries",
-     "metric": "Enquiry rate of Organic Social sessions",
+     "metric": "Enquiry rate of visits from your unpaid social media posts",
      "need": "Landing-page level data after the change",
      "v": 3,
      "e": 2,
@@ -51,19 +51,19 @@
      "score": 9,
      "make": "campaign",
      "exp": {
-      "t": "Dedicated landing page for Organic Social",
-      "h": "A page matching the post message with a single CTA converts better than the pricing or blog page.",
-      "m": "Enquiries ÷ sessions on the landing page",
+      "t": "Dedicated page for your unpaid social media posts",
+      "h": "A page matching the post message with a single action button converts better than the pricing or blog page.",
+      "m": "Enquiries ÷ visits on the landing page",
       "d": 21
      },
      "ev": [
-      "Organic Social: 37% of sessions, enquiry rate 0.39% vs site 1.36%",
+      "37% of your visits come from your unpaid social media posts, but only 0.39% of these visitors get in touch, against 1.36% on average.",
       "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "Medium: 1,781 sessions (8.9× the minimum of 200), 42% past the threshold, data on 28 of 28 days."
+      "why": "Medium: 1,781 visits (8.9× the minimum of 200), 42% past the threshold, data on 28 of 28 days."
      },
      "rule": false,
      "engine": "rules",
@@ -85,21 +85,21 @@
      "id": "mobile-gap",
      "calc": [
       "Mobile: 24 ÷ 2,968 = 0.81%; desktop: 41 ÷ 1,806 = 2.27%",
-      "Rule: mobile 30%+ of sessions and below 60% of the desktop rate (1.36%)"
+      "Rule: mobile 30%+ of visits and below 60% of the desktop rate (1.36%)"
      ],
-     "title": "Mobile visitors enquire far less than desktop visitors",
+     "title": "Phone visitors get in touch far less than computer visitors",
      "why": "If the mobile path is harder, every channel pays for it.",
      "action": "Test the enquiry path on a phone: form length, button size, load time, WhatsApp/click-to-call option.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.008086253369272238,
-       "text": "Mobile: 62% of sessions, enquiry rate 0.81%"
+       "text": "62% of your visits come from phones, but only 0.81% of these visitors get in touch"
       },
       {
        "metric": "enquiry_rate",
        "value": 0.022702104097452935,
-       "text": "Desktop: enquiry rate 2.27%"
+       "text": "On a computer (desktop), 2.27% of visitors get in touch"
       }
      ],
      "kind": "weak",
@@ -120,17 +120,17 @@
      "exp": {
       "t": "Shorter mobile enquiry form",
       "h": "Reducing the mobile form to name and phone raises the mobile enquiry rate.",
-      "m": "Mobile enquiries ÷ mobile sessions",
+      "m": "Mobile enquiries ÷ mobile visits",
       "d": 14
      },
      "ev": [
-      "Mobile: 62% of sessions, enquiry rate 0.81%",
-      "Desktop: enquiry rate 2.27%"
+      "62% of your visits come from phones, but only 0.81% of these visitors get in touch",
+      "On a computer (desktop), 2.27% of visitors get in touch"
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "Medium: 2,968 sessions (14.8× the minimum of 200), 41% past the threshold, data on 28 of 28 days."
+      "why": "Medium: 2,968 visits (14.8× the minimum of 200), 41% past the threshold, data on 28 of 28 days."
      },
      "rule": false,
      "engine": "rules",
@@ -155,7 +155,7 @@
      "kind": "risk",
      "title": "Your own materials state different offers",
      "why": "A prospect who sees two versions of the offer cannot tell which is true; outdated material also puts campaign copy at risk.",
-     "action": "Approve the current offer in Company knowledge, reject the outdated one, and retire or correct the old document.",
+     "action": "Approve the current offer in Company info, reject the outdated one, and retire or correct the old document.",
      "evidence": [
       {
        "factId": "<fact>",
@@ -168,7 +168,7 @@
      "cls": "obs",
      "plat": "All channels",
      "obj": "Brand trust and consistency",
-     "metric": "No offer conflicts in Company knowledge or Brand QA",
+     "metric": "No offer conflicts in Company info or the check",
      "need": "None",
      "v": 2,
      "e": 3,
@@ -202,16 +202,16 @@
     {
      "id": "page-leak",
      "calc": [
-      "/pricing: 7 ÷ 1,676 = 0.42%; site 1.36%; rule: 12%+ of sessions and below 60% of the site rate (0.82%)"
+      "/pricing: 7 ÷ 1,676 = 0.42%; site 1.36%; rule: 12%+ of visits and below 60% of the site rate (0.82%)"
      ],
-     "title": "Landing page /pricing under-converts",
+     "title": "The /pricing page gets many visits but few enquiries",
      "why": "A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.",
-     "action": "Review /pricing: put the primary CTA above the fold, shorten the form, state the offer in the first screen.",
+     "action": "Review /pricing: put the main action button above the fold, shorten the form, state the offer in the first screen.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.004176610978520286,
-       "text": "/pricing: 1,676 sessions (35%), enquiry rate 0.42% vs site 1.36%"
+       "text": "1,676 visits (35% of all) start on /pricing, but only 0.42% of these visitors get in touch, against 1.36% on average."
       }
      ],
      "kind": "weak",
@@ -231,17 +231,17 @@
      "make": "exp",
      "exp": {
       "t": "New first screen on /pricing",
-      "h": "Showing the offer and one CTA in the first screen raises the enquiry rate of this page.",
-      "m": "Enquiries ÷ sessions on the page",
+      "h": "Showing the offer and one action button in the first screen raises the enquiry rate of this page.",
+      "m": "Enquiries ÷ visits on the page",
       "d": 21
      },
      "ev": [
-      "/pricing: 1,676 sessions (35%), enquiry rate 0.42% vs site 1.36%"
+      "1,676 visits (35% of all) start on /pricing, but only 0.42% of these visitors get in touch, against 1.36% on average."
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "Medium: 1,676 sessions (8.4× the minimum of 200), 49% past the threshold, data on 28 of 28 days."
+      "why": "Medium: 1,676 visits (8.4× the minimum of 200), 49% past the threshold, data on 28 of 28 days."
      },
      "rule": false,
      "engine": "rules",
@@ -319,9 +319,9 @@
      "synthetic": false,
      "id": "cta-mix",
      "kind": "weak",
-     "title": "Several different calls to action are in use",
+     "title": "Several different action buttons are in use",
      "why": "When materials ask people to do different things, fewer people do any of them and results cannot be compared across channels.",
-     "action": "Choose one primary CTA in Company knowledge and use it on every campaign asset; keep the others as secondary links only.",
+     "action": "Choose one main action button in Company info and use it on every campaign asset; keep the others as secondary links only.",
      "evidence": [
       {
        "factId": "<fact>",
@@ -337,12 +337,12 @@
       }
      ],
      "calc": [
-      "3 different English calls to action found in your sources (rule: more than 1)."
+      "3 different English action buttons found in your sources (rule: more than 1)."
      ],
      "cls": "obs",
      "plat": "Website & all channels",
      "obj": "Qualified enquiries",
-     "metric": "Brand QA: share of assets using the primary CTA; enquiry rate before and after",
+     "metric": "Check: share of assets using the main action button; enquiry rate before and after",
      "need": "Nothing to act. GA4 key events are needed to measure the effect.",
      "v": 2,
      "e": 3,
@@ -351,9 +351,9 @@
      "score": 8,
      "make": "exp",
      "exp": {
-      "t": "One primary CTA vs. the current mix",
-      "h": "If every page and post uses the single primary CTA, a larger share of visitors will enquire.",
-      "m": "Enquiries ÷ sessions",
+      "t": "One main action button vs. the current mix",
+      "h": "If every page and post uses the single main action button, a larger share of visitors will enquire.",
+      "m": "Enquiries ÷ visits",
       "d": 21
      },
      "ev": [
@@ -364,7 +364,7 @@
      "conf": "high",
      "confidence": {
       "level": "high",
-      "why": "High: Read directly from your sources: 3 calls to action."
+      "why": "High: Read directly from your sources: 3 action buttons."
      },
      "rule": false,
      "engine": "rules",
@@ -408,7 +408,7 @@
      "cls": "obs",
      "plat": "Documents & creatives",
      "obj": "Brand trust and consistency",
-     "metric": "Zero unapproved claims in Brand QA",
+     "metric": "Zero unapproved claims in the check",
      "need": "Proof documents if you want to keep a claim",
      "v": 2,
      "e": 3,
@@ -449,7 +449,7 @@
      "synthetic": false,
      "title": "1 business question(s) no source could answer",
      "why": "Recommendations in these areas would be guesses. BrandPilot leaves them blank rather than inventing answers.",
-     "action": "Answer the open questions in Company knowledge — one line each is enough.",
+     "action": "Answer the open questions in Company info — one line each is enough.",
      "needs": "Your answers",
      "evidence": [
       {
@@ -458,10 +458,10 @@
       }
      ],
      "calc": [
-      "1 open question(s) in Company knowledge."
+      "1 open question(s) in Company info."
      ],
      "cls": "gap",
-     "plat": "Company knowledge",
+     "plat": "Company info",
      "obj": "Qualified enquiries",
      "metric": "Open questions remaining",
      "need": "Your answers",
@@ -499,7 +499,7 @@
      ],
      "title": "\"how-to tips\" is your strongest content theme",
      "why": "Your own history shows what the audience responds to — a better guide than generic best practice.",
-     "action": "Publish more \"how-to tips\" posts and end each with the primary CTA and a tracked link.",
+     "action": "Publish more \"how-to tips\" posts and end each with the main action button and a tracked link.",
      "evidence": [
       {
        "metric": "engagement_rate",
@@ -534,7 +534,7 @@
      "make": "campaign",
      "exp": {
       "t": "“how-to tips” vs “offer” as campaign creative",
-      "h": "The strongest organic theme also produces more tracked link clicks per reach when used with the campaign CTA.",
+      "h": "The strongest organic theme also produces more tracked link clicks per reach when used with the campaign action button.",
       "m": "Link clicks ÷ reach",
       "d": 14
      },
@@ -693,7 +693,7 @@
      ],
      "title": "People search for what you offer but rarely reach you",
      "why": "These queries already show your pages. Moving a few positions up usually costs less than buying the same visits.",
-     "action": "Create or improve one page per query: put the phrase in the title, answer the need directly, add the primary CTA.",
+     "action": "Create or improve one page per query: put the phrase in the title, answer the need directly, add the main action button.",
      "evidence": [
       {
        "metric": "ctr",
@@ -1094,7 +1094,7 @@
      "cls": "obs",
      "plat": "Brand",
      "obj": "Brand trust and consistency",
-     "metric": "Colour and CTA checks in Brand QA",
+     "metric": "Colour and action button checks in the check",
      "need": "None",
      "v": 1,
      "e": 3,
@@ -1124,7 +1124,7 @@
       "Brand guidelines"
      ],
      "assumptions": [
-      "Uses only facts you approved in Company knowledge."
+      "Uses only facts you approved in Company info."
      ]
     },
     {
@@ -1183,23 +1183,23 @@
     {
      "id": "ch-best",
      "calc": [
-      "Email: 8 enquiries ÷ 265 sessions = 3.02%",
-      "Site: 65 ÷ 4,774 = 1.36%; rule: above 120% of the site rate (1.63%), channels with 200+ sessions"
+      "Email: 8 enquiries ÷ 265 visits = 3.02%",
+      "Site: 65 ÷ 4,774 = 1.36%; rule: above 120% of the site rate (1.63%), channels with 200+ visits"
      ],
-     "title": "Email visitors enquire at the highest rate",
+     "title": "Visitors from email get in touch most often",
      "why": "This channel already brings people with intent; growing it is lower-risk than fixing a weak one.",
-     "action": "Invest more effort in Email: more content, better pages, clearer follow-up.",
+     "action": "Put more effort into email: more content, better pages, clearer follow-up.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.03018867924528302,
-       "text": "Email: 8 enquiries from 265 sessions (3.02%)"
+       "text": "Email: 8 enquiries from 265 visits (3.02%)"
       },
       {
        "metric": "enquiry_rate",
        "value": 0.013615416841223292,
        "rows": 560,
-       "text": "Site average: 1.36% (65 enquiries from 4,774 sessions)"
+       "text": "Site average: 1.36% (65 enquiries from 4,774 visits)"
       }
      ],
      "kind": "strong",
@@ -1209,7 +1209,7 @@
      "cls": "measured",
      "plat": "GA4",
      "obj": "Qualified enquiries",
-     "metric": "Sessions and enquiries from this channel",
+     "metric": "Visits and enquiries from this channel",
      "need": "Lead quality by channel (leads import)",
      "v": 2,
      "e": 1,
@@ -1218,13 +1218,13 @@
      "score": 4,
      "make": "campaign",
      "ev": [
-      "Email: 8 enquiries from 265 sessions (3.02%)",
-      "Site average: 1.36% (65 enquiries from 4,774 sessions)"
+      "Email: 8 enquiries from 265 visits (3.02%)",
+      "Site average: 1.36% (65 enquiries from 4,774 visits)"
      ],
      "conf": "low",
      "confidence": {
       "level": "low",
-      "why": "Low: 265 sessions (1.3× the minimum of 200), 85% past the threshold, data on 28 of 28 days."
+      "why": "Low: 265 visits (1.3× the minimum of 200), 85% past the threshold, data on 28 of 28 days."
      },
      "rule": false,
      "engine": "rules",
@@ -1247,17 +1247,17 @@
     {
      "id": "ch-leak",
      "calc": [
-      "Organic Social: 7 استفسار ÷ 1,781 جلسة = 0.39%؛ الموقع 65 ÷ 4,774 = 1.36%",
-      "القاعدة: 20٪ أو أكثر من الجلسات (37%) ومعدل أقل من نصف معدل الموقع (0.68%)"
+      "منشوراتك على السوشيال: 7 استفسار ÷ 1,781 زيارة = 0.39%؛ الموقع 65 ÷ 4,774 = 1.36%",
+      "القاعدة: 20٪ أو أكثر من الزيارات (37%) ومعدل أقل من نصف معدل الموقع (0.68%)"
      ],
-     "title": "Organic Social تجلب زيارات كثيرة واستفسارات قليلة",
+     "title": "زيارات كثيرة من منشوراتك على السوشيال، لكن الاستفسارات قليلة",
      "why": "نكسب الانتباه ولا نحوّله إلى استفسارات.",
-     "action": "وجّه زيارات Organic Social إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.",
+     "action": "وجّه زوار منشوراتك على السوشيال إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.0039303761931499155,
-       "text": "Organic Social: 37% من الجلسات، معدل الاستفسار 0.39% مقابل 1.36% للموقع"
+       "text": "37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.39% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.36% في المتوسط."
       },
       {
        "text": "فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور."
@@ -1270,7 +1270,7 @@
      "cls": "measured",
      "plat": "GA4",
      "obj": "استفسارات مؤهلة",
-     "metric": "معدل استفسار جلسات Organic Social",
+     "metric": "معدل استفسار زوار منشوراتك على السوشيال",
      "need": "بيانات لكل صفحة دخول بعد التغيير",
      "v": 3,
      "e": 2,
@@ -1279,19 +1279,19 @@
      "score": 9,
      "make": "campaign",
      "exp": {
-      "t": "صفحة مخصصة لـ Organic Social",
-      "h": "صفحة تطابق رسالة المنشور بدعوة واحدة تحوّل أفضل من صفحة الأسعار أو المدونة.",
-      "m": "الاستفسارات ÷ الجلسات في الصفحة المخصصة",
+      "t": "صفحة مخصصة لـ منشوراتك على السوشيال",
+      "h": "صفحة تطابق رسالة المنشور بزر إجراء واحد تحوّل أفضل من صفحة الأسعار أو المدونة.",
+      "m": "الاستفسارات ÷ الزيارات في الصفحة المخصصة",
       "d": 21
      },
      "ev": [
-      "Organic Social: 37% من الجلسات، معدل الاستفسار 0.39% مقابل 1.36% للموقع",
+      "37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.39% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.36% في المتوسط.",
       "فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور."
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "متوسطة: 1,781 جلسة (8.9 ضعف الحد الأدنى 200)، 42% بعد العتبة، بيانات 28 من 28 يوماً."
+      "why": "متوسطة: 1,781 زيارة (8.9 ضعف الحد الأدنى 200)، 42% بعد العتبة، بيانات 28 من 28 يوماً."
      },
      "rule": false,
      "engine": "rules",
@@ -1313,21 +1313,21 @@
      "id": "mobile-gap",
      "calc": [
       "الجوال: 24 ÷ 2,968 = 0.81%؛ سطح المكتب: 41 ÷ 1,806 = 2.27%",
-      "القاعدة: الجوال 30٪ أو أكثر من الجلسات وأقل من 60٪ من معدل سطح المكتب (1.36%)"
+      "القاعدة: الجوال 30٪ أو أكثر من الزيارات وأقل من 60٪ من معدل سطح المكتب (1.36%)"
      ],
-     "title": "زوار الجوال يستفسرون أقل بكثير من زوار سطح المكتب",
+     "title": "زوار الجوال يتواصلون معك أقل بكثير من زوار الكمبيوتر",
      "why": "إذا كان مسار الجوال أصعب، فكل القنوات تدفع الثمن.",
      "action": "اختبر مسار الاستفسار على الهاتف: طول النموذج، حجم الأزرار، زمن التحميل، وخيار واتساب أو الاتصال بنقرة.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.008086253369272238,
-       "text": "الجوال: 62% من الجلسات، معدل الاستفسار 0.81%"
+       "text": "62% من زياراتك تأتي من الجوال، لكن 0.81% فقط من هؤلاء الزوار يتواصلون معك"
       },
       {
        "metric": "enquiry_rate",
        "value": 0.022702104097452935,
-       "text": "سطح المكتب: معدل الاستفسار 2.27%"
+       "text": "على الكمبيوتر (سطح المكتب) يتواصل معك 2.27% من الزوار"
       }
      ],
      "kind": "weak",
@@ -1348,17 +1348,17 @@
      "exp": {
       "t": "نموذج استفسار أقصر على الموبايل",
       "h": "اختصار نموذج الموبايل إلى الاسم والهاتف يرفع معدل الاستفسار.",
-      "m": "استفسارات الموبايل ÷ جلسات الموبايل",
+      "m": "استفسارات الموبايل ÷ زيارات الموبايل",
       "d": 14
      },
      "ev": [
-      "الجوال: 62% من الجلسات، معدل الاستفسار 0.81%",
-      "سطح المكتب: معدل الاستفسار 2.27%"
+      "62% من زياراتك تأتي من الجوال، لكن 0.81% فقط من هؤلاء الزوار يتواصلون معك",
+      "على الكمبيوتر (سطح المكتب) يتواصل معك 2.27% من الزوار"
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "متوسطة: 2,968 جلسة (14.8 ضعف الحد الأدنى 200)، 41% بعد العتبة، بيانات 28 من 28 يوماً."
+      "why": "متوسطة: 2,968 زيارة (14.8 ضعف الحد الأدنى 200)، 41% بعد العتبة، بيانات 28 من 28 يوماً."
      },
      "rule": false,
      "engine": "rules",
@@ -1383,7 +1383,7 @@
      "kind": "risk",
      "title": "موادك نفسها تذكر عروضاً مختلفة",
      "why": "العميل المحتمل الذي يرى نسختين من العرض لا يعرف أيهما الصحيح، والمواد القديمة تعرّض نصوص الحملات للخطأ.",
-     "action": "اعتمد العرض الحالي في معرفة الشركة وارفض القديم، ثم صحّح أو أوقف المستند القديم.",
+     "action": "اعتمد العرض الحالي في معلومات الشركة وارفض القديم، ثم صحّح أو أوقف المستند القديم.",
      "evidence": [
       {
        "factId": "<fact>",
@@ -1430,16 +1430,16 @@
     {
      "id": "page-leak",
      "calc": [
-      "/pricing: 7 ÷ 1,676 = 0.42%؛ الموقع 1.36%؛ القاعدة: 12٪ أو أكثر من الجلسات وأقل من 60٪ من معدل الموقع (0.82%)"
+      "/pricing: 7 ÷ 1,676 = 0.42%؛ الموقع 1.36%؛ القاعدة: 12٪ أو أكثر من الزيارات وأقل من 60٪ من معدل الموقع (0.82%)"
      ],
-     "title": "صفحة الدخول /pricing أقل تحويلاً من المتوسط",
+     "title": "صفحة /pricing تجلب زيارات كثيرة لكن الاستفسارات قليلة",
      "why": "صفحة عالية الزيارات بتحويل أقل من متوسط الموقع هي أرخص مكان لكسب استفسارات: الزوار موجودون بالفعل.",
-     "action": "راجع /pricing: ضع الدعوة الرئيسية في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.",
+     "action": "راجع /pricing: ضع زر الإجراء الرئيسي في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.004176610978520286,
-       "text": "/pricing: 1,676 جلسة (35%)، معدل الاستفسار 0.42% مقابل 1.36% للموقع"
+       "text": "1,676 زيارة (35% من الكل) تبدأ من /pricing، لكن 0.42% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.36% في المتوسط."
       }
      ],
      "kind": "weak",
@@ -1459,17 +1459,17 @@
      "make": "exp",
      "exp": {
       "t": "شاشة أولى جديدة في /pricing",
-      "h": "عرض العرض ودعوة واحدة في أول شاشة يرفع معدل الاستفسار لهذه الصفحة.",
-      "m": "الاستفسارات ÷ الجلسات في الصفحة",
+      "h": "عرض العرض وزر إجراء واحد في أول شاشة يرفع معدل الاستفسار لهذه الصفحة.",
+      "m": "الاستفسارات ÷ الزيارات في الصفحة",
       "d": 21
      },
      "ev": [
-      "/pricing: 1,676 جلسة (35%)، معدل الاستفسار 0.42% مقابل 1.36% للموقع"
+      "1,676 زيارة (35% من الكل) تبدأ من /pricing، لكن 0.42% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.36% في المتوسط."
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "متوسطة: 1,676 جلسة (8.4 ضعف الحد الأدنى 200)، 49% بعد العتبة، بيانات 28 من 28 يوماً."
+      "why": "متوسطة: 1,676 زيارة (8.4 ضعف الحد الأدنى 200)، 49% بعد العتبة، بيانات 28 من 28 يوماً."
      },
      "rule": false,
      "engine": "rules",
@@ -1547,9 +1547,9 @@
      "synthetic": false,
      "id": "cta-mix",
      "kind": "weak",
-     "title": "هناك أكثر من عبارة حثّ على التواصل مستخدمة",
+     "title": "يُستخدم أكثر من زر إجراء",
      "why": "عندما تطلب المواد من الناس أشياء مختلفة، يقل من يستجيب ويصعب مقارنة النتائج بين القنوات.",
-     "action": "اختر دعوة أساسية واحدة في معرفة الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.",
+     "action": "اختر زر إجراء أساسي واحد في معلومات الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.",
      "evidence": [
       {
        "factId": "<fact>",
@@ -1565,12 +1565,12 @@
       }
      ],
      "calc": [
-      "3 دعوات مختلفة لاتخاذ إجراء في مصادرك (القاعدة: أكثر من 1)."
+      "3 أزرار إجراء مختلفة في مصادرك (القاعدة: أكثر من 1)."
      ],
      "cls": "obs",
      "plat": "الموقع وكل القنوات",
      "obj": "استفسارات مؤهلة",
-     "metric": "فحص الجودة: نسبة المواد التي تستخدم الدعوة الأساسية؛ معدل الاستفسار قبل وبعد",
+     "metric": "الفحص: نسبة المواد التي تستخدم زر الإجراء الأساسي؛ معدل الاستفسار قبل وبعد",
      "need": "لا شيء للتنفيذ. قياس الأثر يحتاج أحداث GA4.",
      "v": 2,
      "e": 3,
@@ -1579,9 +1579,9 @@
      "score": 8,
      "make": "exp",
      "exp": {
-      "t": "دعوة أساسية واحدة مقابل الوضع الحالي",
-      "h": "إذا استخدمت كل الصفحات والمنشورات الدعوة الأساسية وحدها، سترتفع نسبة من يرسلون استفساراً.",
-      "m": "الاستفسارات ÷ الجلسات",
+      "t": "زر إجراء أساسي واحد مقابل الوضع الحالي",
+      "h": "إذا استخدمت كل الصفحات والمنشورات زر الإجراء الأساسي وحدها، سترتفع نسبة من يرسلون استفساراً.",
+      "m": "الاستفسارات ÷ الزيارات",
       "d": 21
      },
      "ev": [
@@ -1592,7 +1592,7 @@
      "conf": "high",
      "confidence": {
       "level": "high",
-      "why": "عالية: مقروء مباشرة من مصادرك: 3 دعوات لاتخاذ إجراء."
+      "why": "عالية: مقروء مباشرة من مصادرك: 3 أزرار إجراء."
      },
      "rule": false,
      "engine": "rules",
@@ -1636,7 +1636,7 @@
      "cls": "obs",
      "plat": "المستندات والتصاميم",
      "obj": "ثقة واتساق العلامة",
-     "metric": "صفر ادعاءات غير معتمدة في فحص الجودة",
+     "metric": "صفر ادعاءات غير معتمدة في الفحص",
      "need": "مستندات إثبات إن أردت الإبقاء على ادعاء",
      "v": 2,
      "e": 3,
@@ -1677,7 +1677,7 @@
      "synthetic": false,
      "title": "1 سؤال عن النشاط لم يُجب عنه أي مصدر",
      "why": "التوصيات في هذه المناطق ستكون تخميناً. BrandPilot يتركها فارغة بدلاً من اختلاق إجابات.",
-     "action": "أجب عن الأسئلة المفتوحة في معرفة الشركة — سطر واحد لكل سؤال يكفي.",
+     "action": "أجب عن الأسئلة المفتوحة في معلومات الشركة — سطر واحد لكل سؤال يكفي.",
      "needs": "إجاباتك",
      "evidence": [
       {
@@ -1686,10 +1686,10 @@
       }
      ],
      "calc": [
-      "1 سؤال مفتوح في معرفة الشركة."
+      "1 سؤال مفتوح في معلومات الشركة."
      ],
      "cls": "gap",
-     "plat": "معرفة الشركة",
+     "plat": "معلومات الشركة",
      "obj": "استفسارات مؤهلة",
      "metric": "عدد الأسئلة المفتوحة",
      "need": "إجاباتك",
@@ -1727,7 +1727,7 @@
      ],
      "title": "«how-to tips» هو أقوى موضوع محتوى لديك",
      "why": "تاريخك نفسه يبيّن ما يتفاعل معه الجمهور — وهو دليل أفضل من الممارسات العامة.",
-     "action": "انشر مزيداً من منشورات «how-to tips» واختم كلاً منها بالدعوة الرئيسية ورابط متتبَّع.",
+     "action": "انشر مزيداً من منشورات «how-to tips» واختم كلاً منها بزر الإجراء الرئيسي ورابط متتبَّع.",
      "evidence": [
       {
        "metric": "engagement_rate",
@@ -1762,7 +1762,7 @@
      "make": "campaign",
      "exp": {
       "t": "«how-to tips» مقابل «offer» كمحتوى للحملة",
-      "h": "أقوى موضوع عضوي ينتج أيضاً نقرات متتبعة أكثر لكل وصول عند استخدامه مع دعوة الحملة.",
+      "h": "أقوى موضوع عضوي ينتج أيضاً نقرات متتبعة أكثر لكل وصول عند استخدامه مع زر إجراء الحملة.",
       "m": "نقرات الروابط ÷ الوصول",
       "d": 14
      },
@@ -1921,7 +1921,7 @@
      ],
      "title": "الناس يبحثون عمّا تقدمه لكنهم قلّما يصلون إليك",
      "why": "هذه الاستعلامات تُظهر صفحاتك بالفعل. التقدم بضعة مراكز يكلّف عادةً أقل من شراء الزيارات نفسها.",
-     "action": "أنشئ أو حسّن صفحة لكل استعلام: ضع العبارة في العنوان، أجب عن الحاجة مباشرة، وأضف الدعوة الرئيسية.",
+     "action": "أنشئ أو حسّن صفحة لكل استعلام: ضع العبارة في العنوان، أجب عن الحاجة مباشرة، وأضف زر الإجراء الرئيسي.",
      "evidence": [
       {
        "metric": "ctr",
@@ -2121,7 +2121,7 @@
      ],
      "title": "توقف النشر لمدة 19 يوماً",
      "why": "النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظارك.",
-     "action": "اعتمد تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.",
+     "action": "اعتمد تقويماً أسبوعياً ثابتاً؛ إنشاء حملة ينشئ واحداً مع كل حملة.",
      "evidence": [
       {
        "metric": "posting_gap_days",
@@ -2322,7 +2322,7 @@
      "cls": "obs",
      "plat": "العلامة",
      "obj": "ثقة واتساق العلامة",
-     "metric": "فحوص الألوان والدعوة في فحص الجودة",
+     "metric": "فحوص الألوان وزر الإجراء في الفحص",
      "need": "لا شيء",
      "v": 1,
      "e": 3,
@@ -2352,7 +2352,7 @@
       "Brand guidelines"
      ],
      "assumptions": [
-      "يستخدم فقط الحقائق التي اعتمدتها في معرفة الشركة."
+      "يستخدم فقط الحقائق التي اعتمدتها في معلومات الشركة."
      ]
     },
     {
@@ -2411,23 +2411,23 @@
     {
      "id": "ch-best",
      "calc": [
-      "Email: 8 استفسار ÷ 265 جلسة = 3.02%",
-      "الموقع: 65 ÷ 4,774 = 1.36%؛ القاعدة: أعلى من 120٪ من معدل الموقع (1.63%)، للقنوات ذات 200 جلسة أو أكثر"
+      "البريد: 8 استفسار ÷ 265 زيارة = 3.02%",
+      "الموقع: 65 ÷ 4,774 = 1.36%؛ القاعدة: أعلى من 120٪ من معدل الموقع (1.63%)، للقنوات ذات 200 زيارة أو أكثر"
      ],
-     "title": "زوار Email هم الأعلى في معدل الاستفسار",
+     "title": "زوار البريد هم الأكثر تواصلاً معك",
      "why": "هذه القناة تجلب بالفعل زواراً لديهم نية؛ تنميتها أقل مخاطرة من إصلاح قناة ضعيفة.",
-     "action": "استثمر جهداً أكبر في Email: محتوى أكثر، صفحات أفضل، متابعة أوضح.",
+     "action": "ضع جهداً أكبر في البريد: محتوى أكثر، صفحات أفضل، متابعة أوضح.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.03018867924528302,
-       "text": "Email: 8 استفسار من 265 جلسة (3.02%)"
+       "text": "البريد: 8 استفسار من 265 زيارة (3.02%)"
       },
       {
        "metric": "enquiry_rate",
        "value": 0.013615416841223292,
        "rows": 560,
-       "text": "متوسط الموقع: 1.36% (65 استفسار من 4,774 جلسة)"
+       "text": "متوسط الموقع: 1.36% (65 استفسار من 4,774 زيارة)"
       }
      ],
      "kind": "strong",
@@ -2437,7 +2437,7 @@
      "cls": "measured",
      "plat": "GA4",
      "obj": "استفسارات مؤهلة",
-     "metric": "الجلسات والاستفسارات من هذه القناة",
+     "metric": "الزيارات والاستفسارات من هذه القناة",
      "need": "جودة العملاء حسب القناة",
      "v": 2,
      "e": 1,
@@ -2446,13 +2446,13 @@
      "score": 4,
      "make": "campaign",
      "ev": [
-      "Email: 8 استفسار من 265 جلسة (3.02%)",
-      "متوسط الموقع: 1.36% (65 استفسار من 4,774 جلسة)"
+      "البريد: 8 استفسار من 265 زيارة (3.02%)",
+      "متوسط الموقع: 1.36% (65 استفسار من 4,774 زيارة)"
      ],
      "conf": "low",
      "confidence": {
       "level": "low",
-      "why": "منخفضة: 265 جلسة (1.3 ضعف الحد الأدنى 200)، 85% بعد العتبة، بيانات 28 من 28 يوماً."
+      "why": "منخفضة: 265 زيارة (1.3 ضعف الحد الأدنى 200)، 85% بعد العتبة، بيانات 28 من 28 يوماً."
      },
      "rule": false,
      "engine": "rules",
@@ -2477,17 +2477,17 @@
     {
      "id": "ch-leak",
      "calc": [
-      "Organic Social: 13 enquiries ÷ 5,318 sessions = 0.24%; site 189 ÷ 14,303 = 1.32%",
-      "Rule: 20%+ of sessions (37%) and a rate below half the site rate (0.66%)"
+      "Your unpaid social media posts: 13 enquiries ÷ 5,318 visits = 0.24%; site 189 ÷ 14,303 = 1.32%",
+      "Rule: 20%+ of visits (37%) and a rate below half the site rate (0.66%)"
      ],
-     "title": "Organic Social brings many visits but few enquiries",
+     "title": "Many visits from your unpaid social media posts, but few enquiries",
      "why": "Attention is being won but not converted.",
-     "action": "Send Organic Social visitors to one dedicated page with a single clear next step, instead of general pages.",
+     "action": "Send visitors from your unpaid social media posts to one dedicated page with a single clear next step, instead of general pages.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.002444528018051899,
-       "text": "Organic Social: 37% of sessions, enquiry rate 0.24% vs site 1.32%"
+       "text": "37% of your visits come from your unpaid social media posts, but only 0.24% of these visitors get in touch, against 1.32% on average."
       },
       {
        "text": "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
@@ -2500,7 +2500,7 @@
      "cls": "measured",
      "plat": "GA4",
      "obj": "Qualified enquiries",
-     "metric": "Enquiry rate of Organic Social sessions",
+     "metric": "Enquiry rate of visits from your unpaid social media posts",
      "need": "Landing-page level data after the change",
      "v": 3,
      "e": 3,
@@ -2509,19 +2509,19 @@
      "score": 10,
      "make": "campaign",
      "exp": {
-      "t": "Dedicated landing page for Organic Social",
-      "h": "A page matching the post message with a single CTA converts better than the pricing or blog page.",
-      "m": "Enquiries ÷ sessions on the landing page",
+      "t": "Dedicated page for your unpaid social media posts",
+      "h": "A page matching the post message with a single action button converts better than the pricing or blog page.",
+      "m": "Enquiries ÷ visits on the landing page",
       "d": 21
      },
      "ev": [
-      "Organic Social: 37% of sessions, enquiry rate 0.24% vs site 1.32%",
+      "37% of your visits come from your unpaid social media posts, but only 0.24% of these visitors get in touch, against 1.32% on average.",
       "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
      ],
      "conf": "high",
      "confidence": {
       "level": "high",
-      "why": "High: 5,318 sessions (26.6× the minimum of 200), 63% past the threshold, data on 84 of 84 days."
+      "why": "High: 5,318 visits (26.6× the minimum of 200), 63% past the threshold, data on 84 of 84 days."
      },
      "rule": false,
      "engine": "rules",
@@ -2543,21 +2543,21 @@
      "id": "mobile-gap",
      "calc": [
       "Mobile: 71 ÷ 8,858 = 0.80%; desktop: 118 ÷ 5,445 = 2.17%",
-      "Rule: mobile 30%+ of sessions and below 60% of the desktop rate (1.30%)"
+      "Rule: mobile 30%+ of visits and below 60% of the desktop rate (1.30%)"
      ],
-     "title": "Mobile visitors enquire far less than desktop visitors",
+     "title": "Phone visitors get in touch far less than computer visitors",
      "why": "If the mobile path is harder, every channel pays for it.",
      "action": "Test the enquiry path on a phone: form length, button size, load time, WhatsApp/click-to-call option.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.008015353352901333,
-       "text": "Mobile: 62% of sessions, enquiry rate 0.80%"
+       "text": "62% of your visits come from phones, but only 0.80% of these visitors get in touch"
       },
       {
        "metric": "enquiry_rate",
        "value": 0.0216712580348944,
-       "text": "Desktop: enquiry rate 2.17%"
+       "text": "On a computer (desktop), 2.17% of visitors get in touch"
       }
      ],
      "kind": "weak",
@@ -2578,17 +2578,17 @@
      "exp": {
       "t": "Shorter mobile enquiry form",
       "h": "Reducing the mobile form to name and phone raises the mobile enquiry rate.",
-      "m": "Mobile enquiries ÷ mobile sessions",
+      "m": "Mobile enquiries ÷ mobile visits",
       "d": 14
      },
      "ev": [
-      "Mobile: 62% of sessions, enquiry rate 0.80%",
-      "Desktop: enquiry rate 2.17%"
+      "62% of your visits come from phones, but only 0.80% of these visitors get in touch",
+      "On a computer (desktop), 2.17% of visitors get in touch"
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "Medium: 8,858 sessions (44.3× the minimum of 200), 38% past the threshold, data on 84 of 84 days."
+      "why": "Medium: 8,858 visits (44.3× the minimum of 200), 38% past the threshold, data on 84 of 84 days."
      },
      "rule": false,
      "engine": "rules",
@@ -2613,7 +2613,7 @@
      "kind": "risk",
      "title": "Your own materials state different offers",
      "why": "A prospect who sees two versions of the offer cannot tell which is true; outdated material also puts campaign copy at risk.",
-     "action": "Approve the current offer in Company knowledge, reject the outdated one, and retire or correct the old document.",
+     "action": "Approve the current offer in Company info, reject the outdated one, and retire or correct the old document.",
      "evidence": [
       {
        "factId": "<fact>",
@@ -2626,7 +2626,7 @@
      "cls": "obs",
      "plat": "All channels",
      "obj": "Brand trust and consistency",
-     "metric": "No offer conflicts in Company knowledge or Brand QA",
+     "metric": "No offer conflicts in Company info or the check",
      "need": "None",
      "v": 2,
      "e": 3,
@@ -2660,16 +2660,16 @@
     {
      "id": "page-leak",
      "calc": [
-      "/pricing: 20 ÷ 4,965 = 0.40%; site 1.32%; rule: 12%+ of sessions and below 60% of the site rate (0.79%)"
+      "/pricing: 20 ÷ 4,965 = 0.40%; site 1.32%; rule: 12%+ of visits and below 60% of the site rate (0.79%)"
      ],
-     "title": "Landing page /pricing under-converts",
+     "title": "The /pricing page gets many visits but few enquiries",
      "why": "A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.",
-     "action": "Review /pricing: put the primary CTA above the fold, shorten the form, state the offer in the first screen.",
+     "action": "Review /pricing: put the main action button above the fold, shorten the form, state the offer in the first screen.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.004028197381671702,
-       "text": "/pricing: 4,965 sessions (35%), enquiry rate 0.40% vs site 1.32%"
+       "text": "4,965 visits (35% of all) start on /pricing, but only 0.40% of these visitors get in touch, against 1.32% on average."
       }
      ],
      "kind": "weak",
@@ -2689,17 +2689,17 @@
      "make": "exp",
      "exp": {
       "t": "New first screen on /pricing",
-      "h": "Showing the offer and one CTA in the first screen raises the enquiry rate of this page.",
-      "m": "Enquiries ÷ sessions on the page",
+      "h": "Showing the offer and one action button in the first screen raises the enquiry rate of this page.",
+      "m": "Enquiries ÷ visits on the page",
       "d": 21
      },
      "ev": [
-      "/pricing: 4,965 sessions (35%), enquiry rate 0.40% vs site 1.32%"
+      "4,965 visits (35% of all) start on /pricing, but only 0.40% of these visitors get in touch, against 1.32% on average."
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "Medium: 4,965 sessions (24.8× the minimum of 200), 49% past the threshold, data on 84 of 84 days."
+      "why": "Medium: 4,965 visits (24.8× the minimum of 200), 49% past the threshold, data on 84 of 84 days."
      },
      "rule": false,
      "engine": "rules",
@@ -2777,9 +2777,9 @@
      "synthetic": false,
      "id": "cta-mix",
      "kind": "weak",
-     "title": "Several different calls to action are in use",
+     "title": "Several different action buttons are in use",
      "why": "When materials ask people to do different things, fewer people do any of them and results cannot be compared across channels.",
-     "action": "Choose one primary CTA in Company knowledge and use it on every campaign asset; keep the others as secondary links only.",
+     "action": "Choose one main action button in Company info and use it on every campaign asset; keep the others as secondary links only.",
      "evidence": [
       {
        "factId": "<fact>",
@@ -2795,12 +2795,12 @@
       }
      ],
      "calc": [
-      "3 different English calls to action found in your sources (rule: more than 1)."
+      "3 different English action buttons found in your sources (rule: more than 1)."
      ],
      "cls": "obs",
      "plat": "Website & all channels",
      "obj": "Qualified enquiries",
-     "metric": "Brand QA: share of assets using the primary CTA; enquiry rate before and after",
+     "metric": "Check: share of assets using the main action button; enquiry rate before and after",
      "need": "Nothing to act. GA4 key events are needed to measure the effect.",
      "v": 2,
      "e": 3,
@@ -2809,9 +2809,9 @@
      "score": 8,
      "make": "exp",
      "exp": {
-      "t": "One primary CTA vs. the current mix",
-      "h": "If every page and post uses the single primary CTA, a larger share of visitors will enquire.",
-      "m": "Enquiries ÷ sessions",
+      "t": "One main action button vs. the current mix",
+      "h": "If every page and post uses the single main action button, a larger share of visitors will enquire.",
+      "m": "Enquiries ÷ visits",
       "d": 21
      },
      "ev": [
@@ -2822,7 +2822,7 @@
      "conf": "high",
      "confidence": {
       "level": "high",
-      "why": "High: Read directly from your sources: 3 calls to action."
+      "why": "High: Read directly from your sources: 3 action buttons."
      },
      "rule": false,
      "engine": "rules",
@@ -2866,7 +2866,7 @@
      "cls": "obs",
      "plat": "Documents & creatives",
      "obj": "Brand trust and consistency",
-     "metric": "Zero unapproved claims in Brand QA",
+     "metric": "Zero unapproved claims in the check",
      "need": "Proof documents if you want to keep a claim",
      "v": 2,
      "e": 3,
@@ -2907,7 +2907,7 @@
      "synthetic": false,
      "title": "1 business question(s) no source could answer",
      "why": "Recommendations in these areas would be guesses. BrandPilot leaves them blank rather than inventing answers.",
-     "action": "Answer the open questions in Company knowledge — one line each is enough.",
+     "action": "Answer the open questions in Company info — one line each is enough.",
      "needs": "Your answers",
      "evidence": [
       {
@@ -2916,10 +2916,10 @@
       }
      ],
      "calc": [
-      "1 open question(s) in Company knowledge."
+      "1 open question(s) in Company info."
      ],
      "cls": "gap",
-     "plat": "Company knowledge",
+     "plat": "Company info",
      "obj": "Qualified enquiries",
      "metric": "Open questions remaining",
      "need": "Your answers",
@@ -3040,7 +3040,7 @@
      ],
      "title": "\"how-to tips\" is your strongest content theme",
      "why": "Your own history shows what the audience responds to — a better guide than generic best practice.",
-     "action": "Publish more \"how-to tips\" posts and end each with the primary CTA and a tracked link.",
+     "action": "Publish more \"how-to tips\" posts and end each with the main action button and a tracked link.",
      "evidence": [
       {
        "metric": "engagement_rate",
@@ -3075,7 +3075,7 @@
      "make": "campaign",
      "exp": {
       "t": "“how-to tips” vs “product update” as campaign creative",
-      "h": "The strongest organic theme also produces more tracked link clicks per reach when used with the campaign CTA.",
+      "h": "The strongest organic theme also produces more tracked link clicks per reach when used with the campaign action button.",
       "m": "Link clicks ÷ reach",
       "d": 14
      },
@@ -3296,23 +3296,23 @@
     {
      "id": "ch-best",
      "calc": [
-      "Email: 21 enquiries ÷ 777 sessions = 2.70%",
-      "Site: 189 ÷ 14,303 = 1.32%; rule: above 120% of the site rate (1.59%), channels with 200+ sessions"
+      "Email: 21 enquiries ÷ 777 visits = 2.70%",
+      "Site: 189 ÷ 14,303 = 1.32%; rule: above 120% of the site rate (1.59%), channels with 200+ visits"
      ],
-     "title": "Email visitors enquire at the highest rate",
+     "title": "Visitors from email get in touch most often",
      "why": "This channel already brings people with intent; growing it is lower-risk than fixing a weak one.",
-     "action": "Invest more effort in Email: more content, better pages, clearer follow-up.",
+     "action": "Put more effort into email: more content, better pages, clearer follow-up.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.02702702702702703,
-       "text": "Email: 21 enquiries from 777 sessions (2.70%)"
+       "text": "Email: 21 enquiries from 777 visits (2.70%)"
       },
       {
        "metric": "enquiry_rate",
        "value": 0.013214011046633573,
        "rows": 1680,
-       "text": "Site average: 1.32% (189 enquiries from 14,303 sessions)"
+       "text": "Site average: 1.32% (189 enquiries from 14,303 visits)"
       }
      ],
      "kind": "strong",
@@ -3322,7 +3322,7 @@
      "cls": "measured",
      "plat": "GA4",
      "obj": "Qualified enquiries",
-     "metric": "Sessions and enquiries from this channel",
+     "metric": "Visits and enquiries from this channel",
      "need": "Lead quality by channel (leads import)",
      "v": 2,
      "e": 3,
@@ -3331,13 +3331,13 @@
      "score": 6,
      "make": "campaign",
      "ev": [
-      "Email: 21 enquiries from 777 sessions (2.70%)",
-      "Site average: 1.32% (189 enquiries from 14,303 sessions)"
+      "Email: 21 enquiries from 777 visits (2.70%)",
+      "Site average: 1.32% (189 enquiries from 14,303 visits)"
      ],
      "conf": "high",
      "confidence": {
       "level": "high",
-      "why": "High: 777 sessions (3.9× the minimum of 200), 70% past the threshold, data on 84 of 84 days."
+      "why": "High: 777 visits (3.9× the minimum of 200), 70% past the threshold, data on 84 of 84 days."
      },
      "rule": false,
      "engine": "rules",
@@ -3362,7 +3362,7 @@
      ],
      "title": "People search for what you offer but rarely reach you",
      "why": "These queries already show your pages. Moving a few positions up usually costs less than buying the same visits.",
-     "action": "Create or improve one page per query: put the phrase in the title, answer the need directly, add the primary CTA.",
+     "action": "Create or improve one page per query: put the phrase in the title, answer the need directly, add the main action button.",
      "evidence": [
       {
        "metric": "ctr",
@@ -3697,7 +3697,7 @@
      "cls": "obs",
      "plat": "Brand",
      "obj": "Brand trust and consistency",
-     "metric": "Colour and CTA checks in Brand QA",
+     "metric": "Colour and action button checks in the check",
      "need": "None",
      "v": 1,
      "e": 3,
@@ -3727,7 +3727,7 @@
       "Brand guidelines"
      ],
      "assumptions": [
-      "Uses only facts you approved in Company knowledge."
+      "Uses only facts you approved in Company info."
      ]
     },
     {
@@ -3850,17 +3850,17 @@
     {
      "id": "ch-leak",
      "calc": [
-      "Organic Social: 13 استفسار ÷ 5,318 جلسة = 0.24%؛ الموقع 189 ÷ 14,303 = 1.32%",
-      "القاعدة: 20٪ أو أكثر من الجلسات (37%) ومعدل أقل من نصف معدل الموقع (0.66%)"
+      "منشوراتك على السوشيال: 13 استفسار ÷ 5,318 زيارة = 0.24%؛ الموقع 189 ÷ 14,303 = 1.32%",
+      "القاعدة: 20٪ أو أكثر من الزيارات (37%) ومعدل أقل من نصف معدل الموقع (0.66%)"
      ],
-     "title": "Organic Social تجلب زيارات كثيرة واستفسارات قليلة",
+     "title": "زيارات كثيرة من منشوراتك على السوشيال، لكن الاستفسارات قليلة",
      "why": "نكسب الانتباه ولا نحوّله إلى استفسارات.",
-     "action": "وجّه زيارات Organic Social إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.",
+     "action": "وجّه زوار منشوراتك على السوشيال إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.002444528018051899,
-       "text": "Organic Social: 37% من الجلسات، معدل الاستفسار 0.24% مقابل 1.32% للموقع"
+       "text": "37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.24% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.32% في المتوسط."
       },
       {
        "text": "فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور."
@@ -3873,7 +3873,7 @@
      "cls": "measured",
      "plat": "GA4",
      "obj": "استفسارات مؤهلة",
-     "metric": "معدل استفسار جلسات Organic Social",
+     "metric": "معدل استفسار زوار منشوراتك على السوشيال",
      "need": "بيانات لكل صفحة دخول بعد التغيير",
      "v": 3,
      "e": 3,
@@ -3882,19 +3882,19 @@
      "score": 10,
      "make": "campaign",
      "exp": {
-      "t": "صفحة مخصصة لـ Organic Social",
-      "h": "صفحة تطابق رسالة المنشور بدعوة واحدة تحوّل أفضل من صفحة الأسعار أو المدونة.",
-      "m": "الاستفسارات ÷ الجلسات في الصفحة المخصصة",
+      "t": "صفحة مخصصة لـ منشوراتك على السوشيال",
+      "h": "صفحة تطابق رسالة المنشور بزر إجراء واحد تحوّل أفضل من صفحة الأسعار أو المدونة.",
+      "m": "الاستفسارات ÷ الزيارات في الصفحة المخصصة",
       "d": 21
      },
      "ev": [
-      "Organic Social: 37% من الجلسات، معدل الاستفسار 0.24% مقابل 1.32% للموقع",
+      "37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.24% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.32% في المتوسط.",
       "فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور."
      ],
      "conf": "high",
      "confidence": {
       "level": "high",
-      "why": "عالية: 5,318 جلسة (26.6 ضعف الحد الأدنى 200)، 63% بعد العتبة، بيانات 84 من 84 يوماً."
+      "why": "عالية: 5,318 زيارة (26.6 ضعف الحد الأدنى 200)، 63% بعد العتبة، بيانات 84 من 84 يوماً."
      },
      "rule": false,
      "engine": "rules",
@@ -3916,21 +3916,21 @@
      "id": "mobile-gap",
      "calc": [
       "الجوال: 71 ÷ 8,858 = 0.80%؛ سطح المكتب: 118 ÷ 5,445 = 2.17%",
-      "القاعدة: الجوال 30٪ أو أكثر من الجلسات وأقل من 60٪ من معدل سطح المكتب (1.30%)"
+      "القاعدة: الجوال 30٪ أو أكثر من الزيارات وأقل من 60٪ من معدل سطح المكتب (1.30%)"
      ],
-     "title": "زوار الجوال يستفسرون أقل بكثير من زوار سطح المكتب",
+     "title": "زوار الجوال يتواصلون معك أقل بكثير من زوار الكمبيوتر",
      "why": "إذا كان مسار الجوال أصعب، فكل القنوات تدفع الثمن.",
      "action": "اختبر مسار الاستفسار على الهاتف: طول النموذج، حجم الأزرار، زمن التحميل، وخيار واتساب أو الاتصال بنقرة.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.008015353352901333,
-       "text": "الجوال: 62% من الجلسات، معدل الاستفسار 0.80%"
+       "text": "62% من زياراتك تأتي من الجوال، لكن 0.80% فقط من هؤلاء الزوار يتواصلون معك"
       },
       {
        "metric": "enquiry_rate",
        "value": 0.0216712580348944,
-       "text": "سطح المكتب: معدل الاستفسار 2.17%"
+       "text": "على الكمبيوتر (سطح المكتب) يتواصل معك 2.17% من الزوار"
       }
      ],
      "kind": "weak",
@@ -3951,17 +3951,17 @@
      "exp": {
       "t": "نموذج استفسار أقصر على الموبايل",
       "h": "اختصار نموذج الموبايل إلى الاسم والهاتف يرفع معدل الاستفسار.",
-      "m": "استفسارات الموبايل ÷ جلسات الموبايل",
+      "m": "استفسارات الموبايل ÷ زيارات الموبايل",
       "d": 14
      },
      "ev": [
-      "الجوال: 62% من الجلسات، معدل الاستفسار 0.80%",
-      "سطح المكتب: معدل الاستفسار 2.17%"
+      "62% من زياراتك تأتي من الجوال، لكن 0.80% فقط من هؤلاء الزوار يتواصلون معك",
+      "على الكمبيوتر (سطح المكتب) يتواصل معك 2.17% من الزوار"
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "متوسطة: 8,858 جلسة (44.3 ضعف الحد الأدنى 200)، 38% بعد العتبة، بيانات 84 من 84 يوماً."
+      "why": "متوسطة: 8,858 زيارة (44.3 ضعف الحد الأدنى 200)، 38% بعد العتبة، بيانات 84 من 84 يوماً."
      },
      "rule": false,
      "engine": "rules",
@@ -3986,7 +3986,7 @@
      "kind": "risk",
      "title": "موادك نفسها تذكر عروضاً مختلفة",
      "why": "العميل المحتمل الذي يرى نسختين من العرض لا يعرف أيهما الصحيح، والمواد القديمة تعرّض نصوص الحملات للخطأ.",
-     "action": "اعتمد العرض الحالي في معرفة الشركة وارفض القديم، ثم صحّح أو أوقف المستند القديم.",
+     "action": "اعتمد العرض الحالي في معلومات الشركة وارفض القديم، ثم صحّح أو أوقف المستند القديم.",
      "evidence": [
       {
        "factId": "<fact>",
@@ -4033,16 +4033,16 @@
     {
      "id": "page-leak",
      "calc": [
-      "/pricing: 20 ÷ 4,965 = 0.40%؛ الموقع 1.32%؛ القاعدة: 12٪ أو أكثر من الجلسات وأقل من 60٪ من معدل الموقع (0.79%)"
+      "/pricing: 20 ÷ 4,965 = 0.40%؛ الموقع 1.32%؛ القاعدة: 12٪ أو أكثر من الزيارات وأقل من 60٪ من معدل الموقع (0.79%)"
      ],
-     "title": "صفحة الدخول /pricing أقل تحويلاً من المتوسط",
+     "title": "صفحة /pricing تجلب زيارات كثيرة لكن الاستفسارات قليلة",
      "why": "صفحة عالية الزيارات بتحويل أقل من متوسط الموقع هي أرخص مكان لكسب استفسارات: الزوار موجودون بالفعل.",
-     "action": "راجع /pricing: ضع الدعوة الرئيسية في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.",
+     "action": "راجع /pricing: ضع زر الإجراء الرئيسي في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.004028197381671702,
-       "text": "/pricing: 4,965 جلسة (35%)، معدل الاستفسار 0.40% مقابل 1.32% للموقع"
+       "text": "4,965 زيارة (35% من الكل) تبدأ من /pricing، لكن 0.40% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.32% في المتوسط."
       }
      ],
      "kind": "weak",
@@ -4062,17 +4062,17 @@
      "make": "exp",
      "exp": {
       "t": "شاشة أولى جديدة في /pricing",
-      "h": "عرض العرض ودعوة واحدة في أول شاشة يرفع معدل الاستفسار لهذه الصفحة.",
-      "m": "الاستفسارات ÷ الجلسات في الصفحة",
+      "h": "عرض العرض وزر إجراء واحد في أول شاشة يرفع معدل الاستفسار لهذه الصفحة.",
+      "m": "الاستفسارات ÷ الزيارات في الصفحة",
       "d": 21
      },
      "ev": [
-      "/pricing: 4,965 جلسة (35%)، معدل الاستفسار 0.40% مقابل 1.32% للموقع"
+      "4,965 زيارة (35% من الكل) تبدأ من /pricing، لكن 0.40% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.32% في المتوسط."
      ],
      "conf": "med",
      "confidence": {
       "level": "med",
-      "why": "متوسطة: 4,965 جلسة (24.8 ضعف الحد الأدنى 200)، 49% بعد العتبة، بيانات 84 من 84 يوماً."
+      "why": "متوسطة: 4,965 زيارة (24.8 ضعف الحد الأدنى 200)، 49% بعد العتبة، بيانات 84 من 84 يوماً."
      },
      "rule": false,
      "engine": "rules",
@@ -4150,9 +4150,9 @@
      "synthetic": false,
      "id": "cta-mix",
      "kind": "weak",
-     "title": "هناك أكثر من عبارة حثّ على التواصل مستخدمة",
+     "title": "يُستخدم أكثر من زر إجراء",
      "why": "عندما تطلب المواد من الناس أشياء مختلفة، يقل من يستجيب ويصعب مقارنة النتائج بين القنوات.",
-     "action": "اختر دعوة أساسية واحدة في معرفة الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.",
+     "action": "اختر زر إجراء أساسي واحد في معلومات الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.",
      "evidence": [
       {
        "factId": "<fact>",
@@ -4168,12 +4168,12 @@
       }
      ],
      "calc": [
-      "3 دعوات مختلفة لاتخاذ إجراء في مصادرك (القاعدة: أكثر من 1)."
+      "3 أزرار إجراء مختلفة في مصادرك (القاعدة: أكثر من 1)."
      ],
      "cls": "obs",
      "plat": "الموقع وكل القنوات",
      "obj": "استفسارات مؤهلة",
-     "metric": "فحص الجودة: نسبة المواد التي تستخدم الدعوة الأساسية؛ معدل الاستفسار قبل وبعد",
+     "metric": "الفحص: نسبة المواد التي تستخدم زر الإجراء الأساسي؛ معدل الاستفسار قبل وبعد",
      "need": "لا شيء للتنفيذ. قياس الأثر يحتاج أحداث GA4.",
      "v": 2,
      "e": 3,
@@ -4182,9 +4182,9 @@
      "score": 8,
      "make": "exp",
      "exp": {
-      "t": "دعوة أساسية واحدة مقابل الوضع الحالي",
-      "h": "إذا استخدمت كل الصفحات والمنشورات الدعوة الأساسية وحدها، سترتفع نسبة من يرسلون استفساراً.",
-      "m": "الاستفسارات ÷ الجلسات",
+      "t": "زر إجراء أساسي واحد مقابل الوضع الحالي",
+      "h": "إذا استخدمت كل الصفحات والمنشورات زر الإجراء الأساسي وحدها، سترتفع نسبة من يرسلون استفساراً.",
+      "m": "الاستفسارات ÷ الزيارات",
       "d": 21
      },
      "ev": [
@@ -4195,7 +4195,7 @@
      "conf": "high",
      "confidence": {
       "level": "high",
-      "why": "عالية: مقروء مباشرة من مصادرك: 3 دعوات لاتخاذ إجراء."
+      "why": "عالية: مقروء مباشرة من مصادرك: 3 أزرار إجراء."
      },
      "rule": false,
      "engine": "rules",
@@ -4239,7 +4239,7 @@
      "cls": "obs",
      "plat": "المستندات والتصاميم",
      "obj": "ثقة واتساق العلامة",
-     "metric": "صفر ادعاءات غير معتمدة في فحص الجودة",
+     "metric": "صفر ادعاءات غير معتمدة في الفحص",
      "need": "مستندات إثبات إن أردت الإبقاء على ادعاء",
      "v": 2,
      "e": 3,
@@ -4280,7 +4280,7 @@
      "synthetic": false,
      "title": "1 سؤال عن النشاط لم يُجب عنه أي مصدر",
      "why": "التوصيات في هذه المناطق ستكون تخميناً. BrandPilot يتركها فارغة بدلاً من اختلاق إجابات.",
-     "action": "أجب عن الأسئلة المفتوحة في معرفة الشركة — سطر واحد لكل سؤال يكفي.",
+     "action": "أجب عن الأسئلة المفتوحة في معلومات الشركة — سطر واحد لكل سؤال يكفي.",
      "needs": "إجاباتك",
      "evidence": [
       {
@@ -4289,10 +4289,10 @@
       }
      ],
      "calc": [
-      "1 سؤال مفتوح في معرفة الشركة."
+      "1 سؤال مفتوح في معلومات الشركة."
      ],
      "cls": "gap",
-     "plat": "معرفة الشركة",
+     "plat": "معلومات الشركة",
      "obj": "استفسارات مؤهلة",
      "metric": "عدد الأسئلة المفتوحة",
      "need": "إجاباتك",
@@ -4413,7 +4413,7 @@
      ],
      "title": "«how-to tips» هو أقوى موضوع محتوى لديك",
      "why": "تاريخك نفسه يبيّن ما يتفاعل معه الجمهور — وهو دليل أفضل من الممارسات العامة.",
-     "action": "انشر مزيداً من منشورات «how-to tips» واختم كلاً منها بالدعوة الرئيسية ورابط متتبَّع.",
+     "action": "انشر مزيداً من منشورات «how-to tips» واختم كلاً منها بزر الإجراء الرئيسي ورابط متتبَّع.",
      "evidence": [
       {
        "metric": "engagement_rate",
@@ -4448,7 +4448,7 @@
      "make": "campaign",
      "exp": {
       "t": "«how-to tips» مقابل «product update» كمحتوى للحملة",
-      "h": "أقوى موضوع عضوي ينتج أيضاً نقرات متتبعة أكثر لكل وصول عند استخدامه مع دعوة الحملة.",
+      "h": "أقوى موضوع عضوي ينتج أيضاً نقرات متتبعة أكثر لكل وصول عند استخدامه مع زر إجراء الحملة.",
       "m": "نقرات الروابط ÷ الوصول",
       "d": 14
      },
@@ -4669,23 +4669,23 @@
     {
      "id": "ch-best",
      "calc": [
-      "Email: 21 استفسار ÷ 777 جلسة = 2.70%",
-      "الموقع: 189 ÷ 14,303 = 1.32%؛ القاعدة: أعلى من 120٪ من معدل الموقع (1.59%)، للقنوات ذات 200 جلسة أو أكثر"
+      "البريد: 21 استفسار ÷ 777 زيارة = 2.70%",
+      "الموقع: 189 ÷ 14,303 = 1.32%؛ القاعدة: أعلى من 120٪ من معدل الموقع (1.59%)، للقنوات ذات 200 زيارة أو أكثر"
      ],
-     "title": "زوار Email هم الأعلى في معدل الاستفسار",
+     "title": "زوار البريد هم الأكثر تواصلاً معك",
      "why": "هذه القناة تجلب بالفعل زواراً لديهم نية؛ تنميتها أقل مخاطرة من إصلاح قناة ضعيفة.",
-     "action": "استثمر جهداً أكبر في Email: محتوى أكثر، صفحات أفضل، متابعة أوضح.",
+     "action": "ضع جهداً أكبر في البريد: محتوى أكثر، صفحات أفضل، متابعة أوضح.",
      "evidence": [
       {
        "metric": "enquiry_rate",
        "value": 0.02702702702702703,
-       "text": "Email: 21 استفسار من 777 جلسة (2.70%)"
+       "text": "البريد: 21 استفسار من 777 زيارة (2.70%)"
       },
       {
        "metric": "enquiry_rate",
        "value": 0.013214011046633573,
        "rows": 1680,
-       "text": "متوسط الموقع: 1.32% (189 استفسار من 14,303 جلسة)"
+       "text": "متوسط الموقع: 1.32% (189 استفسار من 14,303 زيارة)"
       }
      ],
      "kind": "strong",
@@ -4695,7 +4695,7 @@
      "cls": "measured",
      "plat": "GA4",
      "obj": "استفسارات مؤهلة",
-     "metric": "الجلسات والاستفسارات من هذه القناة",
+     "metric": "الزيارات والاستفسارات من هذه القناة",
      "need": "جودة العملاء حسب القناة",
      "v": 2,
      "e": 3,
@@ -4704,13 +4704,13 @@
      "score": 6,
      "make": "campaign",
      "ev": [
-      "Email: 21 استفسار من 777 جلسة (2.70%)",
-      "متوسط الموقع: 1.32% (189 استفسار من 14,303 جلسة)"
+      "البريد: 21 استفسار من 777 زيارة (2.70%)",
+      "متوسط الموقع: 1.32% (189 استفسار من 14,303 زيارة)"
      ],
      "conf": "high",
      "confidence": {
       "level": "high",
-      "why": "عالية: 777 جلسة (3.9 ضعف الحد الأدنى 200)، 70% بعد العتبة، بيانات 84 من 84 يوماً."
+      "why": "عالية: 777 زيارة (3.9 ضعف الحد الأدنى 200)، 70% بعد العتبة، بيانات 84 من 84 يوماً."
      },
      "rule": false,
      "engine": "rules",
@@ -4735,7 +4735,7 @@
      ],
      "title": "الناس يبحثون عمّا تقدمه لكنهم قلّما يصلون إليك",
      "why": "هذه الاستعلامات تُظهر صفحاتك بالفعل. التقدم بضعة مراكز يكلّف عادةً أقل من شراء الزيارات نفسها.",
-     "action": "أنشئ أو حسّن صفحة لكل استعلام: ضع العبارة في العنوان، أجب عن الحاجة مباشرة، وأضف الدعوة الرئيسية.",
+     "action": "أنشئ أو حسّن صفحة لكل استعلام: ضع العبارة في العنوان، أجب عن الحاجة مباشرة، وأضف زر الإجراء الرئيسي.",
      "evidence": [
       {
        "metric": "ctr",
@@ -4869,7 +4869,7 @@
      ],
      "title": "توقف النشر لمدة 19 يوماً",
      "why": "النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظارك.",
-     "action": "اعتمد تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.",
+     "action": "اعتمد تقويماً أسبوعياً ثابتاً؛ إنشاء حملة ينشئ واحداً مع كل حملة.",
      "evidence": [
       {
        "metric": "posting_gap_days",
@@ -5070,7 +5070,7 @@
      "cls": "obs",
      "plat": "العلامة",
      "obj": "ثقة واتساق العلامة",
-     "metric": "فحوص الألوان والدعوة في فحص الجودة",
+     "metric": "فحوص الألوان وزر الإجراء في الفحص",
      "need": "لا شيء",
      "v": 1,
      "e": 3,
@@ -5100,7 +5100,7 @@
       "Brand guidelines"
      ],
      "assumptions": [
-      "يستخدم فقط الحقائق التي اعتمدتها في معرفة الشركة."
+      "يستخدم فقط الحقائق التي اعتمدتها في معلومات الشركة."
      ]
     },
     {
@@ -5231,17 +5231,17 @@
    {
     "id": "ch-leak",
     "calc": [
-     "Organic Social: 13 enquiries ÷ 5,318 sessions = 0.24%; site 189 ÷ 14,303 = 1.32%",
-     "Rule: 20%+ of sessions (37%) and a rate below half the site rate (0.66%)"
+     "Your unpaid social media posts: 13 enquiries ÷ 5,318 visits = 0.24%; site 189 ÷ 14,303 = 1.32%",
+     "Rule: 20%+ of visits (37%) and a rate below half the site rate (0.66%)"
     ],
-    "title": "Organic Social brings many visits but few enquiries",
+    "title": "Many visits from your unpaid social media posts, but few enquiries",
     "why": "Attention is being won but not converted.",
-    "action": "Send Organic Social visitors to one dedicated page with a single clear next step, instead of general pages.",
+    "action": "Send visitors from your unpaid social media posts to one dedicated page with a single clear next step, instead of general pages.",
     "evidence": [
      {
       "metric": "enquiry_rate",
       "value": 0.002444528018051899,
-      "text": "Organic Social: 37% of sessions, enquiry rate 0.24% vs site 1.32%"
+      "text": "37% of your visits come from your unpaid social media posts, but only 0.24% of these visitors get in touch, against 1.32% on average."
      },
      {
       "text": "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
@@ -5254,7 +5254,7 @@
     "cls": "measured",
     "plat": "GA4",
     "obj": "Qualified enquiries",
-    "metric": "Enquiry rate of Organic Social sessions",
+    "metric": "Enquiry rate of visits from your unpaid social media posts",
     "need": "Landing-page level data after the change",
     "v": 3,
     "e": 3,
@@ -5263,19 +5263,19 @@
     "score": 10,
     "make": "campaign",
     "exp": {
-     "t": "Dedicated landing page for Organic Social",
-     "h": "A page matching the post message with a single CTA converts better than the pricing or blog page.",
-     "m": "Enquiries ÷ sessions on the landing page",
+     "t": "Dedicated page for your unpaid social media posts",
+     "h": "A page matching the post message with a single action button converts better than the pricing or blog page.",
+     "m": "Enquiries ÷ visits on the landing page",
      "d": 21
     },
     "ev": [
-     "Organic Social: 37% of sessions, enquiry rate 0.24% vs site 1.32%",
+     "37% of your visits come from your unpaid social media posts, but only 0.24% of these visitors get in touch, against 1.32% on average.",
      "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
     ],
     "conf": "high",
     "confidence": {
      "level": "high",
-     "why": "High: 5,318 sessions (26.6× the minimum of 200), 63% past the threshold, data on 84 of 84 days."
+     "why": "High: 5,318 visits (26.6× the minimum of 200), 63% past the threshold, data on 84 of 84 days."
     },
     "rule": false,
     "engine": "rules",
@@ -5297,21 +5297,21 @@
     "id": "mobile-gap",
     "calc": [
      "Mobile: 71 ÷ 8,858 = 0.80%; desktop: 118 ÷ 5,445 = 2.17%",
-     "Rule: mobile 30%+ of sessions and below 60% of the desktop rate (1.30%)"
+     "Rule: mobile 30%+ of visits and below 60% of the desktop rate (1.30%)"
     ],
-    "title": "Mobile visitors enquire far less than desktop visitors",
+    "title": "Phone visitors get in touch far less than computer visitors",
     "why": "If the mobile path is harder, every channel pays for it.",
     "action": "Test the enquiry path on a phone: form length, button size, load time, WhatsApp/click-to-call option.",
     "evidence": [
      {
       "metric": "enquiry_rate",
       "value": 0.008015353352901333,
-      "text": "Mobile: 62% of sessions, enquiry rate 0.80%"
+      "text": "62% of your visits come from phones, but only 0.80% of these visitors get in touch"
      },
      {
       "metric": "enquiry_rate",
       "value": 0.0216712580348944,
-      "text": "Desktop: enquiry rate 2.17%"
+      "text": "On a computer (desktop), 2.17% of visitors get in touch"
      }
     ],
     "kind": "weak",
@@ -5332,17 +5332,17 @@
     "exp": {
      "t": "Shorter mobile enquiry form",
      "h": "Reducing the mobile form to name and phone raises the mobile enquiry rate.",
-     "m": "Mobile enquiries ÷ mobile sessions",
+     "m": "Mobile enquiries ÷ mobile visits",
      "d": 14
     },
     "ev": [
-     "Mobile: 62% of sessions, enquiry rate 0.80%",
-     "Desktop: enquiry rate 2.17%"
+     "62% of your visits come from phones, but only 0.80% of these visitors get in touch",
+     "On a computer (desktop), 2.17% of visitors get in touch"
     ],
     "conf": "med",
     "confidence": {
      "level": "med",
-     "why": "Medium: 8,858 sessions (44.3× the minimum of 200), 38% past the threshold, data on 84 of 84 days."
+     "why": "Medium: 8,858 visits (44.3× the minimum of 200), 38% past the threshold, data on 84 of 84 days."
     },
     "rule": false,
     "engine": "rules",
@@ -5367,7 +5367,7 @@
     "kind": "risk",
     "title": "Your own materials state different offers",
     "why": "A prospect who sees two versions of the offer cannot tell which is true; outdated material also puts campaign copy at risk.",
-    "action": "Approve the current offer in Company knowledge, reject the outdated one, and retire or correct the old document.",
+    "action": "Approve the current offer in Company info, reject the outdated one, and retire or correct the old document.",
     "evidence": [
      {
       "factId": "<fact>",
@@ -5380,7 +5380,7 @@
     "cls": "obs",
     "plat": "All channels",
     "obj": "Brand trust and consistency",
-    "metric": "No offer conflicts in Company knowledge or Brand QA",
+    "metric": "No offer conflicts in Company info or the check",
     "need": "None",
     "v": 2,
     "e": 3,
@@ -5414,16 +5414,16 @@
    {
     "id": "page-leak",
     "calc": [
-     "/pricing: 20 ÷ 4,965 = 0.40%; site 1.32%; rule: 12%+ of sessions and below 60% of the site rate (0.79%)"
+     "/pricing: 20 ÷ 4,965 = 0.40%; site 1.32%; rule: 12%+ of visits and below 60% of the site rate (0.79%)"
     ],
-    "title": "Landing page /pricing under-converts",
+    "title": "The /pricing page gets many visits but few enquiries",
     "why": "A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.",
-    "action": "Review /pricing: put the primary CTA above the fold, shorten the form, state the offer in the first screen.",
+    "action": "Review /pricing: put the main action button above the fold, shorten the form, state the offer in the first screen.",
     "evidence": [
      {
       "metric": "enquiry_rate",
       "value": 0.004028197381671702,
-      "text": "/pricing: 4,965 sessions (35%), enquiry rate 0.40% vs site 1.32%"
+      "text": "4,965 visits (35% of all) start on /pricing, but only 0.40% of these visitors get in touch, against 1.32% on average."
      }
     ],
     "kind": "weak",
@@ -5443,17 +5443,17 @@
     "make": "exp",
     "exp": {
      "t": "New first screen on /pricing",
-     "h": "Showing the offer and one CTA in the first screen raises the enquiry rate of this page.",
-     "m": "Enquiries ÷ sessions on the page",
+     "h": "Showing the offer and one action button in the first screen raises the enquiry rate of this page.",
+     "m": "Enquiries ÷ visits on the page",
      "d": 21
     },
     "ev": [
-     "/pricing: 4,965 sessions (35%), enquiry rate 0.40% vs site 1.32%"
+     "4,965 visits (35% of all) start on /pricing, but only 0.40% of these visitors get in touch, against 1.32% on average."
     ],
     "conf": "med",
     "confidence": {
      "level": "med",
-     "why": "Medium: 4,965 sessions (24.8× the minimum of 200), 49% past the threshold, data on 84 of 84 days."
+     "why": "Medium: 4,965 visits (24.8× the minimum of 200), 49% past the threshold, data on 84 of 84 days."
     },
     "rule": false,
     "engine": "rules",
@@ -5531,9 +5531,9 @@
     "synthetic": false,
     "id": "cta-mix",
     "kind": "weak",
-    "title": "Several different calls to action are in use",
+    "title": "Several different action buttons are in use",
     "why": "When materials ask people to do different things, fewer people do any of them and results cannot be compared across channels.",
-    "action": "Choose one primary CTA in Company knowledge and use it on every campaign asset; keep the others as secondary links only.",
+    "action": "Choose one main action button in Company info and use it on every campaign asset; keep the others as secondary links only.",
     "evidence": [
      {
       "factId": "<fact>",
@@ -5549,12 +5549,12 @@
      }
     ],
     "calc": [
-     "3 different English calls to action found in your sources (rule: more than 1)."
+     "3 different English action buttons found in your sources (rule: more than 1)."
     ],
     "cls": "obs",
     "plat": "Website & all channels",
     "obj": "Qualified enquiries",
-    "metric": "Brand QA: share of assets using the primary CTA; enquiry rate before and after",
+    "metric": "Check: share of assets using the main action button; enquiry rate before and after",
     "need": "Nothing to act. GA4 key events are needed to measure the effect.",
     "v": 2,
     "e": 3,
@@ -5563,9 +5563,9 @@
     "score": 8,
     "make": "exp",
     "exp": {
-     "t": "One primary CTA vs. the current mix",
-     "h": "If every page and post uses the single primary CTA, a larger share of visitors will enquire.",
-     "m": "Enquiries ÷ sessions",
+     "t": "One main action button vs. the current mix",
+     "h": "If every page and post uses the single main action button, a larger share of visitors will enquire.",
+     "m": "Enquiries ÷ visits",
      "d": 21
     },
     "ev": [
@@ -5576,7 +5576,7 @@
     "conf": "high",
     "confidence": {
      "level": "high",
-     "why": "High: Read directly from your sources: 3 calls to action."
+     "why": "High: Read directly from your sources: 3 action buttons."
     },
     "rule": false,
     "engine": "rules",
@@ -5620,7 +5620,7 @@
     "cls": "obs",
     "plat": "Documents & creatives",
     "obj": "Brand trust and consistency",
-    "metric": "Zero unapproved claims in Brand QA",
+    "metric": "Zero unapproved claims in the check",
     "need": "Proof documents if you want to keep a claim",
     "v": 2,
     "e": 3,
@@ -5661,7 +5661,7 @@
     "synthetic": false,
     "title": "1 business question(s) no source could answer",
     "why": "Recommendations in these areas would be guesses. BrandPilot leaves them blank rather than inventing answers.",
-    "action": "Answer the open questions in Company knowledge — one line each is enough.",
+    "action": "Answer the open questions in Company info — one line each is enough.",
     "needs": "Your answers",
     "evidence": [
      {
@@ -5670,10 +5670,10 @@
      }
     ],
     "calc": [
-     "1 open question(s) in Company knowledge."
+     "1 open question(s) in Company info."
     ],
     "cls": "gap",
-    "plat": "Company knowledge",
+    "plat": "Company info",
     "obj": "Qualified enquiries",
     "metric": "Open questions remaining",
     "need": "Your answers",
@@ -5794,7 +5794,7 @@
     ],
     "title": "\"how-to tips\" is your strongest content theme",
     "why": "Your own history shows what the audience responds to — a better guide than generic best practice.",
-    "action": "Publish more \"how-to tips\" posts and end each with the primary CTA and a tracked link.",
+    "action": "Publish more \"how-to tips\" posts and end each with the main action button and a tracked link.",
     "evidence": [
      {
       "metric": "engagement_rate",
@@ -5829,7 +5829,7 @@
     "make": "campaign",
     "exp": {
      "t": "“how-to tips” vs “product update” as campaign creative",
-     "h": "The strongest organic theme also produces more tracked link clicks per reach when used with the campaign CTA.",
+     "h": "The strongest organic theme also produces more tracked link clicks per reach when used with the campaign action button.",
      "m": "Link clicks ÷ reach",
      "d": 14
     },
@@ -6050,23 +6050,23 @@
    {
     "id": "ch-best",
     "calc": [
-     "Email: 21 enquiries ÷ 777 sessions = 2.70%",
-     "Site: 189 ÷ 14,303 = 1.32%; rule: above 120% of the site rate (1.59%), channels with 200+ sessions"
+     "Email: 21 enquiries ÷ 777 visits = 2.70%",
+     "Site: 189 ÷ 14,303 = 1.32%; rule: above 120% of the site rate (1.59%), channels with 200+ visits"
     ],
-    "title": "Email visitors enquire at the highest rate",
+    "title": "Visitors from email get in touch most often",
     "why": "This channel already brings people with intent; growing it is lower-risk than fixing a weak one.",
-    "action": "Invest more effort in Email: more content, better pages, clearer follow-up.",
+    "action": "Put more effort into email: more content, better pages, clearer follow-up.",
     "evidence": [
      {
       "metric": "enquiry_rate",
       "value": 0.02702702702702703,
-      "text": "Email: 21 enquiries from 777 sessions (2.70%)"
+      "text": "Email: 21 enquiries from 777 visits (2.70%)"
      },
      {
       "metric": "enquiry_rate",
       "value": 0.013214011046633573,
       "rows": 1680,
-      "text": "Site average: 1.32% (189 enquiries from 14,303 sessions)"
+      "text": "Site average: 1.32% (189 enquiries from 14,303 visits)"
      }
     ],
     "kind": "strong",
@@ -6076,7 +6076,7 @@
     "cls": "measured",
     "plat": "GA4",
     "obj": "Qualified enquiries",
-    "metric": "Sessions and enquiries from this channel",
+    "metric": "Visits and enquiries from this channel",
     "need": "Lead quality by channel (leads import)",
     "v": 2,
     "e": 3,
@@ -6085,13 +6085,13 @@
     "score": 6,
     "make": "campaign",
     "ev": [
-     "Email: 21 enquiries from 777 sessions (2.70%)",
-     "Site average: 1.32% (189 enquiries from 14,303 sessions)"
+     "Email: 21 enquiries from 777 visits (2.70%)",
+     "Site average: 1.32% (189 enquiries from 14,303 visits)"
     ],
     "conf": "high",
     "confidence": {
      "level": "high",
-     "why": "High: 777 sessions (3.9× the minimum of 200), 70% past the threshold, data on 84 of 84 days."
+     "why": "High: 777 visits (3.9× the minimum of 200), 70% past the threshold, data on 84 of 84 days."
     },
     "rule": false,
     "engine": "rules",
@@ -6116,7 +6116,7 @@
     ],
     "title": "People search for what you offer but rarely reach you",
     "why": "These queries already show your pages. Moving a few positions up usually costs less than buying the same visits.",
-    "action": "Create or improve one page per query: put the phrase in the title, answer the need directly, add the primary CTA.",
+    "action": "Create or improve one page per query: put the phrase in the title, answer the need directly, add the main action button.",
     "evidence": [
      {
       "metric": "ctr",
@@ -6451,7 +6451,7 @@
     "cls": "obs",
     "plat": "Brand",
     "obj": "Brand trust and consistency",
-    "metric": "Colour and CTA checks in Brand QA",
+    "metric": "Colour and action button checks in the check",
     "need": "None",
     "v": 1,
     "e": 3,
@@ -6481,7 +6481,7 @@
      "Brand guidelines"
     ],
     "assumptions": [
-     "Uses only facts you approved in Company knowledge."
+     "Uses only facts you approved in Company info."
     ]
    },
    {

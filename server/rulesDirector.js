@@ -58,7 +58,7 @@ export function rulesAnswer(db, companyId, { question, lang = 'en', range = '28'
     ].join('\n\n');
     const acts2 = pf.filter((x) => x.make === 'campaign').slice(0, 2).map((x) => ({ l: L('Create campaign for ', 'أنشئ حملة لـ ') + x.seg, a: 'recCamp', v: x.id }))
       .concat(pf.filter((x) => x.make === 'task').slice(0, 1).map((x) => ({ l: L('Add task: ', 'أضف مهمة: ') + (x.title.length > 30 ? `${x.title.slice(0, 30)}…` : x.title), a: 'recTask', v: x.id })));
-    return R(L('What your project experience supports', 'ما الذي تدعمه خبرة مشاريعك'), text, { used: [L('Company CV & portfolio', 'السيرة المؤسسية والمشاريع'), L('Approved knowledge', 'المعرفة المعتمدة')], actions: acts2, cls: 'interp', support: sup(...pf) });
+    return R(L('What your project experience supports', 'ما الذي تدعمه خبرة مشاريعك'), text, { used: [L('Company CV & portfolio', 'السيرة المؤسسية والمشاريع'), L('Approved knowledge', 'معلومات الشركة المعتمدة')], actions: acts2, cls: 'interp', support: sup(...pf) });
   }
   if (/additional data|data do you need|missing data|what data|بيانات (إضافية|ناقصة)|ما البيانات/.test(t)) {
     const g = A.filter((x) => x.basis === 'insufficient');
@@ -68,11 +68,11 @@ export function rulesAnswer(db, companyId, { question, lang = 'en', range = '28'
   if (/create.*campaign|أنشئ.*حملة|launch.*campaign/.test(t)) {
     const x = find('seg-best') || ranked.find((y) => y.make === 'campaign');
     if (!x) return none;
-    return R(L('Proposed campaign', 'حملة مقترحة'), `${card(x)}\n\n${L('Approving creates a draft campaign in Campaign Studio. Nothing is published.', 'الموافقة تنشئ مسودة حملة في استوديو الحملات. لا يُنشر شيء.')}`, { used: used(x), actions: [{ l: L('Approve: create draft campaign', 'وافق: أنشئ مسودة حملة'), a: 'recCamp', v: x.id }], support: sup(x) });
+    return R(L('Proposed campaign', 'حملة مقترحة'), `${card(x)}\n\n${L('Approving creates a draft campaign in Campaign Studio. Nothing is published.', 'الموافقة تنشئ مسودة حملة في إنشاء حملة. لا يُنشر شيء.')}`, { used: used(x), actions: [{ l: L('Approve: create draft campaign', 'وافق: أنشئ مسودة حملة'), a: 'recCamp', v: x.id }], support: sup(x) });
   }
   if (/content plan|calendar|خطة محتوى|تقويم/.test(t)) {
     const x = find('theme-best');
-    return R(L('Content plan focused on enquiries', 'خطة محتوى تركز على الاستفسارات'), `${x ? card(x) : L('No theme data yet, so the plan uses approved product facts only.', 'لا توجد بيانات مواضيع بعد، فالخطة تعتمد على حقائق المنتج المعتمدة فقط.')}\n\n${L('A campaign draft includes a two-week bilingual calendar with tracked links.', 'مسودة الحملة تتضمن تقويماً ثنائي اللغة لأسبوعين بروابط متتبَّعة.')}`, { used: x ? used(x) : [L('Approved knowledge', 'المعرفة المعتمدة')], actions: [{ l: L('Approve: create campaign with calendar', 'وافق: أنشئ حملة بتقويم'), a: 'recCamp', v: x ? x.id : '' }], support: sup(x) });
+    return R(L('Content plan focused on enquiries', 'خطة محتوى تركز على الاستفسارات'), `${x ? card(x) : L('No theme data yet, so the plan uses approved product facts only.', 'لا توجد بيانات مواضيع بعد، فالخطة تعتمد على حقائق المنتج المعتمدة فقط.')}\n\n${L('A campaign draft includes a two-week bilingual calendar with tracked links.', 'مسودة الحملة تتضمن تقويماً ثنائي اللغة لأسبوعين بروابط متتبَّعة.')}`, { used: x ? used(x) : [L('Approved knowledge', 'معلومات الشركة المعتمدة')], actions: [{ l: L('Approve: create campaign with calendar', 'وافق: أنشئ حملة بتقويم'), a: 'recCamp', v: x ? x.id : '' }], support: sup(x) });
   }
   if (/landing page|dedicated page|صفحة الهبوط|صفحة هبوط|صفحة الحملة|صفحة الدخول|صفحة مخصصة|الصفحة المخصصة/.test(t)) {
     const x = find('page-leak') || find('mobile-gap') || find('no-track');
@@ -142,14 +142,14 @@ export function rulesAnswer(db, companyId, { question, lang = 'en', range = '28'
       const s = g.reduce((a, r) => a + (Number(r.sessions) || 0), 0);
       const e = g.reduce((a, r) => a + (Number(r.enquiries) || 0), 0);
       const q = l.filter((r) => r.status === 'qualified' || r.status === 'customer').length;
-      return `- **${k.name}**: ${fmtN(s)} ${L('sessions', 'جلسة')}, ${fmtN(e)} ${L('enquiries', 'استفسار')}, ${fmtN(l.length)} ${L('leads', 'عميل محتمل')} (${pct(q, l.length)} ${L('qualified', 'مؤهلون')})`;
+      return `- **${k.name}**: ${fmtN(s)} ${L('visits', 'زيارة')}, ${fmtN(e)} ${L('enquiries', 'استفسار')}, ${fmtN(l.length)} ${L('leads', 'عميل محتمل')} (${pct(q, l.length)} ${L('qualified', 'مؤهلون')})`;
     }).filter(Boolean);
-    if (!rows.length) return R(L('No campaign results yet', 'لا توجد نتائج حملات بعد'), L('No imported rows carry a campaign tag that matches a BrandPilot campaign. Import results with the utm_campaign value shown in Campaign Studio.', 'لا توجد صفوف مستوردة بوسم حملة يطابق حملة في BrandPilot. استورد النتائج بقيمة utm_campaign الظاهرة في استوديو الحملات.'), { actions: [integ], cls: 'unknown', insufficient: true });
+    if (!rows.length) return R(L('No campaign results yet', 'لا توجد نتائج حملات بعد'), L('No imported rows carry a campaign tag that matches a BrandPilot campaign. Import results with the utm_campaign value shown in Campaign Studio.', 'لا توجد صفوف مستوردة بوسم حملة يطابق حملة في BrandPilot. استورد النتائج بقيمة utm_campaign الظاهرة في إنشاء حملة.'), { actions: [integ], cls: 'unknown', insufficient: true });
     return R(L('Campaign review', 'مراجعة الحملات'), `${rows.join('\n')}\n\n${L('Campaign and non-campaign traffic differ in audience and timing, so differences are associations, not proof of cause.', 'زيارات الحملة وغيرها تختلف في الجمهور والتوقيت، فالفروق ارتباطات لا إثبات سببية.')}`, { used: [L('Campaign-tagged rows (all imported data)', 'الصفوف الموسومة بالحملة (كل البيانات المستوردة)')], actions: [{ l: L('Open Automation & Improvement', 'افتح الأتمتة والتحسين'), a: 'go', v: 'auto' }], cls: 'interp' });
   }
   if (/chang|تغيّر|تغير|اتغير/.test(t)) {
     const m = metrics(db, companyId, range);
-    const names = { sessions: L('Sessions', 'الجلسات'), enquiries: L('Enquiries', 'الاستفسارات'), leads: L('Leads', 'العملاء المحتملون'), qualified_leads: L('Qualified leads', 'العملاء المؤهلون'), reach: L('Reach', 'الوصول'), engagements: L('Engagements', 'التفاعلات') };
+    const names = { sessions: L('Visits', 'الزيارات'), enquiries: L('Enquiries', 'الاستفسارات'), leads: L('Leads', 'العملاء المحتملون'), qualified_leads: L('Qualified leads', 'العملاء المؤهلون'), reach: L('Reach', 'الوصول'), engagements: L('Engagements', 'التفاعلات') };
     const lines = Object.entries(names).filter(([k]) => m.kpis[k] && m.kpis[k].value !== null && m.kpis[k].previous !== null).map(([k, n]) => `- ${n}: ${fmtN(m.kpis[k].value)} (${L('previous period', 'الفترة السابقة')}: ${fmtN(m.kpis[k].previous)})`);
     return R(L('What changed', 'ما الذي تغيّر'), lines.length ? lines.join('\n') : L('No comparison period is available in the imported data.', 'لا توجد فترة مقارنة في البيانات المستوردة.'), { used: [L('Imported datasets', 'البيانات المستوردة')], actions: [{ l: L('Open Analytics', 'افتح التحليلات'), a: 'go', v: 'analytics' }], cls: 'fact', support: lines.length ? Object.keys(names).filter((k) => m.kpis[k]?.value !== null).map((k) => ({ type: 'metric', id: k })) : [], insufficient: !lines.length });
   }
@@ -160,5 +160,5 @@ export function rulesAnswer(db, companyId, { question, lang = 'en', range = '28'
     const lines = [[L('30 days', '30 يوماً'), w], [L('60 days', '60 يوماً'), o], [L('90 days', '90 يوماً'), s]].filter(([, x]) => x).map(([d, x]) => `**${d}:** ${x.action}`);
     return lines.length ? R(L('30 / 60 / 90-day objectives', 'أهداف 30 / 60 / 90 يوماً'), lines.join('\n\n'), { used: [L('Audit priorities', 'أولويات التقييم')], actions: [{ l: L('Open Growth & Leads', 'افتح النمو والعملاء'), a: 'go', v: 'growth' }], support: sup(w, o, s) }) : none;
   }
-  return R(L('That is outside what the rules engine can answer', 'هذا خارج ما يستطيع نظام القواعد الإجابة عنه'), L('Without an AI model, the Director answers from fixed rules over your approved knowledge and imported data, so it does not understand free-form questions. Try one of the suggested questions, ask an administrator to set up an AI model on the server, or export the context package to your own Claude and import its answer.', 'من دون نموذج ذكاء اصطناعي، يجيب مدير التسويق بقواعد ثابتة على معرفتك المعتمدة وبياناتك المستوردة، فلا يفهم الأسئلة الحرة. جرّب أحد الأسئلة المقترحة، أو اطلب من المسؤول إعداد نموذج على الخادم، أو صدّر حزمة معلومات الشركة إلى Claude الخاص بك واستورد إجابته.'), { actions: [{ l: L('Copy context package for Claude', 'انسخ حزمة معلومات الشركة لـ Claude'), a: 'copyPkg', v: question }], cls: 'unknown', insufficient: true });
+  return R(L('That is outside what the rules engine can answer', 'هذا خارج ما يستطيع نظام القواعد الإجابة عنه'), L('Without an AI model, the Director answers from fixed rules over your approved knowledge and imported data, so it does not understand free-form questions. Try one of the suggested questions, ask an administrator to set up an AI model on the server, or export the context package to your own Claude and import its answer.', 'من دون نموذج ذكاء اصطناعي، يجيب مدير التسويق بقواعد ثابتة على معلومات شركتك المعتمدة وبياناتك المستوردة، فلا يفهم الأسئلة الحرة. جرّب أحد الأسئلة المقترحة، أو اطلب من المسؤول إعداد نموذج على الخادم، أو صدّر حزمة معلومات الشركة إلى Claude الخاص بك واستورد إجابته.'), { actions: [{ l: L('Copy context package for Claude', 'انسخ حزمة معلومات الشركة لـ Claude'), a: 'copyPkg', v: question }], cls: 'unknown', insufficient: true });
 }

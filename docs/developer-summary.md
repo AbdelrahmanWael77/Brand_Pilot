@@ -8,6 +8,7 @@ PR yet. Each branch is built on the one before; merge in this order:
 3. `feat/p5-audit-trail`
 4. `feat/p6-track-record`
 5. `feat/p3-number-check`
+6. `feat/p7-simple` (the redesign; review with the owner's screenshots in docs/ui-audit/screenshots-p7*)
 
 Tests on the last branch (`feat/p3-number-check`): `npm test` 441/441, `npm run test:ui` 18/18 (needs Chrome; not part of
 `npm test` — consider running it in CI). Handoff notes: `IMPLEMENTATION_STATUS.md`, `NEXT_AGENT_PROMPT.md`.
@@ -81,3 +82,11 @@ Check carefully:
   keeps its slash); check the Arabic screens.
 - The AI key lives only in `.env` (git-ignored, never committed on any branch). After every real-AI run, its value was
   searched in the database, API responses, page, server logs and reports: never found.
+
+## 6. `feat/p7-simple`: the redesign (check carefully)
+
+- Page only, plus wording in server text: no route, schema or trust logic changed. One number-check change: "reached" / "وصلت" are read as reach (a real-run false alarm; tested).
+- Recommendation and AI wording changed (plain words, channels named in plain words by `server/plain.js`; the GA4 name stays in `subject` and the data). Prompt `director-2026-11-21b`. The FlowNest baseline was re-recorded twice, wording only.
+- The FlowNest demo is created ready by the page (`demoReady`, `demoCamp`): demo mode only.
+- **Settings → Advanced** (AI model, AI files, import history, the real/simulated table) is collapsed and visible to every signed-in account owner. There are no user roles: a real admin role needs a server change (owner: later).
+- Fonts: Geist and Readex Pro ship in public/vendor/fonts (OFL licence files added).

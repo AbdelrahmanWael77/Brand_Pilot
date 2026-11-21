@@ -119,7 +119,8 @@ const METRICS = {
   impressions: ['impressions', 'impression', 'ظهور', 'مرات الظهور'],
   position: ['position', 'positions', 'rank', 'ranking', 'ترتيب', 'موضع', 'المركز', 'مركز'],
   engagement: ['engagement', 'engagements', 'تفاعل', 'التفاعل'],
-  reach: ['reach', 'الوصول', 'وصول'],
+  // P7 (real run, 2026-11-21): "وصلت منشوراتك إلى 33,933 شخصاً" / "your posts reached 33,933 people" are reach
+  reach: ['reach', 'reached', 'reaches', 'الوصول', 'وصول', 'وصلت'],
   projects: ['projects', 'project', 'مشاريع', 'مشروع', 'المشاريع'],
   spend: ['spend', 'spent', 'budget', 'إنفاق', 'الإنفاق', 'ميزانية'],
   posts: ['posts', 'post', 'منشور', 'منشورات', 'المنشورات'],
@@ -160,11 +161,13 @@ function clausesAround(t, pos) {
   cuts.push(sentence.length);
   const parts = [];
   const VS = /vs\.?|versus|against|compared with|مقابل/i;
-  for (let i = 0; i < cuts.length; i += 2) parts.push([s0 + cuts[i], s0 + cuts[i + 1], i > 0 && VS.test(sentence.slice(cuts[i - 1], cuts[i]))]);
+  for (let i = 0; i < cuts.length; i += 2) parts.push([s0 + cuts[i], s0 + cuts[i + 1], i > 0 && VS.test(sentence.slice(cuts[i - 1], cuts[i])), i > 0 && sentence.slice(cuts[i - 1], cuts[i]).trim() === '(']);
   const idx = parts.findIndex(([a, b]) => pos >= a && pos <= b);
   const own = idx < 0 ? [s0, s1] : parts[idx];
   // looking back for a subject, the second side of a comparison is skipped: it names what the topic is compared with
-  const before = idx < 0 ? [] : parts.slice(0, idx).reverse().filter((p) => !p[2]);
+  let before = idx < 0 ? [] : parts.slice(0, idx).reverse().filter((p) => !p[2]);
+  // P7 (real run): a bracket explains the clause right before it ("a site average of 1.36% (65 enquiries from 4,774 visits)"), even when that clause is the second side of a comparison
+  if (idx > 0 && parts[idx][3]) before = [parts[idx - 1], ...before.filter((p) => p !== parts[idx - 1])];
   return { sentence, own: t.slice(own[0], own[1]), ownAt: own, ownVs: idx >= 0 && !!parts[idx][2], before: before.map(([a, b]) => t.slice(a, b)) };
 }
 

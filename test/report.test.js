@@ -82,14 +82,14 @@ test('empty company: no numbers shown as zero, no findings, gaps listed, both la
   const en = renderReport(r, 'en');
   assert.match(en, /^# Marketing report — Empty Co/);
   assert.match(en, /No data imported yet\./);
-  assert.match(en, /\| Website sessions \| no data \| — \|/);
+  assert.match(en, /\| Website visits \| no data \| — \|/);
   assert.match(en, /No finding is supported/);
   assert.match(en, /## Not enough data yet/);
   assert.match(en, /No campaigns yet\./);
   assert.doesNotMatch(en, /\| 0 \|/); // a missing number is never written as 0
   const ar = renderReport(r, 'ar');
   assert.match(ar, /^# التقرير التسويقي — Empty Co/);
-  assert.match(ar, /\| جلسات الموقع \| لا توجد بيانات \| — \|/);
+  assert.match(ar, /\| زيارات الموقع \| لا توجد بيانات \| — \|/);
 });
 
 test('report from validated data: KPIs with change, findings by section with evidence, campaigns; nothing unapproved', async () => {
@@ -134,11 +134,11 @@ test('Markdown download: headers, numbers, escaping of company text, Arabic labe
   assert.match(en, /^# Marketing report — Nile \\\| Bakery \\\*Co\\\*\n/);
   assert.match(en, /Period: 2026-10-28 to 2026-11-03/);
   assert.match(en, /compared with: 2026-10-21 to 2026-10-27/);
-  assert.match(en, /\| Website sessions \| 2,000 \| \+400\.0% \|/);
+  assert.match(en, /\| Website visits \| 2,000 \| \+400\.0% \|/);
   assert.match(en, /\| Enquiry rate \| 1\.75% \| /);
   assert.match(en, /\| Leads \| no data \| — \|/);
-  assert.match(en, /### Strengths\n\n\*\*Search visitors enquire at the highest rate\*\* — from your imported data/);
-  assert.match(en, /Evidence:\n- Search: 20 enquiries from 500 sessions \(4\.00%\)/); // P1: findings use the report's period (7 days) like the KPIs, no longer all rows
+  assert.match(en, /### Strengths\n\n\*\*Visitors from Search get in touch most often\*\* — from your imported data/);
+  assert.match(en, /Evidence:\n- Search: 20 enquiries from 500 visits \(4\.00%\)/); // P1: findings use the report's period (7 days) like the KPIs, no longer all rows
   assert.match(en, /### Weaknesses/);
   assert.match(en, /1 approved fact\(s\) in Company knowledge/);
   assert.match(en, /- \*\*Search push\*\* — draft; 1 of 2 assets approved; from recommendation `ch-best`/);
@@ -146,18 +146,18 @@ test('Markdown download: headers, numbers, escaping of company text, Arabic labe
 
   const ar = await (await get(companyId, '?range=7&format=md&lang=ar')).text();
   assert.match(ar, /^# التقرير التسويقي — /);
-  assert.match(ar, /\| جلسات الموقع \| 2,000 \| \+400\.0% \|/);
+  assert.match(ar, /\| زيارات الموقع \| 2,000 \| \+400\.0% \|/);
   assert.match(ar, /### نقاط القوة/);
   // Findings are written in Arabic by the server audit; no "findings are English" note.
-  assert.match(ar, /\*\*زوار Search هم الأعلى في معدل الاستفسار\*\* — من بياناتك المستوردة/);
-  assert.match(ar, /- Search: 20 استفسار من 500 جلسة \(4\.00%\)/); // P1: the report's period, as above
+  assert.match(ar, /\*\*زوار Search هم الأكثر تواصلاً معك\*\* — من بياناتك المستوردة/);
+  assert.match(ar, /- Search: 20 استفسار من 500 زيارة \(4\.00%\)/); // P1: the report's period, as above
   assert.match(ar, /الظهور في البحث العضوي غير معروف\*\* — استورد تصدير الأداء من Search Console\./);
   assert.doesNotMatch(ar, /بالإنجليزية حالياً|visitors enquire|Import a /);
   assert.doesNotMatch(en, /[\u0600-\u06FF]/); // and the English report has no Arabic in it
   // JSON in Arabic on request; English by default.
   const j = await (await get(companyId, '?range=7&lang=ar')).json();
   assert.equal(j.findingsLang, 'ar');
-  assert.equal(j.findings.strong[0].title, 'زوار Search هم الأعلى في معدل الاستفسار');
+  assert.equal(j.findings.strong[0].title, 'زوار Search هم الأكثر تواصلاً معك');
   assert.equal((await (await get(companyId, '?range=7')).json()).findingsLang, 'en');
   // A report saved before Arabic findings existed (English texts, no findingsLang) still says so in Arabic.
   const old = await (await get(companyId, '?range=7')).json();
@@ -177,7 +177,7 @@ test('synthetic data is labeled in the JSON and in the document', async () => {
   const en = renderReport(r, 'en');
   assert.match(en, /\*\*Contains synthetic demo data — not real performance\.\*\*/);
   assert.match(en, /\(all imported data\)/);
-  assert.match(en, /\| Website sessions \| 2,400 \(synthetic\) \| — \|/);
+  assert.match(en, /\| Website visits \| 2,400 \(synthetic\) \| — \|/);
   assert.match(en, /from your imported data \(synthetic\)/);
 });
 
@@ -200,18 +200,18 @@ test('printable HTML: self-contained, locked down, escaped, right direction per 
   assert.doesNotMatch(en, /<script|<img|<link|<iframe|<a\s|<form|<object|<embed|javascript:/i); // no tag that runs or loads anything
   assert.match(en, /&lt;script&gt;alert\(1\)&lt;\/script&gt; &quot;Co&quot; &amp; &#39;Sons&#39;/);
   assert.match(en, /&lt;img src=x onerror=alert\(2\)&gt;/);
-  assert.match(en, /<td>Website sessions<\/td><td class="n"><span class="ltr">2,000<\/span><\/td><td class="n"><span class="ltr">\+400\.0%<\/span><\/td>/);
+  assert.match(en, /<td>Website visits<\/td><td class="n"><span class="ltr">2,000<\/span><\/td><td class="n"><span class="ltr">\+400\.0%<\/span><\/td>/);
   assert.match(en, /<td>Leads<\/td><td class="n"><span class="nd">no data<\/span><\/td>/);
   assert.match(en, /<h3>Strengths<\/h3>/);
-  assert.match(en, /Search: 20 enquiries from 500 sessions/); // P1: the report's period, as above
+  assert.match(en, /Search: 20 enquiries from 500 visits/); // P1: the report's period, as above
   assert.match(en, /@media print/);
   assert.doesNotMatch(en, />0<\/span><\/td>/); // sessions etc. exist; missing numbers are never 0
   assert.doesNotMatch(en, /PENDING|REJECTED/);
 
   const ar = await (await get(evil, '?range=7&format=html&lang=ar')).text();
   assert.match(ar, /^<!doctype html>\n<html lang="ar" dir="rtl">/);
-  assert.match(ar, /<td>جلسات الموقع<\/td>/);
-  assert.match(ar, /هم الأعلى في معدل الاستفسار/);
+  assert.match(ar, /<td>زيارات الموقع<\/td>/);
+  assert.match(ar, /هم الأكثر تواصلاً معك/);
   assert.doesNotMatch(ar, /بالإنجليزية حالياً/);
   // Latin / numeric runs inside Arabic finding text are isolated on the Arabic page only.
   assert.match(ar, /<li dir="auto">[^<]*<bdi>[A-Za-z0-9]/);

@@ -33,7 +33,9 @@ try {
   await page.evaluate(() => A.demoCo());
   await page.waitForFunction(() => C() && C().demo === 'flownest' && C().imports.length >= 4, null, { timeout: 30000 });
   await page.waitForTimeout(2500);
-  const shots = [['home', 'dash'], ['next-steps', 'audit'], ['ask', 'director'], ['campaign-studio', 'studio'], ['company-knowledge', 'know']];
+  const ALL = [['home', 'dash'], ['results', 'analytics'], ['leads', 'growth'], ['next-steps', 'audit'], ['ask', 'director'], ['my-tasks', 'auto'], ['campaign-studio', 'studio'], ['content-series', 'series'], ['check-download', 'qa'], ['reports', 'reports'], ['company-sources', 'onboard'], ['company-info', 'know'], ['data', 'integ'], ['settings', 'trust']];
+  // P7 checkpoint 2: every screen; BRANDPILOT_SHOTS=key,key limits the list
+  const shots = process.env.BRANDPILOT_SHOTS ? ALL.filter(([n]) => process.env.BRANDPILOT_SHOTS.split(',').includes(n)) : ALL;
   for (const lang of ['en', 'ar']) {
     await page.evaluate((l) => { if (S.lang !== l) A.lang(); }, lang);
     for (const [name, v] of shots) {

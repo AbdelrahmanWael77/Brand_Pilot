@@ -32,10 +32,10 @@ test('a recommendation built on a small sample is Low, with the reason on the it
   const x = item(computeAudit({ ...none, ga4 }, []).items, 'ch-best');
   assert.equal(x.conf, 'low');
   assert.equal(x.confidence.level, 'low');
-  assert.match(x.confidence.why, /^Low: 250 sessions \(1\.3× the minimum of 200\)/);
+  assert.match(x.confidence.why, /^Low: 250 visits \(1\.3× the minimum of 200\)/);
   assert.equal(x.e, 1, 'the evidence part of the priority score follows the confidence');
   assert.deepEqual(x.calc.length, 2);
-  assert.match(x.calc[0], /^Email: 25 enquiries ÷ 250 sessions = 10\.00%$/);
+  assert.match(x.calc[0], /^Email: 25 enquiries ÷ 250 visits = 10\.00%$/);
   assert.ok(x.assumptions.length >= 1);
   assert.equal(x.make, 'campaign');
 });
@@ -116,9 +116,9 @@ test('Arabic wording and Arabic-Indic digits when the company chose them; Wester
   const day = (d, ch, s, e) => ({ date: d, channel: ch, device: 'desktop', sessions: s, enquiries: e });
   const ga4 = [day('2026-11-01', 'Email', 1200, 60), day('2026-11-01', 'Search', 3000, 30)];
   const ar = item(computeAudit({ ...none, ga4 }, [], { lang: 'ar', fmt: makeFmt('ar', 'arab') }).items, 'ch-best');
-  assert.match(ar.ev[0], /٦٠ استفسار من ١٬٢٠٠ جلسة/);
+  assert.match(ar.ev[0], /٦٠ استفسار من ١٬٢٠٠ زيارة/);
   const latn = item(computeAudit({ ...none, ga4 }, [], { lang: 'ar', fmt: makeFmt('ar', 'latn') }).items, 'ch-best');
-  assert.match(latn.ev[0], /60 استفسار من 1,200 جلسة \(5\.00%\)/);
+  assert.match(latn.ev[0], /60 استفسار من 1,200 زيارة \(5\.00%\)/);
   assert.equal(ar.confidence.level, latn.confidence.level);
 });
 

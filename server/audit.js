@@ -25,6 +25,7 @@ import { createData, KINDS } from './data.js';
 import { createKnowledge } from './knowledge.js';
 import { periods, RANGES } from './metrics.js';
 import { sourceRules, decorate } from './auditMeta.js';
+import { chPlain, cap } from './plain.js';
 
 /** Thresholds, as in the prototype. */
 export const T = {
@@ -126,48 +127,51 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
     if (!E) {
       conclude('weak', 'ga4', {
         id: 'no-track',
-        q: { n: S, min: T.channelMinSessions, margin: 1, unit: L('sessions', 'جلسة') },
-        calc: [L(`0 enquiry events ÷ ${n(S)} sessions = 0% (rule: ${n(T.channelMinSessions)}+ sessions and no enquiry event).`, `0 حدث استفسار ÷ ${n(S)} جلسة = 0٪ (القاعدة: ${n(T.channelMinSessions)} جلسة أو أكثر بلا أي حدث استفسار).`)],
+        q: { n: S, min: T.channelMinSessions, margin: 1, unit: L('visits', 'زيارة') },
+        calc: [L(`0 enquiry events ÷ ${n(S)} visits = 0% (rule: ${n(T.channelMinSessions)}+ visits and no enquiry event).`, `0 حدث استفسار ÷ ${n(S)} زيارة = 0٪ (القاعدة: ${n(T.channelMinSessions)} زيارة أو أكثر بلا أي حدث استفسار).`)],
         title: L('The website records no enquiry events', 'الموقع لا يسجل أي أحداث استفسار'),
         why: L('Without a key event for form submissions, WhatsApp clicks or bookings, nobody can tell which channel or page produces enquiries.', 'بدون حدث رئيسي لإرسال النموذج أو نقرات واتساب أو الحجز، لا يمكن معرفة أي قناة أو صفحة تجلب الاستفسارات.'),
         action: L('Define one GA4 key event per enquiry path (form submit, WhatsApp click, call click) and re-import.', 'عرّف حدثاً رئيسياً في GA4 لكل مسار استفسار (إرسال النموذج، نقرة واتساب، نقرة اتصال) ثم أعد الاستيراد.'),
         evidence: [
-          { metric: 'sessions', value: S, rows: g.length, text: L(`${n(S)} sessions imported, 0 enquiry key events in the whole period.`, `تم استيراد ${n(S)} جلسة، و0 حدث استفسار رئيسي في كامل الفترة.`) },
+          { metric: 'sessions', value: S, rows: g.length, text: L(`${n(S)} visits imported, 0 enquiry key events in the whole period.`, `تم استيراد ${n(S)} زيارة، و0 حدث استفسار رئيسي في كامل الفترة.`) },
           { text: L('Interpretation: tracking is most likely not configured (a true zero is unlikely at this traffic level).', 'تفسير: على الأرجح التتبع غير مُعدّ (الصفر الحقيقي غير مرجّح عند هذا الحجم من الزيارات).') },
         ],
       });
     } else {
       const rate = E / S;
-      const site = { metric: 'enquiry_rate', value: rate, rows: g.length, text: L(`Site average: ${pct(rate, 2)} (${n(E)} enquiries from ${n(S)} sessions)`, `متوسط الموقع: ${pct(rate, 2)} (${n(E)} استفسار من ${n(S)} جلسة)`) };
+      const site = { metric: 'enquiry_rate', value: rate, rows: g.length, text: L(`Site average: ${pct(rate, 2)} (${n(E)} enquiries from ${n(S)} visits)`, `متوسط الموقع: ${pct(rate, 2)} (${n(E)} استفسار من ${n(S)} زيارة)`) };
       const channels = breakdown(g, 'channel').filter((x) => x.sessions >= T.channelMinSessions).sort((a, b) => b.rate - a.rate);
       if (channels.length < 2) {
-        insufficient('ch-best', 'ga4', L('Traffic channels cannot be compared yet', 'لا يمكن مقارنة قنوات الزيارات بعد'), L(`At least two channels with ${n(T.channelMinSessions)}+ sessions each are needed (now: ${n(channels.length)}).`, `يلزم وجود قناتين على الأقل، لكل منهما ${n(T.channelMinSessions)} جلسة أو أكثر (حالياً: ${n(channels.length)}).`));
+        insufficient('ch-best', 'ga4', L('Traffic channels cannot be compared yet', 'لا يمكن مقارنة قنوات الزيارات بعد'), L(`At least two channels with ${n(T.channelMinSessions)}+ visits each are needed (now: ${n(channels.length)}).`, `يلزم وجود قناتين على الأقل، لكل منهما ${n(T.channelMinSessions)} زيارة أو أكثر (حالياً: ${n(channels.length)}).`));
       } else {
         const best = channels[0];
+        // P7: channels are named in plain words (server/plain.js); `subject` keeps the GA4 name
+        const be = chPlain(best.name, 'en'), ba = chPlain(best.name, 'ar');
         if (best.rate > rate * T.bestOverAverage) {
           conclude('strong', 'ga4', {
             id: 'ch-best',
             subject: best.name,
-            q: { n: best.sessions, min: T.channelMinSessions, margin: best.rate / (rate * T.bestOverAverage) - 1, unit: L('sessions', 'جلسة') },
-            calc: [L(`${best.name}: ${n(best.enquiries)} enquiries ÷ ${n(best.sessions)} sessions = ${pct(best.rate, 2)}`, `${best.name}: ${n(best.enquiries)} استفسار ÷ ${n(best.sessions)} جلسة = ${pct(best.rate, 2)}`), L(`Site: ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}; rule: above 120% of the site rate (${pct(rate * T.bestOverAverage, 2)}), channels with ${n(T.channelMinSessions)}+ sessions`, `الموقع: ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}؛ القاعدة: أعلى من 120٪ من معدل الموقع (${pct(rate * T.bestOverAverage, 2)})، للقنوات ذات ${n(T.channelMinSessions)} جلسة أو أكثر`)],
-            title: L(`${best.name} visitors enquire at the highest rate`, `زوار ${best.name} هم الأعلى في معدل الاستفسار`),
+            q: { n: best.sessions, min: T.channelMinSessions, margin: best.rate / (rate * T.bestOverAverage) - 1, unit: L('visits', 'زيارة') },
+            calc: [L(`${cap(be)}: ${n(best.enquiries)} enquiries ÷ ${n(best.sessions)} visits = ${pct(best.rate, 2)}`, `${ba}: ${n(best.enquiries)} استفسار ÷ ${n(best.sessions)} زيارة = ${pct(best.rate, 2)}`), L(`Site: ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}; rule: above 120% of the site rate (${pct(rate * T.bestOverAverage, 2)}), channels with ${n(T.channelMinSessions)}+ visits`, `الموقع: ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}؛ القاعدة: أعلى من 120٪ من معدل الموقع (${pct(rate * T.bestOverAverage, 2)})، للقنوات ذات ${n(T.channelMinSessions)} زيارة أو أكثر`)],
+            title: L(`Visitors from ${be} get in touch most often`, `زوار ${ba} هم الأكثر تواصلاً معك`),
             why: L('This channel already brings people with intent; growing it is lower-risk than fixing a weak one.', 'هذه القناة تجلب بالفعل زواراً لديهم نية؛ تنميتها أقل مخاطرة من إصلاح قناة ضعيفة.'),
-            action: L(`Invest more effort in ${best.name}: more content, better pages, clearer follow-up.`, `استثمر جهداً أكبر في ${best.name}: محتوى أكثر، صفحات أفضل، متابعة أوضح.`),
-            evidence: [{ metric: 'enquiry_rate', value: best.rate, text: L(`${best.name}: ${n(best.enquiries)} enquiries from ${n(best.sessions)} sessions (${pct(best.rate, 2)})`, `${best.name}: ${n(best.enquiries)} استفسار من ${n(best.sessions)} جلسة (${pct(best.rate, 2)})`) }, site],
+            action: L(`Put more effort into ${be}: more content, better pages, clearer follow-up.`, `ضع جهداً أكبر في ${ba}: محتوى أكثر، صفحات أفضل، متابعة أوضح.`),
+            evidence: [{ metric: 'enquiry_rate', value: best.rate, text: L(`${cap(be)}: ${n(best.enquiries)} enquiries from ${n(best.sessions)} visits (${pct(best.rate, 2)})`, `${ba}: ${n(best.enquiries)} استفسار من ${n(best.sessions)} زيارة (${pct(best.rate, 2)})`) }, site],
           });
         }
         const leak = channels.filter((x) => x.sessions / S >= T.leakMinShare && x.rate < rate * T.leakBelowAverage).sort((a, b) => b.sessions - a.sessions)[0];
         if (leak) {
+          const le = chPlain(leak.name, 'en'), la = chPlain(leak.name, 'ar');
           conclude('weak', 'ga4', {
             id: 'ch-leak',
             subject: leak.name,
-            q: { n: leak.sessions, min: T.channelMinSessions, margin: 1 - leak.rate / (rate * T.leakBelowAverage), unit: L('sessions', 'جلسة') },
-            calc: [L(`${leak.name}: ${n(leak.enquiries)} enquiries ÷ ${n(leak.sessions)} sessions = ${pct(leak.rate, 2)}; site ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}`, `${leak.name}: ${n(leak.enquiries)} استفسار ÷ ${n(leak.sessions)} جلسة = ${pct(leak.rate, 2)}؛ الموقع ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}`), L(`Rule: 20%+ of sessions (${pct(leak.sessions / S, 0)}) and a rate below half the site rate (${pct(rate * T.leakBelowAverage, 2)})`, `القاعدة: 20٪ أو أكثر من الجلسات (${pct(leak.sessions / S, 0)}) ومعدل أقل من نصف معدل الموقع (${pct(rate * T.leakBelowAverage, 2)})`)],
-            title: L(`${leak.name} brings many visits but few enquiries`, `${leak.name} تجلب زيارات كثيرة واستفسارات قليلة`),
+            q: { n: leak.sessions, min: T.channelMinSessions, margin: 1 - leak.rate / (rate * T.leakBelowAverage), unit: L('visits', 'زيارة') },
+            calc: [L(`${cap(le)}: ${n(leak.enquiries)} enquiries ÷ ${n(leak.sessions)} visits = ${pct(leak.rate, 2)}; site ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}`, `${la}: ${n(leak.enquiries)} استفسار ÷ ${n(leak.sessions)} زيارة = ${pct(leak.rate, 2)}؛ الموقع ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}`), L(`Rule: 20%+ of visits (${pct(leak.sessions / S, 0)}) and a rate below half the site rate (${pct(rate * T.leakBelowAverage, 2)})`, `القاعدة: 20٪ أو أكثر من الزيارات (${pct(leak.sessions / S, 0)}) ومعدل أقل من نصف معدل الموقع (${pct(rate * T.leakBelowAverage, 2)})`)],
+            title: L(`Many visits from ${le}, but few enquiries`, `زيارات كثيرة من ${la}، لكن الاستفسارات قليلة`),
             why: L('Attention is being won but not converted.', 'نكسب الانتباه ولا نحوّله إلى استفسارات.'),
-            action: L(`Send ${leak.name} visitors to one dedicated page with a single clear next step, instead of general pages.`, `وجّه زيارات ${leak.name} إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.`),
+            action: L(`Send visitors from ${le} to one dedicated page with a single clear next step, instead of general pages.`, `وجّه زوار ${la} إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.`),
             evidence: [
-              { metric: 'enquiry_rate', value: leak.rate, text: L(`${leak.name}: ${pct(leak.sessions / S, 0)} of sessions, enquiry rate ${pct(leak.rate, 2)} vs site ${pct(rate, 2)}`, `${leak.name}: ${pct(leak.sessions / S, 0)} من الجلسات، معدل الاستفسار ${pct(leak.rate, 2)} مقابل ${pct(rate, 2)} للموقع`) },
+              { metric: 'enquiry_rate', value: leak.rate, text: L(`${pct(leak.sessions / S, 0)} of your visits come from ${le}, but only ${pct(leak.rate, 2)} of these visitors get in touch, against ${pct(rate, 2)} on average.`, `${pct(leak.sessions / S, 0)} من زياراتك تأتي من ${la}، لكن ${pct(leak.rate, 2)} فقط من هؤلاء الزوار يتواصلون معك، مقابل ${pct(rate, 2)} في المتوسط.`) },
               { text: L('Hypothesis, not a measurement: posts send people to pages that do not match what the post promised.', 'فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور.') },
             ],
           });
@@ -182,12 +186,12 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
           conclude('weak', 'ga4', {
             id: 'page-leak',
             subject: page.name,
-            q: { n: page.sessions, min: T.channelMinSessions, margin: 1 - page.rate / (rate * T.pageBelowAverage), unit: L('sessions', 'جلسة') },
-            calc: [L(`${page.name}: ${n(page.enquiries)} ÷ ${n(page.sessions)} = ${pct(page.rate, 2)}; site ${pct(rate, 2)}; rule: 12%+ of sessions and below 60% of the site rate (${pct(rate * T.pageBelowAverage, 2)})`, `${page.name}: ${n(page.enquiries)} ÷ ${n(page.sessions)} = ${pct(page.rate, 2)}؛ الموقع ${pct(rate, 2)}؛ القاعدة: 12٪ أو أكثر من الجلسات وأقل من 60٪ من معدل الموقع (${pct(rate * T.pageBelowAverage, 2)})`)],
-            title: L(`Landing page ${page.name} under-converts`, `صفحة الدخول ${page.name} أقل تحويلاً من المتوسط`),
+            q: { n: page.sessions, min: T.channelMinSessions, margin: 1 - page.rate / (rate * T.pageBelowAverage), unit: L('visits', 'زيارة') },
+            calc: [L(`${page.name}: ${n(page.enquiries)} ÷ ${n(page.sessions)} = ${pct(page.rate, 2)}; site ${pct(rate, 2)}; rule: 12%+ of visits and below 60% of the site rate (${pct(rate * T.pageBelowAverage, 2)})`, `${page.name}: ${n(page.enquiries)} ÷ ${n(page.sessions)} = ${pct(page.rate, 2)}؛ الموقع ${pct(rate, 2)}؛ القاعدة: 12٪ أو أكثر من الزيارات وأقل من 60٪ من معدل الموقع (${pct(rate * T.pageBelowAverage, 2)})`)],
+            title: L(`The ${page.name} page gets many visits but few enquiries`, `صفحة ${page.name} تجلب زيارات كثيرة لكن الاستفسارات قليلة`),
             why: L('A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.', 'صفحة عالية الزيارات بتحويل أقل من متوسط الموقع هي أرخص مكان لكسب استفسارات: الزوار موجودون بالفعل.'),
-            action: L(`Review ${page.name}: put the primary CTA above the fold, shorten the form, state the offer in the first screen.`, `راجع ${page.name}: ضع الدعوة الرئيسية في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.`),
-            evidence: [{ metric: 'enquiry_rate', value: page.rate, text: L(`${page.name}: ${n(page.sessions)} sessions (${pct(page.sessions / S, 0)}), enquiry rate ${pct(page.rate, 2)} vs site ${pct(rate, 2)}`, `${page.name}: ${n(page.sessions)} جلسة (${pct(page.sessions / S, 0)})، معدل الاستفسار ${pct(page.rate, 2)} مقابل ${pct(rate, 2)} للموقع`) }],
+            action: L(`Review ${page.name}: put the main action button above the fold, shorten the form, state the offer in the first screen.`, `راجع ${page.name}: ضع زر الإجراء الرئيسي في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.`),
+            evidence: [{ metric: 'enquiry_rate', value: page.rate, text: L(`${n(page.sessions)} visits (${pct(page.sessions / S, 0)} of all) start on ${page.name}, but only ${pct(page.rate, 2)} of these visitors get in touch, against ${pct(rate, 2)} on average.`, `${n(page.sessions)} زيارة (${pct(page.sessions / S, 0)} من الكل) تبدأ من ${page.name}، لكن ${pct(page.rate, 2)} فقط من هؤلاء الزوار يتواصلون معك، مقابل ${pct(rate, 2)} في المتوسط.`) }],
           });
         }
       }
@@ -195,18 +199,18 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
       const mo = devices.find((x) => x.name === 'mobile');
       const de = devices.find((x) => x.name === 'desktop');
       if (!mo || !de) {
-        insufficient('mobile-gap', 'ga4', L('Mobile and desktop visitors cannot be compared yet', 'لا يمكن مقارنة زوار الجوال وسطح المكتب بعد'), L('GA4 rows need a device column with both mobile and desktop sessions.', 'صفوف GA4 تحتاج عمود الجهاز مع جلسات للجوال ولسطح المكتب.'));
+        insufficient('mobile-gap', 'ga4', L('Mobile and desktop visitors cannot be compared yet', 'لا يمكن مقارنة زوار الجوال وسطح المكتب بعد'), L('GA4 rows need a device column with both mobile and desktop visits.', 'صفوف GA4 تحتاج عمود الجهاز مع زيارات للجوال ولسطح المكتب.'));
       } else if (mo.sessions / S >= T.mobileMinShare && mo.rate < de.rate * T.mobileBelowDesktop) {
         conclude('weak', 'ga4', {
           id: 'mobile-gap',
-          q: { n: mo.sessions, min: T.channelMinSessions, margin: 1 - mo.rate / (de.rate * T.mobileBelowDesktop), unit: L('sessions', 'جلسة') },
-          calc: [L(`Mobile: ${n(mo.enquiries)} ÷ ${n(mo.sessions)} = ${pct(mo.rate, 2)}; desktop: ${n(de.enquiries)} ÷ ${n(de.sessions)} = ${pct(de.rate, 2)}`, `الجوال: ${n(mo.enquiries)} ÷ ${n(mo.sessions)} = ${pct(mo.rate, 2)}؛ سطح المكتب: ${n(de.enquiries)} ÷ ${n(de.sessions)} = ${pct(de.rate, 2)}`), L(`Rule: mobile 30%+ of sessions and below 60% of the desktop rate (${pct(de.rate * T.mobileBelowDesktop, 2)})`, `القاعدة: الجوال 30٪ أو أكثر من الجلسات وأقل من 60٪ من معدل سطح المكتب (${pct(de.rate * T.mobileBelowDesktop, 2)})`)],
-          title: L('Mobile visitors enquire far less than desktop visitors', 'زوار الجوال يستفسرون أقل بكثير من زوار سطح المكتب'),
+          q: { n: mo.sessions, min: T.channelMinSessions, margin: 1 - mo.rate / (de.rate * T.mobileBelowDesktop), unit: L('visits', 'زيارة') },
+          calc: [L(`Mobile: ${n(mo.enquiries)} ÷ ${n(mo.sessions)} = ${pct(mo.rate, 2)}; desktop: ${n(de.enquiries)} ÷ ${n(de.sessions)} = ${pct(de.rate, 2)}`, `الجوال: ${n(mo.enquiries)} ÷ ${n(mo.sessions)} = ${pct(mo.rate, 2)}؛ سطح المكتب: ${n(de.enquiries)} ÷ ${n(de.sessions)} = ${pct(de.rate, 2)}`), L(`Rule: mobile 30%+ of visits and below 60% of the desktop rate (${pct(de.rate * T.mobileBelowDesktop, 2)})`, `القاعدة: الجوال 30٪ أو أكثر من الزيارات وأقل من 60٪ من معدل سطح المكتب (${pct(de.rate * T.mobileBelowDesktop, 2)})`)],
+          title: L('Phone visitors get in touch far less than computer visitors', 'زوار الجوال يتواصلون معك أقل بكثير من زوار الكمبيوتر'),
           why: L('If the mobile path is harder, every channel pays for it.', 'إذا كان مسار الجوال أصعب، فكل القنوات تدفع الثمن.'),
           action: L('Test the enquiry path on a phone: form length, button size, load time, WhatsApp/click-to-call option.', 'اختبر مسار الاستفسار على الهاتف: طول النموذج، حجم الأزرار، زمن التحميل، وخيار واتساب أو الاتصال بنقرة.'),
           evidence: [
-            { metric: 'enquiry_rate', value: mo.rate, text: L(`Mobile: ${pct(mo.sessions / S, 0)} of sessions, enquiry rate ${pct(mo.rate, 2)}`, `الجوال: ${pct(mo.sessions / S, 0)} من الجلسات، معدل الاستفسار ${pct(mo.rate, 2)}`) },
-            { metric: 'enquiry_rate', value: de.rate, text: L(`Desktop: enquiry rate ${pct(de.rate, 2)}`, `سطح المكتب: معدل الاستفسار ${pct(de.rate, 2)}`) },
+            { metric: 'enquiry_rate', value: mo.rate, text: L(`${pct(mo.sessions / S, 0)} of your visits come from phones, but only ${pct(mo.rate, 2)} of these visitors get in touch`, `${pct(mo.sessions / S, 0)} من زياراتك تأتي من الجوال، لكن ${pct(mo.rate, 2)} فقط من هؤلاء الزوار يتواصلون معك`) },
+            { metric: 'enquiry_rate', value: de.rate, text: L(`On a computer (desktop), ${pct(de.rate, 2)} of visitors get in touch`, `على الكمبيوتر (سطح المكتب) يتواصل معك ${pct(de.rate, 2)} من الزوار`) },
           ],
         });
       }
@@ -236,7 +240,7 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
           calc: [L(`Rule: ${n(T.queryMinImpressions)}+ impressions, average position 5–15, click rate under ${pct(T.queryMaxCtr, 1)}; ${n(missed.length)} quer(ies) match`, `القاعدة: ${n(T.queryMinImpressions)} ظهور أو أكثر، متوسط المركز 5–15، معدل نقر أقل من ${pct(T.queryMaxCtr, 1)}؛ ${n(missed.length)} استعلام مطابق`)],
           title: L('People search for what you offer but rarely reach you', 'الناس يبحثون عمّا تقدمه لكنهم قلّما يصلون إليك'),
           why: L('These queries already show your pages. Moving a few positions up usually costs less than buying the same visits.', 'هذه الاستعلامات تُظهر صفحاتك بالفعل. التقدم بضعة مراكز يكلّف عادةً أقل من شراء الزيارات نفسها.'),
-          action: L('Create or improve one page per query: put the phrase in the title, answer the need directly, add the primary CTA.', 'أنشئ أو حسّن صفحة لكل استعلام: ضع العبارة في العنوان، أجب عن الحاجة مباشرة، وأضف الدعوة الرئيسية.'),
+          action: L('Create or improve one page per query: put the phrase in the title, answer the need directly, add the main action button.', 'أنشئ أو حسّن صفحة لكل استعلام: ضع العبارة في العنوان، أجب عن الحاجة مباشرة، وأضف زر الإجراء الرئيسي.'),
           evidence: missed.map((x) => ({ metric: 'ctr', value: x.clicks / x.impressions, text: L(`"${x.name}": ${n(x.impressions)} impressions, ${n(x.clicks)} clicks (${pct(x.clicks / x.impressions, 1)}), average position ${F.dec(x.position, 1)}`, `«${x.name}»: ${n(x.impressions)} ظهور، ${n(x.clicks)} نقرة (${pct(x.clicks / x.impressions, 1)})، متوسط المركز ${F.dec(x.position, 1)}`) })),
         });
       }
@@ -353,7 +357,7 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
       calc: [L(`Longest gap between posting days: ${n(pg.gap)} days (rule: more than ${n(T.cadenceMaxGap)})${postedBefore ? `, counted from the last post before this period (${postedBefore})` : ''}${pg.open ? `, still open on ${periodEnd}` : ''}`, `أطول فجوة بين أيام النشر: ${n(pg.gap)} يوماً (القاعدة: أكثر من ${n(T.cadenceMaxGap)})${postedBefore ? `، محسوبة من آخر منشور قبل هذه الفترة (${postedBefore})` : ''}${pg.open ? `، وما زالت مستمرة في ${periodEnd}` : ''}`)],
       title: pg.open ? L(`No posts for ${n(pg.gap)} days`, `لا منشورات منذ ${n(pg.gap)} يوماً`) : L(`Posting stopped for ${n(pg.gap)} days`, `توقف النشر لمدة ${n(pg.gap)} يوماً`),
       why: L('Irregular publishing makes results hard to read and gives followers no reason to expect you.', 'النشر غير المنتظم يصعّب قراءة النتائج ولا يعطي المتابعين سبباً لانتظارك.'),
-      action: L('Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.', 'اعتمد تقويماً أسبوعياً ثابتاً؛ استوديو الحملات ينشئ واحداً مع كل حملة.'),
+      action: L('Adopt a fixed weekly calendar; Campaign Studio generates one with each campaign.', 'اعتمد تقويماً أسبوعياً ثابتاً؛ إنشاء حملة ينشئ واحداً مع كل حملة.'),
       evidence: [
         pg.open
           ? { metric: 'posting_gap_days', value: pg.gap, text: L(`No posts since ${pg.after} (until ${periodEnd}).`, `لا منشورات منذ ${pg.after} (حتى ${periodEnd}).`) }
@@ -390,7 +394,7 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
         calc: [L(`"${top.name}": engagements ÷ reach = ${pct(top.rate, 1)}; account ${pct(account, 1)}; rule: above 120% of the account rate (${pct(account * T.themeOverAverage, 1)}), themes with ${n(T.themeMinPosts)}+ posts`, `«${top.name}»: التفاعل ÷ الوصول = ${pct(top.rate, 1)}؛ الحساب ${pct(account, 1)}؛ القاعدة: أعلى من 120٪ من معدل الحساب (${pct(account * T.themeOverAverage, 1)})، للموضوعات ذات ${n(T.themeMinPosts)} منشورات أو أكثر`)],
         title: L(`"${top.name}" is your strongest content theme`, `«${top.name}» هو أقوى موضوع محتوى لديك`),
         why: L('Your own history shows what the audience responds to — a better guide than generic best practice.', 'تاريخك نفسه يبيّن ما يتفاعل معه الجمهور — وهو دليل أفضل من الممارسات العامة.'),
-        action: L(`Publish more "${top.name}" posts and end each with the primary CTA and a tracked link.`, `انشر مزيداً من منشورات «${top.name}» واختم كلاً منها بالدعوة الرئيسية ورابط متتبَّع.`),
+        action: L(`Publish more "${top.name}" posts and end each with the main action button and a tracked link.`, `انشر مزيداً من منشورات «${top.name}» واختم كلاً منها بزر الإجراء الرئيسي ورابط متتبَّع.`),
         evidence: [
           { metric: 'engagement_rate', value: top.rate, rows: top.posts, text: L(`"${top.name}": engagement ${pct(top.rate, 1)} of reach across ${n(top.posts)} posts; link clicks ${pct(top.clicks, 2)} of reach`, `«${top.name}»: التفاعل ${pct(top.rate, 1)} من الوصول عبر ${n(top.posts)} منشور؛ نقرات الروابط ${pct(top.clicks, 2)} من الوصول`) },
           { metric: 'engagement_rate', value: account, rows: m.length, text: L(`Account average engagement: ${pct(account, 1)}; weakest theme "${weakest.name}": ${pct(weakest.rate, 1)}`, `متوسط تفاعل الحساب: ${pct(account, 1)}؛ أضعف موضوع «${weakest.name}»: ${pct(weakest.rate, 1)}`) },
@@ -518,7 +522,7 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
     });
   } else {
     const missing = [tone.length ? null : L('tone of voice', 'نبرة الصوت'), brand.length ? null : L('brand identity (colours)', 'هوية العلامة (الألوان)')].filter(Boolean).join(L(' and ', ' و'));
-    insufficient('brand-doc', null, L('Brand guidelines are not approved yet', 'إرشادات العلامة غير معتمدة بعد'), L(`Approve a fact for ${missing} in Company knowledge.`, `اعتمد حقيقة لـ${missing} في معرفة الشركة.`));
+    insufficient('brand-doc', null, L('Brand guidelines are not approved yet', 'إرشادات العلامة غير معتمدة بعد'), L(`Approve a fact for ${missing} in Company info.`, `اعتمد حقيقة لـ${missing} في معلومات الشركة.`));
   }
 
   /* ---- Documents and portfolio (P1: ported from the browser; only when the caller passes the company's findings) ---- */

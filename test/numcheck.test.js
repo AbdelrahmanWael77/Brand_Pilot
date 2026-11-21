@@ -76,7 +76,7 @@ test('swapped metrics and subjects are caught', () => {
   assert.deepEqual(status('The /pricing page had 1,781 sessions.'), ['1,781:mismatch'], 'Organic Social’s sessions given to /pricing');
   assert.deepEqual(status('Organic Social has an enquiry rate of 37%.'), ['37%:mismatch'], 'its share of sessions given as its enquiry rate');
   const r = checkText('Mobile visitors enquire at 2.27%.', pool).numbers[0];
-  assert.match(r.actual.label, /Desktop/);
+  assert.match(r.actual.label, /desktop/i);
 });
 
 test('a number from another period is caught unless the answer says it is the previous period', () => {
@@ -128,6 +128,13 @@ test('the sentence shapes behind the false alarms of the 20-question run are rea
   assert.deepEqual(status('Instagram had 0 qualified out of 4 leads, but it is not ranked because it has fewer than 10 leads.'), ['0:verified', '4:verified', '10:verified'], 'the ranking threshold');
   assert.deepEqual(status('In your CRM, Facebook has 12 leads (3 qualified) and Instagram has 4 (0 qualified).'), ['12:verified', '3:verified', '4:verified', '0:verified']);
   assert.deepEqual(status('فيسبوك أفضل في جلب العملاء المحتملين: معدل النقر 1.12% مقابل 0.61% في إنستجرام، وسجّل 12 عميلًا محتملًا مقابل 4.'), ['1.12%:verified', '0.61%:verified', '12:verified', '4:verified'], 'the other side of a comparison');
+  // P7 real run (2026-11-21): "your posts reached N people" is reach, in Arabic too; a swapped number is still caught
+  assert.deepEqual(status('وصلت منشوراتك إلى 33,933 شخصاً، وحققت 1,036 تفاعلاً و309 نقرات على الروابط.'), ['33,933:verified', '1,036:verified', '309:verified']);
+  assert.deepEqual(status('Your posts reached 33,933 people.'), ['33,933:verified']);
+  // P7 real run: a bracket explains the clause right before it, also the second side of a comparison
+  assert.deepEqual(status('Email visitors got in touch most often: 8 enquiries from 265 visits (3.02%), against a site average of 1.36% (65 enquiries from 4,774 visits).'), ['8:verified', '265:verified', '3.02%:verified', '1.36%:verified', '65:verified', '4,774:verified']);
+  assert.notEqual(status('Email visitors got in touch most often: 65 enquiries from 4,774 visits (3.02%).')[0], '65:verified', 'the site total given to email is still caught');
+  assert.notEqual(status('وصلت منشوراتك إلى 1,036 شخصاً.')[0], '1,036:verified');
   // and the same shapes still catch swaps
   assert.notEqual(status('Facebook recorded 4 leads vs 12 on Instagram.')[0], '4:verified');
   assert.notEqual(status('Organic Social has an enquiry rate of 37%.')[0], '37%:verified');
@@ -231,7 +238,7 @@ test('route: an AI answer with true numbers is verified; one whose main claim is
     assert.deepEqual(bad.body.check.reason, { code: 'unverified', raw: '3.4%' });
     const rows = trailOf(a.db, a.co, 'answer');
     assert.deepEqual(rows.map((r) => r.detail.check.blocked), [false, true]);
-    assert.equal(rows[0].prompt_version, 'director-2026-11-21');
+    assert.equal(rows[0].prompt_version, 'director-2026-11-21b');
   } finally { a.close(); }
 });
 

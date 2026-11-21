@@ -13,17 +13,17 @@ export const MENU_FEATURES = {
     growth: ['[data-c=def]', 'form[data-s=expAdd]'], // lead definitions, experiments
   } },
   audit: { label: 'Next steps', tabs: {
-    audit: ['.ns-list .ns-i', 'form[data-s=askNext]', '[data-a=auditTab]', 'details.ns-why', '[data-a=recTask]', '[data-a=recCamp]', '[data-a=recExp]', '[data-a=ex][data-v=audit]'],
-    director: ['form[data-s=ask]', '[data-a=dthNew]'], // Ask, conversations (P7: "use another AI" copy/paste moved to Settings → Advanced)
+    audit: ['.ns-list .ns-i', '[data-a=auditTab]', 'details.ns-why', '[data-a=recTask]', '[data-a=recCamp]', '[data-a=recExp]'], // P7: no ask box (Ask is its own tab); the export is in Reports
+    director: ['form[data-s=ask]', '[data-a=askQ]'], // P7: the question box and short questions; the conversation list (New chat) appears once there are conversations; "use another AI" is in Settings → Advanced
     auto: ['[data-a=weekly]', '[data-c=autoT]'], // tasks, weekly review
   } },
   studio: { label: 'Campaigns', tabs: {
     studio: ['[data-a=campNew], [data-a=stHome]'], // Studio home, or the open campaign with its way back
-    series: ['[data-a=sxNewT]', 'form[data-s=sxCreate]'],
+    series: ['[data-a=sxNewT]'], // P7: the creation form opens after "New series"
     qa: ['[data-a=approveAll]', '#cdl [data-a=ex][data-v=zip]', '#cdl [data-a=ex][data-v=strategy]', '#cdl [data-a=ex][data-v=calendar]', '#cdl [data-a=ex][data-v=campjson]', '#cdl [data-a=jCamp]'], // Brand QA, then the campaign downloads and publishing schedule (a campaign with assets exists in this test)
   } },
   reports: { label: 'Reports', tabs: {
-    reports: ['[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=repRange]', '[data-a=ex][data-v=exec]', '[data-a=ex][data-v=audit]', ],
+    reports: ['[data-a=ex][data-v=audit]', '[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=repRange]', '[data-a=ex][data-v=exec]', '[data-a=ex][data-v=audit]', ],
   } },
   know: { label: 'Company', tabs: {
     onboard: ['[data-a=srcAdd]', '[data-a=discover]'],

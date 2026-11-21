@@ -31,7 +31,7 @@ test('no-track: sessions but no enquiry events', () => {
   const i = item(items, 'no-track');
   assert.equal(i.basis, 'data');
   assert.equal(i.kind, 'weak');
-  assert.deepEqual(i.evidence[0], { metric: 'sessions', value: 500, rows: 2, text: '500 sessions imported, 0 enquiry key events in the whole period.' });
+  assert.deepEqual(i.evidence[0], { metric: 'sessions', value: 500, rows: 2, text: '500 visits imported, 0 enquiry key events in the whole period.' });
   // Channel and device rules are not evaluated without enquiries.
   assert.equal(item(items, 'ch-best'), undefined);
   assert.equal(item(items, 'mobile-gap'), undefined);
@@ -46,12 +46,12 @@ test('ch-best and ch-leak: triggered, not triggered, insufficient', () => {
   const best = item(items, 'ch-best');
   assert.equal(best.basis, 'data');
   assert.equal(best.kind, 'strong');
-  assert.match(best.title, /^Search /);
+  assert.match(best.title, /^Visitors from Search /); // P7: plain words
   near(best.evidence[0].value, 0.04);
   near(best.evidence[1].value, 35 / 2000);
-  assert.equal(best.evidence[0].text, 'Search: 20 enquiries from 500 sessions (4.00%)');
+  assert.equal(best.evidence[0].text, 'Search: 20 enquiries from 500 visits (4.00%)');
   const leak = item(items, 'ch-leak');
-  assert.match(leak.title, /^Social /);
+  assert.match(leak.title, /^Many visits from Social,/);
   near(leak.evidence[0].value, 0.005);
   assert.match(leak.evidence[1].text, /^Hypothesis, not a measurement/);
 
@@ -64,7 +64,7 @@ test('ch-best and ch-leak: triggered, not triggered, insufficient', () => {
   items = run({ ga4: [ga4('Search', 'desktop', 150, 30), ga4('Social', 'desktop', 1000, 5)] });
   const ins = item(items, 'ch-best');
   assert.equal(ins.basis, 'insufficient');
-  assert.match(ins.needs, /200\+ sessions each/);
+  assert.match(ins.needs, /200\+ visits each/);
   assert.equal(item(items, 'ch-leak'), undefined);
 });
 
@@ -129,8 +129,8 @@ test('page rule: page-leak — triggered, not triggered, insufficient', () => {
   let p = item(run({ ga4: [page('/pricing', 1000, 5), page('/home', 1500, 40), page('/blog', 500, 15)] }), 'page-leak');
   assert.equal(p.basis, 'data');
   assert.equal(p.kind, 'weak');
-  assert.equal(p.title, 'Landing page /pricing under-converts');
-  assert.equal(p.evidence[0].text, '/pricing: 1000 sessions (33%), enquiry rate 0.50% vs site 2.00%');
+  assert.equal(p.title, 'The /pricing page gets many visits but few enquiries');
+  assert.equal(p.evidence[0].text, '1000 visits (33% of all) start on /pricing, but only 0.50% of these visitors get in touch, against 2.00% on average.');
   near(p.evidence[0].value, 0.005);
   // Two leaking pages → the one with more sessions.
   p = item(run({ ga4: [page('/a', 1000, 2), page('/b', 1200, 3), page('/home', 800, 55)] }), 'page-leak');
@@ -277,9 +277,9 @@ test('route: audit uses the validated mirror and approved facts; pending and rej
   const a = await r.json();
   assert.deepEqual(a.period, { from: '2026-11-01', to: '2026-11-03' });
   assert.equal(a.synthetic, true);
-  assert.match(item(a.items, 'ch-best').title, /^Search /);
+  assert.match(item(a.items, 'ch-best').title, /^Visitors from Search /);
   assert.equal(item(a.items, 'ch-best').synthetic, true);
-  assert.match(item(a.items, 'ch-leak').title, /^Social /);
+  assert.match(item(a.items, 'ch-leak').title, /^Many visits from Social,/);
   // Only one approved brand fact category → brand rule is insufficient, and nothing unapproved leaks into the output.
   assert.equal(item(a.items, 'brand-doc').basis, 'insufficient');
   assert.doesNotMatch(JSON.stringify(a), /PENDING|REJECTED|NO EVIDENCE/);
@@ -325,8 +325,8 @@ test('Arabic wording: same rules, ids, numbers and evidence values; only the tex
     });
   }
   const by = Object.fromEntries(ar.map((i) => [i.id, i]));
-  assert.equal(by['ch-best'].title, 'زوار Search هم الأعلى في معدل الاستفسار');
-  assert.equal(by['ch-best'].evidence[0].text, 'Search: 20 استفسار من 500 جلسة (4.00%)');
+  assert.equal(by['ch-best'].title, 'زوار Search هم الأكثر تواصلاً معك');
+  assert.equal(by['ch-best'].evidence[0].text, 'Search: 20 استفسار من 500 زيارة (4.00%)');
   assert.equal(by['src-lowq'].evidence[0].text, 'Ads: 30 عميل محتمل، 7% مؤهلون مقابل 37% إجمالاً');
   assert.equal(by['seo-q'].evidence[0].text, '«marketing agency»: 2000 ظهور، 10 نقرة (0.5%)، متوسط المركز 8.0');
   assert.equal(by['brand-doc'].title, 'نبرة الصوت والألوان موثقة ومعتمدة');
@@ -338,7 +338,7 @@ test('Arabic wording: same rules, ids, numbers and evidence values; only the tex
     assert.match(i.title, AR, i.id);
     assert.match(i.needs, AR, i.id);
   }
-  assert.equal(item(none, 'brand-doc').needs, 'اعتمد حقيقة لـنبرة الصوت وهوية العلامة (الألوان) في معرفة الشركة.');
+  assert.equal(item(none, 'brand-doc').needs, 'اعتمد حقيقة لـنبرة الصوت وهوية العلامة (الألوان) في معلومات الشركة.');
 });
 
 test('route: ?lang=ar answers in Arabic; an unknown language is refused', async () => {

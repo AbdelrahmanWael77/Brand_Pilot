@@ -34,7 +34,7 @@ test('P3 checkpoint 2 on screen (EN, AR)', { timeout: 500_000 }, async () => {
     for (const [lang, labels] of [['en', ['What you have', 'What you need', 'What it unlocks']], ['ar', ['ما لديك', 'ما تحتاجه', 'ما الذي يتيحه']]]) {
       const g = await page.evaluate(async (l) => {
         if (S.lang !== l) A.lang();
-        S.ui.range = '28'; A.go('audit');
+        S.ui.range = '28'; S.ui.nsMore = true; A.go('audit'); // P7: all rows ("Show more")
         for (let i = 0; i < 100 && !recsGet(C()).ok; i++) await new Promise((r) => setTimeout(r, 50));
         for (let i = 0; i < 60 && !document.querySelector('main [data-gap]'); i++) { await new Promise((r) => setTimeout(r, 100)); R(); }
         document.querySelectorAll('main details').forEach((d) => { d.open = true; });

@@ -7,7 +7,7 @@ import { withFlowNest } from './lib/flownest.mjs';
 
 const LABEL = { en: { 7: 'last 7 days', 28: 'last 28 days', 90: 'last 90 days', all: 'all imported data' }, ar: { 7: 'آخر 7 أيام', 28: 'آخر 28 يوماً', 90: 'آخر 90 يوماً', all: 'كل البيانات المستوردة' } };
 
-test('every Director answer and the grounding line state the period on screen (7, 28, 90 days, all data), EN and AR', { timeout: 400_000 }, async () => {
+test('every Director answer states the period on screen (7, 28, 90 days, all data), EN and AR', { timeout: 400_000 }, async () => {
   await withFlowNest(async ({ page, errors }) => {
     for (const lang of ['en', 'ar']) {
       for (const range of ['7', '28', '90', 'all']) {
@@ -27,7 +27,7 @@ test('every Director answer and the grounding line state the period on screen (7
         assert.ok(r.per, `${lang} ${range}: a period on screen`);
         const span = `${r.per.from} → ${r.per.to}`;
         assert.ok(r.answer.includes(span) && r.answer.includes(LABEL[lang][range]), `${lang} ${range} answer: ${r.answer}`);
-        assert.ok(r.ground.includes(span) && r.ground.includes(LABEL[lang][range]), `${lang} ${range} grounding: ${r.ground}`);
+        // P7 checkpoint 2: the grounding line above the chat was removed by the owner; each answer still states its period
       }
     }
     assert.deepEqual(errors, []);

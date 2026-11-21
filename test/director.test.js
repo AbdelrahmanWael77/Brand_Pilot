@@ -120,7 +120,7 @@ test('only approved facts with evidence reach the context; pending, rejected and
   // Audit items keep their basis and evidence.
   const best = c.audit.items.find((i) => i.id === 'ch-best');
   assert.equal(best.basis, 'data');
-  assert.match(best.evidence[0].text, /^Search: 20 enquiries from 500 sessions/);
+  assert.match(best.evidence[0].text, /^Search: 20 enquiries from 500 visits/);
   assert.equal(c.audit.items.find((i) => i.id === 'no-gsc').basis, 'insufficient');
 
   assert.deepEqual(buildContext(db, companyId), c);
