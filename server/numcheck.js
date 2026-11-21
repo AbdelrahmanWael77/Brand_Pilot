@@ -84,7 +84,9 @@ export function extractNumbers(text) {
     const inlineList = !pct && !decimals && /(^|[.:;!?؟،])\s*$/.test(t.slice(Math.max(0, start - 3), start)) && t[end] === ')';
     // a day of a plan, not a figure: "Days 61-90", "At day 90", "اليوم 90", "الأيام 31-60" (a duration stated as data, "19 days", is still checked)
     const planDay = !pct && !decimals && /(\bdays?|اليوم|الأيام|يوم|أيام)\s*(\d+\s*[-–]\s*)?$/i.test(t.slice(Math.max(0, start - 16), start));
-    out.push({ raw, start, end: start + m[0].trimEnd().length, value, decimals, step: approxStep, pct, plain: listMarker || inlineList || planDay || year || small });
+    const timeAfter = TIME_AFTER.test(t.slice(end, end + 14));
+    const periodLen = !pct && !decimals && timeAfter && ([7, 14, 28, 30, 56, 60, 90, 180, 365].includes(value) || /(\blast|\bpast|\bprevious|\bover the|\bnext|آخر|خلال|الـ|أول)\s*$/i.test(t.slice(Math.max(0, start - 14), start)));
+    out.push({ raw, start, end: start + m[0].trimEnd().length, value, decimals, step: approxStep, pct, plain: listMarker || inlineList || planDay || periodLen || year || small });
   }
   return out;
 }
@@ -122,7 +124,7 @@ const METRICS = {
   spend: ['spend', 'spent', 'budget', 'إنفاق', 'الإنفاق', 'ميزانية'],
   posts: ['posts', 'post', 'منشور', 'منشورات', 'المنشورات'],
 };
-const PREV = /\b(previous|prior|before|earlier|last period|fell|rose|dropped|declined|grew|increased|decreased|went from|moved from|down from|up from|compared with|compared to|versus the|was|were)\b|from\s+\d[\d,.]*%?\s+to\s+\d|السابقة|السابق|الماضية|قبل|انخفض|ارتفع|تراجع|زاد|مقارنة|كان|كانت|من\s+\d[\d,.]*%?\s+إلى\s+\d/i;
+const PREV = /\b(previous|prior|before|earlier|last period|fell|rose|dropped|declined|grew|increased|decreased|went from|moved from|down from|up from|compared with|compared to|versus the)\b|from\s+\d[\d,.]*%?\s+to\s+\d|السابقة|السابق|الماضية|قبل|انخفض|ارتفع|تراجع|زاد|مقارنة|من\s+\d[\d,.]*%?\s+إلى\s+\d/i;
 const CLAUSE = /[;:()\[\]،؛\n]|,(?!\d{3})|\s(?:vs\.?|versus|against|compared with|while|whereas|but|مقابل|بينما|لكن)\s/gi;
 const SENTENCE = /[.!?؟\n](?!\d)/g;
 
@@ -178,7 +180,8 @@ function aboutAt(text, pos, subjects) {
   let to = clause.length;
   let end = rel;
   for (const m of clause.matchAll(/\d[\d,.]*\s?%?/g)) {
-    if (m.index + m[0].length <= rel) from = m.index + m[0].length;
+    // the word right after a number describes it ("6 posts", "6 منشورات"): it is not read for the next number
+    if (m.index + m[0].length <= rel) { from = m.index + m[0].length; const w = clause.slice(from, rel).match(/^\s*[^\s\d.,;:()]+/); if (w && from + w[0].length < rel) from += w[0].length; }
     else if (m.index <= rel) end = m.index + m[0].length;
     else { to = m.index; break; }
   }

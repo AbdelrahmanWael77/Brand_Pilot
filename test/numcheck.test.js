@@ -147,6 +147,20 @@ test('the shapes behind the false alarms of the held-out run (2026-11-21), and t
   assert.equal(proj.find((n) => n.raw === '3').source.id, 'pf-noout');
 });
 
+test('owner hand test (2026-11-21): a number after another period in the same sentence, and period lengths', () => {
+  assert.deepEqual(status('On Facebook, reach was 12,349 from 6 posts in the previous period and 19,981 from 10 posts in this one.'), ['12,349:verified', '6:verified', '19,981:verified', '10:verified']);
+  assert.deepEqual(status('على فيسبوك، كان الوصول 12,349 من 6 منشورات في الفترة السابقة و19,981 من 10 منشورات في هذه الفترة.'), ['12,349:verified', '6:verified', '19,981:verified', '10:verified']);
+  // the previous period's value given as this period's is still caught
+  assert.deepEqual(status('Facebook reach was 12,349 this period.'), ['12,349:other_period']);
+  assert.deepEqual(status('Facebook reached 12,349 people this period.'), ['12,349:other_period'], '"was" alone no longer marks the previous period');
+  assert.deepEqual(status('بلغ وصول فيسبوك 12,349 في هذه الفترة.'), ['12,349:other_period']);
+  // period lengths are not figures (not checked, not underlined); a duration stated as data still is
+  for (const t of ['Reach was 33,933 in the last 28 days.', 'بلغ الوصول 33,933 في آخر 28 يوماً.', 'Run it for 7 days, then for 90 days.', 'خلال 90 يوماً'])
+    assert.deepEqual(extractNumbers(t).filter((n) => !n.plain && /^(28|7|90)$/.test(n.raw)), [], t);
+  assert.deepEqual(status('Reach was 33,933 in the last 28 days.'), ['33,933:verified']);
+  assert.deepEqual(status('Posting stopped for 19 days.'), ['19:verified']);
+});
+
 test('the main claim decides: an unverified number in it blocks the answer, elsewhere it is only marked', () => {
   const text = 'The site-wide enquiry rate is 1.36%. Instagram could grow 250% with more posts.';
   const ok = checkAnswer(text, pool);

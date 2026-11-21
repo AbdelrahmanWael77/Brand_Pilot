@@ -548,6 +548,20 @@
         "audit:page-leak",
         "audit:ch-best"
       ]
+    },
+    {
+      "lang": "en",
+      "question": "how increase my Reach?",
+      "origin": "owner hand test 2026-11-21 (sentence from a real answer)",
+      "answer": "On Facebook, reach was 12,349 from 6 posts in the previous period and 19,981 from 10 posts in this one. Reach was 33,933 in the last 28 days.",
+      "support": []
+    },
+    {
+      "lang": "ar",
+      "question": "كيف أزيد الوصول؟",
+      "origin": "owner hand test 2026-11-21 (Arabic version of the same sentences)",
+      "answer": "على فيسبوك، كان الوصول 12,349 من 6 منشورات في الفترة السابقة و19,981 من 10 منشورات في هذه الفترة. بلغ الوصول 33,933 في آخر 28 يوماً.",
+      "support": []
     }
   ]
 }
