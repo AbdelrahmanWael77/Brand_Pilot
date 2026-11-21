@@ -1,0 +1,152 @@
+{
+  "Midnight Violet": [
+    {
+      "fg": "#16132B",
+      "bg": "#FFFFFF",
+      "ratio": 18.07,
+      "aa": true
+    },
+    {
+      "fg": "#56526E",
+      "bg": "#FFFFFF",
+      "ratio": 7.43,
+      "aa": true
+    },
+    {
+      "fg": "#6E6A86",
+      "bg": "#F6F5FB",
+      "ratio": 4.76,
+      "aa": true
+    },
+    {
+      "fg": "#FFFFFF",
+      "bg": "#6A4BFF",
+      "ratio": 5.17,
+      "aa": true
+    },
+    {
+      "fg": "#C9C3F2",
+      "bg": "#16132B",
+      "ratio": 10.82,
+      "aa": true
+    },
+    {
+      "fg": "#0B7349",
+      "bg": "#E8F7F1",
+      "ratio": 5.33,
+      "aa": true
+    },
+    {
+      "fg": "#B45309",
+      "bg": "#FFF6E6",
+      "ratio": 4.68,
+      "aa": true
+    },
+    {
+      "fg": "#5B3BF0",
+      "bg": "#EEEAFF",
+      "ratio": 5.36,
+      "aa": true
+    }
+  ],
+  "Night Signal": [
+    {
+      "fg": "#ECEEF3",
+      "bg": "#11141B",
+      "ratio": 15.87,
+      "aa": true
+    },
+    {
+      "fg": "#A7AEBE",
+      "bg": "#11141B",
+      "ratio": 8.28,
+      "aa": true
+    },
+    {
+      "fg": "#8790A3",
+      "bg": "#0A0C11",
+      "ratio": 6.1,
+      "aa": true
+    },
+    {
+      "fg": "#0A0C11",
+      "bg": "#4F8CFF",
+      "ratio": 6.08,
+      "aa": true
+    },
+    {
+      "fg": "#34D399",
+      "bg": "#11141B",
+      "ratio": 9.58,
+      "aa": true
+    },
+    {
+      "fg": "#FBBF24",
+      "bg": "#11141B",
+      "ratio": 11.04,
+      "aa": true
+    },
+    {
+      "fg": "#F87171",
+      "bg": "#11141B",
+      "ratio": 6.66,
+      "aa": true
+    },
+    {
+      "fg": "#22D3EE",
+      "bg": "#11141B",
+      "ratio": 10.2,
+      "aa": true
+    }
+  ],
+  "Sunroom": [
+    {
+      "fg": "#2A1F17",
+      "bg": "#FFFFFF",
+      "ratio": 16.07,
+      "aa": true
+    },
+    {
+      "fg": "#5E5045",
+      "bg": "#FFFFFF",
+      "ratio": 7.75,
+      "aa": true
+    },
+    {
+      "fg": "#776759",
+      "bg": "#FBF6EF",
+      "ratio": 5.05,
+      "aa": true
+    },
+    {
+      "fg": "#FFFFFF",
+      "bg": "#C2410C",
+      "ratio": 5.18,
+      "aa": true
+    },
+    {
+      "fg": "#9A3412",
+      "bg": "#FFEDE2",
+      "ratio": 6.42,
+      "aa": true
+    },
+    {
+      "fg": "#15803D",
+      "bg": "#EAF6EE",
+      "ratio": 4.52,
+      "aa": true
+    },
+    {
+      "fg": "#B45309",
+      "bg": "#FFF4E2",
+      "ratio": 4.61,
+      "aa": true
+    },
+    {
+      "fg": "#6D28D9",
+      "bg": "#FFFFFF",
+      "ratio": 7.1,
+      "aa": true
+    }
+  ]
+}
