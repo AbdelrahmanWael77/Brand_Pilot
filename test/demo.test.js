@@ -40,7 +40,7 @@ test('page: the FlowNest demo action renders and runs only when the server flag 
   // the command-menu entry is added only behind the flag
   assert.match(html, /demoOn\(\)\?\[\{t:L\('Create FlowNest demo company \(synthetic\)'/);
   // the action itself does nothing without the flag
-  assert.match(html, /async demoCo\(\)\{if\(!demoOn\(\)\)return;/);
+  assert.match(html, /async demoCo\(o\)\{if\(!demoOn\(\)\)return;/);
   // the flag is true only when the server says exactly true
   assert.match(html, /const demoOn=\(\)=>!!\(SRV\.cfg&&SRV\.cfg\.demo===true\)/);
 });
@@ -50,7 +50,8 @@ test('page: demo controls need a demo company AND the server flag (a leftover de
   assert.match(html, /const demoUI=c=>!!\(c&&c\.demo&&demoOn\(\)\);/);
   // the Demo guide, its open panel, the "load synthetic demo" button and the fixture loaders render only through demoUI
   assert.match(html, /function guideHTML\(c\)\{if\(!demoUI\(c\)\)return'';/);
-  assert.match(html, /S\.ui\.guide&&demoUI\(c\)\?'gopen'/);
+  // P7: the demo checklist is part of the one guide, and also renders only through demoUI
+  assert.ok(html.includes("${demoUI(c)?guideList(c):''}"));
   assert.match(html, /demoUI\(c\)&&!c\.sources\.length\?`<button class="btn" data-a="loadDemo">/);
   assert.match(html, /\$\{demoUI\(c\)\?`<div class="note"><b>\$\{L\('Demo fixtures'/);
   // the actions refuse to run outside demo mode, even if called directly

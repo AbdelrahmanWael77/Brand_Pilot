@@ -19,9 +19,9 @@ test('no request to Google Fonts on any screen, English and Arabic; both shipped
     const google = requests.filter((u) => /fonts\.(googleapis|gstatic)\.com/.test(u));
     assert.deepEqual(google, []);
     const fonts = requests.filter((u) => /\/vendor\/fonts\/.+\.woff2$/.test(u));
-    assert.ok(fonts.some((u) => /plus-jakarta-sans-latin-\d+-normal\.woff2$/.test(u)), 'the Latin font loads from the app');
-    assert.ok(fonts.some((u) => /ibm-plex-sans-arabic-arabic-\d+-normal\.woff2$/.test(u)), 'the Arabic font loads from the app');
-    assert.ok(await page.evaluate(() => document.fonts.check('16px "Plus Jakarta Sans"', 'Hello')), 'Plus Jakarta Sans is available');
+    assert.ok(fonts.some((u) => /geist-sans-latin-\d+-normal\.woff2$/.test(u)), 'the Latin font loads from the app');
+    assert.ok(fonts.some((u) => /readex-pro-arabic-\d+-normal\.woff2$/.test(u)), 'the Arabic font loads from the app');
+    assert.ok(await page.evaluate(() => document.fonts.check('16px "Geist"', 'Hello')), 'Geist is available');
     assert.deepEqual(errors, []);
   });
 });

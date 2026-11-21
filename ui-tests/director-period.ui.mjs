@@ -21,7 +21,7 @@ test('every Director answer and the grounding line state the period on screen (7
           A.askQ(l === 'ar' ? 'ما أكبر نقطة ضعف تسويقية لدينا؟' : 'What is our biggest marketing weakness?');
           for (let i = 0; i < 100 && !document.querySelector('main .dv-per'); i++) await new Promise((x) => setTimeout(x, 50));
           const lines = [...document.querySelectorAll('main .dv-per')];
-          return { per, answer: lines.length ? lines[lines.length - 1].innerText : '', ground: document.querySelector('main .dv-gr summary')?.innerText || '', view: S.ui.view };
+          return { per, answer: lines.length ? lines[lines.length - 1].textContent : '', ground: document.querySelector('main .dv-gr summary')?.innerText || '', view: S.ui.view };
         }, [lang, range]);
         assert.equal(r.view, 'director');
         assert.ok(r.per, `${lang} ${range}: a period on screen`);

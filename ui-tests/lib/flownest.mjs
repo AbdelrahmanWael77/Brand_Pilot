@@ -61,7 +61,9 @@ export async function withFlowNest(fn, { viewport = { width: 1366, height: 900 }
     await page.waitForFunction(() => typeof demoOn === 'function' && demoOn() === true, null, { timeout: 15000 });
 
     // 1. the app's own demo action
-    await page.evaluate(() => A.demoCo());
+    // P7: { raw: true } skips the ready-made demo setup (facts approved, conflict settled, a campaign): the baseline and the
+    // UI tests keep measuring the raw demo materials, built step by step below.
+    await page.evaluate(() => A.demoCo({ raw: true }));
     await page.waitForFunction(() => C() && C().demo === 'flownest' && C().imports.length >= 4, null, { timeout: 30000 });
     // 2–3. rules extraction, approve plain facts, publish the knowledge
     await page.evaluate(() => {

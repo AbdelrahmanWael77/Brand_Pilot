@@ -12,12 +12,12 @@ import { dataRows } from './data.js';
 const LABEL = { meta: ['social post', 'منشور تواصل'], ga4: ['website (GA4)', 'زيارات موقع (GA4)'], gsc: ['Search Console', 'Search Console'], leads: ['lead', 'عميل محتمل'] };
 
 const UNLOCKS = {
-  'no-ga4': ['Enquiry rate by channel, landing page and device, and the website steps in Next steps.', 'معدل الاستفسار حسب القناة وصفحة الهبوط والجهاز، وخطوات الموقع في «الخطوات التالية».'],
+  'no-ga4': ['Enquiry rate by channel, landing page and device, and the website steps in Next steps.', 'معدل الاستفسار حسب القناة وصفحة الدخول والجهاز، وخطوات الموقع في «الخطوات التالية».'],
   'no-meta': ['Engagement by theme, language and platform, your posting rhythm, and the content plan.', 'التفاعل حسب الموضوع واللغة والمنصة، وإيقاع النشر، وخطة المحتوى.'],
   'no-gsc': ['The search queries that already show your pages but get few clicks.', 'استعلامات البحث التي تُظهر صفحاتك لكنها تجلب نقرات قليلة.'],
   'no-leads': ['Lead quality by source and segment, and qualified leads per channel.', 'جودة العملاء حسب المصدر والشريحة، والعملاء المؤهلون لكل قناة.'],
   'ch-best': ['Which channel’s visitors enquire best, to put more effort there.', 'أي قناة يستفسر زوارها أكثر، لتضع جهداً أكبر فيها.'],
-  'page-leak': ['Which landing page loses enquiries.', 'أي صفحة هبوط تخسر الاستفسارات.'],
+  'page-leak': ['Which landing page loses enquiries.', 'أي صفحة دخول تخسر الاستفسارات.'],
   'mobile-gap': ['Whether mobile visitors enquire less than desktop visitors.', 'هل يستفسر زوار الجوال أقل من زوار سطح المكتب.'],
   'seo-q': ['Search queries worth a better page.', 'استعلامات بحث تستحق صفحة أفضل.'],
   'seg-best': ['Which segment brings the most qualified leads, and a campaign for it.', 'أي شريحة تجلب أكثر العملاء المؤهلين، وحملة لها.'],

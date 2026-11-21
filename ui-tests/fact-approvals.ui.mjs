@@ -61,7 +61,7 @@ test('fact approvals on screen: recorded approver and review date, legacy, expir
       await page.waitForTimeout(600);
       assert.equal(downloads, 0, `${lang}: no download while a linked fact is expired`);
       page.off('download', count);
-      assert.match(await page.evaluate(() => { A.go('dash'); return document.querySelector('main').innerText; }), t.needs, `${lang}: Home lists it under Needs you`);
+      assert.match(await page.evaluate(() => { A.go('audit'); return document.querySelector('main').textContent; }), t.needs, `${lang}: Next steps lists it under Needs you (P7: moved from Home)`);
       l1 = await line();
       assert.equal(l1.k, 'expired');
       assert.ok(l1.t.includes(t.due) && l1.t.includes('2020-01-01'), `${lang}: ${l1.t}`);

@@ -47,7 +47,7 @@ test('P3 checkpoint 2 on screen (EN, AR)', { timeout: 500_000 }, async () => {
     // ---- Latin paths in Arabic, everywhere ----
     await page.evaluate(async () => { if (S.lang !== 'ar') A.lang(); A.go('audit'); await new Promise((r) => setTimeout(r, 1500)); R(); document.querySelectorAll('main details').forEach((d) => { d.open = true; }); });
     let sl = await slashes(page);
-    await page.evaluate(async () => { S.ui.dth = null; await A.ask(null, null, 'كيف نحسّن صفحة الهبوط؟'); });
+    await page.evaluate(async () => { S.ui.dth = null; await A.ask(null, null, 'كيف نحسّن صفحة الحملة؟'); });
     sl = sl.concat(await slashes(page));
     const nsrc = await page.evaluate(() => { const b = [...document.querySelectorAll('#dv-last .nv.ok')].find((x) => /0\.42|1,676/.test(x.textContent)); if (b) b.click(); return !!b; });
     assert.ok(nsrc, 'a /pricing number to open');

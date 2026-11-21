@@ -74,9 +74,9 @@ export function rulesAnswer(db, companyId, { question, lang = 'en', range = '28'
     const x = find('theme-best');
     return R(L('Content plan focused on enquiries', 'خطة محتوى تركز على الاستفسارات'), `${x ? card(x) : L('No theme data yet, so the plan uses approved product facts only.', 'لا توجد بيانات مواضيع بعد، فالخطة تعتمد على حقائق المنتج المعتمدة فقط.')}\n\n${L('A campaign draft includes a two-week bilingual calendar with tracked links.', 'مسودة الحملة تتضمن تقويماً ثنائي اللغة لأسبوعين بروابط متتبَّعة.')}`, { used: x ? used(x) : [L('Approved knowledge', 'المعرفة المعتمدة')], actions: [{ l: L('Approve: create campaign with calendar', 'وافق: أنشئ حملة بتقويم'), a: 'recCamp', v: x ? x.id : '' }], support: sup(x) });
   }
-  if (/landing page|صفحة الهبوط/.test(t)) {
+  if (/landing page|dedicated page|صفحة الهبوط|صفحة هبوط|صفحة الحملة|صفحة الدخول|صفحة مخصصة|الصفحة المخصصة/.test(t)) {
     const x = find('page-leak') || find('mobile-gap') || find('no-track');
-    return x ? R(L('Landing page improvement', 'تحسين صفحة الهبوط'), card(x), { used: used(x), actions: acts(x), support: sup(x) }) : none;
+    return x ? R(L('Landing page improvement', 'تحسين صفحة الحملة'), card(x), { used: used(x), actions: acts(x), support: sup(x) }) : none;
   }
   if (/weak|ضعف/.test(t)) {
     const x = ranked.find((y) => y.kind === 'weak');
@@ -125,7 +125,7 @@ export function rulesAnswer(db, companyId, { question, lang = 'en', range = '28'
   }
   if (/week|أسبوع|اسبوع/.test(t)) {
     const p = ranked.filter((y) => y.kind !== 'strong').slice(0, 5);
-    return p.length ? R(L('This week’s plan', 'خطة هذا الأسبوع'), p.map((x, i) => `${i + 1}. ${x.title} — ${x.action}`).join('\n'), { used: [L('Audit priorities', 'أولويات التدقيق')], actions: p.slice(0, 3).map((x) => ({ l: L('Add task: ', 'أضف مهمة: ') + (x.title.length > 34 ? `${x.title.slice(0, 34)}…` : x.title), a: 'recTask', v: x.id })), support: sup(...p) }) : none;
+    return p.length ? R(L('This week’s plan', 'خطة هذا الأسبوع'), p.map((x, i) => `${i + 1}. ${x.title} — ${x.action}`).join('\n'), { used: [L('Audit priorities', 'أولويات التقييم')], actions: p.slice(0, 3).map((x) => ({ l: L('Add task: ', 'أضف مهمة: ') + (x.title.length > 34 ? `${x.title.slice(0, 34)}…` : x.title), a: 'recTask', v: x.id })), support: sup(...p) }) : none;
   }
   if (/qualified|attract|clients|مؤهل|عملاء/.test(t)) {
     const xs = ['seg-best', 'src-best', 'src-lowq', 'src-unknown', 'defs', 'no-leads'].map((id) => A.find((y) => y.id === id)).filter(Boolean);
@@ -158,7 +158,7 @@ export function rulesAnswer(db, companyId, { question, lang = 'en', range = '28'
     const o = ranked.find((y) => y.kind === 'opp');
     const s = ranked.find((y) => y.kind === 'strong');
     const lines = [[L('30 days', '30 يوماً'), w], [L('60 days', '60 يوماً'), o], [L('90 days', '90 يوماً'), s]].filter(([, x]) => x).map(([d, x]) => `**${d}:** ${x.action}`);
-    return lines.length ? R(L('30 / 60 / 90-day objectives', 'أهداف 30 / 60 / 90 يوماً'), lines.join('\n\n'), { used: [L('Audit priorities', 'أولويات التدقيق')], actions: [{ l: L('Open Growth & Leads', 'افتح النمو والعملاء'), a: 'go', v: 'growth' }], support: sup(w, o, s) }) : none;
+    return lines.length ? R(L('30 / 60 / 90-day objectives', 'أهداف 30 / 60 / 90 يوماً'), lines.join('\n\n'), { used: [L('Audit priorities', 'أولويات التقييم')], actions: [{ l: L('Open Growth & Leads', 'افتح النمو والعملاء'), a: 'go', v: 'growth' }], support: sup(w, o, s) }) : none;
   }
-  return R(L('That is outside what the rules engine can answer', 'هذا خارج ما يستطيع محرك القواعد الإجابة عنه'), L('Without an AI model, the Director answers from fixed rules over your approved knowledge and imported data, so it does not understand free-form questions. Try one of the suggested questions, ask an administrator to set up an AI model on the server, or export the context package to your own Claude and import its answer.', 'من دون نموذج ذكاء اصطناعي، يجيب المدير بقواعد ثابتة على معرفتك المعتمدة وبياناتك المستوردة، فلا يفهم الأسئلة الحرة. جرّب أحد الأسئلة المقترحة، أو اطلب من المسؤول إعداد نموذج على الخادم، أو صدّر حزمة السياق إلى Claude الخاص بك واستورد إجابته.'), { actions: [{ l: L('Copy context package for Claude', 'انسخ حزمة السياق لـ Claude'), a: 'copyPkg', v: question }], cls: 'unknown', insufficient: true });
+  return R(L('That is outside what the rules engine can answer', 'هذا خارج ما يستطيع نظام القواعد الإجابة عنه'), L('Without an AI model, the Director answers from fixed rules over your approved knowledge and imported data, so it does not understand free-form questions. Try one of the suggested questions, ask an administrator to set up an AI model on the server, or export the context package to your own Claude and import its answer.', 'من دون نموذج ذكاء اصطناعي، يجيب مدير التسويق بقواعد ثابتة على معرفتك المعتمدة وبياناتك المستوردة، فلا يفهم الأسئلة الحرة. جرّب أحد الأسئلة المقترحة، أو اطلب من المسؤول إعداد نموذج على الخادم، أو صدّر حزمة معلومات الشركة إلى Claude الخاص بك واستورد إجابته.'), { actions: [{ l: L('Copy context package for Claude', 'انسخ حزمة معلومات الشركة لـ Claude'), a: 'copyPkg', v: question }], cls: 'unknown', insufficient: true });
 }

@@ -6,8 +6,8 @@ import assert from 'node:assert/strict';
 import { withFlowNest } from './lib/flownest.mjs';
 
 const T = {
-  en: { h: 'Activity (audit trail)', note: 'Entries cannot be edited or deleted.', strat: 'Strategy approved:', rules: 'rules engine', recs: /recommendations recorded/ },
-  ar: { h: 'النشاط (سجل التدقيق)', note: 'لا يمكن تعديل السجلات أو حذفها.', strat: 'اعتُمدت الاستراتيجية:', rules: 'محرك القواعد', recs: /سُجّلت \d+ توصيات|سُجّلت توصية/ },
+  en: { h: 'Activity', note: 'Entries cannot be edited or deleted.', strat: 'Strategy approved:', rules: 'rules engine', recs: /recommendations recorded/ },
+  ar: { h: 'النشاط', note: 'لا يمكن تعديل السجلات أو حذفها.', strat: 'اعتُمدت الاستراتيجية:', rules: 'نظام القواعد', recs: /سُجّلت \d+ توصيات|سُجّلت توصية/ },
 };
 
 test('Settings → Activity comes from the server trail and shows recommendations, answers, fact and strategy decisions (EN, AR)', { timeout: 300_000 }, async () => {
@@ -58,12 +58,13 @@ test('Settings → Activity comes from the server trail and shows recommendation
       for (let i = 0; i < 50 && !document.querySelector('[data-trail-card] [data-trail=fact_decision]'); i++) await new Promise((r) => setTimeout(r, 100));
     }, fid);
     assert.ok(await page.evaluate(() => !!document.querySelector('main [data-trail-card] [data-trail=fact_decision]')), 'fact decision listed');
-    // owner 2026-11-20: Activity is in Settings only; Tasks → History and Home link to it; browser notes are not shown
+    // owner 2026-11-20: Activity is in Settings only; Tasks → History links to it; browser notes are not shown.
+    // P7 (owner 2026-11-21): Home shows one next step and no activity link (the link stays in My tasks).
     for (const lang of ['en', 'ar']) {
       const where = await page.evaluate(async (l) => {
         if (S.lang !== l) A.lang();
         const out = {};
-        for (const v of ['auto', 'dash']) {
+        for (const v of ['dash', 'auto']) {
           A.go(v);
           await new Promise((r) => setTimeout(r, 300));
           const link = document.querySelector('main [data-a=seeAct]');
@@ -78,7 +79,7 @@ test('Settings → Activity comes from the server trail and shows recommendation
       const label = lang === 'ar' ? 'اعرض النشاط في الإعدادات' : 'See activity in Settings';
       for (const v of ['auto', 'dash']) {
         assert.equal(where[v].card, false, `${lang} ${v}: no activity card outside Settings`);
-        assert.equal(where[v].link, label, `${lang} ${v}: link to Settings`);
+        assert.equal(where[v].link, v === 'dash' ? null : label, `${lang} ${v}: link to Settings`);
         assert.equal(where[v].notes, false);
       }
       assert.deepEqual(where.after, { view: 'trust', card: true });

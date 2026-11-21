@@ -110,7 +110,7 @@ test('Director answers: AI answers keep the model id and prompt version; rules-e
   assert.equal(rules.engine, 'rules');
   assert.equal(rules.promptVersion, RULES_VERSION);
   assert.equal(rules.detail.range, '7');
-  assert.match(rules.summary, /محرك القواعد/);
+  assert.match(rules.summary, /نظام القواعد/); // P7: plain Arabic for "rules engine"
   const local = await (await call('POST', `/api/companies/${co}/trail/answer`, alice, { question: 'q', engine: 'endpoint' })).json();
   assert.equal((await trailOf(co, alice, '?kind=answer')).find((x) => x.id === local.trailId).engine, 'local endpoint');
   assert.equal((await call('POST', `/api/companies/${co}/trail/answer`, alice, { question: '' })).status, 400);

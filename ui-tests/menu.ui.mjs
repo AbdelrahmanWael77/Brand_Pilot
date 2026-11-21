@@ -8,13 +8,13 @@ import { withFlowNest } from './lib/flownest.mjs';
 /** Section (sidebar item) → its tabs → the controls each tab must offer. */
 export const MENU_FEATURES = {
   dash: { label: 'Home', tabs: {
-    dash: ['.hk', '[data-c=range]', '.hn .ns-i', '.hk-f [data-v=analytics]', '.hk-f [data-v=growth]'], // KPIs, period, your next step, all numbers, leads
+    dash: ['.h7-st', '[data-c=range]', '.h7-next', '.h7-nums [data-v=analytics]', 'form[data-s=askNext]', '[data-a=askQ]'], // P7 Home: key numbers, period, your next step, all numbers, Ask box, suggested questions (Leads is the Home tab next to Results)
     analytics: ['[data-a=pl]', '[data-c=mt]'], // platform tabs, trend metric
     growth: ['[data-c=def]', 'form[data-s=expAdd]'], // lead definitions, experiments
   } },
   audit: { label: 'Next steps', tabs: {
     audit: ['.ns-list .ns-i', 'form[data-s=askNext]', '[data-a=auditTab]', 'details.ns-why', '[data-a=recTask]', '[data-a=recCamp]', '[data-a=recExp]', '[data-a=ex][data-v=audit]'],
-    director: ['form[data-s=ask]', '[data-a=dthNew]', '[data-a=copyPkg]', '[data-a=claudeIn]'], // Ask, conversations, advanced bridge
+    director: ['form[data-s=ask]', '[data-a=dthNew]'], // Ask, conversations (P7: "use another AI" copy/paste moved to Settings → Advanced)
     auto: ['[data-a=weekly]', '[data-c=autoT]'], // tasks, weekly review
   } },
   studio: { label: 'Campaigns', tabs: {
@@ -23,14 +23,14 @@ export const MENU_FEATURES = {
     qa: ['[data-a=approveAll]', '#cdl [data-a=ex][data-v=zip]', '#cdl [data-a=ex][data-v=strategy]', '#cdl [data-a=ex][data-v=calendar]', '#cdl [data-a=ex][data-v=campjson]', '#cdl [data-a=jCamp]'], // Brand QA, then the campaign downloads and publishing schedule (a campaign with assets exists in this test)
   } },
   reports: { label: 'Reports', tabs: {
-    reports: ['[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=repRange]', '[data-a=ex][data-v=exec]', '[data-a=ex][data-v=audit]', '[data-a=ex][data-v=knowledge]', '[data-a=ex][data-v=pkg]'],
+    reports: ['[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=repRange]', '[data-a=ex][data-v=exec]', '[data-a=ex][data-v=audit]', ],
   } },
   know: { label: 'Company', tabs: {
     onboard: ['[data-a=srcAdd]', '[data-a=discover]'],
     know: ['[data-a=kApprove]', '[data-a=kReject]', 'form[data-s=kAdd]'],
   } },
   integ: { label: 'Data', footer: true, tabs: { integ: ['[data-c=imp]', '[data-a=tpl]', '[data-a=connect]', '[data-a=clearData]'] } },
-  trust: { label: 'Settings', footer: true, tabs: { trust: ['[data-a=exportAll]', '[data-c=importAll]', '[data-a=delCo]', '[data-c=aiMode]', '[data-c=digits]'] } },
+  trust: { label: 'Settings', footer: true, tabs: { trust: ['[data-a=exportAll]', '[data-c=importAll]', '[data-a=delCo]', '[data-c=aiMode]', '[data-c=digits]', '#adv [data-a=ex][data-v=knowledge]', '#adv [data-a=ex][data-v=pkg]', '#adv .ih', '#adv .rsx', '#adv [data-a=copyPkg]', '#adv [data-a=claudeIn]'] } }, // P7: AI files, import history and the real/simulated table are in Settings → Advanced
 };
 
 test('every section and tab of the new menu opens by clicking, with its features', { timeout: 300_000 }, async () => {

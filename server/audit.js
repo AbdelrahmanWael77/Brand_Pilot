@@ -165,7 +165,7 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
             calc: [L(`${leak.name}: ${n(leak.enquiries)} enquiries ÷ ${n(leak.sessions)} sessions = ${pct(leak.rate, 2)}; site ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}`, `${leak.name}: ${n(leak.enquiries)} استفسار ÷ ${n(leak.sessions)} جلسة = ${pct(leak.rate, 2)}؛ الموقع ${n(E)} ÷ ${n(S)} = ${pct(rate, 2)}`), L(`Rule: 20%+ of sessions (${pct(leak.sessions / S, 0)}) and a rate below half the site rate (${pct(rate * T.leakBelowAverage, 2)})`, `القاعدة: 20٪ أو أكثر من الجلسات (${pct(leak.sessions / S, 0)}) ومعدل أقل من نصف معدل الموقع (${pct(rate * T.leakBelowAverage, 2)})`)],
             title: L(`${leak.name} brings many visits but few enquiries`, `${leak.name} تجلب زيارات كثيرة واستفسارات قليلة`),
             why: L('Attention is being won but not converted.', 'نكسب الانتباه ولا نحوّله إلى استفسارات.'),
-            action: L(`Send ${leak.name} traffic to a dedicated landing page with one CTA instead of general pages.`, `وجّه زيارات ${leak.name} إلى صفحة هبوط مخصصة بدعوة واحدة لاتخاذ إجراء بدلاً من الصفحات العامة.`),
+            action: L(`Send ${leak.name} visitors to one dedicated page with a single clear next step, instead of general pages.`, `وجّه زيارات ${leak.name} إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.`),
             evidence: [
               { metric: 'enquiry_rate', value: leak.rate, text: L(`${leak.name}: ${pct(leak.sessions / S, 0)} of sessions, enquiry rate ${pct(leak.rate, 2)} vs site ${pct(rate, 2)}`, `${leak.name}: ${pct(leak.sessions / S, 0)} من الجلسات، معدل الاستفسار ${pct(leak.rate, 2)} مقابل ${pct(rate, 2)} للموقع`) },
               { text: L('Hypothesis, not a measurement: posts send people to pages that do not match what the post promised.', 'فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور.') },
@@ -175,7 +175,7 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
       }
       const pages = breakdown(g, 'landing_page');
       if (!pages.length) {
-        insufficient('page-leak', 'ga4', L('Landing pages cannot be compared yet', 'لا يمكن مقارنة صفحات الهبوط بعد'), L('GA4 rows need a landing_page column.', 'صفوف GA4 تحتاج عمود landing_page.'));
+        insufficient('page-leak', 'ga4', L('Landing pages cannot be compared yet', 'لا يمكن مقارنة صفحات الدخول بعد'), L('GA4 rows need a landing_page column.', 'صفوف GA4 تحتاج عمود landing_page.'));
       } else {
         const page = pages.filter((x) => x.sessions / S >= T.pageMinShare && x.rate < rate * T.pageBelowAverage).sort((a, b) => b.sessions - a.sessions)[0];
         if (page) {
@@ -184,7 +184,7 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
             subject: page.name,
             q: { n: page.sessions, min: T.channelMinSessions, margin: 1 - page.rate / (rate * T.pageBelowAverage), unit: L('sessions', 'جلسة') },
             calc: [L(`${page.name}: ${n(page.enquiries)} ÷ ${n(page.sessions)} = ${pct(page.rate, 2)}; site ${pct(rate, 2)}; rule: 12%+ of sessions and below 60% of the site rate (${pct(rate * T.pageBelowAverage, 2)})`, `${page.name}: ${n(page.enquiries)} ÷ ${n(page.sessions)} = ${pct(page.rate, 2)}؛ الموقع ${pct(rate, 2)}؛ القاعدة: 12٪ أو أكثر من الجلسات وأقل من 60٪ من معدل الموقع (${pct(rate * T.pageBelowAverage, 2)})`)],
-            title: L(`Landing page ${page.name} under-converts`, `صفحة الهبوط ${page.name} أقل تحويلاً من المتوسط`),
+            title: L(`Landing page ${page.name} under-converts`, `صفحة الدخول ${page.name} أقل تحويلاً من المتوسط`),
             why: L('A high-traffic page converting below the site average is the cheapest place to gain enquiries: the visitors are already there.', 'صفحة عالية الزيارات بتحويل أقل من متوسط الموقع هي أرخص مكان لكسب استفسارات: الزوار موجودون بالفعل.'),
             action: L(`Review ${page.name}: put the primary CTA above the fold, shorten the form, state the offer in the first screen.`, `راجع ${page.name}: ضع الدعوة الرئيسية في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.`),
             evidence: [{ metric: 'enquiry_rate', value: page.rate, text: L(`${page.name}: ${n(page.sessions)} sessions (${pct(page.sessions / S, 0)}), enquiry rate ${pct(page.rate, 2)} vs site ${pct(rate, 2)}`, `${page.name}: ${n(page.sessions)} جلسة (${pct(page.sessions / S, 0)})، معدل الاستفسار ${pct(page.rate, 2)} مقابل ${pct(rate, 2)} للموقع`) }],
@@ -486,7 +486,7 @@ export function computeAudit(data, facts, { lang = 'en', prev = null, postedBefo
         title: L('Facebook and Instagram do different jobs', 'فيسبوك وإنستجرام يؤديان دورين مختلفين'),
         why: L('Treating both platforms the same wastes the strength of each.', 'معاملة المنصتين بالطريقة نفسها تهدر قوة كل منهما.'),
         action: clicks(fb) > clicks(ig)
-          ? L('Use Facebook for posts that link to the landing page; use Instagram for attention and DMs.', 'استخدم فيسبوك للمنشورات التي تقود إلى صفحة الهبوط، وإنستجرام لجذب الانتباه والرسائل.')
+          ? L('Use Facebook for posts that link to the landing page; use Instagram for attention and DMs.', 'استخدم فيسبوك للمنشورات التي تقود إلى صفحة الحملة، وإنستجرام لجذب الانتباه والرسائل.')
           : L('Use Instagram as the main traffic and enquiry driver; keep Facebook for reach among existing followers.', 'اجعل إنستجرام المحرك الأساسي للزيارات والاستفسارات، وفيسبوك للوصول إلى المتابعين الحاليين.'),
         evidence: [
           { metric: 'engagement_rate', value: engagement(fb), rows: fb.length, text: L(`Facebook: engagement ${pct(engagement(fb), 1)} of reach, link clicks ${pct(clicks(fb), 2)} (${n(fb.length)} posts)`, `فيسبوك: تفاعل ${pct(engagement(fb), 1)} من الوصول، نقرات ${pct(clicks(fb), 2)} (${n(fb.length)} منشور)`) },

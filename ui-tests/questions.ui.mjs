@@ -12,21 +12,21 @@ test('Q1 "How is my marketing doing?" and Q2 "What should I do next, and why?" i
       await page.waitForTimeout(400);
       assert.equal(await page.evaluate(() => document.documentElement.dir || 'ltr'), lang === 'ar' ? 'rtl' : 'ltr');
       if (lang === 'ar') {
-        // Arabic is set in IBM Plex Sans Arabic, shipped with the app
-        const font = await page.evaluate(async () => { await document.fonts.load('16px "IBM Plex Sans Arabic"', 'مرحبا'); await document.fonts.ready; return { loaded: document.fonts.check('16px "IBM Plex Sans Arabic"', 'مرحبا'), family: getComputedStyle(document.body).fontFamily }; });
-        assert.ok(font.loaded && /IBM Plex Sans Arabic/.test(font.family), JSON.stringify(font));
+        // Arabic is set in Readex Pro, shipped with the app (P7)
+        const font = await page.evaluate(async () => { await document.fonts.load('16px "Readex Pro"', 'مرحبا'); await document.fonts.ready; return { loaded: document.fonts.check('16px "Readex Pro"', 'مرحبا'), family: getComputedStyle(document.body).fontFamily }; });
+        assert.ok(font.loaded && /Readex Pro/.test(font.family), JSON.stringify(font));
       }
       let clicks = 0;
       const click = async (sel) => { clicks++; await page.click(sel); await page.waitForTimeout(500); };
 
-      // Q1: one click on Home → the KPI cards with this period's numbers
+      // Q1: one click on Home → the three key numbers of this period (P7; all numbers are one more click, on Results)
       await click('#gside .gs-nav [data-a=go][data-v=dash]');
       const q1 = await page.evaluate(async () => {
         const m = await (await fetch(`/api/companies/${C().id}/metrics?range=${S.ui.range || '28'}`)).json();
-        return { view: S.ui.view, kpis: document.querySelectorAll('main .hk').length, sessionsShown: document.querySelector('main').innerText.includes(fmt(m.kpis.sessions.value)) };
+        return { view: S.ui.view, kpis: document.querySelectorAll('main .h7-st').length, sessionsShown: document.querySelector('main').innerText.includes(fmt(m.kpis.sessions.value)) };
       });
       assert.deepEqual(q1, { view: 'dash', kpis: q1.kpis, sessionsShown: true }, `${lang} Q1`);
-      assert.ok(q1.kpis >= 4, `${lang} Q1: KPI cards`);
+      assert.ok(q1.kpis >= 3, `${lang} Q1: key numbers`);
       assert.ok(clicks <= 2, `${lang} Q1 clicks ${clicks}`);
 
       // Q2: back to Settings, then one click on Next steps → the ranked list; a second click on "Why?" → the evidence

@@ -1,0 +1,162 @@
+# BrandPilot screen plan (P7)
+
+One plan per screen, following [ux-rules.md](ux-rules.md). For each screen: purpose, actions, what is visible first,
+what is behind a click or moved to **Settings → Advanced**, and what is removed from view. Nothing is deleted from
+the product: "removed" means removed from that screen; where it went is stated.
+
+Checkpoint 1 builds Home, the shell (menu, header, one guide), the demo setup and the plain-language sweep.
+Checkpoint 2 applies the same plan to the other screens.
+
+---
+
+## 1. Home
+
+1. **Purpose:** see in one look how marketing is going and what to do next.
+2. **Main action:** the button on "Your next step" (e.g. "Create campaign"). **Secondary:** "All numbers", the Ask
+   box, "All next steps".
+3. **Visible first (1440×900):**
+   - Greeting by local time, with the user's name if known ("Good morning" / "صباح الخير").
+   - One sentence: how the period went, with the biggest problem on a coral tint.
+   - "Your next step": one card with a coral edge, a 2-line reason and one button.
+   - 3 numbers (sessions, enquiries, qualified leads) with their change, then "All numbers".
+   - A large Ask box with 3–4 suggested questions as pill buttons.
+   - The company goal, in the interface language.
+4. **Behind a click:** "See why" on the next step (evidence); "All numbers" opens Results; the period picker stays in
+   the header.
+5. **Removed from Home:** the gradient banner; "Health strong 0/7", "Needs you 0", "Priorities 3" counters; the
+   "Needs you" card (its items show in Next steps); the six-card KPI strip (moves to Results); the Marketing health
+   list (moves to Results); the date line; the "Synthetic demo data" chip (replaced by one thin banner per page).
+
+## 2. Next steps (Recommendations)
+
+1. **Purpose:** decide which improvements to make, in order.
+2. **Main:** the action button on the top recommendation. **Secondary:** "Add to my tasks", "See why", filters.
+3. **Visible first:** the top recommendation with a small coral marker, then about 5 more as rows (title, one line,
+   one button).
+4. **Behind a click:** evidence, data used, confidence and "not enough data" details ("See why"); the rest of the
+   list ("Show more"); filters.
+5. **Removed:** severity/category chips on every row (shown inside "See why"); repeated counts; "rules engine"
+   wording; the explanation paragraph under the title.
+
+## 3. Ask
+
+1. **Purpose:** ask a question about your marketing and get a short, checked answer.
+2. **Main:** "Ask". **Secondary:** suggested questions (pills), "Add to my tasks" on an answer.
+3. **Visible first:** the question box and suggested questions; then the conversation. An answer shows a one-line
+   headline, action items and caveats, and one small "✓ Numbers checked" mark.
+4. **Behind a click:** the number check details ("✓ Numbers checked" opens them); sources of each number; the period
+   and model line (moves into the details).
+5. **Removed:** the lines above the chat (model, mode, prompt version, context size); "Rules engine — not AI" and
+   other technical labels. The "Paste an answer from your own Claude" tool moves to Settings → Advanced.
+
+## 4. My tasks
+
+1. **Purpose:** track the improvements you accepted.
+2. **Main:** "Make this week's review" (or the next task's action). **Secondary:** mark done, open a task's plan.
+3. **Visible first:** this week's review (one card), then open tasks (about 5).
+4. **Behind a click:** a task's step-by-step plan; finished tasks; the track record.
+5. **Removed:** the paragraph under the title; the "History and setup checklist" block (the setup checklist goes into
+   the guide; the activity link stays in Settings).
+
+## 5. Campaigns list (Campaign Studio → Your content)
+
+1. **Purpose:** see your campaigns and open one.
+2. **Main:** "New campaign". **Secondary:** open, duplicate.
+3. **Visible first:** campaign rows (name, status in one word, last change), about 5.
+4. **Behind a click:** older campaigns ("Show more"); version history.
+5. **Removed:** the logo/brand-kit banner (moves to Company info → Brand); the explanation paragraphs; the "AI Content
+   Series" teaser (it has its own menu tab).
+
+## 6. Campaign flow (create a campaign)
+
+1. **Purpose:** turn a recommendation into a ready campaign, step by step.
+2. **Main:** "Continue" on each step, "Create the content" on the last. **Secondary:** "Back", edit a field.
+3. **Visible first:** a step bar (Brief → Strategy → Content → Check), the current step's fields, prefilled from
+   approved facts.
+4. **Behind a click:** where each prefilled value comes from (a small source link); advanced brief fields (fonts,
+   colours) under "More options".
+5. **Removed:** the template gallery from the first screen (it stays under "Single post"); duplicate explanations.
+
+## 7. Check & download
+
+1. **Purpose:** know whether a campaign is ready, fix what is not, and download it.
+2. **Main:** "Download" when ready, otherwise the first "Fix" button. **Secondary:** preview each asset.
+3. **Visible first:** one status line (green "Ready to download" / amber "2 things to fix"), the list of fixes with one
+   button each.
+4. **Behind a click:** the full check report per asset; version history.
+5. **Removed:** the check names in technical wording ("placeholders", "offer-numbers"), replaced by plain sentences.
+
+## 8. Content series
+
+1. **Purpose:** make recurring posts in one look.
+2. **Main:** "New series". **Secondary:** open a series, approve a post.
+3. **Visible first:** your series (cards), or an empty state with one line and the "New series" button.
+4. **Behind a click:** the 4-step creation form (opens after "New series"), the style details.
+5. **Removed:** the always-open creation form when series exist; the long explanation under the title.
+
+## 9. Reports
+
+1. **Purpose:** get a report to read or share.
+2. **Main:** "Download report". **Secondary:** period, preview, save a snapshot.
+3. **Visible first:** the period picker and the main buttons; saved reports (about 5).
+4. **Behind a click:** automatic reports (schedule); company reports to share.
+5. **Moved to Settings → Advanced:** "Company knowledge (JSON)" and "AI context package (JSON)" (AI files).
+   **Removed:** the explanation paragraphs.
+
+## 10. Company sources
+
+1. **Purpose:** see and add what BrandPilot learns your company from.
+2. **Main:** "Add a source". **Secondary:** "Read my sources", remove a source.
+3. **Visible first:** the sources list (name, type, "✓ Read" or "Not read yet").
+4. **Behind a click:** the text of a source; character counts and dates.
+5. **Removed:** "No AI model is set up…" note (Settings shows the AI status); the "Synthetic" chip on every row (one
+   banner per page instead).
+
+## 11. Company info (Company knowledge)
+
+1. **Purpose:** check and approve what BrandPilot knows about your company.
+2. **Main:** "Approve" on the facts waiting for you. **Secondary:** edit a fact, see its source.
+3. **Visible first:** "Waiting for you" (facts to decide, about 5), then the approved profile by topic (one line each).
+4. **Behind a click:** evidence and source of each fact; rejected facts; brand identity details.
+5. **Removed:** decision-tracking details and status counters from the first view (they stay under each fact's
+   details).
+
+## 12. Data
+
+1. **Purpose:** see which data is in and add more.
+2. **Main:** "Add data" (drop a file). **Secondary:** per source: import, template, remove.
+3. **Visible first:** one summary line ("5 of 6 sources added · last import …"), the source rows (one line each).
+4. **Behind a click:** each source's details ("Unlocks…", file names, date ranges); post tags.
+5. **Moved to Settings → Advanced:** import history and demo files. **Removed:** "Read-only by design…" paragraph
+   (shown once in Settings → Your data).
+
+## 13. Settings
+
+1. **Purpose:** change your company, language and account settings.
+2. **Main:** "Save" in each section. **Secondary:** export, delete.
+3. **Visible first:** Company name, Arabic number style, Your data (privacy, in 3 short lines), Back up or move,
+   Danger zone.
+4. **Behind a click — Advanced (account owner):** AI model choice; "What is real, simulated, or waiting for a
+   service"; AI files (company knowledge JSON, AI context package, paste an answer from your own Claude); import
+   history; Activity; "How answers are made".
+5. **Removed:** the technical title "Trust, privacy & AI settings" (now "Settings").
+
+---
+
+## Where things went (Checkpoint 1)
+
+| Item | Before | Now |
+|---|---|---|
+| Health strong / Needs you / Priorities counters | Home banner | removed from Home; the same information is in Next steps and Results |
+| "Needs you" card | Home | Next steps (its items are the recommendations and the facts waiting for you) |
+| Six KPI cards and Marketing health | Home | Results (Home → All numbers) |
+| AI model choice | Settings | Settings → Advanced |
+| "What is real, simulated, or waiting for a service" | Settings | Settings → Advanced |
+| Company knowledge JSON, AI context package | Reports | Settings → Advanced → AI files |
+| Import history and demo files | Data | Settings → Advanced |
+| Number-check details on answers | under every answer | behind "✓ Numbers checked" |
+| Demo guide and the step guide | two floating buttons | one guide, in the page flow |
+
+Settings → Advanced is shown to the account owner. BrandPilot has no user roles yet (every account owns its own
+companies), so today every signed-in owner sees it; a separate admin role needs a server change and is not part of
+P7.

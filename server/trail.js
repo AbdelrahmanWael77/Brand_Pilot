@@ -133,11 +133,11 @@ const titleIn = (t, lang) => (typeof t === 'string' ? t : (t && (t[lang] || t.en
 function view(r, lang) {
   const d = JSON.parse(r.detail);
   const L = (en, ar) => (lang === 'ar' ? ar : en);
-  const DEMO = (x) => (x.demo ? L('Demo history (synthetic data): ', 'سجل تجريبي (بيانات اصطناعية): ') : '');
+  const DEMO = (x) => (x.demo ? L('Demo history (synthetic data): ', 'سجل تجريبي (بيانات غير حقيقية): ') : '');
   const st = { approved: L('approved', 'اعتُمدت'), rejected: L('rejected', 'رُفضت'), pending: L('sent back to review', 'أعيدت إلى المراجعة'), demo_expired: L('put past its review date (demo)', 'جُعلت متجاوزة لتاريخ مراجعتها (تجربة)') };
   const summary = {
     recommendation: () => L(`Recommendation recorded: ${titleIn(d.title, 'en')}`, `سُجّلت توصية: ${titleIn(d.title, 'ar')}`),
-    answer: () => L(`AI Director answered (${r.engine === 'rules' ? 'rules engine' : r.engine}): ${r.subject}`, `أجاب مدير التسويق (${r.engine === 'rules' ? 'محرك القواعد' : r.engine}): ${r.subject}`),
+    answer: () => L(`AI Director answered (${r.engine === 'rules' ? 'rules engine' : r.engine}): ${r.subject}`, `أجاب مدير التسويق (${r.engine === 'rules' ? 'نظام القواعد' : r.engine}): ${r.subject}`),
     fact_decision: () => L(`Fact ${st[d.status] || d.status}: “${d.text}”${d.reviewBy ? ` (review by ${d.reviewBy})` : ''}`, `حقيقة — ${st[d.status] || d.status}: «${d.text}»${d.reviewBy ? ` (المراجعة قبل ${d.reviewBy})` : ''}`),
     tracking_started: () => L(`Approval tracking started; ${d.legacy} fact(s) approved before it`, `بدأ تسجيل الاعتمادات؛ ${d.legacy} حقيقة اعتُمدت قبله`),
     strategy_approval: () => L(`Strategy approved: ${d.name}`, `اعتُمدت الاستراتيجية: ${d.name}`),

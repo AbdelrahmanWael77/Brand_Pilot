@@ -94,7 +94,7 @@ export function buildContext(db, companyId, { range = '28' } = {}) {
 export const ARABIC_GLOSSARY = [
   'Arabic glossary: use exactly these words, the ones the screens of the app use, and no other variants:',
   'mobile = الجوال (never الموبايل); desktop = سطح المكتب (never الديسكتوب); brochure = الكتيّب (never البروشور); social media = التواصل الاجتماعي (never السوشيال); organic search = البحث العضوي; email = البريد الإلكتروني;',
-  'sessions = الجلسات; enquiries = الاستفسارات; enquiry rate = معدل الاستفسار; leads = العملاء المحتملون; qualified leads = العملاء المؤهلون; customers = العملاء; engagement = التفاعل; reach = الوصول; spend = الإنفاق; cost per lead = تكلفة العميل المحتمل; landing page = صفحة الهبوط; previous period = الفترة السابقة; demo or synthetic data = بيانات تجريبية;',
+  'sessions = الجلسات; enquiries = الاستفسارات; enquiry rate = معدل الاستفسار; leads = العملاء المحتملون; qualified leads = العملاء المؤهلون; customers = العملاء; engagement = التفاعل; reach = الوصول; spend = الإنفاق; cost per lead = تكلفة العميل المحتمل; landing page = صفحة الدخول (GA4) or صفحة الحملة (a campaign page), never صفحة الهبوط; dedicated page = صفحة واحدة مخصصة; previous period = الفترة السابقة; demo or synthetic data = بيانات تجريبية;',
   'to tell the owner to start = ابدأ (the imperative, never أبدأ).',
   'Never put an English word inside an Arabic sentence (no "demo", "CTA", "leads", "traffic"): use the Arabic word above. Only names taken from the context stay as they are written there: channel names (for example Organic Social), page paths (for example /pricing), search queries, product and company names.',
 ].join(' ');
@@ -245,7 +245,7 @@ export function isEmptyContext(context) {
  * → `{ answer, support: [{ type, id, text, synthetic }], insufficient, unsupported, synthetic, model, next, needs? }`
  */
 /** P5: changes whenever buildPrompt's instructions change; stored with every AI answer in the audit trail. */
-export const PROMPT_VERSION = 'director-2026-11-20c'; // P3: structured claims, every number checked; Arabic glossary
+export const PROMPT_VERSION = 'director-2026-11-21'; // P3: structured claims, every number checked; Arabic glossary (P7: plain Arabic for landing page)
 
 export async function ask(db, ai, companyId, { question, lang = 'en', range = '28', history = [] }) {
   const context = buildContext(db, companyId, { range });

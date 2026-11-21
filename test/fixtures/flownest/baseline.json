@@ -1,7 +1,7 @@
 {
  "about": "Recommendations BrandPilot produces for the synthetic FlowNest demo company (rules engine, no AI). Pre-P1 version: commit fc8a772. recs[range][lang] = what the screens list (since P1: the server audit) for all data and the last 28 days; server = GET /api/companies/:id/audit. Rebuild: node scripts/flownest-baseline.mjs --write",
- "recordedAt": "2026-11-20",
- "commit": "cf0c4c4",
+ "recordedAt": "2026-11-21",
+ "commit": "30a97fa",
  "counts": {
   "sources": 6,
   "findings": 51,
@@ -24,7 +24,7 @@
      ],
      "title": "Organic Social brings many visits but few enquiries",
      "why": "Attention is being won but not converted.",
-     "action": "Send Organic Social traffic to a dedicated landing page with one CTA instead of general pages.",
+     "action": "Send Organic Social visitors to one dedicated page with a single clear next step, instead of general pages.",
      "evidence": [
       {
        "metric": "enquiry_rate",
@@ -1252,7 +1252,7 @@
      ],
      "title": "Organic Social تجلب زيارات كثيرة واستفسارات قليلة",
      "why": "نكسب الانتباه ولا نحوّله إلى استفسارات.",
-     "action": "وجّه زيارات Organic Social إلى صفحة هبوط مخصصة بدعوة واحدة لاتخاذ إجراء بدلاً من الصفحات العامة.",
+     "action": "وجّه زيارات Organic Social إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.",
      "evidence": [
       {
        "metric": "enquiry_rate",
@@ -1271,7 +1271,7 @@
      "plat": "GA4",
      "obj": "استفسارات مؤهلة",
      "metric": "معدل استفسار جلسات Organic Social",
-     "need": "بيانات على مستوى صفحة الهبوط بعد التغيير",
+     "need": "بيانات لكل صفحة دخول بعد التغيير",
      "v": 3,
      "e": 2,
      "f": 2,
@@ -1279,9 +1279,9 @@
      "score": 9,
      "make": "campaign",
      "exp": {
-      "t": "صفحة هبوط مخصصة لـ Organic Social",
+      "t": "صفحة مخصصة لـ Organic Social",
       "h": "صفحة تطابق رسالة المنشور بدعوة واحدة تحوّل أفضل من صفحة الأسعار أو المدونة.",
-      "m": "الاستفسارات ÷ الجلسات في صفحة الهبوط",
+      "m": "الاستفسارات ÷ الجلسات في الصفحة المخصصة",
       "d": 21
      },
      "ev": [
@@ -1432,7 +1432,7 @@
      "calc": [
       "/pricing: 7 ÷ 1,676 = 0.42%؛ الموقع 1.36%؛ القاعدة: 12٪ أو أكثر من الجلسات وأقل من 60٪ من معدل الموقع (0.82%)"
      ],
-     "title": "صفحة الهبوط /pricing أقل تحويلاً من المتوسط",
+     "title": "صفحة الدخول /pricing أقل تحويلاً من المتوسط",
      "why": "صفحة عالية الزيارات بتحويل أقل من متوسط الموقع هي أرخص مكان لكسب استفسارات: الزوار موجودون بالفعل.",
      "action": "راجع /pricing: ضع الدعوة الرئيسية في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.",
      "evidence": [
@@ -1547,7 +1547,7 @@
      "synthetic": false,
      "id": "cta-mix",
      "kind": "weak",
-     "title": "هناك أكثر من دعوة لاتخاذ إجراء مستخدمة",
+     "title": "هناك أكثر من عبارة حثّ على التواصل مستخدمة",
      "why": "عندما تطلب المواد من الناس أشياء مختلفة، يقل من يستجيب ويصعب مقارنة النتائج بين القنوات.",
      "action": "اختر دعوة أساسية واحدة في معرفة الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.",
      "evidence": [
@@ -1947,7 +1947,7 @@
      "plat": "Search Console",
      "obj": "ظهور ملائم",
      "metric": "النقرات ومتوسط المركز لهذه العبارات",
-     "need": "الاستفسارات حسب صفحة الهبوط لتأكيد تحويل زوار البحث",
+     "need": "الاستفسارات حسب صفحة الدخول لتأكيد تحويل زوار البحث",
      "v": 2,
      "e": 3,
      "f": 2,
@@ -2055,7 +2055,7 @@
      ],
      "title": "فيسبوك وإنستجرام يؤديان دورين مختلفين",
      "why": "معاملة المنصتين بالطريقة نفسها تهدر قوة كل منهما.",
-     "action": "استخدم فيسبوك للمنشورات التي تقود إلى صفحة الهبوط، وإنستجرام لجذب الانتباه والرسائل.",
+     "action": "استخدم فيسبوك للمنشورات التي تقود إلى صفحة الحملة، وإنستجرام لجذب الانتباه والرسائل.",
      "evidence": [
       {
        "metric": "engagement_rate",
@@ -2482,7 +2482,7 @@
      ],
      "title": "Organic Social brings many visits but few enquiries",
      "why": "Attention is being won but not converted.",
-     "action": "Send Organic Social traffic to a dedicated landing page with one CTA instead of general pages.",
+     "action": "Send Organic Social visitors to one dedicated page with a single clear next step, instead of general pages.",
      "evidence": [
       {
        "metric": "enquiry_rate",
@@ -3855,7 +3855,7 @@
      ],
      "title": "Organic Social تجلب زيارات كثيرة واستفسارات قليلة",
      "why": "نكسب الانتباه ولا نحوّله إلى استفسارات.",
-     "action": "وجّه زيارات Organic Social إلى صفحة هبوط مخصصة بدعوة واحدة لاتخاذ إجراء بدلاً من الصفحات العامة.",
+     "action": "وجّه زيارات Organic Social إلى صفحة واحدة مخصصة فيها خطوة واحدة واضحة، بدلاً من الصفحات العامة.",
      "evidence": [
       {
        "metric": "enquiry_rate",
@@ -3874,7 +3874,7 @@
      "plat": "GA4",
      "obj": "استفسارات مؤهلة",
      "metric": "معدل استفسار جلسات Organic Social",
-     "need": "بيانات على مستوى صفحة الهبوط بعد التغيير",
+     "need": "بيانات لكل صفحة دخول بعد التغيير",
      "v": 3,
      "e": 3,
      "f": 2,
@@ -3882,9 +3882,9 @@
      "score": 10,
      "make": "campaign",
      "exp": {
-      "t": "صفحة هبوط مخصصة لـ Organic Social",
+      "t": "صفحة مخصصة لـ Organic Social",
       "h": "صفحة تطابق رسالة المنشور بدعوة واحدة تحوّل أفضل من صفحة الأسعار أو المدونة.",
-      "m": "الاستفسارات ÷ الجلسات في صفحة الهبوط",
+      "m": "الاستفسارات ÷ الجلسات في الصفحة المخصصة",
       "d": 21
      },
      "ev": [
@@ -4035,7 +4035,7 @@
      "calc": [
       "/pricing: 20 ÷ 4,965 = 0.40%؛ الموقع 1.32%؛ القاعدة: 12٪ أو أكثر من الجلسات وأقل من 60٪ من معدل الموقع (0.79%)"
      ],
-     "title": "صفحة الهبوط /pricing أقل تحويلاً من المتوسط",
+     "title": "صفحة الدخول /pricing أقل تحويلاً من المتوسط",
      "why": "صفحة عالية الزيارات بتحويل أقل من متوسط الموقع هي أرخص مكان لكسب استفسارات: الزوار موجودون بالفعل.",
      "action": "راجع /pricing: ضع الدعوة الرئيسية في أعلى الصفحة، اختصر النموذج، واذكر العرض في الشاشة الأولى.",
      "evidence": [
@@ -4150,7 +4150,7 @@
      "synthetic": false,
      "id": "cta-mix",
      "kind": "weak",
-     "title": "هناك أكثر من دعوة لاتخاذ إجراء مستخدمة",
+     "title": "هناك أكثر من عبارة حثّ على التواصل مستخدمة",
      "why": "عندما تطلب المواد من الناس أشياء مختلفة، يقل من يستجيب ويصعب مقارنة النتائج بين القنوات.",
      "action": "اختر دعوة أساسية واحدة في معرفة الشركة واستخدمها في كل مواد الحملة، واجعل الباقي روابط ثانوية.",
      "evidence": [
@@ -4485,7 +4485,7 @@
      ],
      "title": "فيسبوك وإنستجرام يؤديان دورين مختلفين",
      "why": "معاملة المنصتين بالطريقة نفسها تهدر قوة كل منهما.",
-     "action": "استخدم فيسبوك للمنشورات التي تقود إلى صفحة الهبوط، وإنستجرام لجذب الانتباه والرسائل.",
+     "action": "استخدم فيسبوك للمنشورات التي تقود إلى صفحة الحملة، وإنستجرام لجذب الانتباه والرسائل.",
      "evidence": [
       {
        "metric": "engagement_rate",
@@ -4761,7 +4761,7 @@
      "plat": "Search Console",
      "obj": "ظهور ملائم",
      "metric": "النقرات ومتوسط المركز لهذه العبارات",
-     "need": "الاستفسارات حسب صفحة الهبوط لتأكيد تحويل زوار البحث",
+     "need": "الاستفسارات حسب صفحة الدخول لتأكيد تحويل زوار البحث",
      "v": 2,
      "e": 3,
      "f": 2,
@@ -5236,7 +5236,7 @@
     ],
     "title": "Organic Social brings many visits but few enquiries",
     "why": "Attention is being won but not converted.",
-    "action": "Send Organic Social traffic to a dedicated landing page with one CTA instead of general pages.",
+    "action": "Send Organic Social visitors to one dedicated page with a single clear next step, instead of general pages.",
     "evidence": [
      {
       "metric": "enquiry_rate",
