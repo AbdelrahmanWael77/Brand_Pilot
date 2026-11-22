@@ -275,3 +275,17 @@ row's ⋯ (Template, Remove data, Connect) or gone from view (file names and row
 Import history); "Review post tags" when every post is tagged is no longer on Data (tagging opens from a row's ⋯ when
 posts need a theme). Company info → the ring and the confirmed / to-check counts are gone from view; version and history
 behind "History". Track record → the demo note is hidden (the label next to the score stays).
+
+## Last fixes (2026-11-22): Content series header, flagged lines on the series post, Data buttons
+
+| Screen | What changed | 5 s? | Distracting? | What else to remove |
+|---|---|---|---|---|
+| New content series | The dark banner, "AI CONTENT SERIES" and "PREVIEW" are gone; the light page header: "New content series", one line, "Create series" | Yes | No | — |
+| Series page | The dark series banner is gone; the light page header: the series name, its purpose, the badges as plain small text (style · channel · goal · posts), "Create a post" | Yes | Two blue buttons close together ("Create a post" in the header, "Write the post" in the topic box) | "Create a post" could go if the topic box is enough |
+| Series post review | Light card like campaign Review drafts; each flagged line on the post with "Fix" and "It's correct"; while something is flagged the main button is "Fix 1 thing first" / "Fix 2 things first" and goes to it | Yes | No | — |
+| Data | No big drop zone; every "Add a file" is outline; only a source that is "Not added yet" has the blue button | Yes | No | — |
+
+Where things went: the "I checked these" box for all flagged statements → one "It's correct" per line (a number taken
+out of the words counts as fixed). The drop zone's "several files at once" picker → the small link "Add several files
+at once" under the sources. The creation form's explanation lines (the banner text, the 4-step list, the brand-kit note
+under the preview) are hidden; the step bar says the same.

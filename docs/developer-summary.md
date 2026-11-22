@@ -1,4 +1,4 @@
-# BrandPilot: developer summary of the five branches (2026-11-21)
+# BrandPilot: developer summary of the six branches (2026-11-22)
 
 **PR:** https://github.com/AbdelrahmanWael77/Brand_Pilot/pull/2 (`improve-UIUX` → `dev`). The other four branches have no
 PR yet. Each branch is built on the one before; merge in this order:
@@ -10,7 +10,7 @@ PR yet. Each branch is built on the one before; merge in this order:
 5. `feat/p3-number-check`
 6. `feat/p7-simple` (the redesign; review with the owner's screenshots in docs/ui-audit/screenshots-p7*)
 
-Tests on the last branch (`feat/p3-number-check`): `npm test` 441/441, `npm run test:ui` 18/18 (needs Chrome; not part of
+Tests on the last branch (`feat/p7-simple`): `npm test` 442/442, `npm run test:ui` 19/19 (needs Chrome; not part of
 `npm test` — consider running it in CI). Handoff notes: `IMPLEMENTATION_STATUS.md`, `NEXT_AGENT_PROMPT.md`.
 
 ## Production database rule
@@ -85,8 +85,49 @@ Check carefully:
 
 ## 6. `feat/p7-simple`: the redesign (check carefully)
 
-- Page only, plus wording in server text: no route, schema or trust logic changed. One number-check change: "reached" / "وصلت" are read as reach (a real-run false alarm; tested).
-- Recommendation and AI wording changed (plain words, channels named in plain words by `server/plain.js`; the GA4 name stays in `subject` and the data). Prompt `director-2026-11-21b`. The FlowNest baseline was re-recorded twice, wording only.
-- The FlowNest demo is created ready by the page (`demoReady`, `demoCamp`): demo mode only.
-- **Settings → Advanced** (AI model, AI files, import history, the real/simulated table) is collapsed and visible to every signed-in account owner. There are no user roles: a real admin role needs a server change (owner: later).
-- Fonts: Geist and Readex Pro ship in public/vendor/fonts (OFL licence files added).
+Built on `feat/p3-number-check`; pushed, no PR yet. Goal: an extremely simple, premium product in English and Arabic.
+The rules the screens follow are in `docs/ux-rules.md`; every screen, with what moved where, is in `docs/screen-plan.md`.
+
+**Tests:** `npm test` 442/442, `npm run test:ui` 19/19. The UI tests need Chrome and include an AA contrast check of every
+screen in both languages. UI tests changed only where layout or navigation changed (menu, a11y, questions, consistency,
+track, director-period, fact-approvals, p3cp2, trail); one new test: `ui-tests/series-flags.ui.mjs`.
+
+What changed (page only unless noted):
+- **Look:** palette 1, cobalt & apricot (`html[data-pal]`, default `1`, sign-in page included), Geist and Readex Pro fonts
+  shipped in `public/vendor/fonts` (OFL licences added). Two other palettes stay in the code (`A.setPal`).
+- **Navigation:** a light sidebar with groups (`NAV7` in `public/index.html`): Home, Ask, Next steps, Content, Performance,
+  Company, then Data and Settings; a user card for company switch and sign out; a header language button. No tabs above pages.
+  Keyboard: arrow keys move and open groups (mirrored in Arabic).
+- **Screens:** new Home; Ask answers as numbered steps with "Add to my tasks"; My tasks (Active / Completed); a Track
+  record page; Results and Leads summaries (the old pages behind "More detail"); Campaigns list, a two-screen New
+  campaign, Review drafts grouped by draft with an EN / ع switch and "Approve and download"; Content series in 3 steps,
+  a series page and a post review with flagged lines and "Fix"; Company info, Sources, Data, Reports and Settings
+  simplified. Nothing was deleted: hidden or moved items are listed per round in `docs/screen-plan.md`.
+- **Demo:** the FlowNest demo company is created ready (`A.demoCo`, `demoReady`, `demoCamp`), demo mode only. Tests use
+  `A.demoCo({ raw: true })` for the old raw path.
+- **Server text only** (no route, schema or trust logic changed): plain channel names (`server/plain.js`), a short
+  next-step line (`step` in `server/auditMeta.js`), plain wording in audit, report, gaps and trail text; Director prompt
+  `director-2026-11-22` (possible reasons, no forecasts, Arabic glossary). The FlowNest baseline was re-recorded three
+  times, wording only, each with a diff document committed first (`docs/ui-audit/p7-*baseline-diff.md`).
+- **Number check:** two fixes for real-run false alarms, with tests: "reached" / "وصلت" are read as reach, and a number
+  in brackets that explains the previous clause is read with that clause. Real-AI run on the final prompt: 10 questions,
+  129 numbers, 0 flagged, 0 blocked, the key never found in any output.
+
+Check carefully:
+- **Approve and download** (campaign Review drafts) approves the drafts, records the strategy approval on the server and
+  then downloads the zip; nothing downloads if the server refuses the approval. Watch this path in staging.
+- **Series post approval** stays on the page (as before): flagged lines must be fixed or marked "It's correct" one by
+  one; a number taken out of the words counts as fixed. The old single "I checked these" box is replaced.
+- **Campaign names in two languages** are read from the recommendation's title in each language (`campNames`: two
+  `GET /audit` calls, English and Arabic, once per campaign made from a recommendation that has no names yet); a
+  campaign the user described keeps the words typed, in both languages.
+- **Settings → Advanced** (AI model, AI files, import history, the real / simulated table) is collapsed and visible to every
+  signed-in account owner. There are no user roles: a real admin role needs a server change (owner: later).
+- **Arabic:** mixed English and Arabic lines (series names, page paths like `/pricing`) rely on `<bdi>`; check the Arabic
+  screens on real data.
+- `public/index.html` is one large file patched in place; P7 code sits mostly in the last `<script>` block, wrapping older
+  views (`V.studio`, `V.integ`, `V.series` …) rather than rewriting them.
+
+Screenshots (before / after, English and Arabic): `docs/ui-audit/screenshots-p7` (checkpoint 1), `screenshots-p7-cp2`,
+`screenshots-p7-cp2b`, `screenshots-p7-cp2c` (finishing round) and `screenshots-p7-last` (last fixes); palettes in
+`docs/ui-audit/p7-palettes`. Scripts to retake them: `docs/ui-audit/scripts/p7-*.mjs`.

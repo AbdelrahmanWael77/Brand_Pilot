@@ -324,3 +324,22 @@
 .wz7-more>summary{cursor:pointer;font-weight:600;color:var(--brand-ink)}
 .sx-ws7{grid-template-columns:minmax(0,1fr)!important}.sx-set7{margin-top:16px}.sx-set7>summary{cursor:pointer;font-weight:600;color:var(--brand-ink);padding:8px 0}
 .sx-set7 .sx-side{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+
+/* P7 last fixes: the series page uses the light page header; badges as plain small text; flagged lines on the post */
+.sx-ph7 h1{margin:0}.sx-ph7 p{margin:4px 0 0}.sx-meta7{font-size:13.5px;color:var(--ink-3)}
+.sx-new{overflow:hidden}.sx-flags7{display:grid;gap:8px;margin:0 0 14px}.sx-flags7:empty{display:none}
+.sx-words .sx-flags7{margin:12px 0 0}
+/* P7 last fixes: post review on a light card, like campaign Review drafts (the dark stage stays only around each picture) */
+.sx-res{background:var(--surface);border:1px solid var(--rule);color:var(--ink)}
+.sx-res h2{color:var(--ink)}
+.sx-res .btn{background:var(--surface);border-color:var(--rule-2,var(--rule));color:var(--ink)}.sx-res .btn:hover{background:var(--paper)}
+.sx-res .btn.pri{background:var(--brand);color:#fff;border-color:var(--brand)}.sx-res .btn.pri:hover{background:var(--brand-ink)}
+.sx-res .btn.ghost{background:transparent;border-color:transparent;color:var(--brand-ink)}
+.sx-res .muted{color:var(--ink-3)}
+.sx-var{background:var(--paper);border-color:var(--rule)}.sx-var.on{border-color:var(--brand)}
+.sx-res .sx-seg{background:var(--surface);border-color:var(--rule);color:var(--ink-2)}.sx-res .sx-seg.on{background:var(--brand-tint);color:var(--brand-ink);border-color:var(--brand)}
+.sx-act{border-top-color:var(--rule)}
+.sx-res .rv7-pb .btn.ghost{color:var(--brand-ink)}
+.sx-res .sx-spin{border-color:var(--rule);border-top-color:var(--brand)}.sx-res .sx-wait{background:var(--paper-2,var(--paper))}
+.sx-res .sx-ref input{background:var(--surface);color:var(--ink);border-color:var(--rule)}
+.sx-new-pv>p.muted{display:none}
