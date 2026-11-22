@@ -289,3 +289,7 @@ Where things went: the "I checked these" box for all flagged statements → one 
 out of the words counts as fixed). The drop zone's "several files at once" picker → the small link "Add several files
 at once" under the sources. The creation form's explanation lines (the banner text, the 4-step list, the brand-kit note
 under the preview) are hidden; the step bar says the same.
+
+Owner follow-up (2026-11-22): the series page header has no button ("Create a post" removed; "Write the post" in the
+topic box is the main action). Series approvals and each "It's correct" are now recorded on the server and in the
+trail (Settings → Activity lists them).

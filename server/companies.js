@@ -352,6 +352,46 @@ export function createCompanies(
     res.status(201).json({ trailId: id });
   });
 
+  // P7 (owner 2026-11-22): series approvals are recorded like campaign approvals. A series lives in the company state;
+  // its name comes from the server's copy, or from the browser when the series has not reached the server yet.
+  const NUM = /\d+(?:[.,]\d+)*/g;
+  const seriesName = (req) => {
+    const sid = String(req.params.sid).slice(0, 200);
+    let known = null;
+    try { const row = q.getState.get(req.company.id); known = row ? (JSON.parse(row.data).series || []).find((x) => x && x.id === sid) : null; } catch { known = null; }
+    const name = typeof known?.name === 'string' && known.name ? known.name : typeof req.body?.name === 'string' ? req.body.name.trim().slice(0, 200) : '';
+    return { sid, name: name.slice(0, 200), mirrored: !!known };
+  };
+  const str = (x, n) => (typeof x === 'string' ? x.trim().slice(0, n) : '');
+  // A flagged line of a series post marked "It's correct" by a person: who, when, which line.
+  router.post('/:id/series/:sid/flag-ok', requireCompany, (req, res) => {
+    const { sid, name, mirrored } = seriesName(req);
+    const f = req.body?.flag;
+    const text = str(f?.text, 400), flagKind = f?.kind === 'number' ? 'number' : f?.kind === 'claim' ? 'claim' : '';
+    if (!name) return res.status(404).json({ error: 'not_found' });
+    if (!text || !flagKind) return res.status(400).json({ error: 'invalid_flag' });
+    const id = trail.append(req.company.id, { kind: 'claim_check', subject: sid, userId: req.user.id, dataHash: trail.fingerprint(req.company.id), detail: { series: name, topic: str(req.body?.topic, 300), lang: req.body?.lang === 'ar' ? 'ar' : 'en', flagKind, text, mirrored } });
+    res.status(201).json({ trailId: id });
+  });
+  // A series post approved. Every flagged line must be cleared: a number taken out of the words, or a line a person
+  // marked "It's correct" (a claim_check row of this series with the same text). Otherwise nothing is recorded (409).
+  router.post('/:id/series/:sid/approve', requireCompany, (req, res) => {
+    const { sid, name, mirrored } = seriesName(req);
+    if (!name) return res.status(404).json({ error: 'not_found' });
+    const p = req.body?.post || {};
+    const headline = str(p.headline, 300), caption = str(p.caption, 3000), words = str(p.words, 6000) || [headline, caption].join(' ');
+    const topic = str(req.body?.topic, 300);
+    if (!headline && !caption) return res.status(400).json({ error: 'invalid_post' });
+    const flags = (Array.isArray(req.body?.flags) ? req.body.flags : []).slice(0, 50).map((x) => ({ kind: x?.kind === 'number' ? 'number' : 'claim', text: str(x?.text, 400), state: x?.state }));
+    if (flags.some((x) => !x.text)) return res.status(400).json({ error: 'invalid_flag' });
+    const checked = new Map(db.prepare("SELECT id, detail FROM trail WHERE company_id = ? AND kind = 'claim_check' AND subject = ? ORDER BY rowid").all(req.company.id, sid).map((r) => [JSON.parse(r.detail).text, r.id]));
+    const nums = new Set(words.match(NUM) || []);
+    const open = flags.filter((x) => !(x.state === 'checked' && checked.has(x.text)) && !(x.state === 'fixed' && x.kind === 'number' && !nums.has(x.text)));
+    if (open.length) return res.status(409).json({ error: 'flags_open', flags: open.map((x) => x.text) });
+    const id = trail.append(req.company.id, { kind: 'series_approval', subject: sid, userId: req.user.id, dataHash: trail.fingerprint(req.company.id), detail: { series: name, topic, lang: req.body?.lang === 'ar' ? 'ar' : 'en', headline, caption, flags: flags.map((x) => ({ ...x, check: x.state === 'checked' ? checked.get(x.text) : null })), mirrored } });
+    res.status(201).json({ trailId: id });
+  });
+
   // P5: a person approves a campaign's strategy. Recorded in the trail with the facts the campaign uses. The browser
   // sends the name and fact ids too, because the campaign may reach the server's copy only with the next save.
   router.post('/:id/campaigns/:cid/approve-strategy', requireCompany, (req, res) => {

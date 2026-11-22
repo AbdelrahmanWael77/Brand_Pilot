@@ -550,7 +550,7 @@
     const st = fixStyle(styleOf(c, s)), d = draftOf(c, s), refs = refsOf(c, s.id), mine = creativesOf(c).filter((k) => k.sid === s.id).reverse();
     const lg = pickLogo(c, st.bg[0]);
     const head = `<div class="sx-top"><button class="linklike" data-a="sxHome">${S.lang === 'ar' ? '→' : '←'} ${L('All series', 'كل السلاسل')}</button><button class="btn sm ghost sx-del" data-a="sxDel" data-v="${esc(s.id)}">${ic('x', 14)}<span>${L('Delete series', 'احذف السلسلة')}</span></button></div>
-      <div class="ph sx-ph7"><div><h1><bdi>${esc(s.name)}</bdi></h1>${s.purpose ? `<p><bdi>${esc(s.purpose)}</bdi></p>` : ''}<p class="sx-meta7">${[s.style ? L('Style approved', 'الأسلوب معتمد') : s.styleProp ? L('Style waiting for your review', 'أسلوب بانتظار مراجعتك') : L('Style not set yet', 'لم يُحدَّد الأسلوب بعد'), CHN[s.channel] || 'LinkedIn', nxL(NXO[s.objective] || NXO.engagement), L(mine.length + ' posts', fmt(mine.length) + ' منشور')].join(' · ')}</p></div><div class="row"><button class="btn pri" data-a="sxNewPost7">${ic('plus', 16)}${L('Create a post', 'أنشئ منشوراً')}</button></div></div>`;
+      <div class="ph sx-ph7"><div><h1><bdi>${esc(s.name)}</bdi></h1>${s.purpose ? `<p><bdi>${esc(s.purpose)}</bdi></p>` : ''}<p class="sx-meta7">${[s.style ? L('Style approved', 'الأسلوب معتمد') : s.styleProp ? L('Style waiting for your review', 'أسلوب بانتظار مراجعتك') : L('Style not set yet', 'لم يُحدَّد الأسلوب بعد'), CHN[s.channel] || 'LinkedIn', nxL(NXO[s.objective] || NXO.engagement), L(mine.length + ' posts', fmt(mine.length) + ' منشور')].join(' · ')}</p></div></div>`;
     const warnLogo = !lg ? `<p class="note w">${L('No official logo in the brand kit — the post is made without one. BrandPilot never draws a logo. Add it under Your company → Brand.', 'لا شعار رسمي في هوية العلامة — يُصنع المنشور بدونه. لا يرسم BrandPilot شعاراً أبداً. أضفه من شركتك ← الهوية.')}</p>` : !lg.ok ? `<p class="note w">${L('Your logo versions are all meant for light backgrounds; it may be hard to read on this background. Add a light version in the brand kit.', 'نسخ شعارك مخصصة للخلفيات الفاتحة؛ قد يصعب رؤيته على هذه الخلفية. أضف نسخة فاتحة في الهوية.')}</p>` : '';
     const au = SX.autoU || (SX.autoU = {});
     if (!au[s.id] && !s.kind && !s.undProp && String(s.purpose || '').trim().length < 40 && subjectOf(c, s).length) { au[s.id] = 1; setTimeout(() => aiUnderstand(c, s, true), 0); }
@@ -656,20 +656,26 @@
   /* P7 (owner 2026-11-22): flagged statements on the post, each with one plain line and "Fix" (as in campaign Review
      drafts). A flag is done when its number is no longer in the words, or when the user marks it "It's correct". */
   function flagsOf(d) {
-    if (d.ack) return [];
     const ok = d.okF || [], txt = [d.copy.l1, d.copy.l2, d.copy.sub, ...(d.copy.pts || []), d.copy.caption, d.copy.cta, d.copy.foot].join(' '), nums = txt.match(/\d+(?:[.,]\d+)*/g) || [];
     return (d.warn || []).filter((n) => nums.includes(n)).map((n) => ({ k: 'n:' + n, n, t: L(`“${n}” is not in your approved company info.`, `«${n}» غير موجود في معلومات شركتك المعتمدة.`) }))
       .concat((d.claims || []).map((x, i) => ({ k: 'c:' + i, x, t: L('Check this claim: ', 'تحقّق من هذه العبارة: ') + x })))
       .filter((f) => !ok.includes(f.k));
   }
+  /* every flagged line with how it was cleared, as the server checks it on approval */
+  function flagsAll(d) {
+    const ok = d.okF || [], txt = [d.copy.l1, d.copy.l2, d.copy.sub, ...(d.copy.pts || []), d.copy.caption, d.copy.cta, d.copy.foot].join(' '), nums = txt.match(/\d+(?:[.,]\d+)*/g) || [];
+    return (d.warn || []).map((n) => ({ kind: 'number', text: n, state: ok.includes('n:' + n) ? 'checked' : nums.includes(n) ? 'open' : 'fixed' }))
+      .concat((d.claims || []).map((x, i) => ({ kind: 'claim', text: x, state: ok.includes('c:' + i) ? 'checked' : 'open' })));
+  }
+  const wordsOf = (d) => [d.copy.l1, d.copy.l2, d.copy.sub, ...(d.copy.pts || []), d.copy.caption, d.copy.cta, d.copy.foot].filter(Boolean).join('\n');
   function flagsHTML(d) {
     const F = flagsOf(d);
-    return `<div class="sx-flags7" data-flags7>${F.map((f) => `<p class="rv7-pb" role="note">${ic('alert', 15)}<span dir="auto">${esc(f.t)}</span><button class="btn sm" data-a="sxFix7" data-v="${esc(f.k)}">${L('Fix', 'أصلح')}</button><button class="btn sm ghost" data-a="sxOk7" data-v="${esc(f.k)}">${L("It's correct", 'صحيحة')}</button></p>`).join('')}</div>`;
+    return `<div class="sx-flags7" data-flags7>${F.map((f) => `<p class="rv7-pb" role="note">${ic('alert', 15)}<span dir="auto">${esc(f.t)}</span><button class="btn sm" data-a="sxFix7" data-v="${esc(f.k)}">${L('Fix', 'أصلح')}</button><button class="btn sm ghost" data-a="sxOk7" data-v="${esc(f.k)}" ${SX.busy['ok-' + f.k] ? 'disabled' : ''}>${L("It's correct", 'صحيحة')}</button></p>`).join('')}</div>`;
   }
   function apBtn(s, d, pick) {
     const F = flagsOf(d), n = F.length;
     return n ? `<button class="btn pri" data-sxap data-a="sxFix7" data-v="${esc(F[0].k)}">${ic('alert', 16)}${L(`Fix ${n} ${n === 1 ? 'thing' : 'things'} first`, n === 1 ? 'أصلح أمراً واحداً أولاً' : n === 2 ? 'أصلح أمرين أولاً' : `أصلح ${fmt(n)} أمور أولاً`)}</button>`
-      : `<button class="btn pri" data-sxap data-a="sxApDl" data-v="${esc(s.id)}" ${pick ? '' : 'disabled'}>${ic('check', 16)}${L('Approve and download', 'اعتمد ونزّل')}</button>`;
+      : `<button class="btn pri" data-sxap data-a="sxApDl" data-v="${esc(s.id)}" ${pick && !SX.busy['ap-' + s.id] ? '' : 'disabled'}>${ic('check', 16)}${SX.busy['ap-' + s.id] ? L('Recording the approval…', 'جارٍ تسجيل الاعتماد…') : L('Approve and download', 'اعتمد ونزّل')}</button>`;
   }
   function resultsHTML(c, s, d) {
     if (!d.vars.length) return '';
@@ -952,7 +958,6 @@
     sxKnowOpen() { const f = SX.form || (SX.form = {}); f.knowOpen = !f.knowOpen; R(); },
     sxKindOpen() { const f = SX.form || (SX.form = {}); f.kindOpen = !f.kindOpen; R(); },
     sxNewT() { S.ui.sxNew = !S.ui.sxNew; R(); },
-    sxNewPost7() { const t = document.getElementById('sxT'); if (t) { t.scrollIntoView({ block: 'center' }); t.focus(); } },
     /* Fix: go to the words and select the flagged text (the caption for a claim) */
     sxFix7(k) {
       const c = C(), s = curSeries(c); if (!s) return; const d = draftOf(c, s), f = flagsOf(d).find((x) => x.k === k) || flagsOf(d)[0]; if (!f) return;
@@ -960,11 +965,29 @@
       const want = f.n || f.x || '', el = els.find((e) => want && e.value.includes(want)) || (f.n && els.find((e) => new RegExp('(^|\\D)' + f.n.replace(/[.]/g, '\\.') + '(\\D|$)').test(e.value))) || cap;
       if (!el) return; el.scrollIntoView({ block: 'center' }); el.focus(); const i = want ? el.value.indexOf(want) : -1; if (i >= 0) el.setSelectionRange(i, i + want.length);
     },
-    sxOk7(k) { const c = C(), s = curSeries(c); if (!s) return; const d = draftOf(c, s); d.okF = (d.okF || []).concat(k); save(); R(); },
+    async sxOk7(k) {
+      const c = C(), s = curSeries(c); if (!s) return; const d = draftOf(c, s), f = flagsOf(d).find((x) => x.k === k); if (!f) return;
+      const key = 'ok-' + k; if (SX.busy[key]) return; SX.busy[key] = 1; R();
+      try {
+        const r = await api('POST', '/api/companies/' + c.id + '/series/' + encodeURIComponent(s.id) + '/flag-ok', { name: s.name, topic: d.topic, lang: d.lang, flag: { kind: f.n ? 'number' : 'claim', text: f.n || f.x } });
+        d.okF = (d.okF || []).concat(k); (d.okT || (d.okT = {}))[k] = r.trailId; save();
+      } catch (e) { toast(L('Could not record that. Try again.', 'تعذّر تسجيل ذلك. حاول مجدداً.'), 'err'); }
+      delete SX.busy[key]; R();
+    },
     sxWiz(v) { const w = S.ui.sxWiz; if (!w) return; if (v === 'skip' || v === '3') w.step = 3; else w.step = +v || 2; R(); scrollTo(0, 0); },
     sxWizOk(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; if (!s.styleProp) s.styleProp = { style: JSON.parse(JSON.stringify(fixStyle(styleOf(c, s)))), read: 'kit', model: '', seen: 0, notes: [], refs: [], at: Date.now() }; S.ui.sxWiz = null; A.sxStOk(sid); scrollTo(0, 0); },
     /* the chosen post: download it, then save it to the series as approved (nothing is published) */
-    sxApDl(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftOf(c, s), v = d.vars.find((x) => x.id === d.pick && x.status === 'ready'); if (!v) return toast(L('Choose an option first.', 'اختر خياراً أولاً.'), 'err'); A.sxDl(v.id); A.sxSave(sid, { dataset: { k: 'approve', v: sid } }); },
+    async sxApDl(sid) {
+      const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftOf(c, s), v = d.vars.find((x) => x.id === d.pick && x.status === 'ready'); if (!v) return toast(L('Choose an option first.', 'اختر خياراً أولاً.'), 'err');
+      if (flagsOf(d).length) return A.sxFix7(flagsOf(d)[0].k);
+      const key = 'ap-' + sid; if (SX.busy[key]) return; SX.busy[key] = 1; R();
+      let r = null;
+      try { r = await api('POST', '/api/companies/' + c.id + '/series/' + encodeURIComponent(sid) + '/approve', { name: s.name, topic: d.topic, lang: d.lang, post: { headline: [d.copy.l1, d.copy.l2].filter(Boolean).join(' '), caption: d.copy.caption, words: wordsOf(d) }, flags: flagsAll(d).map(({ kind, text, state }) => ({ kind, text, state })) }); }
+      catch (e) { r = null; toast(e.code === 'flags_open' ? L('A flagged line is not cleared yet. Nothing was downloaded.', 'عبارة مُعلَّمة لم تُعالَج بعد. لم يُنزَّل شيء.') : L('The approval could not be recorded. Nothing was downloaded. Try again.', 'تعذّر تسجيل الاعتماد. لم يُنزَّل شيء. حاول مجدداً.'), 'err'); }
+      delete SX.busy[key];
+      if (!r || !r.trailId) return R();
+      A.sxDl(v.id); A.sxSave(sid, { dataset: { k: 'approve', v: sid }, trailId: r.trailId });
+    },
     // P7: a kind picked on the empty page opens the form with that kind chosen
     sxType7(v) { const f = SX.form || (SX.form = { name: '', purpose: '', channel: 'linkedin', objective: 'engagement', kind: '', audience: '', sources: [] }); const T = TYPES().find((t) => t[0] === v); if (T) { f.type = v; f.kind = T[3]; f.kindOff = false; f.srcMode = T[4]; f.sources = []; if (T[6] && (!String(f.purpose || '').trim() || f.purposeAuto)) { f.purpose = T[6].replace('{topic}', L('this topic', 'هذا الموضوع')); f.purposeAuto = true; } } S.ui.sxNew = true; R(); },
     sxSug(v, el) {
@@ -1074,9 +1097,10 @@
       const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return;
       const d = draftOf(c, s), v = d.vars.find((x) => x.id === d.pick && x.status === 'ready'); if (!v) return;
       const ok = el && el.dataset.k === 'approve';
+      if (ok && !(el && el.trailId)) return toast(L('Approve with “Approve and download”: the approval is recorded on the server first.', 'اعتمد عبر «اعتمد ونزّل»: يُسجَّل الاعتماد على الخادم أولاً.'), 'err');
       if (ok && flagsOf(d).length) return toast(L('Check the flagged statements first.', 'تحقق من العبارات المُعلَّمة أولاً.'), 'err');
       const k = { id: uid('cr'), sid: s.id, topic: d.topic, lang: d.lang, fmt: d.fmt, aspect: aspectOf(c, s, d), layout: v.layout, made: v.made || 'stack', copy: JSON.parse(JSON.stringify(d.copy)), concept: d.concept, ill: v.ill, model: v.model || '', st: fixStyle(styleOf(c, s)), styleRead: (s.style && s.style.read) || 'kit', rec: d.rec || null, status: ok ? 'approved' : 'saved', at: Date.now(), date: today(), part: partFor(c, s, d) || undefined };
-      if (ok) { k.approvedBy = (typeof USER !== 'undefined' && USER && USER.email) || ''; k.approvedAt = today(); }
+      if (ok) { k.approvedBy = (typeof USER !== 'undefined' && USER && USER.email) || ''; k.approvedAt = today(); k.trailId = el.trailId; }
       creativesOf(c).push(k);
       delete draftsOf(c)[s.id]; d.vars.forEach((x) => { if (x.ill !== k.ill) dropMedia(c, x.ill); });
       log(c, 'campaign', `Series post “${d.topic}” ${ok ? 'approved' : 'saved'} in ${s.name}`, `منشور السلسلة «${d.topic}» ${ok ? 'اعتُمد' : 'حُفظ'} في ${s.name}`);

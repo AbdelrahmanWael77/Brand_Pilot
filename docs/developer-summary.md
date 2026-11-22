@@ -10,7 +10,7 @@ PR yet. Each branch is built on the one before; merge in this order:
 5. `feat/p3-number-check`
 6. `feat/p7-simple` (the redesign; review with the owner's screenshots in docs/ui-audit/screenshots-p7*)
 
-Tests on the last branch (`feat/p7-simple`): `npm test` 442/442, `npm run test:ui` 19/19 (needs Chrome; not part of
+Tests on the last branch (`feat/p7-simple`): `npm test` 445/445, `npm run test:ui` 19/19 (needs Chrome; not part of
 `npm test` — consider running it in CI). Handoff notes: `IMPLEMENTATION_STATUS.md`, `NEXT_AGENT_PROMPT.md`.
 
 ## Production database rule
@@ -88,9 +88,9 @@ Check carefully:
 Built on `feat/p3-number-check`; pushed, no PR yet. Goal: an extremely simple, premium product in English and Arabic.
 The rules the screens follow are in `docs/ux-rules.md`; every screen, with what moved where, is in `docs/screen-plan.md`.
 
-**Tests:** `npm test` 442/442, `npm run test:ui` 19/19. The UI tests need Chrome and include an AA contrast check of every
+**Tests:** `npm test` 445/445, `npm run test:ui` 19/19. The UI tests need Chrome and include an AA contrast check of every
 screen in both languages. UI tests changed only where layout or navigation changed (menu, a11y, questions, consistency,
-track, director-period, fact-approvals, p3cp2, trail); one new test: `ui-tests/series-flags.ui.mjs`.
+track, director-period, fact-approvals, p3cp2, trail); new tests: `ui-tests/series-flags.ui.mjs` and `test/series-approval.test.js`.
 
 What changed (page only unless noted):
 - **Look:** palette 1, cobalt & apricot (`html[data-pal]`, default `1`, sign-in page included), Geist and Readex Pro fonts
@@ -105,7 +105,16 @@ What changed (page only unless noted):
   simplified. Nothing was deleted: hidden or moved items are listed per round in `docs/screen-plan.md`.
 - **Demo:** the FlowNest demo company is created ready (`A.demoCo`, `demoReady`, `demoCamp`), demo mode only. Tests use
   `A.demoCo({ raw: true })` for the old raw path.
-- **Server text only** (no route, schema or trust logic changed): plain channel names (`server/plain.js`), a short
+- **Series approvals on the server (new, owner 2026-11-22):** two routes and two trail kinds, no schema change.
+  `POST /api/companies/:id/series/:sid/flag-ok` records a flagged line a person marked "It's correct" (trail kind
+  `claim_check`: who, when, the series, the topic, the line). `POST /api/companies/:id/series/:sid/approve` records an
+  approved series post (trail kind `series_approval`: the series, the topic, the headline, the caption, and how each
+  flagged line was cleared, with the `claim_check` id). The server refuses the approval (409 `flags_open`, nothing
+  recorded) unless every flagged line is either a number no longer in the words or a line with a `claim_check` row in
+  the same series. "Approve and download" downloads only after the server answers 201; the approved post keeps the
+  trail id. A series name comes from the server's copy of the company state, or from the browser if the series has not
+  been saved yet (`mirrored` in the detail says which).
+- **Server text only** (apart from the series approvals above, no route, schema or trust logic changed): plain channel names (`server/plain.js`), a short
   next-step line (`step` in `server/auditMeta.js`), plain wording in audit, report, gaps and trail text; Director prompt
   `director-2026-11-22` (possible reasons, no forecasts, Arabic glossary). The FlowNest baseline was re-recorded three
   times, wording only, each with a diff document committed first (`docs/ui-audit/p7-*baseline-diff.md`).
@@ -116,8 +125,10 @@ What changed (page only unless noted):
 Check carefully:
 - **Approve and download** (campaign Review drafts) approves the drafts, records the strategy approval on the server and
   then downloads the zip; nothing downloads if the server refuses the approval. Watch this path in staging.
-- **Series post approval** stays on the page (as before): flagged lines must be fixed or marked "It's correct" one by
-  one; a number taken out of the words counts as fixed. The old single "I checked these" box is replaced.
+- **Series post approval** is now recorded on the server (see above). Which lines are flagged still comes from the
+  draft the browser keeps (the server's draft check at writing time); the server checks how each was cleared, not
+  that the list is complete. Older approved series posts have no trail row. The old single "I checked these" box is
+  replaced by one "It's correct" per line.
 - **Campaign names in two languages** are read from the recommendation's title in each language (`campNames`: two
   `GET /audit` calls, English and Arabic, once per campaign made from a recommendation that has no names yet); a
   campaign the user described keeps the words typed, in both languages.

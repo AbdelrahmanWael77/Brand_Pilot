@@ -12,6 +12,8 @@
  *   step_tracked       P6: a recommendation became a campaign or task; its plan (metric, baseline, direction, target, window)
  *   evaluation         P6: that step's window is covered by data; the result and the outcome
  *   number_check       P3: the number check of a pasted answer, or its demo (counts and outcome, not the text)
+ *   claim_check        P7: a person marked a flagged line of a series post "It's correct" (the line, the series, the topic)
+ *   series_approval    P7: a person approved a series post (its words, and how each flagged line was cleared)
  *
  * Every row keeps: when, who (user id and the e-mail at that moment), engine, prompt or rules version, and the data
  * fingerprint (data_mirror hash + the approved facts) the row rests on.
@@ -23,7 +25,7 @@
 import crypto from 'node:crypto';
 
 export const RULES_VERSION = 'rules-2026-11-20';
-export const TRAIL_KINDS = ['recommendation', 'answer', 'fact_decision', 'tracking_started', 'strategy_approval', 'report', 'step_tracked', 'evaluation', 'number_check'];
+export const TRAIL_KINDS = ['recommendation', 'answer', 'fact_decision', 'tracking_started', 'strategy_approval', 'report', 'step_tracked', 'evaluation', 'number_check', 'claim_check', 'series_approval'];
 
 export const TRAIL_SCHEMA = `
 CREATE TABLE IF NOT EXISTS trail (
@@ -144,6 +146,8 @@ function view(r, lang) {
     step_tracked: () => DEMO(d) + L(`Step tracked (${d.stepKind === 'campaign' ? 'campaign' : 'task'}): ${titleIn(d.title, 'en')}`, `بدأت متابعة خطوة (${d.stepKind === 'campaign' ? 'حملة' : 'مهمة'}): ${titleIn(d.title, 'ar')}`),
     evaluation: () => DEMO(d) + L(`Step evaluated — ${OUT.en[d.outcome] || d.outcome}: ${titleIn(d.title, 'en')}`, `قُيّمت خطوة — ${OUT.ar[d.outcome] || d.outcome}: ${titleIn(d.title, 'ar')}`),
     number_check: () => DEMO(d) + (d.source === 'demo' ? L(`Number check test: ${d.verified} verified, ${(d.unverified || 0) + (d.mismatch || 0) + (d.other_period || 0)} caught${d.blocked ? ', answer blocked' : ''}`, `اختبار فحص الأرقام: ${d.verified} مُتحقَّق منها، ${(d.unverified || 0) + (d.mismatch || 0) + (d.other_period || 0)} مكتشفة${d.blocked ? '، والإجابة محجوبة' : ''}`) : L(`Pasted answer checked: ${d.verified} numbers verified, ${(d.unverified || 0) + (d.mismatch || 0) + (d.other_period || 0)} unverified${d.blocked ? ', main claim blocked' : ''}`, `فُحصت إجابة ملصقة: ${d.verified} أرقام مُتحقَّق منها، ${(d.unverified || 0) + (d.mismatch || 0) + (d.other_period || 0)} غير مُتحقَّق منها${d.blocked ? '، والادعاء الرئيسي محجوب' : ''}`)),
+    claim_check: () => L(`Flagged ${d.flagKind === 'number' ? 'number' : 'statement'} confirmed as correct (${d.series}): “${d.text}”`, `أُكّدت صحة ${d.flagKind === 'number' ? 'رقم مُعلَّم' : 'عبارة مُعلَّمة'} (${d.series}): «${d.text}»`),
+    series_approval: () => L(`Series post approved (${d.series}): ${d.topic}`, `اعتُمد منشور في السلسلة (${d.series}): ${d.topic}`),
     report: () => L(`Report saved (${d.range === 'all' ? 'all data' : `last ${d.range} days`}, ${d.lang === 'ar' ? 'Arabic' : 'English'})`, `حُفظ تقرير (${d.range === 'all' ? 'كل البيانات' : `آخر ${d.range} يوماً`}، ${d.lang === 'ar' ? 'العربية' : 'الإنجليزية'})`),
   }[r.kind];
   return { id: r.id, at: r.at, kind: r.kind, subject: r.subject, by: r.user_email, engine: r.engine, promptVersion: r.prompt_version, dataHash: r.data_hash, batch: r.batch, detail: d, summary: summary ? summary() : r.kind };
