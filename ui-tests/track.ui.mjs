@@ -12,7 +12,7 @@ const T = {
   ar: { h: 'سجل النتائج', demo: 'سجل تجريبي (بيانات غير حقيقية)', note: /أنشأ العرض التجريبي لـFlowNest 5 خطوات سابقة على بياناته التجريبية/, wait: /بانتظار البيانات حتى/, lim: 'تقول النتيجة ما حدث بعد الخطوة، لا أن الخطوة هي السبب.', score: (m) => new RegExp(`${m} من 5 خطوات مُقيَّمة حرّكت رقمها في الاتجاه المتوقع \\(\\d+%\\) — سجل تجريبي \\(بيانات غير حقيقية\\)\\.`) },
 };
 const card = (page) => page.evaluate(async () => {
-  A.go('audit');
+  A.go('track'); // P7: the track record has its own page under Next steps
   for (let i = 0; i < 60; i++) { await new Promise((r) => setTimeout(r, 100)); if (TREC[C().id]?.r && !TREC[C().id].busy) break; }
   R();
   const el = document.querySelector('main [data-track-card]');

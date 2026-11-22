@@ -5,37 +5,38 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { withFlowNest } from './lib/flownest.mjs';
 
-/** Section (sidebar item) → its tabs → the controls each tab must offer. */
+/** P7 (owner 2026-11-22): the sidebar's rows → their pages → the controls each page must offer. A row is a page
+ *  (top) or a group (group: its key), whose pages are its sub-items. Check & download is reached from the campaign's
+ *  step bar, not from the menu. */
 export const MENU_FEATURES = {
-  dash: { label: 'Home', tabs: {
-    dash: ['.h7-st', '[data-c=range]', '.h7-next', '.h7-nums [data-v=analytics]', 'form[data-s=askNext]', '[data-a=askQ]'], // P7 Home: key numbers, period, your next step, all numbers, Ask box, suggested questions (Leads is the Home tab next to Results)
+  home: { label: 'Home', top: 'dash', tabs: { dash: ['.h7-st', '[data-c=range]', '.h7-next', '.h7-nums [data-v=analytics]', 'form[data-s=askNext]', '[data-a=askQ]'] } },
+  ask: { label: 'Ask', top: 'director', tabs: { director: ['form[data-s=ask]', '[data-a=askQ]'] } }, // the conversation list (New chat) appears once there are conversations; "use another AI" is in Settings → Advanced
+  next: { label: 'Next steps', group: 'next', tabs: {
+    audit: ['.ns-list .ns-i', '[data-a=auditTab]', 'details.ns-why', '[data-a=recTask]', '[data-a=recCamp]', '[data-a=recExp]'], // no ask box (Ask is its own page); the export is in Reports
+    auto: ['[data-a=weekly]', '[data-c=autoT]'], // tasks, weekly review
+    track: ['[data-track-card]'], // the track record, its own page since P7
+  } },
+  content: { label: 'Content', group: 'content', tabs: {
+    studio: ['[data-a=campNew], [data-a=stHome]'], // Studio home, or the open campaign with its way back
+    series: ['[data-a=sxNewT]'], // the creation form opens after "New series"
+    qa: ['[data-a=approveAll]', '#cdl [data-a=ex][data-v=zip]', '#cdl [data-a=ex][data-v=strategy]', '#cdl [data-a=ex][data-v=calendar]', '#cdl [data-a=ex][data-v=campjson]', '#cdl [data-a=jCamp]'], // reached from the step bar
+  } },
+  perf: { label: 'Performance', group: 'perf', tabs: {
     analytics: ['[data-a=pl]', '[data-c=mt]'], // platform tabs, trend metric
     growth: ['[data-c=def]', 'form[data-s=expAdd]'], // lead definitions, experiments
+    reports: ['[data-a=ex][data-v=audit]', '[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=repRange]', '[data-a=ex][data-v=exec]'],
   } },
-  audit: { label: 'Next steps', tabs: {
-    audit: ['.ns-list .ns-i', '[data-a=auditTab]', 'details.ns-why', '[data-a=recTask]', '[data-a=recCamp]', '[data-a=recExp]'], // P7: no ask box (Ask is its own tab); the export is in Reports
-    director: ['form[data-s=ask]', '[data-a=askQ]'], // P7: the question box and short questions; the conversation list (New chat) appears once there are conversations; "use another AI" is in Settings → Advanced
-    auto: ['[data-a=weekly]', '[data-c=autoT]'], // tasks, weekly review
-  } },
-  studio: { label: 'Campaigns', tabs: {
-    studio: ['[data-a=campNew], [data-a=stHome]'], // Studio home, or the open campaign with its way back
-    series: ['[data-a=sxNewT]'], // P7: the creation form opens after "New series"
-    qa: ['[data-a=approveAll]', '#cdl [data-a=ex][data-v=zip]', '#cdl [data-a=ex][data-v=strategy]', '#cdl [data-a=ex][data-v=calendar]', '#cdl [data-a=ex][data-v=campjson]', '#cdl [data-a=jCamp]'], // Brand QA, then the campaign downloads and publishing schedule (a campaign with assets exists in this test)
-  } },
-  reports: { label: 'Reports', tabs: {
-    reports: ['[data-a=ex][data-v=audit]', '[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=repRange]', '[data-a=ex][data-v=exec]', '[data-a=ex][data-v=audit]', ],
-  } },
-  know: { label: 'Company', tabs: {
+  co: { label: 'Company', group: 'co', tabs: {
     onboard: ['[data-a=srcAdd]', '[data-a=discover]'],
     know: ['[data-a=kApprove]', '[data-a=kReject]', 'form[data-s=kAdd]'],
   } },
-  integ: { label: 'Data', footer: true, tabs: { integ: ['[data-c=imp]', '[data-a=tpl]', '[data-a=connect]', '[data-a=clearData]'] } },
-  trust: { label: 'Settings', footer: true, tabs: { trust: ['[data-a=exportAll]', '[data-c=importAll]', '[data-a=delCo]', '[data-c=aiMode]', '[data-c=digits]', '#adv [data-a=ex][data-v=knowledge]', '#adv [data-a=ex][data-v=pkg]', '#adv .ih', '#adv .rsx', '#adv [data-a=copyPkg]', '#adv [data-a=claudeIn]'] } }, // P7: AI files, import history and the real/simulated table are in Settings → Advanced
+  integ: { label: 'Data', top: 'integ', footer: true, tabs: { integ: ['[data-c=imp]', '[data-a=tpl]', '[data-a=connect]', '[data-a=clearData]'] } },
+  trust: { label: 'Settings', top: 'trust', footer: true, tabs: { trust: ['[data-a=exportAll]', '[data-c=importAll]', '[data-a=delCo]', '[data-c=aiMode]', '[data-c=digits]', '#adv [data-a=ex][data-v=knowledge]', '#adv [data-a=ex][data-v=pkg]', '#adv .ih', '#adv .rsx', '#adv [data-a=copyPkg]', '#adv [data-a=claudeIn]'] } }, // AI files, import history and the real/simulated table are in Settings → Advanced
 };
 
-test('every section and tab of the new menu opens by clicking, with its features', { timeout: 300_000 }, async () => {
+test('every row and page of the new menu opens by clicking, with its features', { timeout: 300_000 }, async () => {
   await withFlowNest(async ({ page, errors }) => {
-    // a campaign with generated assets, so Brand QA has something to check
+    // a campaign with generated assets, so the check has something to check
     await page.evaluate(async () => {
       const x = audit(C()).find((r) => r.make === 'campaign');
       A.recCamp(x.id);
@@ -44,16 +45,19 @@ test('every section and tab of the new menu opens by clicking, with its features
       if (g) g.click();
       await new Promise((r) => setTimeout(r, 500));
     });
-    // the sidebar: five sections, then Data and Settings in the footer
-    const main = await page.$$eval('#gside .gs-nav [data-a=go]', (b) => b.map((x) => x.textContent.replace(/\d+$/, '').trim()));
-    assert.deepEqual(main, ['Home', 'Next steps', 'Campaigns', 'Reports', 'Company']);
-    const foot = await page.$$eval('#gside .gs-foot [data-a=go]', (b) => b.map((x) => x.textContent.trim()));
+    // the sidebar: six rows in the order of the day's work, then Data and Settings; no tabs above the page
+    const main = await page.$$eval('#gside .gs-nav > ul > li > .gs-i', (b) => b.map((x) => x.textContent.trim()));
+    assert.deepEqual(main, ['Home', 'Ask', 'Next steps', 'Content', 'Performance', 'Company']);
+    const foot = await page.$$eval('#gside .gs-foot > ul > li > .gs-i', (b) => b.map((x) => x.textContent.trim()));
     assert.deepEqual(foot, ['Data', 'Settings']);
-    for (const [section, { label, footer, tabs }] of Object.entries(MENU_FEATURES)) {
-      await page.click(`#gside ${footer ? '.gs-foot' : '.gs-nav'} [data-a=go]:has-text("${label}")`);
-      await page.waitForTimeout(300);
+    assert.equal(await page.$('.wtabs'), null, 'no tabs above the page');
+    for (const [, { label, top, group, tabs }] of Object.entries(MENU_FEATURES)) {
+      if (top) await page.click(`#gside [data-a=go][data-v="${top}"]`);
+      else await page.click(`#gside [data-a=navG][data-v="${group}"]`); // a group opens its first page
+      await page.waitForTimeout(400);
       for (const [view, sels] of Object.entries(tabs)) {
-        if (Object.keys(tabs).length > 1) await page.click(`.wtabs [data-a=go][data-v="${view}"]`);
+        if (view === 'qa') { await page.click('#gside .gs-s[data-v=studio]'); await page.waitForTimeout(400); await page.click('main [data-a=jCamp][data-v$="|qa"]'); }
+        else if (group) await page.click(`#gside .gs-s[data-v="${view}"]`);
         await page.waitForTimeout(400);
         assert.equal(await page.evaluate(() => S.ui.view), view, `${label} → ${view}`);
         for (const sel of sels) assert.ok(await page.$(`main ${sel}`), `${label} → ${view}: ${sel}`);

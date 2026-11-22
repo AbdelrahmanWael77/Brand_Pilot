@@ -40,10 +40,21 @@ test('keyboard: arrow keys move between tabs (mirrored in Arabic); a modal keeps
       assert.equal(await page.evaluate(() => document.activeElement.dataset.v), 'opp', `${lang}: End`);
       await page.keyboard.press('Home');
       await page.waitForTimeout(300);
-      // the section tabs (Recommendations · Ask · My tasks) move focus with the arrow keys too
-      await page.focus('.wtabs [data-a=go][data-v=audit]');
+      // P7: the sidebar (no tabs above the page): Down moves to the next row; Right (Left in Arabic) opens a closed
+      // group without leaving the page, Left (Right in Arabic) closes it; Enter on a group opens its first page
+      await page.focus('#gside .gs-s[data-v=audit]');
+      await page.keyboard.press('ArrowDown');
+      assert.equal(await page.evaluate(() => document.activeElement.dataset.v), 'auto', `${lang}: next row`);
+      await page.focus('#gside .gs-gh[data-v=perf]');
       await page.keyboard.press(lang === 'ar' ? 'ArrowLeft' : 'ArrowRight');
-      assert.equal(await page.evaluate(() => document.activeElement.dataset.v), 'director', `${lang}: next section tab`);
+      await page.waitForTimeout(200);
+      assert.deepEqual(await page.evaluate(() => ({ open: document.querySelector('#gside .gs-gh[data-v=perf]').getAttribute('aria-expanded'), focused: document.activeElement.dataset.v, view: S.ui.view })), { open: 'true', focused: 'perf', view: 'audit' }, `${lang}: open a group`);
+      await page.keyboard.press(lang === 'ar' ? 'ArrowRight' : 'ArrowLeft');
+      await page.waitForTimeout(200);
+      assert.equal(await page.evaluate(() => document.querySelector('#gside .gs-gh[data-v=perf]').getAttribute('aria-expanded')), 'false', `${lang}: close a group`);
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(300);
+      assert.equal(await page.evaluate(() => S.ui.view), 'analytics', `${lang}: Enter opens the group's first page`);
     }
     // a modal: focus goes in, Tab stays in, Escape closes and the focus returns to the button that opened it
     await page.evaluate(() => { if (S.lang !== 'en') A.lang(); A.go('integ'); });

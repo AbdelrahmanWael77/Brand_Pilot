@@ -20,7 +20,7 @@ test('Q1 "How is my marketing doing?" and Q2 "What should I do next, and why?" i
       const click = async (sel) => { clicks++; await page.click(sel); await page.waitForTimeout(500); };
 
       // Q1: one click on Home → the three key numbers of this period (P7; all numbers are one more click, on Results)
-      await click('#gside .gs-nav [data-a=go][data-v=dash]');
+      await click('#gside [data-a=go][data-v=dash]');
       const q1 = await page.evaluate(async () => {
         const m = await (await fetch(`/api/companies/${C().id}/metrics?range=${S.ui.range || '28'}`)).json();
         return { view: S.ui.view, kpis: document.querySelectorAll('main .h7-st').length, sessionsShown: document.querySelector('main').innerText.includes(fmt(m.kpis.sessions.value)) };
@@ -33,7 +33,7 @@ test('Q1 "How is my marketing doing?" and Q2 "What should I do next, and why?" i
       await page.evaluate(() => { OPENW.clear(); A.go('trust'); }); // a fresh start: no Why? panel remembered open from the other language
       await page.waitForTimeout(300);
       clicks = 0;
-      await click('#gside .gs-nav [data-a=go][data-v=audit]');
+      await click('#gside [data-a=navG][data-v=next]'); // P7: the Next steps group opens Recommendations
       await page.waitForFunction(() => document.querySelector('main .ns-list .ns-i'), null, { timeout: 15000 });
       const top = await page.evaluate(() => { const r = document.querySelector('main .ns-list .ns-i'); return { title: r.querySelector('h3').innerText, action: r.querySelector('.ns-t p')?.innerText || '', conf: !!r.querySelector('.cf') }; });
       assert.ok(top.title && top.action && top.conf, `${lang} Q2: what to do, with confidence`);
@@ -54,7 +54,7 @@ test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create c
       const before = await page.evaluate(() => C().campaigns.length);
       let clicks = 0;
       const click = async (sel) => { clicks++; await page.click(sel); await page.waitForTimeout(600); };
-      await click('#gside .gs-nav [data-a=go][data-v=audit]');
+      await click('#gside [data-a=navG][data-v=next]'); // P7: the Next steps group opens Recommendations
       await page.waitForFunction(() => document.querySelector('main .ns-list [data-a=recCamp]'), null, { timeout: 15000 });
       await click('main .ns-list [data-a=recCamp]');
       const r = await page.evaluate(() => { const k = C().campaigns[C().campaigns.length - 1]; return { view: S.ui.view, n: C().campaigns.length, assets: k ? k.assets.length : 0, langs: k ? [...new Set(k.assets.map((a) => a.lang))].sort() : [], drafts: k ? k.assets.every((a) => a.status !== 'approved') : false, download: !!document.querySelector('main [data-a=aDl], main [data-a=aPng]') /* P7: the editing panel opens on Edit; the PNG download stays in the bar */, rec: k && k.rec, strategyApproved: !!(k && k.approved === true) }; });
