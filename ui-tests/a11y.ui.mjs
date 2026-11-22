@@ -60,6 +60,7 @@ test('keyboard: arrow keys move between tabs (mirrored in Arabic); a modal keeps
     await page.evaluate(() => { if (S.lang !== 'en') A.lang(); A.go('integ'); });
     await page.waitForTimeout(400);
     const opener = await page.$eval('main [data-a=connect]', (b) => b.dataset.v);
+    await page.evaluate((v) => { document.querySelector(`main [data-a=connect][data-v="${v}"]`).closest('details').open = true; }, opener); // P7: Connect sits in the card's ⋯ menu
     await page.focus(`main [data-a=connect][data-v="${opener}"]`);
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => document.querySelector('.ov .modal'));

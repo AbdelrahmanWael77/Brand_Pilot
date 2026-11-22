@@ -502,6 +502,18 @@
       ${T ? `<div class="sx-kl"><span class="sx-kl-i">${ic(mode === 'none' ? 'book' : 'db', 16)}</span><span class="sx-kl-t">${what}</span><button type="button" class="btn sm ghost" data-a="sxKnowOpen">${f.knowOpen ? L('Done', 'تم') : L('Change', 'غيّر')}</button></div>${f.knowOpen ? `<div class="sx-kopen">${knowHTML(c, f, srcs)}</div>` : `<input type="hidden" name="srcMode" value="${mode}">`}` : `<p class="muted small sx-tnote">${L('Not sure? Pick “Something else” or just skip this — BrandPilot works it out from the name and what it is for.', 'لست متأكداً؟ اختر «شيء آخر» أو تخطَّ هذا — يستنتج BrandPilot النوع من الاسم والغرض.')}</p><input type="hidden" name="srcMode" value="${mode}">`}
       <input type="hidden" name="kind" value="${esc(kindOf(c, f))}">`;
   }
+  /* P7 (owner 2026-11-22): creating a series is 3 steps: Name and type → Past posts (optional) → Approve the style. */
+  const wzBar = (n) => `<ol class="wz7" aria-label="${esc(L('Steps', 'الخطوات'))}">${[L('Name and type', 'الاسم والنوع'), L('Past posts', 'منشورات سابقة'), L('Approve the style', 'اعتمد الأسلوب')].map((t, i) => `<li class="${i + 1 < n ? 'done' : i + 1 === n ? 'on' : ''}"${i + 1 === n ? ' aria-current="step"' : ''}><b>${i + 1 < n ? '✓' : i + 1}</b>${t}</li>`).join('')}</ol>`;
+  function wizHTML(c, s) {
+    const step = S.ui.sxWiz.step, st = fixStyle(styleOf(c, s));
+    if (step === 2) return `<section class="sx-wz7">${wzBar(2)}<h1>${L('Add a few past posts', 'أضف بعض المنشورات السابقة')}</h1><p class="muted">${L('Optional. BrandPilot learns the look of the series from them.', 'اختياري. يتعلّم BrandPilot شكل السلسلة منها.')}</p>${refsHTML(c, s, refsOf(c, s.id))}<div class="wz7-f"><button class="btn ghost" data-a="sxWiz" data-v="skip">${L('Skip', 'تخطَّ')}</button><button class="btn pri" data-a="sxWiz" data-v="3">${L('Next', 'التالي')}</button></div></section>`;
+    if (!s.styleProp && !s.style) s.styleProp = { style: JSON.parse(JSON.stringify(st)), read: 'kit', model: '', seen: 0, notes: [], refs: [], at: Date.now() };
+    const pst = fixStyle(s.styleProp ? s.styleProp.style : st);
+    const big = cvHTML('wz-' + s.id, () => ({ st: pst, copy: { l1: s.name + '.', l2: L('Same look, new topic.', 'نفس الشكل، موضوع جديد.'), sub: s.purpose || '', pts: [] }, ill: null, logo: pickLogo(c, pst.bg[0]), fmt: '1:1', layout: pst.layout, lang: lang(), slide: 0, slides: 1, kicker: s.name }), 0.5, L('Style preview', 'معاينة الأسلوب'));
+    return `<section class="sx-wz7">${wzBar(3)}<h1>${L('Approve the style', 'اعتمد الأسلوب')}</h1><p class="muted">${L('Every post in this series will look like this.', 'كل منشور في هذه السلسلة سيبدو هكذا.')}</p><div class="wz7-pv">${big}</div>
+      <details class="wz7-more"><summary>${L('Change colours or layout', 'غيّر الألوان أو التخطيط')}</summary>${styleHTML(c, s, st)}</details>
+      <div class="wz7-f"><button class="btn ghost" data-a="sxWiz" data-v="2">${L('Back', 'رجوع')}</button><button class="btn pri" data-a="sxWizOk" data-v="${esc(s.id)}">${ic('check', 16)}${L('Approve the style', 'اعتمد الأسلوب')}</button></div></section>`;
+  }
   function setupHTML(c, first) {
     const f = SX.form || (SX.form = { name: '', purpose: '', channel: 'linkedin', objective: 'engagement', kind: '', audience: '', sources: [] });
     const ideas = typeof nxIdeas === 'function' ? nxIdeas(c).slice(0, 5) : [];
@@ -511,7 +523,7 @@
     const pill = (name, v, t, on, icn) => `<label class="sx-pill"><input type="radio" name="${name}" value="${v}" ${on ? 'checked' : ''} data-c="sxF">${icn ? ic(icn, 15) : ''}<span>${t}</span></label>`;
     const kinds = [['', L('Let BrandPilot work it out', 'دع BrandPilot يحدده')]].concat(KINDS().map(([k, t]) => [k, t.replace(/\s*\(.*\)$/, '')]));
     const H = KIND_HINT();
-    return `<section class="card sx-new" style="--sx-a:${st.bg[0]};--sx-b:${st.bg[1]};--sx-c:${st.accent}">
+    return `${wzBar(1)}<section class="card sx-new" style="--sx-a:${st.bg[0]};--sx-b:${st.bg[1]};--sx-c:${st.accent}">
       <header class="sx-new-h"><div><p class="sx-eyebrow">${L('AI Content Series', 'سلاسل المحتوى الذكية')}</p><h2>${L('New content series', 'سلسلة محتوى جديدة')}</h2><p>${L('A recurring kind of post with one purpose — BrandPilot keeps its look, suggests its topics and writes its posts.', 'نوع متكرر من المنشورات بغرض واحد — يحافظ BrandPilot على شكلها ويقترح مواضيعها ويكتب منشوراتها.')}</p>
         ${first ? `<ol class="sx-new-how"><li>${L('Name it', 'سمِّها')}</li><li>${L('Add a few previous posts', 'أضف منشورات سابقة')}</li><li>${L('Approve the style', 'اعتمد الأسلوب')}</li><li>${L('Give a topic, get a post', 'أعطِ موضوعاً واحصل على منشور')}</li></ol>` : ''}</div>
         ${first ? '' : `<button type="button" class="sx-new-x" data-a="sxNewT" aria-label="${esc(L('Close', 'إغلاق'))}">${ic('x', 18)}</button>`}</header>
@@ -536,6 +548,7 @@
   }
 
   function seriesView(c, s) {
+    if (S.ui.sxWiz && S.ui.sxWiz.sid === s.id) return wizHTML(c, s);
     const st = fixStyle(styleOf(c, s)), d = draftOf(c, s), refs = refsOf(c, s.id), mine = creativesOf(c).filter((k) => k.sid === s.id).reverse();
     const lg = pickLogo(c, st.bg[0]);
     const head = `<div class="sx-top"><button class="linklike" data-a="sxHome">${S.lang === 'ar' ? '→' : '←'} ${L('All series', 'كل السلاسل')}</button><button class="btn sm ghost sx-del" data-a="sxDel" data-v="${esc(s.id)}">${ic('x', 14)}<span>${L('Delete series', 'احذف السلسلة')}</span></button></div>
@@ -544,7 +557,7 @@
     const au = SX.autoU || (SX.autoU = {});
     if (!au[s.id] && !s.kind && !s.undProp && String(s.purpose || '').trim().length < 40 && subjectOf(c, s).length) { au[s.id] = 1; setTimeout(() => aiUnderstand(c, s, true), 0); }
     if (!d.drafted && !d.copy.l1 && !d.vars.length && !s.topicAI && !SX.autoT[s.id] && !topicIdeas(c, s, null).length) { SX.autoT[s.id] = 1; setTimeout(() => aiTopics(c, s, true), 0); }
-    return head + `<div class="sx-ws"><div class="sx-main">${composerHTML(c, s, d, st)}${warnLogo}${resultsHTML(c, s, d)}${postsHTML(c, s, mine)}</div><aside class="sx-side">${aboutHTML(c, s)}${styleHTML(c, s, st)}${refsHTML(c, s, refs)}${learnHTML(c, s)}</aside></div>` + zoomHTML(c) + pvHTML(c);
+    return head + `<div class="sx-ws sx-ws7"><div class="sx-main">${composerHTML(c, s, d, st)}${warnLogo}${resultsHTML(c, s, d)}${postsHTML(c, s, mine)}<details class="sx-set7"><summary>${L('Series settings: style, past posts and what it is about', 'إعدادات السلسلة: الأسلوب والمنشورات السابقة وموضوعها')}</summary><div class="sx-side">${aboutHTML(c, s)}${styleHTML(c, s, st)}${refsHTML(c, s, refs)}${learnHTML(c, s)}</div></details></div></div>` + zoomHTML(c) + pvHTML(c);
   }
 
   function composerHTML(c, s, d, st) {
@@ -552,7 +565,7 @@
     const recBox = d.rec ? `<div class="sx-recbox"><p class="small"><b>${L('From a recommendation', 'من توصية')}</b> ${nxBadge(d.rec.level)} · ${L('Goal', 'الهدف')}: ${nxL(NXO[d.rec.objective] || NXO.engagement)} · ${CHN[d.rec.channel] || ''} · ${L('Format', 'الشكل')}: ${nxL(NXF[d.rec.format] || NXF.single)}</p>${d.rec.why ? `<p class="small" dir="auto">${esc(d.rec.why)}</p>` : ''}${d.rec.measure ? `<p class="muted small" dir="auto">${esc(d.rec.measure)}</p>` : ''}</div>` : '';
     const step = !d.drafted && !d.copy.l1 ? 1 : !d.vars.length ? 2 : 3;
     const steps = [L('Topic', 'الموضوع'), L('Words', 'الكلمات'), L('Creatives', 'التصاميم')].map((t, i) => `<li class="${i + 1 < step ? 'done' : i + 1 === step ? 'on' : ''}">${t}</li>`).join('');
-    const topicRow = `<form class="sx-topic" data-s="sxPrep" data-v="${esc(s.id)}"><label class="sr-only" for="sxT">${L('Topic', 'الموضوع')}</label><input id="sxT" name="t" dir="auto" maxlength="200" value="${esc(d.topic)}" placeholder="${esc(L('What is the next post about?', 'عن ماذا المنشور التالي؟'))}"><button class="btn pri" ${busy ? 'disabled' : ''}>${busy ? L('Preparing…', 'جارٍ التجهيز…') : noAI() ? L('Write the post', 'اكتب المنشور') : d.drafted ? L('Re-draft with AI', 'أعد الصياغة بالذكاء') : L('Prepare with AI', 'جهّز بالذكاء الاصطناعي')}</button></form>${noAI() ? `<p class="muted small sx-noai">${L('No AI model is set up, so you write the words and BrandPilot builds the design. Add a model in Settings to draft with AI.', 'لا يوجد نموذج ذكاء اصطناعي، لذا تكتب الكلمات ويبني BrandPilot التصميم. أضف نموذجاً من الإعدادات للصياغة بالذكاء الاصطناعي.')}</p>` : ''}
+    const topicRow = `<form class="sx-topic" data-s="sxPrep" data-v="${esc(s.id)}"><label class="sr-only" for="sxT">${L('Topic', 'الموضوع')}</label><input id="sxT" name="t" dir="auto" maxlength="200" value="${esc(d.topic)}" placeholder="${esc(L('What\'s the topic of the next post?', 'ما موضوع المنشور التالي؟'))}"><button class="btn pri" ${busy ? 'disabled' : ''}>${busy ? L('Preparing…', 'جارٍ التجهيز…') : noAI() ? L('Write the post', 'اكتب المنشور') : d.drafted ? L('Re-draft with AI', 'أعد الصياغة بالذكاء') : L('Prepare with AI', 'جهّز بالذكاء الاصطناعي')}</button></form>${noAI() ? `<p class="muted small sx-noai">${L('No AI model is set up, so you write the words and BrandPilot builds the design. Add a model in Settings to draft with AI.', 'لا يوجد نموذج ذكاء اصطناعي، لذا تكتب الكلمات ويبني BrandPilot التصميم. أضف نموذجاً من الإعدادات للصياغة بالذكاء الاصطناعي.')}</p>` : ''}
       <div class="sx-opts" role="group" aria-label="${esc(L('Format', 'الشكل'))}">${[['single', L('Single image', 'صورة واحدة')], ['carousel', L('Carousel', 'منشور دوّار')]].map(([k, t]) => `<button class="sx-seg ${d.fmt === k ? 'on' : ''}" aria-pressed="${d.fmt === k}" data-a="sxFmt" data-v="${k}">${t}</button>`).join('')}<span class="sx-sp"></span>${[['1:1', '1:1'], ['4:5', '4:5']].map(([k, t]) => `<button class="sx-seg ${aspectOf(c, s, d) === k ? 'on' : ''}" aria-pressed="${aspectOf(c, s, d) === k}" data-a="sxAsp" data-v="${k}" title="${k === '4:5' ? L('Portrait — more space in the feed', 'طولي — مساحة أكبر في الخلاصة') : L('Square', 'مربع')}">${t}</button>`).join('')}<span class="sx-sp"></span>${['en', 'ar'].map((k) => `<button class="sx-seg ${d.lang === k ? 'on' : ''}" aria-pressed="${d.lang === k}" data-a="sxLang" data-v="${k}">${k === 'en' ? 'English' : 'العربية'}</button>`).join('')}</div>`;
     const words = d.drafted || d.copy.l1 ? wordsHTML(c, s, d) : '';
     return `<section class="card sx-comp"><div class="sx-comp-h"><h2>${L('New post', 'منشور جديد')}</h2><ol class="sx-steps">${steps}</ol>${d.topic || d.vars.length ? `<button class="btn sm ghost" data-a="sxReset" data-v="${esc(s.id)}">${L('Start over', 'ابدأ من جديد')}</button>` : ''}</div>${recBox}${topicRow}${step === 1 && !busy ? topicsHTML(c, s, rec) : ''}${words}</section>`;
@@ -660,7 +673,7 @@
     const needAck = ((d.warn && d.warn.length) || (d.claims && d.claims.length)) && !d.ack;
     return `<section class="sx-res"><div class="sx-res-h"><h2>${L('Compare and choose', 'قارن واختر')}</h2><button class="btn sm" data-a="sxMore" data-v="${esc(s.id)}" ${d.vars.some((v) => v.status === 'pending') ? 'disabled' : ''}>${L('Another variation', 'تنويع آخر')}</button></div>
       <div class="sx-vars">${d.vars.map(card).join('')}</div>
-      <div class="sx-act"><button class="btn pri" data-a="sxSave" data-v="${esc(s.id)}" ${pick ? '' : 'disabled'}>${L('Save to series', 'احفظ في السلسلة')}</button><button class="btn" data-a="sxSave" data-v="${esc(s.id)}" data-k="approve" ${pick && !needAck ? '' : 'disabled'}>${ic('check', 16)}${L('Save and approve', 'احفظ واعتمد')}</button><button class="btn" data-a="sxViewV" data-v="${esc(pick ? pick.id : '')}" ${pick ? '' : 'disabled'}>${ic('eye', 16)}${L('Preview as a post', 'عاين كمنشور')}</button><button class="btn ghost" data-a="sxDl" data-v="${esc(pick ? pick.id : '')}" ${pick ? '' : 'disabled'}>${ic('dl', 16)}${L('Download PNG', 'نزّل PNG')}</button>
+      <div class="sx-act"><button class="btn pri" data-a="sxApDl" data-v="${esc(s.id)}" ${pick && !needAck ? '' : 'disabled'}>${ic('check', 16)}${L('Approve and download', 'اعتمد ونزّل')}</button><button class="btn" data-a="sxSave" data-v="${esc(s.id)}" ${pick ? '' : 'disabled'}>${L('Save to series', 'احفظ في السلسلة')}</button><button class="btn" data-a="sxViewV" data-v="${esc(pick ? pick.id : '')}" ${pick ? '' : 'disabled'}>${ic('eye', 16)}${L('Preview as a post', 'عاين كمنشور')}</button><button class="btn ghost" data-a="sxDl" data-v="${esc(pick ? pick.id : '')}" ${pick ? '' : 'disabled'}>${ic('dl', 16)}${L('Download PNG', 'نزّل PNG')}</button>
       <span class="muted small">${!pick ? L('Choose an option first.', 'اختر خياراً أولاً.') : needAck ? L('Check the flagged statements before approving.', 'تحقق من العبارات المُعلَّمة قبل الاعتماد.') : L('Editable Canva copy: not available for series posts yet — download the PNG or the illustration.', 'نسخة Canva قابلة للتعديل: غير متاحة لمنشورات السلاسل بعد — نزّل PNG أو الرسم.')}</span></div></section>`;
   }
 
@@ -923,6 +936,10 @@
     sxKnowOpen() { const f = SX.form || (SX.form = {}); f.knowOpen = !f.knowOpen; R(); },
     sxKindOpen() { const f = SX.form || (SX.form = {}); f.kindOpen = !f.kindOpen; R(); },
     sxNewT() { S.ui.sxNew = !S.ui.sxNew; R(); },
+    sxWiz(v) { const w = S.ui.sxWiz; if (!w) return; if (v === 'skip' || v === '3') w.step = 3; else w.step = +v || 2; R(); scrollTo(0, 0); },
+    sxWizOk(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; if (!s.styleProp) s.styleProp = { style: JSON.parse(JSON.stringify(fixStyle(styleOf(c, s)))), read: 'kit', model: '', seen: 0, notes: [], refs: [], at: Date.now() }; S.ui.sxWiz = null; A.sxStOk(sid); scrollTo(0, 0); },
+    /* the chosen post: download it, then save it to the series as approved (nothing is published) */
+    sxApDl(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftOf(c, s), v = d.vars.find((x) => x.id === d.pick && x.status === 'ready'); if (!v) return toast(L('Choose an option first.', 'اختر خياراً أولاً.'), 'err'); A.sxDl(v.id); A.sxSave(sid, { dataset: { k: 'approve', v: sid } }); },
     // P7: a kind picked on the empty page opens the form with that kind chosen
     sxType7(v) { const f = SX.form || (SX.form = { name: '', purpose: '', channel: 'linkedin', objective: 'engagement', kind: '', audience: '', sources: [] }); const T = TYPES().find((t) => t[0] === v); if (T) { f.type = v; f.kind = T[3]; f.kindOff = false; f.srcMode = T[4]; f.sources = []; if (T[6] && !String(f.purpose || '').trim()) { f.purpose = T[6].replace('{topic}', L('this topic', 'هذا الموضوع')); f.purposeAuto = true; } } S.ui.sxNew = true; R(); },
     sxSug(v, el) {
@@ -979,8 +996,8 @@
       const s = { id: uid('sr'), at: Date.now(), name, purpose: String(fd.get('purpose') || '').trim().slice(0, 400), objective: Object.keys(NXO).includes(fd.get('objective')) ? fd.get('objective') : 'engagement', channel: ['linkedin', 'instagram', 'facebook'].includes(fd.get('channel')) ? fd.get('channel') : 'linkedin', audience: String(fd.get('audience') || '').trim().slice(0, 160), kind: KINDS().some(([k]) => k === fd.get('kind')) ? fd.get('kind') : '', ideas: '', sources: fd.get('srcMode') === 'pick' ? fd.getAll('src').map(String).slice(0, 20) : [], knowledge: fd.get('srcMode') === 'none' && KGEN.includes(String(fd.get('kind') || '')) ? 'none' : fd.get('srcMode') === 'pick' && fd.getAll('src').length ? 'pick' : 'auto', themes: [], look: '' };
       serOf(c).push(s); SX.form = null; S.ui.sxNew = false;
       log(c, 'campaign', `Content series “${name}” created`, `تم إنشاء سلسلة المحتوى «${name}»`);
-      toast(L('Series created. Next: add a few previous posts so BrandPilot learns its look.', 'أُنشئت السلسلة. التالي: أضف منشورات سابقة ليتعلم BrandPilot شكلها.'), 'ok');
-      save(); go(s.id); aiUnderstand(c, s, true);
+      toast(L('Series created.', 'أُنشئت السلسلة.'), 'ok');
+      S.ui.sxWiz = { sid: s.id, step: 2 }; save(); go(s.id); aiUnderstand(c, s, true);
     },
     sxIdea(sid, el) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (!s) return; const d = draftOf(c, s); d.topic = el.dataset.k; if (!d.rec && (el.dataset.f === 'carousel' || el.dataset.f === 'single')) d.fmt = el.dataset.f; save(); aiDraft(c, s); },
     sxUnd(sid) { const c = C(), s = serOf(c).find((x) => x.id === sid); if (s) aiUnderstand(c, s, false); },

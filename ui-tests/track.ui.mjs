@@ -8,8 +8,8 @@ import assert from 'node:assert/strict';
 import { withFlowNest } from './lib/flownest.mjs';
 
 const T = {
-  en: { h: 'Track record', demo: 'Demo history (synthetic data)', note: /5 earlier steps were created by the FlowNest demo setup on its synthetic data, and evaluated by the same code as real steps\. They are not real results/, wait: /Waiting for data until \d{1,2} \w+ \d{4}/, lim: 'A result says what happened after a step, not that the step caused it.', score: (m) => new RegExp(`${m} of 5 evaluated steps moved their number the expected way \\(\\d+%\\) — Demo history \\(synthetic data\\)\\.`) },
-  ar: { h: 'سجل النتائج', demo: 'سجل تجريبي (بيانات غير حقيقية)', note: /أنشأ العرض التجريبي لـFlowNest 5 خطوات سابقة على بياناته التجريبية/, wait: /بانتظار البيانات حتى/, lim: 'تقول النتيجة ما حدث بعد الخطوة، لا أن الخطوة هي السبب.', score: (m) => new RegExp(`${m} من 5 خطوات مُقيَّمة حرّكت رقمها في الاتجاه المتوقع \\(\\d+%\\) — سجل تجريبي \\(بيانات غير حقيقية\\)\\.`) },
+  en: { h: 'Track record', demo: 'Demo history (synthetic data)', note: /5 earlier steps were created by the FlowNest demo setup on its synthetic data, and evaluated by the same code as real steps\. They are not real results/, wait: /Waiting for data until \d{1,2} \w+ \d{4}/, lim: 'A result says what happened after a step, not that the step caused it.', score: (m) => new RegExp(`${m} of 5 evaluated steps moved their number the expected way \\(\\d+%\\)\\. ?Demo history \\(synthetic data\\)`) },
+  ar: { h: 'سجل النتائج', demo: 'سجل تجريبي (بيانات غير حقيقية)', note: /أنشأ العرض التجريبي لـFlowNest 5 خطوات سابقة على بياناته التجريبية/, wait: /بانتظار البيانات حتى/, lim: 'تقول النتيجة ما حدث بعد الخطوة، لا أن الخطوة هي السبب.', score: (m) => new RegExp(`${m} من 5 خطوات مُقيَّمة حرّكت رقمها في الاتجاه المتوقع \\(\\d+%\\)\\. ?سجل تجريبي \\(بيانات غير حقيقية\\)`) },
 };
 const card = (page) => page.evaluate(async () => {
   A.go('track'); // P7: the track record has its own page under Next steps

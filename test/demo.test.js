@@ -53,7 +53,7 @@ test('page: demo controls need a demo company AND the server flag (a leftover de
   // P7: the demo checklist is part of the one guide, and also renders only through demoUI
   assert.ok(html.includes("${demoUI(c)?guideList(c):''}"));
   assert.match(html, /demoUI\(c\)&&!c\.sources\.length\?`<button class="btn" data-a="loadDemo">/);
-  assert.match(html, /\$\{demoUI\(c\)\?`<div class="note"><b>\$\{L\('Demo results'/);
+  assert.ok(html.includes('${demoUI(c)?`<p class="src7-demo" data-demo-results>')); // P7: a small link in demo mode only
   // the actions refuse to run outside demo mode, even if called directly
   for (const a of ['loadDemo(){', 'loadBase(){', 'loadCamp(id){']) assert.ok(html.includes(` ${a}const c=C();if(!demoUI(c))return;`), a);
   // no other place shows a demo control on c.demo alone

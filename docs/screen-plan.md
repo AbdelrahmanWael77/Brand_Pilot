@@ -249,3 +249,29 @@ Palette 2 (deep teal `#0F6E68`, coral accent `#E07A5F`) is the app's palette. Na
 - Content series creation is still one form with numbered sections, not the 3-step flow (Name and type → Past posts →
   Approve the style); the series page and post review are unchanged.
 - Review drafts shows checks the browser and the server agree on; per-draft fixes open the editor for that draft.
+
+---
+
+## Finishing round (2026-11-22): palette 1 and the remaining screens
+
+Palette 1, cobalt & apricot, is the app's palette (sign-in page included): main `#1F4FD6`, dark `#1A3FAE`, active
+`#EDF2FF`, apricot `#E8833A` on `#FDF1E6` (only: the highlighted problem on Home, the next-step edge, the problem row of
+Results), page `#F7F8FA`, lines `#E4E7EC`, text `#111827` / `#414A5A`. AA contrast: the contrast test of every screen in
+English and Arabic passes.
+
+| Screen | What changed | 5 s? | Distracting? | What else to remove |
+|---|---|---|---|---|
+| Review drafts | One row per draft (Facebook post, Instagram post, LinkedIn post, Landing page, Email, Messaging guide); EN / ع switch above the preview; the post preview fits the first screen; Remove removes both languages | Yes | No | — |
+| New campaign | "Or start from a next step" shows the short next-step line, or the recommendation's full title — never cut text | Yes | No | — |
+| Campaigns, Review drafts | Campaign names in both languages (a campaign from a recommendation takes its title in each language) | Yes | No | — |
+| Track record | "Demo history (synthetic data)" once, as a small label next to the score; the long demo note is hidden | Yes | No | — |
+| Company info | One line: "8 of 9 key topics covered · 1 missing" (no ring, no counters); "Needs you first" as one compact row with the question and Save | Yes | No | — |
+| Data | One row per source: name, "Added" / "Not added yet", last update, "Add a file"; Connect, Template, Remove data and Tag posts under ⋯; no file names, no row counts; the demo button is a small link in demo mode | Yes | No | The drop zone could go (each row has "Add a file") |
+| Sources, Settings | No character counts; no explanation lines; "Your data" folds | Yes | No | — |
+| Content series | Creating: 3 steps (Name and type → Past posts, optional, with Skip → Approve the style with a large preview); the series page: "What's the topic of the next post?" and the past posts, settings folded; post review: "Approve and download" is the main action | Yes | The series banner uses the series colours | — |
+
+Where things went: Data → file names, row counts, "Template", "Remove data", "Connect" and "Tag posts" are under each
+row's ⋯ (Template, Remove data, Connect) or gone from view (file names and row counts stay in Settings → Advanced →
+Import history); "Review post tags" when every post is tagged is no longer on Data (tagging opens from a row's ⋯ when
+posts need a theme). Company info → the ring and the confirmed / to-check counts are gone from view; version and history
+behind "History". Track record → the demo note is hidden (the label next to the score stays).
