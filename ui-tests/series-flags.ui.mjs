@@ -73,6 +73,21 @@ test('Content series post review: flagged lines with Fix, "It\'s correct" and ap
       assert.equal(s.main, t.go);
       assert.equal(s.act, 'sxApDl');
 
+      // a number the browser never flagged (typed into the words, outside the page's list): the server finds it,
+      // refuses, and the line appears on the post; nothing is downloaded
+      const extra = lang === 'ar' ? '77' : '99'; // a line confirmed once stays confirmed in its series: a new number per language
+      await page.evaluate(({ id, n }) => { const d = C().sxd[id]; d.copy.caption += ' ' + n; R(); }, { id: sid, n: extra });
+      const dn = downloads;
+      await page.click('[data-sxap]');
+      await page.waitForFunction(() => document.querySelectorAll('.sx-res [data-flags7] .rv7-pb').length === 1);
+      s = await state();
+      assert.equal(s.rows[0], lang === 'ar' ? `«${extra}» غير موجود في معلومات شركتك المعتمدة.` : `“${extra}” is not in your approved company info.`);
+      assert.equal(s.main, t.one);
+      assert.equal(downloads, dn);
+      await page.click('.sx-res [data-a=sxOk7]');
+      await page.waitForFunction(() => !document.querySelector('.sx-res [data-flags7] .rv7-pb'));
+      assert.equal(JSON.parse(trail('claim_check').at(-1).detail).flagKind, 'number');
+
       // the server refuses: nothing is downloaded, nothing is approved
       const approved = () => page.evaluate(() => C().creatives.filter((k) => k.status === 'approved').length);
       const a0 = await approved();

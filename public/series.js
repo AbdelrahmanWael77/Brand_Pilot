@@ -912,7 +912,7 @@
     SX.busy[key] = 1; R();
     try {
       await synced(c);
-      const r = await api('POST', '/api/companies/' + c.id + '/recs/draft', { series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [], knowledge: s.knowledge || 'auto' }, topic: d.topic, channel: s.channel || 'linkedin', lang: d.lang, format: d.fmt === 'carousel' ? 'carousel' : 'single', examples: ex, style: { colors: [st.bg[0], st.accent, st.ink].filter(isHex), note: [st.headline && 'Headline: ' + st.headline, st.tone && 'Tone: ' + st.tone, st.illustration && 'Illustration: ' + st.illustration].filter(Boolean).join(' ').slice(0, 600) } });
+      const r = await api('POST', '/api/companies/' + c.id + '/recs/draft', { sid: s.id, series: { name: s.name, purpose: s.purpose || '', objective: s.objective || 'engagement', audience: s.audience || '', kind: s.kind || '', sources: s.sources || [], knowledge: s.knowledge || 'auto' }, topic: d.topic, channel: s.channel || 'linkedin', lang: d.lang, format: d.fmt === 'carousel' ? 'carousel' : 'single', examples: ex, style: { colors: [st.bg[0], st.accent, st.ink].filter(isHex), note: [st.headline && 'Headline: ' + st.headline, st.tone && 'Tone: ' + st.tone, st.illustration && 'Illustration: ' + st.illustration].filter(Boolean).join(' ').slice(0, 600) } });
       if (!r.draft) toast(L('No approved knowledge yet — approve facts in Your company first, or write the words yourself.', 'لا معرفة معتمدة بعد — اعتمد الحقائق أولاً أو اكتب الكلمات بنفسك.'), 'err');
       else {
         const x = r.draft, [a, b] = splitHead(x.headline, st);
@@ -983,7 +983,7 @@
       const key = 'ap-' + sid; if (SX.busy[key]) return; SX.busy[key] = 1; R();
       let r = null;
       try { r = await api('POST', '/api/companies/' + c.id + '/series/' + encodeURIComponent(sid) + '/approve', { name: s.name, topic: d.topic, lang: d.lang, post: { headline: [d.copy.l1, d.copy.l2].filter(Boolean).join(' '), caption: d.copy.caption, words: wordsOf(d) }, flags: flagsAll(d).map(({ kind, text, state }) => ({ kind, text, state })) }); }
-      catch (e) { r = null; toast(e.code === 'flags_open' ? L('A flagged line is not cleared yet. Nothing was downloaded.', 'عبارة مُعلَّمة لم تُعالَج بعد. لم يُنزَّل شيء.') : L('The approval could not be recorded. Nothing was downloaded. Try again.', 'تعذّر تسجيل الاعتماد. لم يُنزَّل شيء. حاول مجدداً.'), 'err'); }
+      catch (e) { r = null; if (e.code === 'flags_open' && Array.isArray(e.open)) { e.open.forEach((x) => { if (x.kind === 'number') { d.warn = d.warn || []; if (!d.warn.includes(x.text)) d.warn.push(x.text); } else { d.claims = d.claims || []; if (!d.claims.includes(x.text)) d.claims.push(x.text); } }); save(); } toast(e.code === 'flags_open' ? L('The check found lines to fix or confirm. Nothing was downloaded.', 'وجد الفحص عبارات يجب إصلاحها أو تأكيدها. لم يُنزَّل شيء.') : L('The approval could not be recorded. Nothing was downloaded. Try again.', 'تعذّر تسجيل الاعتماد. لم يُنزَّل شيء. حاول مجدداً.'), 'err'); }
       delete SX.busy[key];
       if (!r || !r.trailId) return R();
       A.sxDl(v.id); A.sxSave(sid, { dataset: { k: 'approve', v: sid }, trailId: r.trailId });

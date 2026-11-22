@@ -1,6 +1,6 @@
 import express from 'express';
 import crypto from 'node:crypto';
-import { createKnowledge, STATUSES } from './knowledge.js';
+import { createKnowledge, STATUSES, approvedFacts } from './knowledge.js';
 import { createData } from './data.js';
 import { createCampaigns } from './campaigns.js';
 import { buildReport, renderReport, renderReportHtml, REPORT_LANGS } from './report.js';
@@ -15,7 +15,7 @@ import { buildPool, checkAnswer, checkText, demoSample, summary as checkSummary 
 import { rulesAnswer } from './rulesDirector.js';
 import { gaps } from './gaps.js';
 import { suggestThemes, cleanPosts } from './themes.js';
-import { draftBrief, cleanDraftRequest, polishPost, cleanPolishRequest } from './recs.js';
+import { draftBrief, cleanDraftRequest, polishPost, cleanPolishRequest, unsupportedNumbers, claimsToCheck, seriesFacts, KNOWLEDGE } from './recs.js';
 import { suggestBrief, cleanSuggestRequest } from './campaignBrief.js';
 import { extractFacts, cleanRequest } from './extract.js';
 import { websitePages } from './website.js';
@@ -360,7 +360,7 @@ export function createCompanies(
     let known = null;
     try { const row = q.getState.get(req.company.id); known = row ? (JSON.parse(row.data).series || []).find((x) => x && x.id === sid) : null; } catch { known = null; }
     const name = typeof known?.name === 'string' && known.name ? known.name : typeof req.body?.name === 'string' ? req.body.name.trim().slice(0, 200) : '';
-    return { sid, name: name.slice(0, 200), mirrored: !!known };
+    return { sid, name: name.slice(0, 200), mirrored: !!known, known };
   };
   const str = (x, n) => (typeof x === 'string' ? x.trim().slice(0, n) : '');
   // A flagged line of a series post marked "It's correct" by a person: who, when, which line.
@@ -376,7 +376,7 @@ export function createCompanies(
   // A series post approved. Every flagged line must be cleared: a number taken out of the words, or a line a person
   // marked "It's correct" (a claim_check row of this series with the same text). Otherwise nothing is recorded (409).
   router.post('/:id/series/:sid/approve', requireCompany, (req, res) => {
-    const { sid, name, mirrored } = seriesName(req);
+    const { sid, name, mirrored, known } = seriesName(req);
     if (!name) return res.status(404).json({ error: 'not_found' });
     const p = req.body?.post || {};
     const headline = str(p.headline, 300), caption = str(p.caption, 3000), words = str(p.words, 6000) || [headline, caption].join(' ');
@@ -385,10 +385,20 @@ export function createCompanies(
     const flags = (Array.isArray(req.body?.flags) ? req.body.flags : []).slice(0, 50).map((x) => ({ kind: x?.kind === 'number' ? 'number' : 'claim', text: str(x?.text, 400), state: x?.state }));
     if (flags.some((x) => !x.text)) return res.status(400).json({ error: 'invalid_flag' });
     const checked = new Map(db.prepare("SELECT id, detail FROM trail WHERE company_id = ? AND kind = 'claim_check' AND subject = ? ORDER BY rowid").all(req.company.id, sid).map((r) => [JSON.parse(r.detail).text, r.id]));
-    const nums = new Set(words.match(NUM) || []);
-    const open = flags.filter((x) => !(x.state === 'checked' && checked.has(x.text)) && !(x.state === 'fixed' && x.kind === 'number' && !nums.has(x.text)));
-    if (open.length) return res.status(409).json({ error: 'flags_open', flags: open.map((x) => x.text) });
-    const id = trail.append(req.company.id, { kind: 'series_approval', subject: sid, userId: req.user.id, dataHash: trail.fingerprint(req.company.id), detail: { series: name, topic, lang: req.body?.lang === 'ar' ? 'ar' : 'en', headline, caption, flags: flags.map((x) => ({ ...x, check: x.state === 'checked' ? checked.get(x.text) : null })), mirrored } });
+    // The server's own list (owner 2026-11-22: never the browser's): the same number check on the words received, and
+    // the claims the server found in this series' last AI draft (if no post was approved since), re-checked against the
+    // approved facts of now. The browser's list can only add lines.
+    const ser = { name, sources: Array.isArray(known?.sources) ? known.sources.filter((x) => typeof x === 'string') : [], knowledge: KNOWLEDGE.includes(known?.knowledge) ? known.knowledge : 'auto' };
+    const facts = seriesFacts(approvedFacts(db, req.company.id), ser).facts;
+    const last = db.prepare("SELECT kind, detail FROM trail WHERE company_id = ? AND subject = ? AND kind IN ('series_draft_check', 'series_approval') ORDER BY rowid DESC LIMIT 1").get(req.company.id, sid);
+    const draft = last && last.kind === 'series_draft_check' ? JSON.parse(last.detail) : null;
+    const found = unsupportedNumbers([headline, caption, words], draft ? draft.topic : '', facts).map((text) => ({ kind: 'number', text }))
+      .concat(claimsToCheck(draft ? draft.claims : [], facts).map((text) => ({ kind: 'claim', text })));
+    const nums = new Set([headline, caption, words].join(' ').match(NUM) || []);
+    for (const x of flags) if (!found.some((y) => y.text === x.text) && !(x.kind === 'number' && !nums.has(x.text))) found.push({ kind: x.kind, text: x.text });
+    const open = found.filter((x) => !checked.has(x.text));
+    if (open.length) return res.status(409).json({ error: 'flags_open', flags: open.map((x) => x.text), open });
+    const id = trail.append(req.company.id, { kind: 'series_approval', subject: sid, userId: req.user.id, dataHash: trail.fingerprint(req.company.id), detail: { series: name, topic, lang: req.body?.lang === 'ar' ? 'ar' : 'en', headline, caption, flags: found.map((x) => ({ ...x, check: checked.get(x.text) })), cleared: flags.filter((x) => x.kind === 'number' && !nums.has(x.text)).map((x) => x.text), mirrored } });
     res.status(201).json({ trailId: id });
   });
 
@@ -489,7 +499,14 @@ export function createCompanies(
     askLimiter.hit(req.user.id);
     if (!ai?.configured) return res.status(503).json({ error: 'ai_not_configured' });
     try {
-      res.json(await draftBrief(db, ai, req.company.id, req.company.name, request));
+      const out = await draftBrief(db, ai, req.company.id, req.company.name, request);
+      // P7: a series draft's flagged lines are kept in the trail, so the approval does not rely on the browser's list
+      const sid = typeof req.body?.sid === 'string' ? req.body.sid.slice(0, 200) : '';
+      if (sid && out.draft) {
+        const w = out.warnings || [];
+        trail.append(req.company.id, { kind: 'series_draft_check', subject: sid, userId: req.user.id, engine: out.model || null, dataHash: trail.fingerprint(req.company.id), detail: { series: request.series.name, topic: request.topic, lang: request.lang, numbers: (w.find((x) => x.code === 'unsupported_numbers') || {}).numbers || [], claims: (w.find((x) => x.code === 'company_claims') || {}).claims || [] } });
+      }
+      res.json(out);
     } catch (e) {
       if (!(e instanceof AiError)) throw e;
       console.error(`recs/draft: ${e.code}`, e.cause?.message ?? '');

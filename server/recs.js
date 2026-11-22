@@ -111,6 +111,19 @@ export function buildDraftPrompt({ company, series, topic, channel, lang, format
   return { system, messages: [{ role: 'user', content: user }] };
 }
 
+/** Pure, shared by the draft and the series approval: numbers in the words found neither in the topic nor in the facts. */
+export function unsupportedNumbers(texts, topic, facts) {
+  const known = new Set([topic || '', ...facts.map((f) => f.text)].join(' ').match(/\d+(?:[.,]\d+)*/g) || []);
+  const said = texts.join(' ').match(/\d+(?:[.,]\d+)*/g) || [];
+  return [...new Set(said.filter((x) => !known.has(x)))];
+}
+/** Pure, shared by the draft and the series approval: the statements about the company a person must check — every one
+ *  the model listed, except one copied word for word from an approved fact. */
+export function claimsToCheck(claims, facts) {
+  const factText = facts.map((f) => f.text).join(' \n ').toLowerCase();
+  return claims.filter((x) => x && !factText.includes(x.toLowerCase().replace(/[.!]+$/, '')));
+}
+
 /** Pure: the model's reply checked and capped. Warnings: numbers found neither in the topic nor in the facts, and every
  *  statement about the company itself (the model lists them; the user must check each against the approved facts). */
 export function checkDraft(reply, { topic }, facts) {
@@ -123,12 +136,9 @@ export function checkDraft(reply, { topic }, facts) {
   const visual = line(reply.visual, DRAFT.visual);
   const support = line(reply.support, DRAFT.support);
   const cta = line(reply.cta, DRAFT.cta);
-  const factText = facts.map((f) => f.text).join(' \n ').toLowerCase();
   // A claim copied word for word from an approved fact is supported; every other company statement is for the user to check.
-  const claims = (Array.isArray(reply.claims) ? reply.claims : []).map((x) => line(x, DRAFT.claim)).filter((x) => x && !factText.includes(x.toLowerCase().replace(/[.!]+$/, ''))).slice(0, DRAFT.claims);
-  const known = new Set([topic, ...facts.map((f) => f.text)].join(' ').match(/\d+(?:[.,]\d+)*/g) || []);
-  const said = [headline, support, ...points, caption].join(' ').match(/\d+(?:[.,]\d+)*/g) || [];
-  const numbers = [...new Set(said.filter((x) => !known.has(x)))];
+  const claims = claimsToCheck((Array.isArray(reply.claims) ? reply.claims : []).map((x) => line(x, DRAFT.claim)), facts).slice(0, DRAFT.claims);
+  const numbers = unsupportedNumbers([headline, support, ...points, caption], topic, facts);
   const warnings = [];
   if (numbers.length) warnings.push({ code: 'unsupported_numbers', numbers });
   if (claims.length) warnings.push({ code: 'company_claims', claims });
