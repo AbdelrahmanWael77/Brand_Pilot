@@ -1,7 +1,7 @@
 {
  "about": "Recommendations BrandPilot produces for the synthetic FlowNest demo company (rules engine, no AI). Pre-P1 version: commit fc8a772. recs[range][lang] = what the screens list (since P1: the server audit) for all data and the last 28 days; server = GET /api/companies/:id/audit. Rebuild: node scripts/flownest-baseline.mjs --write",
- "recordedAt": "2026-11-21",
- "commit": "5d67579",
+ "recordedAt": "2026-11-22",
+ "commit": "19b0e7f",
  "counts": {
   "sources": 6,
   "findings": 51,
@@ -56,6 +56,7 @@
       "m": "Enquiries ÷ visits on the landing page",
       "d": 21
      },
+     "step": "Send social media visitors to one focused page",
      "ev": [
       "37% of your visits come from your unpaid social media posts, but only 0.39% of these visitors get in touch, against 1.36% on average.",
       "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
@@ -123,6 +124,7 @@
       "m": "Mobile enquiries ÷ mobile visits",
       "d": 14
      },
+     "step": "Make the enquiry form easy on phones",
      "ev": [
       "62% of your visits come from phones, but only 0.81% of these visitors get in touch",
       "On a computer (desktop), 2.27% of visitors get in touch"
@@ -176,6 +178,7 @@
      "u": 3,
      "score": 9,
      "make": "task",
+     "step": "Settle one offer and use it everywhere",
      "ev": [
       "Sources disagree on the trial length: 14 days (Website — home page (EN)) vs 7 days (Company brochure 2024 (PDF text))"
      ],
@@ -235,6 +238,7 @@
       "m": "Enquiries ÷ visits on the page",
       "d": 21
      },
+     "step": "Fix the first screen of /pricing",
      "ev": [
       "1,676 visits (35% of all) start on /pricing, but only 0.42% of these visitors get in touch, against 1.36% on average."
      ],
@@ -290,6 +294,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "Record the source of every new lead",
      "ev": [
       "27% of 48 leads have an empty source field."
      ],
@@ -356,6 +361,7 @@
       "m": "Enquiries ÷ visits",
       "d": 21
      },
+     "step": "Use one main action button everywhere",
      "ev": [
       "“Start your free trial” — Website — home page (EN)",
       "“Contact sales” — Website — home page (EN)",
@@ -416,6 +422,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "Remove claims your sources cannot back",
      "ev": [
       "“The #1 task management tool in Egypt” — Company brochure 2024 (PDF text) (not approved)",
       "“Guaranteed to double your team's productivity” — Company brochure 2024 (PDF text) (not approved)"
@@ -471,6 +478,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "Answer the open questions about your company",
      "ev": [
       "Which alternatives do customers compare you with?"
      ],
@@ -538,6 +546,7 @@
       "m": "Link clicks ÷ reach",
       "d": 14
      },
+     "step": "Post more about your strongest topic",
      "ev": [
       "\"how-to tips\": engagement 4.5% of reach across 7 posts; link clicks 1.06% of reach",
       "Account average engagement: 3.1%; weakest theme \"offer\": 2.3%",
@@ -726,6 +735,7 @@
      "u": 1,
      "score": 6,
      "make": "task",
+     "step": "Make one page for each top search",
      "ev": [
       "\"برنامج إدارة المهام\": 5,652 impressions, 49 clicks (0.9%), average position 11.4",
       "\"task board for teams\": 4,506 impressions, 81 clicks (1.8%), average position 8.6",
@@ -922,6 +932,7 @@
      "u": 2,
      "score": 5,
      "make": "task",
+     "step": "Post on a steady weekly rhythm",
      "ev": [
       "No posts between 2026-09-06 and 2026-09-25.",
       "20 posts across 20 posting days in this period."
@@ -987,6 +998,7 @@
      "u": 2,
      "score": 5,
      "make": "task",
+     "step": "Find out why engagement fell",
      "ev": [
       "This period: 3.1% engagement per reach (20 posts)",
       "The period before: 4.1% (12 posts)",
@@ -1217,6 +1229,7 @@
      "u": 1,
      "score": 4,
      "make": "campaign",
+     "step": "Put more effort into email",
      "ev": [
       "Email: 8 enquiries from 265 visits (3.02%)",
       "Site average: 1.36% (65 enquiries from 4,774 visits)"
@@ -1284,6 +1297,7 @@
       "m": "الاستفسارات ÷ الزيارات في الصفحة المخصصة",
       "d": 21
      },
+     "step": "وجّه زوار السوشيال إلى صفحة واحدة مخصصة",
      "ev": [
       "37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.39% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.36% في المتوسط.",
       "فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور."
@@ -1351,6 +1365,7 @@
       "m": "استفسارات الموبايل ÷ زيارات الموبايل",
       "d": 14
      },
+     "step": "اجعل نموذج الاستفسار سهلاً على الجوال",
      "ev": [
       "62% من زياراتك تأتي من الجوال، لكن 0.81% فقط من هؤلاء الزوار يتواصلون معك",
       "على الكمبيوتر (سطح المكتب) يتواصل معك 2.27% من الزوار"
@@ -1404,6 +1419,7 @@
      "u": 3,
      "score": 9,
      "make": "task",
+     "step": "اعتمد عرضاً واحداً واستخدمه في كل مكان",
      "ev": [
       "Sources disagree on the trial length: 14 days (Website — home page (EN)) vs 7 days (Company brochure 2024 (PDF text))"
      ],
@@ -1463,6 +1479,7 @@
       "m": "الاستفسارات ÷ الزيارات في الصفحة",
       "d": 21
      },
+     "step": "أصلح الشاشة الأولى في صفحة /pricing",
      "ev": [
       "1,676 زيارة (35% من الكل) تبدأ من /pricing، لكن 0.42% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.36% في المتوسط."
      ],
@@ -1518,6 +1535,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "سجّل مصدر كل عميل محتمل جديد",
      "ev": [
       "27% من 48 عميل محتمل حقل المصدر لديهم فارغ."
      ],
@@ -1584,6 +1602,7 @@
       "m": "الاستفسارات ÷ الزيارات",
       "d": 21
      },
+     "step": "استخدم زر إجراء رئيسياً واحداً في كل مكان",
      "ev": [
       "“Start your free trial” — Website — home page (EN)",
       "“Contact sales” — Website — home page (EN)",
@@ -1644,6 +1663,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "احذف الادعاءات التي لا تدعمها مصادرك",
      "ev": [
       "“The #1 task management tool in Egypt” — Company brochure 2024 (PDF text) (غير معتمدة)",
       "“Guaranteed to double your team's productivity” — Company brochure 2024 (PDF text) (غير معتمدة)"
@@ -1699,6 +1719,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "أجب عن الأسئلة المفتوحة عن شركتك",
      "ev": [
       "ما البدائل التي يقارنك بها العملاء؟"
      ],
@@ -1766,6 +1787,7 @@
       "m": "نقرات الروابط ÷ الوصول",
       "d": 14
      },
+     "step": "انشر أكثر عن أقوى موضوع لديك",
      "ev": [
       "«how-to tips»: التفاعل 4.5% من الوصول عبر 7 منشور؛ نقرات الروابط 1.06% من الوصول",
       "متوسط تفاعل الحساب: 3.1%؛ أضعف موضوع «offer»: 2.3%",
@@ -1954,6 +1976,7 @@
      "u": 1,
      "score": 6,
      "make": "task",
+     "step": "أنشئ صفحة لكل بحث مهم",
      "ev": [
       "«برنامج إدارة المهام»: 5,652 ظهور، 49 نقرة (0.9%)، متوسط المركز 11.4",
       "«task board for teams»: 4,506 ظهور، 81 نقرة (1.8%)، متوسط المركز 8.6",
@@ -2150,6 +2173,7 @@
      "u": 2,
      "score": 5,
      "make": "task",
+     "step": "انشر بانتظام كل أسبوع",
      "ev": [
       "لا توجد منشورات بين 2026-09-06 و 2026-09-25.",
       "20 منشور في 20 يوم نشر في هذه الفترة."
@@ -2215,6 +2239,7 @@
      "u": 2,
      "score": 5,
      "make": "task",
+     "step": "اعرف سبب تراجع التفاعل",
      "ev": [
       "هذه الفترة: 3.1% تفاعل لكل وصول (20 منشور)",
       "الفترة السابقة: 4.1% (12 منشور)",
@@ -2445,6 +2470,7 @@
      "u": 1,
      "score": 4,
      "make": "campaign",
+     "step": "ضع جهداً أكبر في البريد",
      "ev": [
       "البريد: 8 استفسار من 265 زيارة (3.02%)",
       "متوسط الموقع: 1.36% (65 استفسار من 4,774 زيارة)"
@@ -2514,6 +2540,7 @@
       "m": "Enquiries ÷ visits on the landing page",
       "d": 21
      },
+     "step": "Send social media visitors to one focused page",
      "ev": [
       "37% of your visits come from your unpaid social media posts, but only 0.24% of these visitors get in touch, against 1.32% on average.",
       "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
@@ -2581,6 +2608,7 @@
       "m": "Mobile enquiries ÷ mobile visits",
       "d": 14
      },
+     "step": "Make the enquiry form easy on phones",
      "ev": [
       "62% of your visits come from phones, but only 0.80% of these visitors get in touch",
       "On a computer (desktop), 2.17% of visitors get in touch"
@@ -2634,6 +2662,7 @@
      "u": 3,
      "score": 9,
      "make": "task",
+     "step": "Settle one offer and use it everywhere",
      "ev": [
       "Sources disagree on the trial length: 14 days (Website — home page (EN)) vs 7 days (Company brochure 2024 (PDF text))"
      ],
@@ -2693,6 +2722,7 @@
       "m": "Enquiries ÷ visits on the page",
       "d": 21
      },
+     "step": "Fix the first screen of /pricing",
      "ev": [
       "4,965 visits (35% of all) start on /pricing, but only 0.40% of these visitors get in touch, against 1.32% on average."
      ],
@@ -2748,6 +2778,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "Record the source of every new lead",
      "ev": [
       "30% of 151 leads have an empty source field."
      ],
@@ -2814,6 +2845,7 @@
       "m": "Enquiries ÷ visits",
       "d": 21
      },
+     "step": "Use one main action button everywhere",
      "ev": [
       "“Start your free trial” — Website — home page (EN)",
       "“Contact sales” — Website — home page (EN)",
@@ -2874,6 +2906,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "Remove claims your sources cannot back",
      "ev": [
       "“The #1 task management tool in Egypt” — Company brochure 2024 (PDF text) (not approved)",
       "“Guaranteed to double your team's productivity” — Company brochure 2024 (PDF text) (not approved)"
@@ -2929,6 +2962,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "Answer the open questions about your company",
      "ev": [
       "Which alternatives do customers compare you with?"
      ],
@@ -3006,6 +3040,7 @@
       "m": "Qualified leads ÷ leads from the campaign",
       "d": 21
      },
+     "step": "Run a campaign for your strongest segment",
      "ev": [
       "Agencies: 38% qualified (32 leads)",
       "Retail: 29% qualified (35 leads)",
@@ -3079,6 +3114,7 @@
       "m": "Link clicks ÷ reach",
       "d": 14
      },
+     "step": "Post more about your strongest topic",
      "ev": [
       "\"how-to tips\": engagement 5.3% of reach across 20 posts; link clicks 1.06% of reach",
       "Account average engagement: 3.8%; weakest theme \"product update\": 1.6%",
@@ -3330,6 +3366,7 @@
      "u": 1,
      "score": 6,
      "make": "campaign",
+     "step": "Put more effort into email",
      "ev": [
       "Email: 21 enquiries from 777 visits (2.70%)",
       "Site average: 1.32% (189 enquiries from 14,303 visits)"
@@ -3395,6 +3432,7 @@
      "u": 1,
      "score": 6,
      "make": "task",
+     "step": "Make one page for each top search",
      "ev": [
       "\"برنامج إدارة المهام\": 17,036 impressions, 146 clicks (0.9%), average position 11.3",
       "\"task board for teams\": 13,672 impressions, 241 clicks (1.8%), average position 8.5",
@@ -3525,6 +3563,7 @@
      "u": 2,
      "score": 5,
      "make": "task",
+     "step": "Post on a steady weekly rhythm",
      "ev": [
       "No posts between 2026-09-06 and 2026-09-25.",
       "56 posts across 56 posting days in the import."
@@ -3590,6 +3629,7 @@
      "u": 2,
      "score": 5,
      "make": "task",
+     "step": "Find out why engagement fell",
      "ev": [
       "Last 28 days: 3.1% engagement per reach (20 posts)",
       "Earlier baseline: 4.2% (36 posts)",
@@ -3820,6 +3860,7 @@
      "u": 1,
      "score": 4,
      "make": "campaign",
+     "step": "Grow your best source of leads",
      "ev": [
       "Referral: 12 of 21 leads qualified (57%)",
       "All leads: 30% qualified (151 leads)"
@@ -3887,6 +3928,7 @@
       "m": "الاستفسارات ÷ الزيارات في الصفحة المخصصة",
       "d": 21
      },
+     "step": "وجّه زوار السوشيال إلى صفحة واحدة مخصصة",
      "ev": [
       "37% من زياراتك تأتي من منشوراتك على السوشيال، لكن 0.24% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.32% في المتوسط.",
       "فرضية وليست قياساً: المنشورات ترسل الزوار إلى صفحات لا تطابق ما وعد به المنشور."
@@ -3954,6 +3996,7 @@
       "m": "استفسارات الموبايل ÷ زيارات الموبايل",
       "d": 14
      },
+     "step": "اجعل نموذج الاستفسار سهلاً على الجوال",
      "ev": [
       "62% من زياراتك تأتي من الجوال، لكن 0.80% فقط من هؤلاء الزوار يتواصلون معك",
       "على الكمبيوتر (سطح المكتب) يتواصل معك 2.17% من الزوار"
@@ -4007,6 +4050,7 @@
      "u": 3,
      "score": 9,
      "make": "task",
+     "step": "اعتمد عرضاً واحداً واستخدمه في كل مكان",
      "ev": [
       "Sources disagree on the trial length: 14 days (Website — home page (EN)) vs 7 days (Company brochure 2024 (PDF text))"
      ],
@@ -4066,6 +4110,7 @@
       "m": "الاستفسارات ÷ الزيارات في الصفحة",
       "d": 21
      },
+     "step": "أصلح الشاشة الأولى في صفحة /pricing",
      "ev": [
       "4,965 زيارة (35% من الكل) تبدأ من /pricing، لكن 0.40% فقط من هؤلاء الزوار يتواصلون معك، مقابل 1.32% في المتوسط."
      ],
@@ -4121,6 +4166,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "سجّل مصدر كل عميل محتمل جديد",
      "ev": [
       "30% من 151 عميل محتمل حقل المصدر لديهم فارغ."
      ],
@@ -4187,6 +4233,7 @@
       "m": "الاستفسارات ÷ الزيارات",
       "d": 21
      },
+     "step": "استخدم زر إجراء رئيسياً واحداً في كل مكان",
      "ev": [
       "“Start your free trial” — Website — home page (EN)",
       "“Contact sales” — Website — home page (EN)",
@@ -4247,6 +4294,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "احذف الادعاءات التي لا تدعمها مصادرك",
      "ev": [
       "“The #1 task management tool in Egypt” — Company brochure 2024 (PDF text) (غير معتمدة)",
       "“Guaranteed to double your team's productivity” — Company brochure 2024 (PDF text) (غير معتمدة)"
@@ -4302,6 +4350,7 @@
      "u": 2,
      "score": 8,
      "make": "task",
+     "step": "أجب عن الأسئلة المفتوحة عن شركتك",
      "ev": [
       "ما البدائل التي يقارنك بها العملاء؟"
      ],
@@ -4379,6 +4428,7 @@
       "m": "المؤهلون ÷ عملاء الحملة",
       "d": 21
      },
+     "step": "نفّذ حملة لأقوى شريحة عملاء",
      "ev": [
       "Agencies: 38% مؤهلون (32 عميل محتمل)",
       "Retail: 29% مؤهلون (35 عميل محتمل)",
@@ -4452,6 +4502,7 @@
       "m": "نقرات الروابط ÷ الوصول",
       "d": 14
      },
+     "step": "انشر أكثر عن أقوى موضوع لديك",
      "ev": [
       "«how-to tips»: التفاعل 5.3% من الوصول عبر 20 منشور؛ نقرات الروابط 1.06% من الوصول",
       "متوسط تفاعل الحساب: 3.8%؛ أضعف موضوع «product update»: 1.6%",
@@ -4703,6 +4754,7 @@
      "u": 1,
      "score": 6,
      "make": "campaign",
+     "step": "ضع جهداً أكبر في البريد",
      "ev": [
       "البريد: 21 استفسار من 777 زيارة (2.70%)",
       "متوسط الموقع: 1.32% (189 استفسار من 14,303 زيارة)"
@@ -4768,6 +4820,7 @@
      "u": 1,
      "score": 6,
      "make": "task",
+     "step": "أنشئ صفحة لكل بحث مهم",
      "ev": [
       "«برنامج إدارة المهام»: 17,036 ظهور، 146 نقرة (0.9%)، متوسط المركز 11.3",
       "«task board for teams»: 13,672 ظهور، 241 نقرة (1.8%)، متوسط المركز 8.5",
@@ -4898,6 +4951,7 @@
      "u": 2,
      "score": 5,
      "make": "task",
+     "step": "انشر بانتظام كل أسبوع",
      "ev": [
       "لا توجد منشورات بين 2026-09-06 و 2026-09-25.",
       "56 منشور في 56 يوم نشر ضمن الاستيراد."
@@ -4963,6 +5017,7 @@
      "u": 2,
      "score": 5,
      "make": "task",
+     "step": "اعرف سبب تراجع التفاعل",
      "ev": [
       "آخر 28 يوماً: 3.1% تفاعل لكل وصول (20 منشور)",
       "المستوى السابق: 4.2% (36 منشور)",
@@ -5193,6 +5248,7 @@
      "u": 1,
      "score": 4,
      "make": "campaign",
+     "step": "نمِّ أفضل مصدر لعملائك المحتملين",
      "ev": [
       "Referral: 12 من 21 عميل محتمل مؤهلون (57%)",
       "كل العملاء المحتملين: 30% مؤهلون (151 عميل محتمل)"
@@ -5268,6 +5324,7 @@
      "m": "Enquiries ÷ visits on the landing page",
      "d": 21
     },
+    "step": "Send social media visitors to one focused page",
     "ev": [
      "37% of your visits come from your unpaid social media posts, but only 0.24% of these visitors get in touch, against 1.32% on average.",
      "Hypothesis, not a measurement: posts send people to pages that do not match what the post promised."
@@ -5335,6 +5392,7 @@
      "m": "Mobile enquiries ÷ mobile visits",
      "d": 14
     },
+    "step": "Make the enquiry form easy on phones",
     "ev": [
      "62% of your visits come from phones, but only 0.80% of these visitors get in touch",
      "On a computer (desktop), 2.17% of visitors get in touch"
@@ -5388,6 +5446,7 @@
     "u": 3,
     "score": 9,
     "make": "task",
+    "step": "Settle one offer and use it everywhere",
     "ev": [
      "Sources disagree on the trial length: 14 days (Website — home page (EN)) vs 7 days (Company brochure 2024 (PDF text))"
     ],
@@ -5447,6 +5506,7 @@
      "m": "Enquiries ÷ visits on the page",
      "d": 21
     },
+    "step": "Fix the first screen of /pricing",
     "ev": [
      "4,965 visits (35% of all) start on /pricing, but only 0.40% of these visitors get in touch, against 1.32% on average."
     ],
@@ -5502,6 +5562,7 @@
     "u": 2,
     "score": 8,
     "make": "task",
+    "step": "Record the source of every new lead",
     "ev": [
      "30% of 151 leads have an empty source field."
     ],
@@ -5568,6 +5629,7 @@
      "m": "Enquiries ÷ visits",
      "d": 21
     },
+    "step": "Use one main action button everywhere",
     "ev": [
      "“Start your free trial” — Website — home page (EN)",
      "“Contact sales” — Website — home page (EN)",
@@ -5628,6 +5690,7 @@
     "u": 2,
     "score": 8,
     "make": "task",
+    "step": "Remove claims your sources cannot back",
     "ev": [
      "“The #1 task management tool in Egypt” — Company brochure 2024 (PDF text) (not approved)",
      "“Guaranteed to double your team's productivity” — Company brochure 2024 (PDF text) (not approved)"
@@ -5683,6 +5746,7 @@
     "u": 2,
     "score": 8,
     "make": "task",
+    "step": "Answer the open questions about your company",
     "ev": [
      "Which alternatives do customers compare you with?"
     ],
@@ -5760,6 +5824,7 @@
      "m": "Qualified leads ÷ leads from the campaign",
      "d": 21
     },
+    "step": "Run a campaign for your strongest segment",
     "ev": [
      "Agencies: 38% qualified (32 leads)",
      "Retail: 29% qualified (35 leads)",
@@ -5833,6 +5898,7 @@
      "m": "Link clicks ÷ reach",
      "d": 14
     },
+    "step": "Post more about your strongest topic",
     "ev": [
      "\"how-to tips\": engagement 5.3% of reach across 20 posts; link clicks 1.06% of reach",
      "Account average engagement: 3.8%; weakest theme \"product update\": 1.6%",
@@ -6084,6 +6150,7 @@
     "u": 1,
     "score": 6,
     "make": "campaign",
+    "step": "Put more effort into email",
     "ev": [
      "Email: 21 enquiries from 777 visits (2.70%)",
      "Site average: 1.32% (189 enquiries from 14,303 visits)"
@@ -6149,6 +6216,7 @@
     "u": 1,
     "score": 6,
     "make": "task",
+    "step": "Make one page for each top search",
     "ev": [
      "\"برنامج إدارة المهام\": 17,036 impressions, 146 clicks (0.9%), average position 11.3",
      "\"task board for teams\": 13,672 impressions, 241 clicks (1.8%), average position 8.5",
@@ -6279,6 +6347,7 @@
     "u": 2,
     "score": 5,
     "make": "task",
+    "step": "Post on a steady weekly rhythm",
     "ev": [
      "No posts between 2026-09-06 and 2026-09-25.",
      "56 posts across 56 posting days in the import."
@@ -6344,6 +6413,7 @@
     "u": 2,
     "score": 5,
     "make": "task",
+    "step": "Find out why engagement fell",
     "ev": [
      "Last 28 days: 3.1% engagement per reach (20 posts)",
      "Earlier baseline: 4.2% (36 posts)",
@@ -6574,6 +6644,7 @@
     "u": 1,
     "score": 4,
     "make": "campaign",
+    "step": "Grow your best source of leads",
     "ev": [
      "Referral: 12 of 21 leads qualified (57%)",
      "All leads: 30% qualified (151 leads)"

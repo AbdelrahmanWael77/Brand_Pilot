@@ -428,7 +428,8 @@
     const ss = serOf(c), R_ = typeof nxRun === 'function' ? nxRun(c) : { recs: [] }, all = creativesOf(c);
     const head = ph(L('AI Content Series', 'سلاسل المحتوى الذكية'), L('Recurring branded posts in your own signature style. Teach BrandPilot how a series looks, give it a topic, approve a finished post.', 'منشورات متكررة بأسلوب علامتك المميز. علّم BrandPilot شكل السلسلة، أعطه موضوعاً، واعتمد منشوراً جاهزاً.'), `<button class="btn pri" data-a="sxNewT">${ic('plus', 16)}${L('New series', 'سلسلة جديدة')}</button>`);
     // P7 (owner 2026-11-21): the form opens after "New series"; with no series yet, one line and the button
-    const setup = S.ui.sxNew ? setupHTML(c, false) : !ss.length ? `<section class="card sx-empty7"><p>${L('No series yet. Create one to make recurring posts with one look.', 'لا سلاسل بعد. أنشئ سلسلة لتصنع منشورات متكررة بمظهر واحد.')}</p><button class="btn pri" data-a="sxNewT">${ic('plus', 16)}${L('New series', 'سلسلة جديدة')}</button></section>` : '';
+    // P7 (owner 2026-11-22): with no series yet, one line, "Create your first series" and the kinds of series as starting options
+    const setup = S.ui.sxNew ? setupHTML(c, false) : !ss.length ? `<section class="card sx-empty7"><p>${L('A series is a kind of post you make again and again, always with the same look.', 'السلسلة نوع من المنشورات تنشره مرة بعد مرة، دائماً بالمظهر نفسه.')}</p><button class="btn pri" data-a="sxNewT">${ic('plus', 16)}${L('Create your first series', 'أنشئ سلسلتك الأولى')}</button></section><section class="sx-start7" aria-labelledby="sx7h"><h2 id="sx7h">${L('Or start from a kind of series', 'أو ابدأ من نوع سلسلة')}</h2><ul>${TYPES().filter((t) => t[0] !== 'other').slice(0, 6).map((t) => `<li><button data-a="sxType7" data-v="${esc(t[0])}">${ic(t[5] || 'file', 18)}<span><b>${t[1]}</b><small>${t[2]}</small></span></button></li>`).join('')}</ul></section>` : '';
     const cards = ss.map((s) => {
       const st = fixStyle(styleOf(c, s)), mine = all.filter((k) => k.sid === s.id), refs = refsOf(c, s.id), rec = R_.recs.find((r) => r.sid === s.id), d = draftsOf(c)[s.id];
       const pics = mine.slice(-3).reverse().map((k) => cvHTML('h-' + k.id, specOf(c, s, k, { ill: k.ill, layout: k.layout, made: k.made }, 0, k.st), 0.3, k.copy.l1)).concat(refs.slice(-3).map((x) => `<img src="${media(c, x.img).data}" alt="${esc(L('Reference post', 'منشور مرجعي'))}" loading="lazy">`)).slice(0, 3);
@@ -922,6 +923,8 @@
     sxKnowOpen() { const f = SX.form || (SX.form = {}); f.knowOpen = !f.knowOpen; R(); },
     sxKindOpen() { const f = SX.form || (SX.form = {}); f.kindOpen = !f.kindOpen; R(); },
     sxNewT() { S.ui.sxNew = !S.ui.sxNew; R(); },
+    // P7: a kind picked on the empty page opens the form with that kind chosen
+    sxType7(v) { const f = SX.form || (SX.form = { name: '', purpose: '', channel: 'linkedin', objective: 'engagement', kind: '', audience: '', sources: [] }); const T = TYPES().find((t) => t[0] === v); if (T) { f.type = v; f.kind = T[3]; f.kindOff = false; f.srcMode = T[4]; f.sources = []; if (T[6] && !String(f.purpose || '').trim()) { f.purpose = T[6].replace('{topic}', L('this topic', 'هذا الموضوع')); f.purposeAuto = true; } } S.ui.sxNew = true; R(); },
     sxSug(v, el) {
       const f = el.closest('form'), k = el.dataset.k;
       if (!f || !f.elements[k]) return;

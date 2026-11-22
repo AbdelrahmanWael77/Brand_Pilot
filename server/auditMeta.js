@@ -1,4 +1,4 @@
-import { chPlain } from './plain.js';
+import { chPlain, chShort } from './plain.js';
 /**
  * P1 (2026-11-19): what turns a server audit item into a recommendation every screen can show and defend.
  *
@@ -300,6 +300,27 @@ function meta(id, L, x) {
     'pf-old': { cls: 'obs', obj: o.trust, metric: L('Year of latest project', 'سنة أحدث مشروع'), need: L('Recent projects', 'مشاريع حديثة'), v: 1, f: 1, u: 1, make: 'task' },
   };
   const r = M[id] || { cls: 'obs', obj: o.enq, metric: '', need: '', v: 1, f: 1, u: 1, make: 'task' };
+  // P7 (owner 2026-11-22): the next step in one short line (about 10 words); the full action stays in `action`
+  const sh = L(chShort(s, 'en'), chShort(s, 'ar'));
+  const STEP = {
+    'ch-leak': L(`Send ${sh} visitors to one focused page`, `وجّه زوار ${sh} إلى صفحة واحدة مخصصة`),
+    'ch-best': L(`Put more effort into ${sh}`, `ضع جهداً أكبر في ${sh}`),
+    'mobile-gap': L('Make the enquiry form easy on phones', 'اجعل نموذج الاستفسار سهلاً على الجوال'),
+    'page-leak': L(`Fix the first screen of ${s}`, `أصلح الشاشة الأولى في صفحة ${s}`),
+    'src-unknown': L('Record the source of every new lead', 'سجّل مصدر كل عميل محتمل جديد'),
+    'cta-mix': L('Use one main action button everywhere', 'استخدم زر إجراء رئيسياً واحداً في كل مكان'),
+    'offer-conflict': L('Settle one offer and use it everywhere', 'اعتمد عرضاً واحداً واستخدمه في كل مكان'),
+    claims: L('Remove claims your sources cannot back', 'احذف الادعاءات التي لا تدعمها مصادرك'),
+    'know-gaps': L('Answer the open questions about your company', 'أجب عن الأسئلة المفتوحة عن شركتك'),
+    'theme-best': L('Post more about your strongest topic', 'انشر أكثر عن أقوى موضوع لديك'),
+    cadence: L('Post on a steady weekly rhythm', 'انشر بانتظام كل أسبوع'),
+    'eng-drop': L('Find out why engagement fell', 'اعرف سبب تراجع التفاعل'),
+    'seo-q': L('Make one page for each top search', 'أنشئ صفحة لكل بحث مهم'),
+    'src-best': L('Grow your best source of leads', 'نمِّ أفضل مصدر لعملائك المحتملين'),
+    'src-lowq': L('Add one qualifying question to the form', 'أضف سؤال تأهيل واحداً إلى النموذج'),
+    'seg-best': L('Run a campaign for your strongest segment', 'نفّذ حملة لأقوى شريحة عملاء'),
+  };
+  if (STEP[id]) r.step = STEP[id];
   if (id.startsWith('pf-')) r.plat = L('Company CV & portfolio', 'السيرة المؤسسية والمشاريع');
   return r;
 }
@@ -354,6 +375,7 @@ export function decorate(items, ctx) {
       // a check that could not run is not something to act on: no campaign or experiment from it
       make: rule ? null : m.make,
       ...(m.exp && !rule ? { exp: m.exp } : {}),
+      ...(m.step && !rule ? { step: m.step } : {}),
       ...(x.seg ? { seg: x.seg } : {}),
       ev: (x.evidence || []).map((v) => v.text),
       conf: conf.level,

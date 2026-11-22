@@ -238,7 +238,7 @@ test('route: an AI answer with true numbers is verified; one whose main claim is
     assert.deepEqual(bad.body.check.reason, { code: 'unverified', raw: '3.4%' });
     const rows = trailOf(a.db, a.co, 'answer');
     assert.deepEqual(rows.map((r) => r.detail.check.blocked), [false, true]);
-    assert.equal(rows[0].prompt_version, 'director-2026-11-21b');
+    assert.equal(rows[0].prompt_version, 'director-2026-11-22');
   } finally { a.close(); }
 });
 

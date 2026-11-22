@@ -209,3 +209,43 @@ For each screen: **5 s?** can a new user tell what it is for in 5 seconds · **D
 **Admin role (handoff):** Settings → Advanced is collapsed by default and visible to every signed-in account owner.
 A real admin role (who may see and change the AI model, AI files and import history) needs a server change and is
 left for later.
+
+---
+
+## Checkpoint 2, part 2 (2026-11-22): palette 2, navigation and the new screens
+
+Palette 2 (deep teal `#0F6E68`, coral accent `#E07A5F`) is the app's palette. Navigation: the light sidebar with groups
+(part 1). For each screen: **5 s?** · **Distracting?** · **What else to remove** (and whether it was removed).
+
+| Screen | What changed | 5 s? | Distracting? | What else to remove |
+|---|---|---|---|---|
+| Home | The next step is one short line ("Send social media visitors to one focused page"); the full action is in "See why" | Yes | No | — |
+| Ask | Answers: numbered steps each with "Add to my tasks"; the prompt now asks for possible reasons, no forecasts, no ranking by estimated impact | Yes | No | — |
+| Recommendations | Unchanged since part 1 (one-line notice, 3 filters, simple rows) | Yes | The amber notice (meant to be seen) | — |
+| My tasks | Active / Completed; one row per task: title, where it came from, one action (Plan it / Open plan), the rest under ⋯; the weekly review below | Yes | No | The "History and setup checklist" fold |
+| Track record | Its own page: the note under the title, the score card, one row per step with its outcome on the right; the demo label once | Yes | The demo explanation box (required: demo data must be labelled) | The per-step dates (hidden) |
+| Campaigns | A list: one line per campaign with a plain status and "Open"; "New campaign"; "Make a single post instead" is a quiet link | Yes | No | — |
+| New campaign | One box "What is your campaign about?", "Create drafts", up to 3 next steps to start from. From a recommendation this screen is skipped | Yes | No | — |
+| Review drafts | Draft list (name and status), a large preview, "Edit" and "Remove"; a problem shows on the draft with "Fix"; bottom bar "N things need you before download" / "Fix first" and "Approve and download" (records the strategy approval on the server, then downloads); "Campaign details" and "All checks" are small links | Yes | No | — |
+| Results | 3 numbers, one chart with a Visits / Enquiries / Qualified leads switch, the channel table with only the problem row marked; "More detail" opens the earlier page | Yes | No | — |
+| Leads | 3 numbers, one chart (Leads / Qualified), lead sources; a source with fewer than 15 leads says "Not enough data yet (needs 15 leads, has N)"; "More detail" opens the earlier page | Yes | No | — |
+| Content series | With no series: one line, "Create your first series", six kinds of series as starting options (a kind opens the form with it chosen) | Yes | No | The creation form is still one page (see open items) |
+| Company info, Reports, Sources, Data, Settings | As in checkpoint 2 v1 (one line under the title, light bands, plain words); Settings has a Language section | Yes | — | — |
+
+### Where things went (part 2)
+
+| Item | Before | Now |
+|---|---|---|
+| Campaign Studio on opening Campaigns | the last campaign's editor | the Campaigns list; a campaign opens on Review drafts |
+| The draft editor (words, look, picture) | Studio → Drafts | Review drafts → Edit |
+| Step bar (Brief → Drafts → Check & download) | Studio | the editor and Check & download (Review drafts links "All checks") |
+| Detailed Results (platform tabs, compare channels, funnel) | Results | Results → More detail |
+| Detailed Leads (definitions, experiments, funnels) | Leads | Leads → More detail |
+| Track record | end of Recommendations | Next steps → Track record |
+| Guide progress ("Step 3 of 7") | header button | inside the guide panel |
+
+### Open items
+
+- Content series creation is still one form with numbered sections, not the 3-step flow (Name and type → Past posts →
+  Approve the style); the series page and post review are unchanged.
+- Review drafts shows checks the browser and the server agree on; per-draft fixes open the editor for that draft.

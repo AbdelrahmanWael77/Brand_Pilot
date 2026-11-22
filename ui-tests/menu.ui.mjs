@@ -17,13 +17,13 @@ export const MENU_FEATURES = {
     track: ['[data-track-card]'], // the track record, its own page since P7
   } },
   content: { label: 'Content', group: 'content', tabs: {
-    studio: ['[data-a=campNew], [data-a=stHome]'], // Studio home, or the open campaign with its way back
+    studio: ['[data-a=campNew7]', '[data-a=campOpen]'], // P7: the campaigns list: New campaign, and one row per campaign
     series: ['[data-a=sxNewT]'], // the creation form opens after "New series"
     qa: ['[data-a=approveAll]', '#cdl [data-a=ex][data-v=zip]', '#cdl [data-a=ex][data-v=strategy]', '#cdl [data-a=ex][data-v=calendar]', '#cdl [data-a=ex][data-v=campjson]', '#cdl [data-a=jCamp]'], // reached from the step bar
   } },
   perf: { label: 'Performance', group: 'perf', tabs: {
-    analytics: ['[data-a=pl]', '[data-c=mt]'], // platform tabs, trend metric
-    growth: ['[data-c=def]', 'form[data-s=expAdd]'], // lead definitions, experiments
+    analytics: ['.k7g', '[data-a=r7m]', '.tb7', '[data-a=r7old]'], // P7: 3 numbers, chart switch, channel table; the detailed page (platform tabs, trend metric) is behind More detail
+    growth: ['.k7g', '[data-a=l7m]', '.tb7', '[data-a=l7old]'], // P7: 3 numbers, chart switch, lead sources; lead definitions and experiments are behind More detail
     reports: ['[data-a=ex][data-v=audit]', '[data-a=repPreview]', '[data-a=repSave]', '[data-a=repSched]', '[data-a=repDl]', '[data-a=repPrint]', '[data-a=repRange]', '[data-a=ex][data-v=exec]'],
   } },
   co: { label: 'Company', group: 'co', tabs: {
@@ -56,7 +56,7 @@ test('every row and page of the new menu opens by clicking, with its features', 
       else await page.click(`#gside [data-a=navG][data-v="${group}"]`); // a group opens its first page
       await page.waitForTimeout(400);
       for (const [view, sels] of Object.entries(tabs)) {
-        if (view === 'qa') { await page.click('#gside .gs-s[data-v=studio]'); await page.waitForTimeout(400); await page.click('main [data-a=jCamp][data-v$="|qa"]'); }
+        if (view === 'qa') { await page.click('#gside .gs-s[data-v=studio]'); await page.waitForTimeout(400); await page.click('main [data-a=campOpen]'); await page.waitForTimeout(400); await page.click('main [data-a=go][data-v=qa]'); } // Review drafts → All checks
         else if (group) await page.click(`#gside .gs-s[data-v="${view}"]`);
         await page.waitForTimeout(400);
         assert.equal(await page.evaluate(() => S.ui.view), view, `${label} → ${view}`);

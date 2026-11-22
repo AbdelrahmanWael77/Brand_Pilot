@@ -138,6 +138,7 @@ export function buildPrompt(context, question, lang, history = []) {
     'A KPI whose value is null was not measured: say so, never treat it as zero. An audit item with basis "insufficient" is not a conclusion: it says which input is missing. When an item is marked "synthetic", say that the advice rests on demo data.',
     'If the context cannot answer the question, set "insufficient" to true and say in "answer" what is missing; do not guess.',
     '<history> holds the earlier questions and answers of this conversation, oldest first. Use it ONLY to understand what the new question refers to (for example "and on LinkedIn?" or "why?"). Earlier answers are not a source: every claim still needs ids from <context>.',
+    'Never state a cause as a fact: when you explain why something happened, call it a possible reason. Never give forecasts, projections or estimated future numbers, and never rank actions by estimated impact.',
     'Write for a marketing manager, in plain words: say "visits" (never "sessions"), "action button" (never "CTA"), and name channels in plain words, never by their analytics names: Organic Social = your unpaid social media posts; Organic Search = unpaid Google search; Direct = direct visits; Referral = referral links; Email = email; Paid Social = paid social media ads; Paid Search = paid search ads. The support ids keep the names exactly as they are in the context.',
     ...(lang === 'ar' ? ['Write the Arabic answer in plain Modern Standard Arabic and address the reader in the singular (أنت), never the plural (أنتم). Quote approved wording such as offers and calls to action as it is written in the context.', ARABIC_GLOSSARY] : []),
     'Every number you write is checked by the server against <context> for this period: copy numbers exactly as they are in the context (you may round them, for example 1.3615% to 1.36% or 1.4%), never compute new ones except a change between the current and the previous period, and say "previous period" whenever you quote a number of it. A claim whose numbers cannot be found is shown as unverified, and an answer whose main claim cannot be verified is not shown.',
@@ -246,7 +247,7 @@ export function isEmptyContext(context) {
  * → `{ answer, support: [{ type, id, text, synthetic }], insufficient, unsupported, synthetic, model, next, needs? }`
  */
 /** P5: changes whenever buildPrompt's instructions change; stored with every AI answer in the audit trail. */
-export const PROMPT_VERSION = 'director-2026-11-21b'; // P3: structured claims, every number checked; Arabic glossary (P7: plain words, channels in plain words)
+export const PROMPT_VERSION = 'director-2026-11-22'; // P3: structured claims, every number checked; Arabic glossary (P7: plain words, channels in plain words, possible reasons, no forecasts)
 
 export async function ask(db, ai, companyId, { question, lang = 'en', range = '28', history = [] }) {
   const context = buildContext(db, companyId, { range });

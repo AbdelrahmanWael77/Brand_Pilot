@@ -12,6 +12,18 @@ export const CHANNEL_PLAIN = {
   Email: ['email', 'البريد'],
 };
 
+/** A short channel word for one-line next steps ("Send social media visitors to one focused page"). */
+export const CHANNEL_SHORT = {
+  'Organic Social': ['social media', 'السوشيال'],
+  'Organic Search': ['Google search', 'البحث في جوجل'],
+  'Paid Social': ['paid social', 'إعلانات السوشيال'],
+  'Paid Search': ['paid search', 'إعلانات البحث'],
+  Direct: ['direct', 'الدخول المباشر'],
+  Referral: ['referral', 'روابط الإحالة'],
+  Email: ['email', 'البريد'],
+};
+export const chShort = (name, lang) => { const x = CHANNEL_SHORT[name]; return x ? x[lang === 'ar' ? 1 : 0] : name; };
+
 /** The plain name of a channel in a language; an unknown name is returned as it is. */
 export const chPlain = (name, lang) => {
   const x = CHANNEL_PLAIN[name];

@@ -35,7 +35,7 @@ test('Home, Growth, Insights, the server metrics and the report agree for the sa
           // what the user actually reads, formatted by the page
           shown: {
             homeSessions: home.includes(fmt(m.kpis.sessions.value)),
-            growthRate: growth.includes(pc(m.kpis.enquiries.value, m.kpis.sessions.value, 2)),
+            growthRate: growth.includes(fmt(m.kpis.leads.value)), // P7: Leads shows leads, qualified leads and their share
             insightsRate: insights.includes(`Site average: ${(m.kpis.enquiry_rate.value * 100).toFixed(2)}%`),
           },
         };

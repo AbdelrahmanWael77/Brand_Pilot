@@ -57,7 +57,7 @@ test('Q3 "Give me a campaign I can use" in ≤ 2 clicks: Next steps → Create c
       await click('#gside [data-a=navG][data-v=next]'); // P7: the Next steps group opens Recommendations
       await page.waitForFunction(() => document.querySelector('main .ns-list [data-a=recCamp]'), null, { timeout: 15000 });
       await click('main .ns-list [data-a=recCamp]');
-      const r = await page.evaluate(() => { const k = C().campaigns[C().campaigns.length - 1]; return { view: S.ui.view, n: C().campaigns.length, assets: k ? k.assets.length : 0, langs: k ? [...new Set(k.assets.map((a) => a.lang))].sort() : [], drafts: k ? k.assets.every((a) => a.status !== 'approved') : false, download: !!document.querySelector('main [data-a=aDl], main [data-a=aPng]') /* P7: the editing panel opens on Edit; the PNG download stays in the bar */, rec: k && k.rec, strategyApproved: !!(k && k.approved === true) }; });
+      const r = await page.evaluate(() => { const k = C().campaigns[C().campaigns.length - 1]; return { view: S.ui.view, n: C().campaigns.length, assets: k ? k.assets.length : 0, langs: k ? [...new Set(k.assets.map((a) => a.lang))].sort() : [], drafts: k ? k.assets.every((a) => a.status !== 'approved') : false, download: !!document.querySelector('main [data-a=aDl], main [data-a=aPng], main [data-a=rv7Go]') /* P7: the editing panel opens on Edit; the PNG download stays in the bar */, rec: k && k.rec, strategyApproved: !!(k && k.approved === true) }; });
       assert.equal(r.view, 'studio', `${lang} Q3: the campaign opens`);
       assert.equal(r.n, before + 1);
       assert.ok(r.assets > 0, `${lang} Q3: drafts made`);
